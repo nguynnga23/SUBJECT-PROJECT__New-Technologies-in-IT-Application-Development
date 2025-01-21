@@ -1,0 +1,46 @@
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories
+bower_components/
+
+# Environment variables
+.env
+
+# Build files
+dist/
+build/
+.tmp/
+
+# Cache files
+.cache/
+coverage/
+
+# System files
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+*.iml
+
+# npm global installs
+.npm/
+
+# Testing output
+junit.xml
+test-results/
+
+# Git-related files
+*.orig
+
+# Temporary files
+*.tmp
+*.temp
