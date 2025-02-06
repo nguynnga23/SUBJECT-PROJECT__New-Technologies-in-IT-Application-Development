@@ -2,7 +2,7 @@ import { View, Text } from "react-native";
 import { useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 
-export default function privateChatScreen() {
+export default function PrivateChatScreen() {
   const navigation = useNavigation();
   useEffect(() => {
     // Ẩn BottomTab khi vào màn hình này

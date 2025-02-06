@@ -2,7 +2,7 @@ import { View, Text } from "react-native";
 import { useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 
-export default function ChatGroupScreen() {
+export default function GroupChatScreen() {
   const navigation = useNavigation();
   useEffect(() => {
     // Ẩn BottomTab khi vào màn hình này
