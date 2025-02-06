@@ -2,7 +2,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import ContactScreen from "../../features/contact/screens/ContactScreen";
-import ProfileScreen from "../../features/profile/screens/profileScreen";
+import ProfileScreen from "../../features/profile/screens/ProfileScreen";
 import MessageStackNavigator from "../../features/message/components/MessageStackNavigator";
 
 // Tạo Bottom Tabs
