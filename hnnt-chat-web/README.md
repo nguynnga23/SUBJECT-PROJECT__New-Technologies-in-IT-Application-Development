@@ -19,3 +19,4 @@ npm start
 ## Library and Document
 
 -   [Tailwind css ver 3.4.17](https://v3.tailwindcss.com/docs/guides/create-react-app)
+-   [Icon react-icons](https://react-icons.github.io/react-icons/)
