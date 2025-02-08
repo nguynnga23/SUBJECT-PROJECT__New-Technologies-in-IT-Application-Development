@@ -17,7 +17,8 @@ export default function BottomTabNavigator() {
                 headerStyle: {
                     backgroundColor: '#005ae0',
                 },
-                headerTitle: '',
+                headerRight: '',
+                headerLeft: '',
                 tabBarStyle: { backgroundColor: 'white', height: 60 },
                 tabBarIcon: ({ color, size }) => {
                     let iconName;
@@ -38,21 +39,21 @@ export default function BottomTabNavigator() {
                 name="Messages"
                 component={MessageStackNavigator}
                 options={{
-                    headerLeft: () => <Header iconName1="qrcode-scan" iconName2="plus" />,
+                    headerTitle: () => <Header iconName1="qrcode-scan" iconName2="plus" />,
                 }}
             />
             <Tab.Screen
                 name="Contacts"
                 component={ContactScreen}
                 options={{
-                    headerLeft: () => <Header iconName2="adduser" />,
+                    headerTitle: () => <Header iconName2="adduser" navigator="AddFriend" />,
                 }}
             />
             <Tab.Screen
                 name="Profile"
                 component={ProfileScreen}
                 options={{
-                    headerLeft: () => <Header iconName2="setting" />,
+                    headerTitle: () => <Header iconName2="setting" />,
                 }}
             />
         </Tab.Navigator>
