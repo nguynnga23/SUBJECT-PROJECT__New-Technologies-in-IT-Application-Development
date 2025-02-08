@@ -7,6 +7,7 @@ import { AiOutlineUsergroupAdd } from 'react-icons/ai';
 
 import PopupCategoryAndState from '../../components/Popup/PopupCategoryAndState';
 import PopupAddFriend from '../../components/Popup/PopupAddFriend';
+import PopupAddGroup from '../../components/Popup/PopupAddGroup';
 
 const priorityChats = [
     { id: 1, name: 'Nguyen Van A', message: 'Xin chào!', time: '10:00 AM' },
@@ -20,6 +21,7 @@ function Messaging() {
     const [message, setMessage] = useState('');
     const [activeTab, setActiveTab] = useState('priority');
     const [addFriendButton, setAddFriendButton] = useState(false);
+    const [addGroupButton, setAddGroupButton] = useState(false);
 
     const chats = activeTab === 'priority' ? priorityChats : otherChats;
 
@@ -39,7 +41,8 @@ function Messaging() {
                             <PopupAddFriend isOpen={addFriendButton} onClose={() => setAddFriendButton(false)} />
                         </div>
                         <div className="pl-2">
-                            <AiOutlineUsergroupAdd size={20} />
+                            <AiOutlineUsergroupAdd size={20} onClick={() => setAddGroupButton(true)} />
+                            <PopupAddGroup isOpen={addGroupButton} onClose={() => setAddGroupButton(false)} />
                         </div>
                     </div>
                     {/* Tabs */}
