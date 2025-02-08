@@ -34,19 +34,25 @@ export default function BottomTabNavigator() {
                 tabBarInactiveTintColor: 'gray',
             })}
         >
-            <Tab.Screen name="Messages" component={MessageStackNavigator} options={{ headerShown: false }} />
+            <Tab.Screen
+                name="Messages"
+                component={MessageStackNavigator}
+                options={{
+                    headerLeft: () => <Header iconName1="qrcode-scan" iconName2="plus" />,
+                }}
+            />
             <Tab.Screen
                 name="Contacts"
                 component={ContactScreen}
                 options={{
-                    headerLeft: () => <Header iconName="adduser" />,
+                    headerLeft: () => <Header iconName2="adduser" />,
                 }}
             />
             <Tab.Screen
                 name="Profile"
                 component={ProfileScreen}
                 options={{
-                    headerLeft: () => <Header iconName="setting" />,
+                    headerLeft: () => <Header iconName2="setting" />,
                 }}
             />
         </Tab.Navigator>
