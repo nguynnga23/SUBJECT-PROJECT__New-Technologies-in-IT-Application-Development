@@ -5,7 +5,7 @@ import { Button, TextInput } from 'react-native';
 import ContactScreen from '../../features/contact/screens/ContactScreen';
 import ProfileScreen from '../../features/profile/screens/ProfileScreen';
 import MessageStackNavigator from '../../features/message/components/MessageStackNavigator';
-import Header from './header/Header';
+import Header from '../components/Header';
 
 // Tạo Bottom Tabs
 const Tab = createBottomTabNavigator();
