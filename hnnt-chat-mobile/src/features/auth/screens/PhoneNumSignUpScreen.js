@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import { WebView } from 'react-native-webview';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+// import { WebView } from 'react-native-webview';
 import { useNavigation } from "@react-navigation/native";
 // import CheckBox from '@react-native-community/checkbox';
 
-export default function PhoneSignUpScreen() {
+export default function PhoneNumSignUpScreen() {
     const navigation = useNavigation();
 
     const [phone, setPhone] = useState('');
@@ -17,26 +19,27 @@ export default function PhoneSignUpScreen() {
     // const isButtonEnabled = phone.length == 10 && agree;
 
     return (
-        <View style={styles.container}>
-            <View style={{paddingTop: 30}}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Image source={require('../../../assets/icons/back.png')} style={{ width: 30, height: 30 }} />
-                </TouchableOpacity>
-            </View>
+        <SafeAreaView style={styles.container}>
+            <SafeAreaProvider>
+                <View style={{ paddingTop: 10 }}>
+                    <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                        <Ionicons name="arrow-back" size={30} color="black" />
+                    </TouchableOpacity>
+                </View>
 
-            <Text style={styles.title}>Enter phone number</Text>
+                <Text style={styles.title}>Enter phone number</Text>
 
-            {/* Ô nhập số điện thoại */}
-            <TextInput
-                style={styles.input}
-                placeholder="Phone number"
-                keyboardType="phone-pad"
-                value={phone}
-                onChangeText={setPhone}
-            />
+                {/* Ô nhập số điện thoại */}
+                <TextInput
+                    style={styles.input}
+                    placeholder="Phone number"
+                    keyboardType="phone-pad"
+                    value={phone}
+                    onChangeText={setPhone}
+                />
 
-            {/* Các checkbox */}
-            {/* <View style={styles.checkboxContainer}>
+                {/* Các checkbox */}
+                {/* <View style={styles.checkboxContainer}>
                 <CheckBox value={agree} onValueChange={setAgree} />
                 <Text style={styles.text}>
                     I agree to the{' '}
@@ -54,15 +57,20 @@ export default function PhoneSignUpScreen() {
                 )}
             </View> */}
 
-            {/* Nút Tiếp tục */}
-            <TouchableOpacity
-                style={[styles.button, { backgroundColor: isButtonEnabled ? '#007AFF' : '#D3D3D3' }]}
-                disabled={!isButtonEnabled} // Chặn bấm nếu không đủ điều kiện
-            >
-                <Text style={styles.buttonText}>Next</Text>
-            </TouchableOpacity>
-
-        </View>
+                {/* Nút Tiếp tục */}
+                <TouchableOpacity
+                    style={[styles.button, { backgroundColor: isButtonEnabled ? '#007AFF' : '#D3D3D3' }]}
+                    disabled={!isButtonEnabled} // Chặn bấm nếu không đủ điều kiện
+                    onPress={() => {
+                        if (isButtonEnabled) {
+                            navigation.navigate('OTPConfirm');
+                        }
+                    }}
+                >
+                    <Text style={styles.buttonText}>Next</Text>
+                </TouchableOpacity>
+            </SafeAreaProvider>
+        </SafeAreaView>
     );
 };
 
