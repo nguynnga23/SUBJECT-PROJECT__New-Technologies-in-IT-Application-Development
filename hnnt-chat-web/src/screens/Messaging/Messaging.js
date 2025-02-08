@@ -4,6 +4,7 @@ import { IoMdSend } from 'react-icons/io';
 import { BsThreeDots } from 'react-icons/bs';
 import { RiUserAddLine } from 'react-icons/ri';
 import { AiOutlineUsergroupAdd } from 'react-icons/ai';
+import { TiDelete } from 'react-icons/ti';
 
 import PopupCategoryAndState from '../../components/Popup/PopupCategoryAndState';
 import PopupAddFriend from '../../components/Popup/PopupAddFriend';
@@ -16,6 +17,8 @@ const priorityChats = [
 
 const otherChats = [{ id: 3, name: 'Le Van C', message: 'Hẹn gặp bạn sau!', time: '1:30 PM' }];
 
+const tabs = ['Tất cả', 'Liên hệ', 'Tin nhắn', 'File'];
+
 function Messaging() {
     const [selectedChat, setSelectedChat] = useState(null);
     const [message, setMessage] = useState('');
@@ -25,6 +28,9 @@ function Messaging() {
 
     const chats = activeTab === 'priority' ? priorityChats : otherChats;
 
+    const [search, setSearch] = useState('');
+    const [activeSearchTab, setActiveSearchTab] = useState('Tất cả');
+
     return (
         <div className="h-screen flex flex-col">
             <div className="flex-1 flex min-h-0 ">
@@ -33,9 +39,20 @@ function Messaging() {
                         <input
                             type="text"
                             placeholder="Tìm kiếm..."
-                            className="w-full pl-8 p-1.5 border rounded-lg text-xs focus:border-blue-500 focus:outline-none"
+                            className="w-full pl-8 pr-8 p-1.5 border rounded-lg text-xs focus:border-blue-500 focus:outline-none"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
                         />
                         <FaSearch className="absolute left-3 top-2 text-gray-500 text-xs" />
+                        {search != '' && (
+                            <TiDelete
+                                className="absolute right-16 top-2 text-gray-500 text-xs cursor-pointer bg-white"
+                                size={16}
+                                onClick={() => {
+                                    setSearch('');
+                                }}
+                            />
+                        )}
                         <div className="pl-2">
                             <RiUserAddLine size={20} onClick={() => setAddFriendButton(true)} />
                             <PopupAddFriend isOpen={addFriendButton} onClose={() => setAddFriendButton(false)} />
@@ -46,44 +63,71 @@ function Messaging() {
                         </div>
                     </div>
                     {/* Tabs */}
-                    <div className="flex border-b justify-between">
+                    {/* Tabs danh mục */}
+                    {search != '' ? (
                         <div>
-                            <button
-                                className={`flex-1 py-2 mr-3 pt-4 text-xs text-center font-medium ${
-                                    activeTab === 'priority'
-                                        ? 'text-blue-600 border-b-2 border-blue-600'
-                                        : 'text-gray-500'
-                                }`}
-                                onClick={() => setActiveTab('priority')}
-                            >
-                                Ưu tiên
-                            </button>
-                            <button
-                                className={`flex-1 py-2 pt-4 text-xs text-center font-medium ${
-                                    activeTab === 'other' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
-                                }`}
-                                onClick={() => setActiveTab('other')}
-                            >
-                                Khác
-                            </button>
-                        </div>
-                        <PopupCategoryAndState />
-                    </div>
-
-                    <div>
-                        {chats.map((chat) => (
-                            <div
-                                key={chat.id}
-                                className={`p-3 border-b cursor-pointer ${
-                                    selectedChat?.id === chat.id ? 'bg-blue-100' : ''
-                                }`}
-                                onClick={() => setSelectedChat(chat)}
-                            >
-                                <h3 className="font-bold">{chat.name}</h3>
-                                <p className="text-sm text-gray-600">{chat.message}</p>
+                            <div className="flex mt-2 border-b pb-1">
+                                {tabs.map((tab) => (
+                                    <button
+                                        key={tab}
+                                        className={`flex-1 text-sm text-gray-600 px-2 py-1 ${
+                                            activeSearchTab === tab
+                                                ? 'text-blue-600 border-b-2 border-blue-600 font-medium'
+                                                : ''
+                                        }`}
+                                        onClick={() => {
+                                            setActiveSearchTab(tab);
+                                        }}
+                                    >
+                                        {tab}
+                                    </button>
+                                ))}
                             </div>
-                        ))}
-                    </div>
+                            <div>{/* Load dữ liệu search */}</div>
+                        </div>
+                    ) : (
+                        <div>
+                            <div className="flex border-b justify-between">
+                                <div>
+                                    <button
+                                        className={`flex-1 py-2 mr-3 pt-4 text-xs text-center font-medium ${
+                                            activeTab === 'priority'
+                                                ? 'text-blue-600 border-b-2 border-blue-600'
+                                                : 'text-gray-500'
+                                        }`}
+                                        onClick={() => setActiveTab('priority')}
+                                    >
+                                        Ưu tiên
+                                    </button>
+                                    <button
+                                        className={`flex-1 py-2 pt-4 text-xs text-center font-medium ${
+                                            activeTab === 'other'
+                                                ? 'text-blue-600 border-b-2 border-blue-600'
+                                                : 'text-gray-500'
+                                        }`}
+                                        onClick={() => setActiveTab('other')}
+                                    >
+                                        Khác
+                                    </button>
+                                </div>
+                                <PopupCategoryAndState />
+                            </div>
+                            <div>
+                                {chats.map((chat) => (
+                                    <div
+                                        key={chat.id}
+                                        className={`p-3 border-b cursor-pointer ${
+                                            selectedChat?.id === chat.id ? 'bg-blue-100' : ''
+                                        }`}
+                                        onClick={() => setSelectedChat(chat)}
+                                    >
+                                        <h3 className="font-bold">{chat.name}</h3>
+                                        <p className="text-sm text-gray-600">{chat.message}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="w-3/4 flex flex-col bg-white">
