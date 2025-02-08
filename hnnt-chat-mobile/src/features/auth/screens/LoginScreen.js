@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Image } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function LoginScreen() {
   const navigation = useNavigation();
@@ -17,7 +18,7 @@ export default function LoginScreen() {
 
           <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#D6EAF8', paddingTop: 10 }}>
             <TouchableOpacity style={{ paddingRight: 10 }} onPress={() => navigation.goBack()}>
-              <Image source={require('../../../assets/icons/back.png')} style={{ height: 30, width: 30 }} />
+              <Ionicons name="arrow-back" size={30} color="black" />
             </TouchableOpacity>
             <Text style={styles.title}>Login</Text>
           </View>
@@ -63,6 +64,7 @@ export default function LoginScreen() {
               onPress={() => {
                 if (isFormFilled) {
                   // Điều hướng hoặc xử lý đăng nhập
+                  navigation.navigate('HomeTab');
                 }
               }}
             >
