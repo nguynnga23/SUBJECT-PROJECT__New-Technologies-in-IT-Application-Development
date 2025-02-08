@@ -17,7 +17,7 @@ export default function HomeScreen() {
                     <Text style={styles.loginText}>Login</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.signUpButton} onPress={() => navigation.navigate('SignUp')}>
+                <TouchableOpacity style={styles.signUpButton} onPress={() => navigation.navigate('PhoneNumSignUp')}>
                     <Text style={styles.signUpText}>Create new account</Text>
                 </TouchableOpacity>
             </SafeAreaProvider>
