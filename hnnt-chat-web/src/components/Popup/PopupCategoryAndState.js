@@ -88,7 +88,7 @@ function PopupCategoryAndState() {
                         ))}
 
                         {/* Theo thẻ phân loại */}
-                        <p className="text-sm font-bold text-gray-700 mt-3 mb-2">Theo thẻ phân loại</p>
+                        <p className="text-sm font-bold text-gray-700 mt-3 mb-2 border-t pt-1">Theo thẻ phân loại</p>
                         {categories.map((category) => (
                             <div
                                 key={category.id}
@@ -105,6 +105,9 @@ function PopupCategoryAndState() {
                                 <span className="flex-1 text-sm">{category.name}</span>
                             </div>
                         ))}
+                        <p className="flex justify-center item-center cursor-pointer py-2 text-sm font-bold hover:bg-gray-100 text-gray-700 border-t pt-1">
+                            Quản lý thẻ phân loại
+                        </p>
                     </div>
                 </div>
             )}

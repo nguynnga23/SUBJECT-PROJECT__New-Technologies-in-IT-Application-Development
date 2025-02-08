@@ -6,6 +6,7 @@ import { RiUserAddLine } from 'react-icons/ri';
 import { AiOutlineUsergroupAdd } from 'react-icons/ai';
 
 import PopupCategoryAndState from '../../components/Popup/PopupCategoryAndState';
+import PopupAddFriend from '../../components/Popup/PopupAddFriend';
 
 const priorityChats = [
     { id: 1, name: 'Nguyen Van A', message: 'Xin chào!', time: '10:00 AM' },
@@ -18,6 +19,8 @@ function Messaging() {
     const [selectedChat, setSelectedChat] = useState(null);
     const [message, setMessage] = useState('');
     const [activeTab, setActiveTab] = useState('priority');
+    const [addFriendButton, setAddFriendButton] = useState(false);
+
     const chats = activeTab === 'priority' ? priorityChats : otherChats;
 
     return (
@@ -25,13 +28,18 @@ function Messaging() {
             <div className="flex-1 flex min-h-0 ">
                 <div className="w-1/4 min-w-[360px] bg-white border-r p-4">
                     <div className="flex justify-between items-center  relative ">
-                        <input type="text" placeholder="Tìm kiếm..." className="w-full pl-10 p-2 border rounded-lg" />
-                        <FaSearch className="absolute left-3 top-3 text-gray-500" />
+                        <input
+                            type="text"
+                            placeholder="Tìm kiếm..."
+                            className="w-full pl-8 p-1.5 border rounded-lg text-xs focus:border-blue-500 focus:outline-none"
+                        />
+                        <FaSearch className="absolute left-3 top-2 text-gray-500 text-xs" />
                         <div className="pl-2">
-                            <RiUserAddLine size={24} />
+                            <RiUserAddLine size={20} onClick={() => setAddFriendButton(true)} />
+                            <PopupAddFriend isOpen={addFriendButton} onClose={() => setAddFriendButton(false)} />
                         </div>
                         <div className="pl-2">
-                            <AiOutlineUsergroupAdd size={24} />
+                            <AiOutlineUsergroupAdd size={20} />
                         </div>
                     </div>
                     {/* Tabs */}
