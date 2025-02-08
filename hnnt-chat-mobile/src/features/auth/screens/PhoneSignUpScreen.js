@@ -4,7 +4,7 @@ import { WebView } from 'react-native-webview';
 import { useNavigation } from "@react-navigation/native";
 // import CheckBox from '@react-native-community/checkbox';
 
-export default function SignUpScreen() {
+export default function PhoneSignUpScreen() {
     const navigation = useNavigation();
 
     const [phone, setPhone] = useState('');
