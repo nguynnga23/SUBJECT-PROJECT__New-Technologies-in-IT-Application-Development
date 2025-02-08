@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FaChevronDown } from 'react-icons/fa';
 import { FaCircle } from 'react-icons/fa';
-import { MdOutlineMoreHoriz } from 'react-icons/md';
 import { FaRegSquare } from 'react-icons/fa6';
 import { FaRegSquareCheck } from 'react-icons/fa6';
+
+import PopupReaded from './PopupReaded';
 
 const categories = [
     { id: 1, name: 'Khách hàng', color: 'bg-red-500' },
@@ -20,10 +21,23 @@ const states = [
     { id: 2, name: 'Chưa đọc' },
 ];
 
-function PopupCategoryAndState(props) {
+function PopupCategoryAndState() {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedState, setSelectedState] = useState(null);
     const [selectedCategories, setSelectedCategories] = useState([]);
+
+    const popupContainerRef = useRef(null);
+
+    // Hàm đóng popup khi click bên ngoài
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (popupContainerRef.current && !popupContainerRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const toggleCategory = (category) => {
         setSelectedCategories((prevSelected) => {
@@ -38,7 +52,7 @@ function PopupCategoryAndState(props) {
     };
 
     return (
-        <div className="relative inline-block text-left">
+        <div className="relative inline-block text-left" ref={popupContainerRef}>
             {/* Nút mở dropdown */}
             <div className="h-full flex items-center">
                 <button
@@ -49,7 +63,7 @@ function PopupCategoryAndState(props) {
                 >
                     Phân loại <FaChevronDown />
                 </button>
-                <MdOutlineMoreHoriz size={24} />
+                <PopupReaded />
             </div>
 
             {/* Dropdown Menu */}

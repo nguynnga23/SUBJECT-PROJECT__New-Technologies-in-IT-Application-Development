@@ -5,21 +5,11 @@ import { BsThreeDots } from 'react-icons/bs';
 import { RiUserAddLine } from 'react-icons/ri';
 import { AiOutlineUsergroupAdd } from 'react-icons/ai';
 
-import Popup from '../../components/Popup/PopupCategoryAndState';
+import PopupCategoryAndState from '../../components/Popup/PopupCategoryAndState';
 
 const priorityChats = [
     { id: 1, name: 'Nguyen Van A', message: 'Xin chào!', time: '10:00 AM' },
     { id: 2, name: 'Tran Thi B', message: 'Hôm nay bạn thế nào?', time: '11:15 AM' },
-];
-
-const categories = [
-    { id: 1, name: 'Khách hàng', color: 'bg-red-500' },
-    { id: 2, name: 'Gia đình', color: 'bg-green-500' },
-    { id: 3, name: 'Công việc', color: 'bg-orange-500' },
-    { id: 4, name: 'Bạn bè', color: 'bg-purple-500' },
-    { id: 5, name: 'Trả lời sau', color: 'bg-yellow-500' },
-    { id: 6, name: 'Đồng nghiệp', color: 'bg-blue-500' },
-    { id: 7, name: 'Tin nhắn từ người lạ', color: 'bg-gray-500' },
 ];
 
 const otherChats = [{ id: 3, name: 'Le Van C', message: 'Hẹn gặp bạn sau!', time: '1:30 PM' }];
@@ -32,8 +22,8 @@ function Messaging() {
 
     return (
         <div className="h-screen flex flex-col">
-            <div className="flex-1 flex min-h-0">
-                <div className="w-1/4 bg-white border-r p-4">
+            <div className="flex-1 flex min-h-0 ">
+                <div className="w-1/4 min-w-[360px] bg-white border-r p-4">
                     <div className="flex justify-between items-center  relative ">
                         <input type="text" placeholder="Tìm kiếm..." className="w-full pl-10 p-2 border rounded-lg" />
                         <FaSearch className="absolute left-3 top-3 text-gray-500" />
