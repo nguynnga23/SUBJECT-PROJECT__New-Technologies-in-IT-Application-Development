@@ -1,25 +1,27 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
-
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 export default function HomeScreen() {
     const navigation = useNavigation();
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Welcome to HNNT</Text>
-            
-            <View style={{ paddingTop: 40, paddingBottom: 40 }}>
-                <Image source={require('../../../assets/icons/img_HomeScreen.png')} style={styles.image} />
-            </View>
-            
-            <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Login')}>
-                <Text style={styles.loginText}>Login</Text>
-            </TouchableOpacity>
+        <SafeAreaView style={styles.container}>
+            <SafeAreaProvider>
+                <Text style={styles.title}>Welcome to HNNT</Text>
 
-            <TouchableOpacity style={styles.signUpButton} onPress={() => navigation.navigate('SignUp')}>
-                <Text style={styles.signUpText}>Create new account</Text>
-            </TouchableOpacity>
-        </View>
+                <View style={{ paddingTop: 40, paddingBottom: 40 }}>
+                    <Image source={require('../../../assets/icons/img_HomeScreen.png')} style={styles.image} />
+                </View>
+
+                <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Login')}>
+                    <Text style={styles.loginText}>Login</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.signUpButton} onPress={() => navigation.navigate('SignUp')}>
+                    <Text style={styles.signUpText}>Create new account</Text>
+                </TouchableOpacity>
+            </SafeAreaProvider>
+        </SafeAreaView>
     );
 };
 
