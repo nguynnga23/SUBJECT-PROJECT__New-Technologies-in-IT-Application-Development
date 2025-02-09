@@ -10,6 +10,7 @@ import { FaTrashAlt } from 'react-icons/fa';
 import PopupCategoryAndState from '../../components/Popup/PopupCategoryAndState';
 import PopupAddFriend from '../../components/Popup/PopupAddFriend';
 import PopupAddGroup from '../../components/Popup/PopupAddGroup';
+import TabSearch from '../../components/Tab/TabSearch';
 
 const priorityChats = [
     { id: 1, name: 'Nguyen Van A', message: 'Xin chào!', time: '10:00 AM' },
@@ -17,8 +18,6 @@ const priorityChats = [
 ];
 
 const otherChats = [{ id: 3, name: 'Le Van C', message: 'Hẹn gặp bạn sau!', time: '1:30 PM' }];
-
-const tabs = ['Tất cả', 'Liên hệ', 'Tin nhắn', 'File'];
 
 function Messaging() {
     const [selectedChat, setSelectedChat] = useState(null);
@@ -30,7 +29,6 @@ function Messaging() {
     const chats = activeTab === 'priority' ? priorityChats : otherChats;
 
     const [search, setSearch] = useState('');
-    const [activeSearchTab, setActiveSearchTab] = useState('Tất cả');
 
     const [showRightBar, setShowRightBar] = useState(false);
 
@@ -49,7 +47,7 @@ function Messaging() {
                             onChange={(e) => setSearch(e.target.value)}
                         />
                         <FaSearch className="absolute left-3 top-2 text-gray-500 text-xs" />
-                        {search != '' && (
+                        {search !== '' && (
                             <TiDelete
                                 className="absolute right-16 top-2 text-gray-500 text-xs cursor-pointer bg-white"
                                 size={16}
@@ -69,27 +67,8 @@ function Messaging() {
                     </div>
                     {/* Tabs */}
                     {/* Tabs danh mục */}
-                    {search != '' ? (
-                        <div>
-                            <div className="flex mt-2 border-b pb-1">
-                                {tabs.map((tab) => (
-                                    <button
-                                        key={tab}
-                                        className={`flex-1 text-sm text-gray-600 px-2 py-1 ${
-                                            activeSearchTab === tab
-                                                ? 'text-blue-600 border-b-2 border-blue-600 font-medium'
-                                                : ''
-                                        }`}
-                                        onClick={() => {
-                                            setActiveSearchTab(tab);
-                                        }}
-                                    >
-                                        {tab}
-                                    </button>
-                                ))}
-                            </div>
-                            <div>{/* Load dữ liệu search */}</div>
-                        </div>
+                    {search !== '' ? (
+                        <TabSearch />
                     ) : (
                         <div>
                             <div className="flex border-b justify-between">

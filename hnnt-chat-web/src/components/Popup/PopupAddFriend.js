@@ -33,7 +33,7 @@ const PopupAddFriend = ({ isOpen, onClose }) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-[#fff] w-96 rounded-lg shadow-lg max-h-[80vh] flex flex-col">
+            <div className="bg-[#fff] w-96 rounded-lg shadow-lg max-h-[90vh] flex flex-col">
                 {/* Header */}
                 <div className="flex justify-between items-center p-3 border-b border-gray-400">
                     <h2 className="text-lg font-semibold">Thêm bạn</h2>
@@ -43,7 +43,7 @@ const PopupAddFriend = ({ isOpen, onClose }) => {
                 </div>
 
                 {/* Body với Scroll */}
-                <div className="p-4 flex-1 overflow-y-auto">
+                <div className="p-4 flex-1">
                     {/* Ô nhập số điện thoại */}
                     <div className="flex items-center space-x-2 border-b border-gray-400 pb-2">
                         <span className="text-lg">🇻🇳 (+84)</span>
