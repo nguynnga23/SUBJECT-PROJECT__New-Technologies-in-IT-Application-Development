@@ -6,20 +6,20 @@ function TabChatRightBar({ selectedChat }) {
     const [activeMessageTab, setActiveMessageTab] = useState('info');
 
     return (
-        <div className="w-1/4 flex flex-col bg-white min-w-[330px] border-l">
+        <div className="w-1/4 flex flex-col bg-white min-w-[320px] border-l">
             {/* Tabs */}
-            <div className="flex border-b">
+            <div className="flex">
                 <button
-                    className={`flex-1 p-[18.5px] text-center font-medium ${
-                        activeMessageTab === 'info' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
+                    className={`flex-1 p-[18.5px] text-center font-medium w-[50%] ${
+                        activeMessageTab === 'info' ? 'bg-white' : 'bg-gray-200'
                     }`}
                     onClick={() => setActiveMessageTab('info')}
                 >
                     Thông tin
                 </button>
                 <button
-                    className={`flex-1 py-2 text-center font-medium ${
-                        activeMessageTab === 'emoji' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
+                    className={`flex-1 py-2 text-center font-medium w-[50%] ${
+                        activeMessageTab === 'emoji' ? 'bg-white' : 'bg-gray-200'
                     }`}
                     onClick={() => setActiveMessageTab('emoji')}
                 >

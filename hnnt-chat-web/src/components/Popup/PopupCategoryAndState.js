@@ -6,6 +6,7 @@ import { FaRegSquareCheck } from 'react-icons/fa6';
 import { MdLabel } from 'react-icons/md';
 
 import PopupReaded from './PopupReaded';
+import PopupManageCategory from './PopupManageCategory';
 
 const categories = [
     { id: 1, name: 'Khách hàng', color: 'text-red-500' },
@@ -26,6 +27,7 @@ function PopupCategoryAndState() {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedState, setSelectedState] = useState(null);
     const [selectedCategories, setSelectedCategories] = useState([]);
+    const [isOpenManageCategory, setIsOpenManageCategory] = useState(false);
 
     const popupContainerRef = useRef(null);
 
@@ -33,12 +35,14 @@ function PopupCategoryAndState() {
     useEffect(() => {
         function handleClickOutside(event) {
             if (popupContainerRef.current && !popupContainerRef.current.contains(event.target)) {
-                setIsOpen(false);
+                if (!isOpenManageCategory) {
+                    setIsOpen(false);
+                }
             }
         }
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, [isOpen]);
 
     const toggleCategory = (category) => {
         setSelectedCategories((prevSelected) => {
@@ -105,9 +109,18 @@ function PopupCategoryAndState() {
                                 <span className="flex-1 text-sm">{category.name}</span>
                             </div>
                         ))}
-                        <p className="flex justify-center item-center cursor-pointer py-2 text-sm font-bold hover:bg-gray-100 text-gray-700 border-t pt-1">
+                        <p
+                            className="flex justify-center item-center cursor-pointer py-2 text-sm font-bold hover:bg-gray-100 text-gray-700 border-t pt-1"
+                            onClick={() => setIsOpenManageCategory(true)}
+                        >
                             Quản lý thẻ phân loại
                         </p>
+                        {isOpenManageCategory && (
+                            <PopupManageCategory
+                                setIsOpenManageCategory={setIsOpenManageCategory}
+                                isOpenManageCategory={isOpenManageCategory}
+                            />
+                        )}
                     </div>
                 </div>
             )}
