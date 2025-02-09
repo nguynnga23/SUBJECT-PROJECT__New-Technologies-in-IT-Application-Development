@@ -49,12 +49,7 @@ function TabChatSymbol() {
 
                     {activeTab === 'gif' && (
                         <div className="flex">
-                            <GifPicker
-                                tenorApiKey={'AIzaSyD5NsRpObtL-K4lZqF7dFav85qgP3Swoos'}
-                                onGiftClick={onGiftClick}
-                                height={'40%'}
-                                width={'100%'}
-                            />
+                            <GifPicker tenorApiKey={''} onGiftClick={onGiftClick} height={'40%'} width={'100%'} />
                         </div>
                     )}
                 </div>
