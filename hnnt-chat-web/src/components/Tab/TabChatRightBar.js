@@ -10,7 +10,7 @@ function TabChatRightBar({ selectedChat }) {
             {/* Tabs */}
             <div className="flex border-b">
                 <button
-                    className={`flex-1 py-3.5 text-center font-medium ${
+                    className={`flex-1 p-[18.5px] text-center font-medium ${
                         activeMessageTab === 'info' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
                     }`}
                     onClick={() => setActiveMessageTab('info')}
