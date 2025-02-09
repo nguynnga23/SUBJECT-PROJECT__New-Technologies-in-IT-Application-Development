@@ -5,7 +5,7 @@
 //   return (
 //     <View style={{ flex: 1, alignItems: "center" }}>
 //       <Text>Message Screen</Text>
-      
+
 //       <Button title="Nhóm Chat" onPress={() => navigation.navigate("GroupChatScreen")} />
 
 //       <View style={{ paddingTop: 50 }} >
@@ -43,7 +43,7 @@ const ChatListScreen = () => {
   };
 
   const renderItem = ({ item }) => (
-    
+
     <TouchableOpacity style={styles.item} onPress={() => handlePress(item)}>
       <Image source={require("../../../assets/icon.png")} style={styles.avatar} />
       <View style={styles.content}>
