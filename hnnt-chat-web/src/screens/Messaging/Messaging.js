@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { FaSearch, FaRegSmile } from 'react-icons/fa';
-import { IoMdSend } from 'react-icons/io';
-import { BsThreeDots } from 'react-icons/bs';
+import { FaSearch } from 'react-icons/fa';
 import { RiUserAddLine } from 'react-icons/ri';
 import { AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { TiDelete } from 'react-icons/ti';
@@ -11,10 +9,10 @@ import PopupAddFriend from '../../components/Popup/PopupAddFriend';
 import PopupAddGroup from '../../components/Popup/PopupAddGroup';
 import TabSearch from '../../components/Tab/TabSearch';
 import TabMesssage from '../../components/Tab/TabMessage';
+import TabChat from '../../components/Tab/TabChat';
 
 function Messaging() {
     const [selectedChat, setSelectedChat] = useState(null);
-    const [message, setMessage] = useState('');
     const [activeTab, setActiveTab] = useState('priority');
     const [addFriendButton, setAddFriendButton] = useState(false);
     const [addGroupButton, setAddGroupButton] = useState(false);
@@ -72,29 +70,11 @@ function Messaging() {
 
                 <div className={`flex flex-col bg-white ${showRightBar ? 'w-2/4' : 'w-3/4'}`}>
                     {selectedChat ? (
-                        <>
-                            <div className="p-3 border-b flex justify-between items-center">
-                                <h3 className="font-bold text-lg">{selectedChat.name}</h3>
-                                <BsThreeDots
-                                    className="text-xl cursor-pointer"
-                                    onClick={() => setShowRightBar(!showRightBar)}
-                                />
-                            </div>
-                            <div className="flex-1 p-4 overflow-y-auto">
-                                <p className="bg-gray-200 p-2 rounded-lg w-fit mb-2">{selectedChat.message}</p>
-                            </div>
-                            <div className="p-4 flex items-center border-t">
-                                <FaRegSmile className="text-2xl cursor-pointer mr-3" />
-                                <input
-                                    type="text"
-                                    value={message}
-                                    onChange={(e) => setMessage(e.target.value)}
-                                    placeholder="Nhập tin nhắn..."
-                                    className="flex-1 p-2 border rounded-lg"
-                                />
-                                <IoMdSend className="text-2xl cursor-pointer ml-3 text-blue-500" />
-                            </div>
-                        </>
+                        <TabChat
+                            selectedChat={selectedChat}
+                            showRightBar={showRightBar}
+                            setShowRightBar={setShowRightBar}
+                        />
                     ) : (
                         <div className="flex-1 flex items-center justify-center text-gray-500">
                             Chọn một cuộc trò chuyện để bắt đầu
