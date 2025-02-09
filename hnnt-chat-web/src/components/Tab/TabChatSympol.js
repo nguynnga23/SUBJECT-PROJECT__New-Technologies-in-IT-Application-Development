@@ -49,7 +49,12 @@ function TabChatSymbol() {
 
                     {activeTab === 'gif' && (
                         <div className="flex">
-                            <GifPicker tenorApiKey={''} onGiftClick={onGiftClick} height={'40%'} width={'100%'} />
+                            <GifPicker
+                                tenorApiKey={process.env.REACT_APP_TENNORAPIKEY}
+                                onGiftClick={onGiftClick}
+                                height={'40%'}
+                                width={'100%'}
+                            />
                         </div>
                     )}
                 </div>
