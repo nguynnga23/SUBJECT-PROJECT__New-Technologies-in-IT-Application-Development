@@ -9,7 +9,7 @@ import PopupAddGroup from '../../components/Popup/PopupAddGroup';
 import TabSearch from '../../components/Tab/TabSearch';
 import TabMesssage from '../../components/Tab/TabMessage';
 import TabChat from '../../components/Tab/TabChat';
-import TabRightBar from '../../components/Tab/TabRightBar';
+import TabChatRightBar from '../../components/Tab/TabChatRightBar';
 
 function Messaging() {
     const [selectedChat, setSelectedChat] = useState(null);
@@ -79,7 +79,7 @@ function Messaging() {
                         </div>
                     )}
                 </div>
-                {showRightBar && <TabRightBar activeTab={activeTab} selectedChat={selectedChat} />}
+                {showRightBar && <TabChatRightBar selectedChat={selectedChat} />}
             </div>
         </div>
     );

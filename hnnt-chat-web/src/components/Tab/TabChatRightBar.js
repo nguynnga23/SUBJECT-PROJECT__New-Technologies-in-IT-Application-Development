@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { FaTrashAlt } from 'react-icons/fa';
 
-function TabRightBar({ activeTab, selectedChat }) {
+function TabChatRightBar({ selectedChat }) {
     const [activeMessageTab, setActiveMessageTab] = useState('info');
 
     return (
@@ -83,4 +83,4 @@ function TabRightBar({ activeTab, selectedChat }) {
     );
 }
 
-export default TabRightBar;
+export default TabChatRightBar;
