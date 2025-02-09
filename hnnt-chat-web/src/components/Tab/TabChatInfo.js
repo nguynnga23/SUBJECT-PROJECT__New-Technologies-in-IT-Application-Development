@@ -6,7 +6,7 @@ function TabChatInfo({ selectedChat }) {
             {/* Avatar + Tên nhóm */}
             <div className="flex flex-col items-center mb-4 p-3">
                 <img src={selectedChat.avatar} className="w-[55px] h-[55px] rounded-full border object-cover" />
-                <h3 className="font-bold text-lg mt-2 font-bold">{selectedChat.name}</h3>
+                <h3 className="font-bold text-lg mt-2 font-medium">{selectedChat.name}</h3>
             </div>
 
             {/* Danh mục */}

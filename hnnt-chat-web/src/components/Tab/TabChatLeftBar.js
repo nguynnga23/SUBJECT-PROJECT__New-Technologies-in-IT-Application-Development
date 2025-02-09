@@ -17,30 +17,30 @@ function TabChatLeftBar({ selectedChat, setSelectedChat }) {
     const [search, setSearch] = useState('');
 
     return (
-        <div className="w-1/4 min-w-[340px] bg-white border-r p-4">
-            <div className="flex justify-between items-center  relative ">
+        <div className="w-1/4 min-w-[340px] bg-white border-r ">
+            <div className="flex justify-between items-center relative p-4 pb-2">
                 <input
                     type="text"
                     placeholder="Tìm kiếm..."
-                    className="w-full pl-8 pr-8 p-1.5 border rounded-lg text-xs focus:border-blue-500 focus:outline-none"
+                    className="w-full pl-8 pr-6 p-1.5 border bg-gray-200 rounded-lg text-[14px] focus:border-blue-500 focus:outline-none"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />
-                <FaSearch className="absolute left-3 top-2 text-gray-500 text-xs" />
+                <FaSearch className="absolute left-6 top-7 text-gray-500 text-xs" />
                 {search !== '' && (
                     <TiDelete
-                        className="absolute right-16 top-2 text-gray-500 text-xs cursor-pointer bg-white"
+                        className="absolute right-[85px] top-6 text-gray-500 text-xs cursor-pointer bg-gray-200"
                         size={16}
                         onClick={() => {
                             setSearch('');
                         }}
                     />
                 )}
-                <div className="pl-2">
+                <div className="pl-3">
                     <RiUserAddLine size={20} onClick={() => setAddFriendButton(true)} />
                     <PopupAddFriend isOpen={addFriendButton} onClose={() => setAddFriendButton(false)} />
                 </div>
-                <div className="pl-2">
+                <div className="pl-3">
                     <AiOutlineUsergroupAdd size={20} onClick={() => setAddGroupButton(true)} />
                     <PopupAddGroup isOpen={addGroupButton} onClose={() => setAddGroupButton(false)} />
                 </div>

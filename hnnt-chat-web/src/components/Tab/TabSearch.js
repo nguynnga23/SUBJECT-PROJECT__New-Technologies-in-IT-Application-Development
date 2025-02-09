@@ -6,8 +6,8 @@ function TabSearch() {
     const [activeSearchTab, setActiveSearchTab] = useState('Tất cả');
 
     return (
-        <div>
-            <div className="flex mt-2 border-b pb-1">
+        <div className="p-4 pt-1">
+            <div className="flex border-b  ">
                 {tabs.map((tab) => (
                     <button
                         key={tab}

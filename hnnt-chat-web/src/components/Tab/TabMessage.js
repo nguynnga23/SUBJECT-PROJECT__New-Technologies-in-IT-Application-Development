@@ -32,7 +32,7 @@ function TabMesssage({ activeTab, setActiveTab, selectedChat, setSelectedChat })
 
     return (
         <div>
-            <div className="flex border-b justify-between">
+            <div className="flex border-b justify-between p-4 pt-0 pb-0">
                 <div>
                     <button
                         className={`flex-1 py-2 mr-3 pt-4 text-xs text-center font-medium ${
@@ -57,13 +57,15 @@ function TabMesssage({ activeTab, setActiveTab, selectedChat, setSelectedChat })
                 {chats.map((chat) => (
                     <div
                         key={chat.id}
-                        className={`p-3 border-b cursor-pointer ${selectedChat?.id === chat.id ? 'bg-blue-100' : ''}`}
+                        className={`p-3 overflow-y-auto cursor-pointer hover:bg-gray-200 ${
+                            selectedChat?.id === chat.id ? 'bg-blue-100' : ''
+                        }`}
                         onClick={() => setSelectedChat(chat)}
                     >
                         <div className="flex item-center">
                             <img
                                 src={chat.avatar} // Thay bằng avatar thật
-                                className="w-[45px] h-[45px] rounded-full border mr-2 object-cover"
+                                className="w-[45px] h-[45px] rounded-full border mr-3 object-cover"
                             />
                             <div>
                                 <h3 className="font-medium text-xs text-lg mt-1">{chat.name}</h3>
