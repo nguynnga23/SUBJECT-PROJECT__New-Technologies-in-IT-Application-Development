@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
 import { IoMdSend } from 'react-icons/io';
-import { FaRegSmile } from 'react-icons/fa';
 import { MdLabelOutline } from 'react-icons/md';
 import { VscLayoutSidebarRightOff } from 'react-icons/vsc';
 import { VscLayoutSidebarRight } from 'react-icons/vsc';
@@ -8,7 +7,6 @@ import { BsTelephone } from 'react-icons/bs';
 import { GoDeviceCameraVideo } from 'react-icons/go';
 import { IoSearchOutline } from 'react-icons/io5';
 import { AiFillLike } from 'react-icons/ai';
-import { LuSticker } from 'react-icons/lu';
 import { IoImageOutline } from 'react-icons/io5';
 import { MdAttachFile } from 'react-icons/md';
 import { FaRegAddressCard } from 'react-icons/fa6';
@@ -95,7 +93,6 @@ function TabChat({ selectedChat, showRightBar, setShowRightBar, showRightBarSear
             </div>
             <div>
                 <div className="flex bg-white border-t p-2">
-                    <LuSticker className="text-2xl cursor-pointer ml-2 hover:text-blue-500 text-gray-500" />
                     <IoImageOutline className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-500" />
                     <MdAttachFile className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-500" />
                     <FaRegAddressCard className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-500" />
@@ -113,11 +110,10 @@ function TabChat({ selectedChat, showRightBar, setShowRightBar, showRightBarSear
                            h-[50px] max-h-[200px] overflow-y-auto resize-none"
                     />
                     <div className="flex items-center">
-                        <FaRegSmile className="text-2xl cursor-pointer mr-3 hover:text-blue-500 text-gray-500" />
                         {message !== '' ? (
-                            <AiFillLike className="text-2xl cursor-pointer ml-3 text-yellow-500 mr-3" />
-                        ) : (
                             <IoMdSend className="text-2xl cursor-pointer ml-3 text-blue-500 mr-3" />
+                        ) : (
+                            <AiFillLike className="text-2xl cursor-pointer ml-3 text-yellow-500 mr-3" />
                         )}
                     </div>
                 </div>

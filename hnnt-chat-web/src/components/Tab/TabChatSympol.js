@@ -38,7 +38,7 @@ function TabChatSymbol() {
                 <div className=" grid gap-2 w-full max-h-[500px]">
                     {activeTab === 'sticker' &&
                         stickers.map((src, index) => (
-                            <img key={index} src={src} alt="sticker" className="w-16 h-16 cursor-pointer" />
+                            <img key={index} src={src} alt="sticker" className="w-16 h-16 cursor-pointer p-4" />
                         ))}
 
                     {activeTab === 'emoji' && (
