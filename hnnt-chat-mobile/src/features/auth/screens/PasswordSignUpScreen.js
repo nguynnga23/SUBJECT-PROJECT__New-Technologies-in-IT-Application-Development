@@ -12,7 +12,7 @@ export default function PasswordSignUpScreen() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     // Điều kiện bật nút Next
-    const isButtonEnabled = password.length >= 6 && password === confirmPassword;
+    const isButtonEnabled = password.length >= 8 && password === confirmPassword;
 
     return (
         <SafeAreaView style={styles.container}>
@@ -24,6 +24,8 @@ export default function PasswordSignUpScreen() {
 
                 <View style={styles.content}>
                     <Text style={styles.title}>Create Password</Text>
+
+                    <Text style={styles.description}>Please enter password that have at least 8 character</Text>
 
                     {/* Ô nhập Password */}
                     <View style={styles.inputContainer}>
@@ -70,7 +72,7 @@ export default function PasswordSignUpScreen() {
                         disabled={!isButtonEnabled}
                         onPress={() => {
                             if (isButtonEnabled) {
-                                navigation.navigate('HomeTab');
+                                navigation.navigate('HomeScreen');
                             }
                         }}
                     >
@@ -99,6 +101,11 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         textAlign: 'center',
+        marginBottom: 20,
+    },
+    description: {
+        fontSize: 14,
+        color: '#666',
         marginBottom: 20,
     },
     inputContainer: {
