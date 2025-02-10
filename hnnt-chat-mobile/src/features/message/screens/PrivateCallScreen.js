@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 
-const GroupCallScreen = () => {
+const PrivateCallScreen = () => {
     const navigation = useNavigation();
     return (
         <View style={styles.container}>
@@ -43,7 +43,7 @@ const GroupCallScreen = () => {
     );
 };
 
-export default GroupCallScreen;
+export default PrivateCallScreen;
 
 const styles = StyleSheet.create({
     container: {
