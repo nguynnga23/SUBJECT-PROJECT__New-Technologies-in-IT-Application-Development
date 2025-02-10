@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import Header from "../../../common/components/Header";
+import Header from "../../../../common/components/Header";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -59,7 +59,7 @@ export default function GroupChatScreen() {
           </Text>
 
           <TouchableOpacity style={{ position: 'absolute', right: 70 }}
-            onPress={() => navigation.navigate("CallScreen")}
+            onPress={() => navigation.navigate("GroupCallScreen")}
           >
             <Icon name="video-outline" size={35} color="white" />
           </TouchableOpacity>

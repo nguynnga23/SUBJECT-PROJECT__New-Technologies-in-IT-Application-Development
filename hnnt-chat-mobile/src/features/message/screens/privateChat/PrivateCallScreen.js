@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 
-const PrivateCallScreen = () => {
+export default function PrivateCallScreen() {
     const navigation = useNavigation();
+    const [isMicOn, setIsMicOn] = useState(true);
+    const [isCameraOn, setIsCameraOn] = useState(true);
+
     return (
         <View style={styles.container}>
             {/* Nút quay lại */}
@@ -12,38 +15,45 @@ const PrivateCallScreen = () => {
                 <Ionicons name="arrow-back" size={30} color="white" />
             </TouchableOpacity>
 
-            {/* Avatar & Tên người gọi */}
+            {/* Avatar & Tên Nhóm gọi */}
             <View style={styles.profileContainer}>
                 <Image
-                    source={require("../../../assets/icon.png")}
+                    source={require("../../../../assets/icon.png")}
                     style={styles.avatar}
                 />
                 <Text style={styles.name}>...</Text>
-                <Text style={styles.status}>Đang nối máy đến người nhận</Text>
+                <Text style={styles.status}>Connection</Text>
             </View>
 
             {/* Các nút chức năng */}
             <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.button}>
-                    <Ionicons name="videocam" size={30} color="white" />
-                    <Text style={styles.buttonText}>Camera</Text>
+                {/* Nút Camera */}
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => setIsCameraOn(!isCameraOn)}
+                >
+                    <Ionicons name={isCameraOn ? "videocam" : "videocam-off"} size={30} color="white" />
+                    <Text style={styles.buttonText}>{isCameraOn ? "Camera on" : "Camera off"}</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.button}>
-                    <Ionicons name="mic" size={30} color="white" />
-                    <Text style={styles.buttonText}>Mic</Text>
+                {/* Nút Mic */}
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => setIsMicOn(!isMicOn)}
+                >
+                    <Ionicons name={isMicOn ? "mic" : "mic-off"} size={30} color="white" />
+                    <Text style={styles.buttonText}>{isMicOn ? "Mic on" : "Mic off"}</Text>
                 </TouchableOpacity>
 
+                {/* Nút Kết Thúc Cuộc Gọi */}
                 <TouchableOpacity style={[styles.button, styles.endCallButton]}>
                     <Ionicons name="call" size={30} color="white" />
-                    <Text style={styles.buttonText}>Kết thúc</Text>
+                    <Text style={styles.buttonText}>End</Text>
                 </TouchableOpacity>
             </View>
         </View>
     );
 };
-
-export default PrivateCallScreen;
 
 const styles = StyleSheet.create({
     container: {
