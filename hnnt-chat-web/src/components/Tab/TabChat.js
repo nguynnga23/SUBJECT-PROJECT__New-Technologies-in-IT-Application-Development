@@ -13,9 +13,13 @@ import { FaRegAddressCard } from 'react-icons/fa6';
 
 import PopupCategory from '../Popup/PopupCategory';
 
-function TabChat({ selectedChat, showRightBar, setShowRightBar, showRightBarSearch, setShowRightBarSearch }) {
+import { useSelector } from 'react-redux';
+
+function TabChat({ showRightBar, setShowRightBar, showRightBarSearch, setShowRightBarSearch }) {
     const [message, setMessage] = useState('');
     const [isOpenCategory, setIsOpenCategory] = useState(false);
+
+    const activeChat = useSelector((state) => state.chat.activeChat);
 
     const textareaRef = useRef(null);
 
@@ -43,11 +47,11 @@ function TabChat({ selectedChat, showRightBar, setShowRightBar, showRightBarSear
             <div className="p-2 border-b flex justify-between items-center h-[62px] min-w-[600px]">
                 <div className="flex justify-center ">
                     <img
-                        src={selectedChat.avatar} // Thay bằng avatar thật
+                        src={activeChat.avatar} // Thay bằng avatar thật
                         className="w-[45px] h-[45px] rounded-full border mr-2 object-cover"
                     />
                     <div>
-                        <h3 className="font-medium text-base text-lg max-h-[28px]">{selectedChat.name}</h3>
+                        <h3 className="font-medium text-base text-lg max-h-[28px]">{activeChat.name}</h3>
                         <MdLabelOutline
                             className="cursor-pointer"
                             color="gray"
@@ -89,7 +93,7 @@ function TabChat({ selectedChat, showRightBar, setShowRightBar, showRightBarSear
                 </div>
             </div>
             <div className="flex-1 p-4 overflow-y-auto bg-gray-200">
-                <p className="bg-blue-100 border border-blue-400 p-2 rounded-lg w-fit mb-2">{selectedChat.message}</p>
+                <p className="bg-blue-100 border border-blue-400 p-2 rounded-lg w-fit mb-2">{activeChat.message}</p>
             </div>
             <div>
                 <div className="flex bg-white border-t p-2">
@@ -105,7 +109,7 @@ function TabChat({ selectedChat, showRightBar, setShowRightBar, showRightBarSear
                             setMessage(e.target.value);
                             adjustHeight();
                         }}
-                        placeholder={`Nhập tin nhắn với ${selectedChat.name}`}
+                        placeholder={`Nhập tin nhắn với ${activeChat.name}`}
                         className="flex-1 p-3 font-base text-[16px] rounded-lg focus:border-blue-500 focus:outline-none
                            h-[50px] max-h-[200px] overflow-y-auto resize-none"
                     />

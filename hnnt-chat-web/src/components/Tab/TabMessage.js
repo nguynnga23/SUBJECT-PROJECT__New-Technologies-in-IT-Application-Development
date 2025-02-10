@@ -1,4 +1,6 @@
 import PopupCategoryAndState from '../../components/Popup/PopupCategoryAndState';
+import { useSelector, useDispatch } from 'react-redux';
+import { setActiveChat } from '../../redux/slices/chatSlice';
 
 const priorityChats = [
     {
@@ -69,8 +71,11 @@ const otherChats = [
     },
 ];
 
-function TabMesssage({ activeTab, setActiveTab, selectedChat, setSelectedChat }) {
+function TabMesssage({ activeTab, setActiveTab }) {
     const chats = activeTab === 'priority' ? priorityChats : otherChats;
+    const activeChat = useSelector((state) => state.chat.activeChat);
+
+    const dispatch = useDispatch();
 
     return (
         <div>
@@ -100,9 +105,9 @@ function TabMesssage({ activeTab, setActiveTab, selectedChat, setSelectedChat })
                     <div
                         key={chat.id}
                         className={`p-3 overflow-y-auto cursor-pointer hover:bg-gray-200 ${
-                            selectedChat?.id === chat.id ? 'bg-blue-100' : ''
+                            activeChat?.id === chat.id ? 'bg-blue-100' : ''
                         }`}
-                        onClick={() => setSelectedChat(chat)}
+                        onClick={() => dispatch(setActiveChat(chat))}
                     >
                         <div className="flex item-center">
                             <img

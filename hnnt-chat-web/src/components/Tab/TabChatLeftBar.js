@@ -9,12 +9,17 @@ import PopupAddGroup from '../../components/Popup/PopupAddGroup';
 import TabSearch from '../../components/Tab/TabSearch';
 import TabMesssage from '../../components/Tab/TabMessage';
 
-function TabChatLeftBar({ selectedChat, setSelectedChat }) {
+import { useSelector, useDispatch } from 'react-redux';
+import { setActiveChat } from '../../redux/slices/chatSlice';
+
+function TabChatLeftBar() {
     const [activeTab, setActiveTab] = useState('priority');
     const [addFriendButton, setAddFriendButton] = useState(false);
     const [addGroupButton, setAddGroupButton] = useState(false);
 
     const [search, setSearch] = useState('');
+
+    const dispatch = useDispatch();
 
     return (
         <div className="w-1/4 min-w-[340px] bg-white border-r ">
@@ -47,16 +52,7 @@ function TabChatLeftBar({ selectedChat, setSelectedChat }) {
             </div>
             {/* Tabs */}
             {/* Tabs danh mục */}
-            {search !== '' ? (
-                <TabSearch />
-            ) : (
-                <TabMesssage
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
-                    selectedChat={selectedChat}
-                    setSelectedChat={setSelectedChat}
-                />
-            )}
+            {search !== '' ? <TabSearch /> : <TabMesssage activeTab={activeTab} setActiveTab={setActiveTab} />}
         </div>
     );
 }

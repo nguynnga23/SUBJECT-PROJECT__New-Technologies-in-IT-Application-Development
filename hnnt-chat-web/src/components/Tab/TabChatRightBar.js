@@ -2,7 +2,7 @@ import { useState } from 'react';
 import TabChatInfo from './TabChatInfo';
 import TabChatSympol from './TabChatSympol';
 
-function TabChatRightBar({ selectedChat }) {
+function TabChatRightBar() {
     const [activeMessageTab, setActiveMessageTab] = useState('info');
 
     return (
@@ -28,7 +28,7 @@ function TabChatRightBar({ selectedChat }) {
             </div>
 
             {/* Nội dung */}
-            {activeMessageTab === 'info' && <TabChatInfo selectedChat={selectedChat} />}
+            {activeMessageTab === 'info' && <TabChatInfo />}
 
             {activeMessageTab === 'emoji' && <TabChatSympol />}
         </div>

@@ -4,10 +4,13 @@ import { GrPin } from 'react-icons/gr';
 import { AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { GoBellSlash } from 'react-icons/go';
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 
-function TabChatInfo({ selectedChat }) {
+function TabChatInfo() {
     const [notify, setNotify] = useState(true);
     const [pin, setPin] = useState(false);
+
+    const activeChat = useSelector((state) => state.chat.activeChat);
 
     const handlePin = () => {
         setPin(!pin);
@@ -20,8 +23,8 @@ function TabChatInfo({ selectedChat }) {
         <div className="">
             {/* Avatar + Tên nhóm */}
             <div className="flex flex-col items-center p-3">
-                <img src={selectedChat.avatar} className="w-[55px] h-[55px] rounded-full border object-cover" />
-                <h3 className="font-bold text-lg mt-2 font-medium">{selectedChat.name}</h3>
+                <img src={activeChat.avatar} className="w-[55px] h-[55px] rounded-full border object-cover" />
+                <h3 className="font-bold text-lg mt-2 font-medium">{activeChat.name}</h3>
             </div>
             <div className="flex item-center justify-center">
                 <div className="m-4 mt-1 w-[50px] text-center">

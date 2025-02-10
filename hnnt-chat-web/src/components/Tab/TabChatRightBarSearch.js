@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { IoSearchOutline } from 'react-icons/io5';
 import { FaUser, FaCalendarAlt } from 'react-icons/fa';
 
-function TabChatRightBarSearch({ selectedChat }) {
+function TabChatRightBarSearch() {
     const [searchTerm, setSearchTerm] = useState('');
 
     return (
