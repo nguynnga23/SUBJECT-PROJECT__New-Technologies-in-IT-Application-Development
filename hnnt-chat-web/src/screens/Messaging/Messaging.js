@@ -8,6 +8,8 @@ function Messaging() {
     const [selectedChat, setSelectedChat] = useState(null);
     const [showRightBar, setShowRightBar] = useState(false);
     const [showRightBarSearch, setShowRightBarSearch] = useState(false);
+    const [notify, setNotify] = useState(true);
+    const [pin, setPin] = useState(false);
 
     return (
         <div className="h-screen flex flex-col">

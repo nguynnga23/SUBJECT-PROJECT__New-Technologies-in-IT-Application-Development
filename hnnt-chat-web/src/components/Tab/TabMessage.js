@@ -7,6 +7,20 @@ const priorityChats = [
         avatar: 'https://www.catster.com/wp-content/uploads/2023/11/Beluga-Cat-e1714190563227.webp',
         message: 'Xin chào!',
         time: '10:00 AM',
+        pin: true,
+        note: true,
+        messages: [
+            {
+                sender: 1,
+                content: 'Chào bạn',
+                time: '10:00 AM',
+            },
+            {
+                sender: 0,
+                content: 'Chào nha',
+                time: '11: 00AM',
+            },
+        ],
     },
     {
         id: 2,
@@ -14,6 +28,20 @@ const priorityChats = [
         avatar: 'https://m.media-amazon.com/images/I/518K-+yYl2L._AC_SL1000_.jpg',
         message: 'Hôm nay bạn thế nào?',
         time: '11:15 AM',
+        pin: true,
+        note: true,
+        messages: [
+            {
+                sender: 2,
+                content: 'Chào bạn',
+                time: '10:00 AM',
+            },
+            {
+                sender: 0,
+                content: 'Chào nha',
+                time: '11: 00AM',
+            },
+        ],
     },
 ];
 
@@ -24,6 +52,20 @@ const otherChats = [
         avatar: 'https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/474174ewO/anh-meme-meo-khoc-cuc-cute_042216244.jpg',
         message: 'Hẹn gặp bạn sau!',
         time: '1:30 PM',
+        pin: true,
+        note: true,
+        messages: [
+            {
+                sender: 3,
+                content: 'Chào bạn',
+                time: '10:00 AM',
+            },
+            {
+                sender: 0,
+                content: 'Chào nha',
+                time: '11: 00AM',
+            },
+        ],
     },
 ];
 
