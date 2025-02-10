@@ -1,6 +1,7 @@
 import { View, Text } from "react-native";
 import { useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PrivateChatScreen() {
   const navigation = useNavigation();

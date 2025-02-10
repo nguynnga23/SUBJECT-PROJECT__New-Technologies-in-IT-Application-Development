@@ -65,7 +65,7 @@ export default function GroupChatScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity style={{ position: 'absolute', right: 10 }}
-            onPress={() => navigation.navigate("GroupInfoScreen")}
+            onPress={() => navigation.navigate("GroupInfoScreen", { groupName: chatData.group_name })}
           >
             <Icon name="view-headline" size={35} color="white" />
           </TouchableOpacity>
