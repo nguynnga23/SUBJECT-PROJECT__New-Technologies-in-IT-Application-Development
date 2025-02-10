@@ -1,19 +1,22 @@
 import { useState } from 'react';
 import Picker from 'emoji-picker-react';
 import GifPicker from 'gif-picker-react';
+import { useDispatch } from 'react-redux';
+import { sendEmoji, sendGif } from '../../redux/slices/chatSlice';
 
 function TabChatSymbol() {
     const [activeTab, setActiveTab] = useState('emoji');
-    const [chosenEmoji, setChosenEmoji] = useState(null);
-    const [chosenGif, setChosenGif] = useState(null);
 
     const stickers = ['/stickers/pepe1.png', '/stickers/pepe2.png', '/stickers/raccoon1.png', '/stickers/dog.png'];
+    const dispatch = useDispatch();
 
-    const onEmojiClick = (event, emojiObject) => {
-        setChosenEmoji(emojiObject);
+    const onEmojiClick = (emojiData) => {
+        dispatch(sendEmoji(emojiData));
     };
-    const onGiftClick = (event, gifObject) => {
-        setChosenGif(gifObject);
+    const onGifClick = (gifObject) => {
+        console.log(gifObject);
+
+        dispatch(sendGif(gifObject));
     };
 
     return (
@@ -51,7 +54,7 @@ function TabChatSymbol() {
                         <div className="flex h-[calc(100vh-112px)]">
                             <GifPicker
                                 tenorApiKey={process.env.REACT_APP_TENNORAPIKEY}
-                                onGiftClick={onGiftClick}
+                                onGifClick={onGifClick}
                                 height={'100%'}
                                 width={'100%'}
                             />

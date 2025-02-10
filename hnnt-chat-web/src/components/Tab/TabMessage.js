@@ -60,8 +60,16 @@ function TabMesssage() {
                                     className="w-[45px] h-[45px] rounded-full border mr-3 object-cover"
                                 />
                                 <div>
-                                    <h3 className="font-medium text-xs text-lg mt-1">{chat.name}</h3>
-                                    <p className="text-sm text-gray-600 text-xs mt-1">{lastMessage?.content}</p>
+                                    <h3 className="font-medium text-xs text-lg mt-1 max-w-[270px] truncate">
+                                        {chat.name}
+                                    </h3>
+                                    <p className="text-sm text-gray-600 text-xs mt-1 max-w-[270px] truncate">
+                                        {lastMessage?.type === 'gif'
+                                            ? 'GIF'
+                                            : lastMessage?.type === 'image'
+                                            ? 'Hình ảnh'
+                                            : lastMessage?.content}
+                                    </p>
                                 </div>
                             </div>
                         </div>

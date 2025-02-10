@@ -9,10 +9,12 @@ const chatSlice = createSlice({
         showRightBar: false,
         showRightBarSearch: false,
         activeTabMess: 'priority',
+        emojiObject: null,
+        gifObject: null,
     },
     reducers: {
         sendMessage: (state, action) => {
-            const { chatId, content, time } = action.payload;
+            const { chatId, content, time, type } = action.payload;
             const chat = state.chats.find((c) => c.id === chatId);
 
             if (chat) {
@@ -20,6 +22,7 @@ const chatSlice = createSlice({
                     sender: 0,
                     content: content,
                     time: time,
+                    type: type,
                 });
             }
         },
@@ -46,6 +49,12 @@ const chatSlice = createSlice({
         setOnOrOfNotify: (state) => {
             state.activeChat.notify = !state.activeChat.notify;
         },
+        sendEmoji: (state, action) => {
+            state.emojiObject = action.payload;
+        },
+        sendGif: (state, action) => {
+            state.gifObject = action.payload;
+        },
     },
 });
 
@@ -58,5 +67,7 @@ export const {
     setActiveTabMessToOrther,
     setOnOrOfPin,
     setOnOrOfNotify,
+    sendEmoji,
+    sendGif,
 } = chatSlice.actions;
 export default chatSlice.reducer;

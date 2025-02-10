@@ -25,6 +25,8 @@ function TabChat() {
     const dispatch = useDispatch();
     const showRightBar = useSelector((state) => state.chat.showRightBar);
     const showRightBarSearch = useSelector((state) => state.chat.showRightBarSearch);
+    const emojiObject = useSelector((state) => state.chat.emojiObject);
+    const gifObject = useSelector((state) => state.chat.gifObject);
 
     const textareaRef = useRef(null);
 
@@ -43,14 +45,32 @@ function TabChat() {
                 hour: '2-digit',
                 minute: '2-digit',
             });
-            dispatch(sendMessage({ chatId: activeChat.id, content: message, time: currentTime }));
+            dispatch(sendMessage({ chatId: activeChat.id, content: message, time: currentTime, type: 'text' }));
             setMessage('');
         }
     };
 
+    useEffect(() => {
+        if (emojiObject != null) {
+            setMessage((prev) => prev + emojiObject.emoji);
+            adjustHeight();
+        }
+    }, [emojiObject]);
+
+    useEffect(() => {
+        if (gifObject != null) {
+            const currentTime = new Date().toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+
+            dispatch(sendMessage({ chatId: activeChat.id, content: gifObject.url, time: currentTime, type: 'gif' }));
+        }
+    }, [gifObject]);
+
     return (
         <>
-            <div className="p-2 border-b flex justify-between items-center h-[62px] min-w-[600px]">
+            <div className="p-2 border-b flex justify-between items-center h-[62px] min-w-[600px] ">
                 <div className="flex justify-center ">
                     <img
                         src={activeChat.avatar} // Thay bằng avatar thật
@@ -98,37 +118,30 @@ function TabChat() {
                     )}
                 </div>
             </div>
-            <div className="flex-1 p-4 overflow-y-auto bg-gray-200">
+            <div className="flex-1 p-4 overflow-y-auto bg-gray-200 ">
                 {activeChat.messages.map((message, index) => {
-                    if (message.sender === 0) {
-                        return (
-                            <div className=" flex justify-end">
+                    const type = message.type;
+                    return (
+                        <div className={` flex ${message.sender === 0 ? 'justify-end' : 'justify-start'}`}>
+                            {type == 'text' && (
                                 <p
                                     key={index}
-                                    className=" relative bg-blue-100 border border-blue-400 p-2 pb-6 rounded-lg w-fit mb-2 max-w-[200px] min-w-[40px]"
+                                    className={` relative border border-blue-400 p-2 pb-6 rounded-lg w-fit mb-2 max-w-[500px] min-w-[40px] ${
+                                        message.sender === 0 ? 'bg-blue-100' : 'bg-white'
+                                    }`}
                                 >
                                     {message.content}
                                     <p className="absolute left-[8px] bottom-[4px] text-gray-500 text-[10px]">
                                         {message.time}
                                     </p>
                                 </p>
-                            </div>
-                        );
-                    } else {
-                        return (
-                            <div className="flex justify-start">
-                                <p
-                                    key={index}
-                                    className="relative bg-white border border-blue-400 p-2 pb-6 rounded-lg w-fit mb-2 max-w-[200px] min-w-[40px]"
-                                >
-                                    {message.content}
-                                    <p className="absolute left-[8px] bottom-[4px] text-gray-500 text-[10px]">
-                                        {message.time}
-                                    </p>
-                                </p>
-                            </div>
-                        );
-                    }
+                            )}
+                            {type == 'gif' && (
+                                <img src={message.content} alt="GIF" className="max-w-[300px] rounded-lg" />
+                            )}
+                            {type == 'image' && <img src={message.content} alt="GIF" className="max-w-[300px]" />}
+                        </div>
+                    );
                 })}
             </div>
             <div>

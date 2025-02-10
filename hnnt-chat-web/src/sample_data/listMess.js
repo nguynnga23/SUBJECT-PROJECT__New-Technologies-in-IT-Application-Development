@@ -10,11 +10,13 @@ const data = [
             {
                 sender: 1,
                 content: 'Chào bạn',
+                type: 'text',
                 time: '10:00',
             },
             {
                 sender: 0,
                 content: 'Chào nha',
+                type: 'text',
                 time: '11:00',
             },
         ],
@@ -30,11 +32,13 @@ const data = [
             {
                 sender: 2,
                 content: 'Chào bạn',
+                type: 'text',
                 time: '10:00',
             },
             {
                 sender: 0,
                 content: 'Hôm nay bạn thế nào?',
+                type: 'text',
                 time: '11:15',
             },
         ],
