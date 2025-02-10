@@ -17,7 +17,7 @@ export default function ZaloUI() {
             {/* Sidebar */}
             <div className="w-16 h-screen bg-blue-600 flex flex-col items-center py-4 space-y-6">
                 {/* Avatar */}
-                <img src={avatar} alt="Avatar" className="w-12 h-12 rounded-full border-2 border-white" />
+                <img src={avatar} alt="Avatar" className="w-12 h-12 rounded-full border-2 border-white object-cover" />
 
                 {/* Menu Icons */}
                 <div className="flex flex-col space-y-6 text-white ">

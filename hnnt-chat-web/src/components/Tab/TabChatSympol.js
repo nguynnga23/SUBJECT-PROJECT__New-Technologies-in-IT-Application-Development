@@ -3,7 +3,7 @@ import Picker from 'emoji-picker-react';
 import GifPicker from 'gif-picker-react';
 
 function TabChatSymbol() {
-    const [activeTab, setActiveTab] = useState('sticker');
+    const [activeTab, setActiveTab] = useState('emoji');
     const [chosenEmoji, setChosenEmoji] = useState(null);
     const [chosenGif, setChosenGif] = useState(null);
 
@@ -42,17 +42,17 @@ function TabChatSymbol() {
                         ))}
 
                     {activeTab === 'emoji' && (
-                        <div className="flex">
-                            <Picker onEmojiClick={onEmojiClick} height={'40%'} width={'100%'} />
+                        <div className="flex h-[calc(100vh-112px)]">
+                            <Picker onEmojiClick={onEmojiClick} height={'100%'} width={'100%'} />
                         </div>
                     )}
 
                     {activeTab === 'gif' && (
-                        <div className="flex">
+                        <div className="flex h-[calc(100vh-112px)]">
                             <GifPicker
                                 tenorApiKey={process.env.REACT_APP_TENNORAPIKEY}
                                 onGiftClick={onGiftClick}
-                                height={'40%'}
+                                height={'100%'}
                                 width={'100%'}
                             />
                         </div>
