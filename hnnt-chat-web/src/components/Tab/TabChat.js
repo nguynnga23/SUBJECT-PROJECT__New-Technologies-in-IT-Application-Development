@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { IoMdSend } from 'react-icons/io';
 import { MdLabelOutline } from 'react-icons/md';
 import { VscLayoutSidebarRightOff } from 'react-icons/vsc';
@@ -14,13 +14,13 @@ import { FaRegAddressCard } from 'react-icons/fa6';
 import PopupCategory from '../Popup/PopupCategory';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { setShowOrOffRightBar, setShowOrOffRightBarSearch } from '../../redux/slices/chatSlice';
+import { setShowOrOffRightBar, setShowOrOffRightBarSearch, sendMessage } from '../../redux/slices/chatSlice';
 
 function TabChat() {
     const [message, setMessage] = useState('');
     const [isOpenCategory, setIsOpenCategory] = useState(false);
 
-    const activeChat = useSelector((state) => state.chat.activeChat);
+    const activeChat = useSelector((state) => state.chat.chats.find((chat) => chat.id === state.chat.activeChat?.id));
 
     const dispatch = useDispatch();
     const showRightBar = useSelector((state) => state.chat.showRightBar);
@@ -34,6 +34,17 @@ function TabChat() {
             textareaRef.current.style.height = '50px'; // Reset chiều cao trước khi tính toán
             const newHeight = Math.min(textareaRef.current.scrollHeight, 200);
             textareaRef.current.style.height = `${newHeight}px`;
+        }
+    };
+
+    const handleSendMessage = () => {
+        if (message.trim() !== '') {
+            const currentTime = new Date().toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+            dispatch(sendMessage({ chatId: activeChat.id, content: message, time: currentTime }));
+            setMessage('');
         }
     };
 
@@ -88,7 +99,37 @@ function TabChat() {
                 </div>
             </div>
             <div className="flex-1 p-4 overflow-y-auto bg-gray-200">
-                <p className="bg-blue-100 border border-blue-400 p-2 rounded-lg w-fit mb-2">{activeChat.message}</p>
+                {activeChat.messages.map((message, index) => {
+                    if (message.sender === 0) {
+                        return (
+                            <div className=" flex justify-end">
+                                <p
+                                    key={index}
+                                    className=" relative bg-blue-100 border border-blue-400 p-2 pb-6 rounded-lg w-fit mb-2 max-w-[200px] min-w-[40px]"
+                                >
+                                    {message.content}
+                                    <p className="absolute left-[8px] bottom-[4px] text-gray-500 text-[10px]">
+                                        {message.time}
+                                    </p>
+                                </p>
+                            </div>
+                        );
+                    } else {
+                        return (
+                            <div className="flex justify-start">
+                                <p
+                                    key={index}
+                                    className="relative bg-white border border-blue-400 p-2 pb-6 rounded-lg w-fit mb-2 max-w-[200px] min-w-[40px]"
+                                >
+                                    {message.content}
+                                    <p className="absolute left-[8px] bottom-[4px] text-gray-500 text-[10px]">
+                                        {message.time}
+                                    </p>
+                                </p>
+                            </div>
+                        );
+                    }
+                })}
             </div>
             <div>
                 <div className="flex bg-white border-t p-2">
@@ -110,7 +151,10 @@ function TabChat() {
                     />
                     <div className="flex items-center">
                         {message !== '' ? (
-                            <IoMdSend className="text-2xl cursor-pointer ml-3 text-blue-500 mr-3" />
+                            <IoMdSend
+                                className="text-2xl cursor-pointer ml-3 text-blue-500 mr-3"
+                                onClick={handleSendMessage}
+                            />
                         ) : (
                             <AiFillLike className="text-2xl cursor-pointer ml-3 text-yellow-500 mr-3" />
                         )}

@@ -3,21 +3,13 @@ import { GoBell } from 'react-icons/go';
 import { GrPin } from 'react-icons/gr';
 import { AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { GoBellSlash } from 'react-icons/go';
-import { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+
+import { setOnOrOfPin, setOnOrOfNotify } from '../../redux/slices/chatSlice';
 
 function TabChatInfo() {
-    const [notify, setNotify] = useState(true);
-    const [pin, setPin] = useState(false);
-
     const activeChat = useSelector((state) => state.chat.activeChat);
-
-    const handlePin = () => {
-        setPin(!pin);
-    };
-    const handleNotify = () => {
-        setNotify(!notify);
-    };
+    const dispatch = useDispatch();
 
     return (
         <div className="">
@@ -29,39 +21,39 @@ function TabChatInfo() {
             <div className="flex item-center justify-center">
                 <div className="m-4 mt-1 w-[50px] text-center">
                     <div className="flex justify-center">
-                        {notify ? (
+                        {activeChat.notify ? (
                             <GoBell
                                 size={35}
                                 className="p-2 bg-gray-200 rounded-full cursor-pointer"
-                                onClick={handleNotify}
+                                onClick={() => dispatch(setOnOrOfNotify())}
                             />
                         ) : (
                             <GoBellSlash
                                 size={35}
                                 className="p-2 bg-gray-200 rounded-full cursor-pointer text-blue-500"
-                                onClick={handleNotify}
+                                onClick={() => dispatch(setOnOrOfNotify())}
                             />
                         )}
                     </div>
-                    <p className="text-[10px]"> {notify ? 'Tắt thông báo' : 'Bật thông báo'}</p>
+                    <p className="text-[10px]"> {activeChat.notify ? 'Tắt thông báo' : 'Bật thông báo'}</p>
                 </div>
                 <div className="m-4 mt-1 w-[50px] text-center">
                     <div className="flex justify-center">
-                        {!pin ? (
+                        {!activeChat.pin ? (
                             <GrPin
                                 size={35}
                                 className="p-2 bg-gray-200 rounded-full cursor-pointer"
-                                onClick={handlePin}
+                                onClick={() => dispatch(setOnOrOfPin())}
                             />
                         ) : (
                             <GrPin
                                 size={35}
                                 className="p-2 bg-gray-200 rounded-full cursor-pointer text-blue-500"
-                                onClick={handlePin}
+                                onClick={() => dispatch(setOnOrOfPin())}
                             />
                         )}
                     </div>
-                    <p className="text-[10px]"> {!pin ? 'Ghim hội thoại' : 'Bỏ ghim hội thoại'}</p>
+                    <p className="text-[10px]"> {!activeChat.pin ? 'Ghim hội thoại' : 'Bỏ ghim hội thoại'}</p>
                 </div>
                 <div className="m-4 mt-1 w-[50px] text-center">
                     <div className="flex justify-center">

@@ -3,11 +3,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setActiveChat } from '../../redux/slices/chatSlice';
 
 import { setActiveTabMessToOrther, setActiveTabMessToPriority } from '../../redux/slices/chatSlice';
-import { data } from '../../sample_data/listMess';
 
 function TabMesssage() {
     const activeTab = useSelector((state) => state.chat.activeTabMess);
     const activeChat = useSelector((state) => state.chat.activeChat);
+    const data = useSelector((state) => state.chat.chats);
 
     const dispatch = useDispatch();
 
