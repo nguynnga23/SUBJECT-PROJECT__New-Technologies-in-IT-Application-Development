@@ -13,13 +13,18 @@ import { FaRegAddressCard } from 'react-icons/fa6';
 
 import PopupCategory from '../Popup/PopupCategory';
 
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { setShowOrOffRightBar, setShowOrOffRightBarSearch } from '../../redux/slices/chatSlice';
 
-function TabChat({ showRightBar, setShowRightBar, showRightBarSearch, setShowRightBarSearch }) {
+function TabChat() {
     const [message, setMessage] = useState('');
     const [isOpenCategory, setIsOpenCategory] = useState(false);
 
     const activeChat = useSelector((state) => state.chat.activeChat);
+
+    const dispatch = useDispatch();
+    const showRightBar = useSelector((state) => state.chat.showRightBar);
+    const showRightBarSearch = useSelector((state) => state.chat.showRightBarSearch);
 
     const textareaRef = useRef(null);
 
@@ -30,16 +35,6 @@ function TabChat({ showRightBar, setShowRightBar, showRightBarSearch, setShowRig
             const newHeight = Math.min(textareaRef.current.scrollHeight, 200);
             textareaRef.current.style.height = `${newHeight}px`;
         }
-    };
-
-    const toggleSearch = () => {
-        setShowRightBarSearch(!showRightBarSearch);
-        setShowRightBar(false); // Tắt sidebar khi search mở
-    };
-
-    const toggleSidebar = () => {
-        setShowRightBar(!showRightBar);
-        setShowRightBarSearch(false); // Tắt search khi sidebar mở
     };
 
     return (
@@ -74,20 +69,20 @@ function TabChat({ showRightBar, setShowRightBar, showRightBarSearch, setShowRig
                         className={`ml-1.5 p-1 hover:text-gray-500 hover:bg-gray-200  hover:rounded-[5px] cursor-pointer ${
                             showRightBarSearch ? 'text-blue-500 bg-blue-200 rounded-[5px]' : ''
                         }`}
-                        onClick={toggleSearch}
+                        onClick={() => dispatch(setShowOrOffRightBarSearch(!showRightBarSearch))}
                     />
 
                     {showRightBar ? (
                         <VscLayoutSidebarRight
                             size={26}
                             className="ml-1.5 text-blue-500 bg-blue-200 p-1 rounded-[5px] cursor-pointer"
-                            onClick={toggleSidebar}
+                            onClick={() => dispatch(setShowOrOffRightBar(!showRightBar))}
                         />
                     ) : (
                         <VscLayoutSidebarRightOff
                             size={26}
                             className="ml-1.5 text-gray-700 p-1 hover:text-gray-500 hover:rounded-[5px] hover:bg-gray-200 cursor-pointer"
-                            onClick={toggleSidebar}
+                            onClick={() => dispatch(setShowOrOffRightBar(!showRightBar))}
                         />
                     )}
                 </div>

@@ -6,12 +6,12 @@ import TabChatRightBarSearch from '../../components/Tab/TabChatRightBarSearch';
 import { useSelector } from 'react-redux';
 
 function Messaging() {
-    const [showRightBar, setShowRightBar] = useState(false);
-    const [showRightBarSearch, setShowRightBarSearch] = useState(false);
     const [notify, setNotify] = useState(true);
     const [pin, setPin] = useState(false);
 
     const activeChat = useSelector((state) => state.chat.activeChat);
+    const showRightBar = useSelector((state) => state.chat.showRightBar);
+    const showRightBarSearch = useSelector((state) => state.chat.showRightBarSearch);
 
     return (
         <div className="h-screen flex flex-col">
@@ -19,12 +19,7 @@ function Messaging() {
                 <TabChatLeftBar />
                 <div className={`flex flex-col bg-white ${showRightBar || showRightBarSearch ? 'w-2/4' : 'w-3/4'}`}>
                     {activeChat ? (
-                        <TabChat
-                            showRightBar={showRightBar}
-                            setShowRightBar={setShowRightBar}
-                            showRightBarSearch={showRightBarSearch}
-                            setShowRightBarSearch={setShowRightBarSearch}
-                        />
+                        <TabChat />
                     ) : (
                         <div className="flex-1 flex items-center justify-center text-gray-500">
                             Chọn một cuộc trò chuyện để bắt đầu
