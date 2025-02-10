@@ -6,9 +6,6 @@ import TabChatRightBarSearch from '../../components/Tab/TabChatRightBarSearch';
 import { useSelector } from 'react-redux';
 
 function Messaging() {
-    const [notify, setNotify] = useState(true);
-    const [pin, setPin] = useState(false);
-
     const activeChat = useSelector((state) => state.chat.activeChat);
     const showRightBar = useSelector((state) => state.chat.showRightBar);
     const showRightBarSearch = useSelector((state) => state.chat.showRightBarSearch);

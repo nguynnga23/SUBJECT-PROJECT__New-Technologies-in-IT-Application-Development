@@ -7,6 +7,7 @@ const chatSlice = createSlice({
         activeChat: null, // ID cuộc trò chuyện đang mở
         showRightBar: false,
         showRightBarSearch: false,
+        activeTabMess: 'priority',
     },
     reducers: {
         setChats: (state, action) => {
@@ -23,8 +24,21 @@ const chatSlice = createSlice({
             state.showRightBarSearch = action;
             state.showRightBar = false;
         },
+        setActiveTabMessToPriority: (state) => {
+            state.activeTabMess = 'priority';
+        },
+        setActiveTabMessToOrther: (state) => {
+            state.activeTabMess = 'other';
+        },
     },
 });
 
-export const { setChats, setActiveChat, setShowOrOffRightBar, setShowOrOffRightBarSearch } = chatSlice.actions;
+export const {
+    setChats,
+    setActiveChat,
+    setShowOrOffRightBar,
+    setShowOrOffRightBarSearch,
+    setActiveTabMessToPriority,
+    setActiveTabMessToOrther,
+} = chatSlice.actions;
 export default chatSlice.reducer;

@@ -2,6 +2,8 @@ import PopupCategoryAndState from '../../components/Popup/PopupCategoryAndState'
 import { useSelector, useDispatch } from 'react-redux';
 import { setActiveChat } from '../../redux/slices/chatSlice';
 
+import { setActiveTabMessToOrther, setActiveTabMessToPriority } from '../../redux/slices/chatSlice';
+
 const priorityChats = [
     {
         id: 1,
@@ -71,7 +73,8 @@ const otherChats = [
     },
 ];
 
-function TabMesssage({ activeTab, setActiveTab }) {
+function TabMesssage() {
+    const activeTab = useSelector((state) => state.chat.activeTabMess);
     const chats = activeTab === 'priority' ? priorityChats : otherChats;
     const activeChat = useSelector((state) => state.chat.activeChat);
 
@@ -85,7 +88,7 @@ function TabMesssage({ activeTab, setActiveTab }) {
                         className={`flex-1 py-2 mr-3 pt-4 text-xs text-center font-medium ${
                             activeTab === 'priority' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
                         }`}
-                        onClick={() => setActiveTab('priority')}
+                        onClick={() => dispatch(setActiveTabMessToPriority())}
                     >
                         Ưu tiên
                     </button>
@@ -93,7 +96,7 @@ function TabMesssage({ activeTab, setActiveTab }) {
                         className={`flex-1 py-2 pt-4 text-xs text-center font-medium ${
                             activeTab === 'other' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
                         }`}
-                        onClick={() => setActiveTab('other')}
+                        onClick={() => dispatch(setActiveTabMessToOrther())}
                     >
                         Khác
                     </button>
