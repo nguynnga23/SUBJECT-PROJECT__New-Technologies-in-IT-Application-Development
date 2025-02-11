@@ -1,4 +1,4 @@
-import { FiMoreVertical } from 'react-icons/fi';
+import { FiMoreHorizontal } from 'react-icons/fi';
 
 function ChatGif({ index, message, setHoveredMessage, hoveredMessage }) {
     return (
@@ -15,7 +15,7 @@ function ChatGif({ index, message, setHoveredMessage, hoveredMessage }) {
                     onMouseEnter={() => setHoveredMessage(index)}
                     onMouseLeave={() => setTimeout(() => setHoveredMessage(null), 2000)}
                 >
-                    <FiMoreVertical size={15} />
+                    <FiMoreHorizontal size={15} />
                 </button>
             )}
         </div>

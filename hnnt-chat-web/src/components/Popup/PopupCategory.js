@@ -41,7 +41,7 @@ function PopupCategory({ isOpen, setIsOpen }) {
     return (
         <div className="relative inline-block text-left" ref={popupContainerRef}>
             {isOpen && (
-                <div className="absolute mt-11 left-[-105px] w-56 bg-white shadow-lg rounded-lg border">
+                <div className="absolute mt-11 left-[-105px] w-56 bg-white shadow-lg rounded-lg border z-[10]">
                     <div className="">
                         {categories.map((category) => (
                             <div

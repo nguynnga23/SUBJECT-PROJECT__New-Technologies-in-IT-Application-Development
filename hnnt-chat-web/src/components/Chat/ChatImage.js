@@ -1,5 +1,5 @@
 import PopupViewImage from '../Popup/PopupViewImage';
-import { FiMoreVertical } from 'react-icons/fi';
+import { FiMoreHorizontal } from 'react-icons/fi';
 
 import { useState } from 'react';
 
@@ -25,7 +25,7 @@ function ChatImage({ index, message, setHoveredMessage, hoveredMessage }) {
                     onMouseEnter={() => setHoveredMessage(index)}
                     onMouseLeave={() => setTimeout(() => setHoveredMessage(null), 2000)}
                 >
-                    <FiMoreVertical size={15} />
+                    <FiMoreHorizontal size={15} />
                 </button>
             )}
 

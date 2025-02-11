@@ -45,6 +45,7 @@ function TabChat() {
     const chatContainerRef = useRef(null);
 
     const [hoveredMessage, setHoveredMessage] = useState(null);
+    const [isPopupOpenIndex, setIsPopupOpenIndex] = useState(null);
 
     useEffect(() => {
         if (chatContainerRef.current) {
@@ -165,13 +166,25 @@ function TabChat() {
                 {activeChat.messages.map((message, index) => {
                     const type = message.type;
                     return (
-                        <div className={`relative flex ${message.sender === 0 ? 'justify-end' : 'justify-start'}`}>
+                        <div
+                            className={` flex ${message.sender === 0 ? 'justify-end' : 'justify-start'}`}
+                            onMouseEnter={() => {
+                                setHoveredMessage(index);
+                            }}
+                            onMouseLeave={() => {
+                                setTimeout(() => setHoveredMessage(null), 2000);
+                                setHoveredMessage(null);
+                            }}
+                        >
                             {type === 'text' && (
                                 <ChatText
+                                    key={index}
                                     index={index}
                                     message={message}
                                     setHoveredMessage={setHoveredMessage}
                                     hoveredMessage={hoveredMessage}
+                                    isPopupOpenIndex={isPopupOpenIndex}
+                                    setIsPopupOpenIndex={setIsPopupOpenIndex}
                                 />
                             )}
                             {type === 'gif' && (
