@@ -10,9 +10,7 @@ import { AiFillLike } from 'react-icons/ai';
 import { IoImageOutline } from 'react-icons/io5';
 import { MdAttachFile } from 'react-icons/md';
 import { FaRegAddressCard } from 'react-icons/fa6';
-import { CiFileOn } from 'react-icons/ci';
 import { MdOutlineEmojiEmotions } from 'react-icons/md';
-import { FiMoreVertical } from 'react-icons/fi';
 
 import PopupCategory from '../Popup/PopupCategory';
 
@@ -23,9 +21,10 @@ import {
     sendMessage,
     openEmojiTab,
 } from '../../redux/slices/chatSlice';
-import PopupViewImage from '../Popup/PopupViewImage';
 import ChatText from '../Chat/ChatText';
 import ChatGif from '../Chat/ChatGif';
+import ChatImage from '../Chat/ChatImage';
+import ChatFile from '../Chat/ChatFile';
 
 function TabChat() {
     const [message, setMessage] = useState('');
@@ -44,8 +43,6 @@ function TabChat() {
     const inputImageRef = useRef(null); // Tạo tham chiếu đến input image
     const inputFileRef = useRef(null); // Tạo tham chiếu đến input image
     const chatContainerRef = useRef(null);
-
-    const [selectedImage, setSelectedImage] = useState(null);
 
     const [hoveredMessage, setHoveredMessage] = useState(null);
 
@@ -170,69 +167,36 @@ function TabChat() {
                     return (
                         <div className={`relative flex ${message.sender === 0 ? 'justify-end' : 'justify-start'}`}>
                             {type === 'text' && (
-                                <ChatText index={index} message={message} setHoveredMessage={setHoveredMessage} />
+                                <ChatText
+                                    index={index}
+                                    message={message}
+                                    setHoveredMessage={setHoveredMessage}
+                                    hoveredMessage={hoveredMessage}
+                                />
                             )}
-                            {type === 'gif' && <ChatGif />}
+                            {type === 'gif' && (
+                                <ChatGif
+                                    index={index}
+                                    message={message}
+                                    setHoveredMessage={setHoveredMessage}
+                                    hoveredMessage={hoveredMessage}
+                                />
+                            )}
                             {type === 'image' && (
-                                <div
-                                    className="relative pb-2 mb-2"
-                                    onMouseEnter={() => setHoveredMessage(index)}
-                                    onMouseLeave={() => setHoveredMessage(null)}
-                                >
-                                    <img
-                                        src={message.content}
-                                        alt="GIF"
-                                        className="max-w-[500px] mb-4 rounded-lg"
-                                        onClick={() => setSelectedImage(message.content)}
-                                    />
-                                    <p className="absolute left-[8px] bottom-[2px] text-gray-500 text-[10px]">
-                                        {message.time}
-                                    </p>
-                                    {selectedImage && (
-                                        <PopupViewImage
-                                            selectedImage={selectedImage}
-                                            setSelectedImage={setSelectedImage}
-                                        />
-                                    )}
-                                </div>
+                                <ChatImage
+                                    index={index}
+                                    message={message}
+                                    setHoveredMessage={setHoveredMessage}
+                                    hoveredMessage={hoveredMessage}
+                                />
                             )}
                             {type === 'file' && (
-                                <div
-                                    className="relative pb-2 p-3 mb-2 border border-gray-300 rounded-lg bg-gray-100 max-w-[500px]"
-                                    onMouseEnter={() => setHoveredMessage(index)}
-                                    onMouseLeave={() => setHoveredMessage(null)}
-                                >
-                                    <div className="flex items-center space-x-3 mb-4">
-                                        {/* Nút tải file */}
-                                        <a
-                                            href={message.content}
-                                            download={message.content}
-                                            className="hover:underline text-blue-500 text-sm flex"
-                                        >
-                                            {/* Icon file */}
-                                            <CiFileOn className="text-3xl text-blue-500 mr-2" />
-                                            {/* Thông tin file */}
-                                            <div className="flex flex-col">
-                                                <p className="text-sm font-semibold">{message.fileName}</p>
-                                                <p className="text-xs text-gray-500">{message.fileSize}</p>
-                                            </div>
-                                        </a>
-                                    </div>
-
-                                    {/* Thời gian gửi */}
-                                    <p className="absolute left-[8px] bottom-[2px] text-gray-500 text-[10px]">
-                                        {message.time}
-                                    </p>
-                                </div>
-                            )}
-                            {hoveredMessage === index && (
-                                <button
-                                    className="absolute top-2 left-2 p-1 rounded-full hover:bg-gray-300"
-                                    onMouseEnter={() => setHoveredMessage(index)}
-                                    onMouseLeave={() => setTimeout(() => setHoveredMessage(null), 200)}
-                                >
-                                    <FiMoreVertical size={18} />
-                                </button>
+                                <ChatFile
+                                    index={index}
+                                    message={message}
+                                    setHoveredMessage={setHoveredMessage}
+                                    hoveredMessage={hoveredMessage}
+                                />
                             )}
                         </div>
                     );
