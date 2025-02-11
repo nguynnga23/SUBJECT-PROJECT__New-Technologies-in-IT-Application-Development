@@ -10,11 +10,19 @@ import { AiFillLike } from 'react-icons/ai';
 import { IoImageOutline } from 'react-icons/io5';
 import { MdAttachFile } from 'react-icons/md';
 import { FaRegAddressCard } from 'react-icons/fa6';
+import { CiFileOn } from 'react-icons/ci';
+import { MdOutlineEmojiEmotions } from 'react-icons/md';
 
 import PopupCategory from '../Popup/PopupCategory';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { setShowOrOffRightBar, setShowOrOffRightBarSearch, sendMessage } from '../../redux/slices/chatSlice';
+import {
+    setShowOrOffRightBar,
+    setShowOrOffRightBarSearch,
+    sendMessage,
+    openEmojiTab,
+} from '../../redux/slices/chatSlice';
+import PopupViewImage from '../Popup/PopupViewImage';
 
 function TabChat() {
     const [message, setMessage] = useState('');
@@ -30,8 +38,11 @@ function TabChat() {
 
     const textareaRef = useRef(null);
 
-    const fileInputRef = useRef(null); // Tạo tham chiếu đến input file
+    const inputImageRef = useRef(null); // Tạo tham chiếu đến input image
+    const inputFileRef = useRef(null); // Tạo tham chiếu đến input image
     const chatContainerRef = useRef(null);
+
+    const [selectedImage, setSelectedImage] = useState(null);
 
     useEffect(() => {
         if (chatContainerRef.current) {
@@ -77,7 +88,7 @@ function TabChat() {
         }
     }, [gifObject]);
 
-    const handleImageChange = (event) => {
+    const handleFileChange = (event, type) => {
         const file = event.target.files[0];
         if (file) {
             const currentTime = new Date().toLocaleTimeString([], {
@@ -89,8 +100,10 @@ function TabChat() {
                 sendMessage({
                     chatId: activeChat.id,
                     content: URL.createObjectURL(file),
+                    fileName: file.name, // Lấy tên file
+                    fileSize: (file.size / 1024).toFixed(2) + ' KB',
                     time: currentTime,
-                    type: 'image',
+                    type: type,
                 }),
             );
         }
@@ -165,7 +178,7 @@ function TabChat() {
                                 </p>
                             )}
                             {type === 'gif' && (
-                                <div className="relative pb-2">
+                                <div className="relative pb-2 mb-2">
                                     <img src={message.content} alt="GIF" className="max-w-[300px] rounded-lg mb-4 " />
                                     <p className="absolute left-[8px] bottom-[2px] text-gray-500 text-[10px]">
                                         {message.time}
@@ -173,8 +186,44 @@ function TabChat() {
                                 </div>
                             )}
                             {type === 'image' && (
-                                <div className="relative pb-2">
-                                    <img src={message.content} alt="GIF" className="max-w-[500px] mb-4" />
+                                <div className="relative pb-2 mb-2">
+                                    <img
+                                        src={message.content}
+                                        alt="GIF"
+                                        className="max-w-[500px] mb-4 rounded-lg"
+                                        onClick={() => setSelectedImage(message.content)}
+                                    />
+                                    <p className="absolute left-[8px] bottom-[2px] text-gray-500 text-[10px]">
+                                        {message.time}
+                                    </p>
+                                    {selectedImage && (
+                                        <PopupViewImage
+                                            selectedImage={selectedImage}
+                                            setSelectedImage={setSelectedImage}
+                                        />
+                                    )}
+                                </div>
+                            )}
+                            {type === 'file' && (
+                                <div className="relative pb-2 p-3 mb-2 border border-gray-300 rounded-lg bg-gray-100 max-w-[500px]">
+                                    <div className="flex items-center space-x-3 mb-4">
+                                        {/* Nút tải file */}
+                                        <a
+                                            href={message.content}
+                                            download={message.content}
+                                            className="hover:underline text-blue-500 text-sm flex"
+                                        >
+                                            {/* Icon file */}
+                                            <CiFileOn className="text-3xl text-blue-500 mr-2" />
+                                            {/* Thông tin file */}
+                                            <div className="flex flex-col">
+                                                <p className="text-sm font-semibold">{message.fileName}</p>
+                                                <p className="text-xs text-gray-500">{message.fileSize}</p>
+                                            </div>
+                                        </a>
+                                    </div>
+
+                                    {/* Thời gian gửi */}
                                     <p className="absolute left-[8px] bottom-[2px] text-gray-500 text-[10px]">
                                         {message.time}
                                     </p>
@@ -191,18 +240,34 @@ function TabChat() {
                         <input
                             type="file"
                             accept="image/*"
-                            ref={fileInputRef}
-                            onChange={handleImageChange}
+                            ref={inputImageRef}
+                            onChange={(event) => handleFileChange(event, 'image')}
                             className="hidden"
                         />
 
                         {/* Icon mở thư mục chọn ảnh */}
                         <IoImageOutline
                             className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-500"
-                            onClick={() => fileInputRef.current.click()} // Kích hoạt input khi nhấn vào icon
+                            onClick={() => inputImageRef.current.click()} // Kích hoạt input khi nhấn vào icon
                         />
                     </div>
-                    <MdAttachFile className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-500" />
+                    <div>
+                        {/* Input chọn ảnh (ẩn đi) */}
+                        <input
+                            type="file"
+                            accept=".doc,.docx,.xls,.xlsx,.pdf,.txt,.ppt,.pptx,.csv"
+                            ref={inputFileRef}
+                            onChange={(event) => handleFileChange(event, 'file')}
+                            className="hidden"
+                        />
+
+                        {/* Icon mở thư mục chọn file */}
+                        <MdAttachFile
+                            className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-500"
+                            onClick={() => inputFileRef.current.click()}
+                        />
+                    </div>
+
                     <FaRegAddressCard className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-500" />
                 </div>
                 <div className="flex items-center border-t p-2">
@@ -219,6 +284,10 @@ function TabChat() {
                     />
 
                     <div className="flex items-center">
+                        <MdOutlineEmojiEmotions
+                            className="text-2xl cursor-pointer ml-3 text-gray-500 mr-3 hover:text-blue-500"
+                            onClick={() => dispatch(openEmojiTab())}
+                        />
                         {message !== '' ? (
                             <IoMdSend
                                 className="text-2xl cursor-pointer ml-3 text-blue-500 mr-3"

@@ -11,19 +11,30 @@ const chatSlice = createSlice({
         activeTabMess: 'priority',
         emojiObject: null,
         gifObject: null,
+        rightBarTab: 'info',
     },
     reducers: {
         sendMessage: (state, action) => {
-            const { chatId, content, time, type } = action.payload;
+            const { chatId, content, time, type, fileName, fileSize } = action.payload;
             const chat = state.chats.find((c) => c.id === chatId);
 
             if (chat) {
-                chat.messages.push({
+                const message = {
                     sender: 0,
                     content: content,
                     time: time,
                     type: type,
-                });
+                };
+                // Nếu có fileName thì thêm vào object
+                if (fileName) {
+                    message.fileName = fileName;
+                }
+
+                // Nếu có fileSize thì thêm vào object
+                if (fileSize) {
+                    message.fileSize = fileSize;
+                }
+                chat.messages.push(message);
             }
         },
         setActiveChat: (state, action) => {
@@ -55,6 +66,10 @@ const chatSlice = createSlice({
         sendGif: (state, action) => {
             state.gifObject = action.payload;
         },
+        openEmojiTab: (state) => {
+            state.showRightBar = true;
+            state.rightBarTab = 'sympol';
+        },
     },
 });
 
@@ -69,5 +84,6 @@ export const {
     setOnOrOfNotify,
     sendEmoji,
     sendGif,
+    openEmojiTab,
 } = chatSlice.actions;
 export default chatSlice.reducer;

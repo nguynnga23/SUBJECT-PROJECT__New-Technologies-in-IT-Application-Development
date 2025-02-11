@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import TabChatInfo from './TabChatInfo';
 import TabChatSympol from './TabChatSympol';
+import { useDispatch, useSelector } from 'react-redux';
 
 function TabChatRightBar() {
-    const [activeMessageTab, setActiveMessageTab] = useState('info');
+    const dispatch = useDispatch();
+    const initTab = useSelector((state) => state.chat.rightBarTab);
+    const [activeMessageTab, setActiveMessageTab] = useState(initTab);
 
     return (
         <div className="w-1/4 flex flex-col bg-white min-w-[320px] border-l">
@@ -19,9 +22,9 @@ function TabChatRightBar() {
                 </button>
                 <button
                     className={`flex-1 py-2 text-center font-medium w-[50%] ${
-                        activeMessageTab === 'emoji' ? 'bg-white' : 'bg-gray-200'
+                        activeMessageTab === 'sympol' ? 'bg-white' : 'bg-gray-200'
                     }`}
-                    onClick={() => setActiveMessageTab('emoji')}
+                    onClick={() => setActiveMessageTab('sympol')}
                 >
                     Biểu tượng
                 </button>
@@ -30,7 +33,7 @@ function TabChatRightBar() {
             {/* Nội dung */}
             {activeMessageTab === 'info' && <TabChatInfo />}
 
-            {activeMessageTab === 'emoji' && <TabChatSympol />}
+            {activeMessageTab === 'sympol' && <TabChatSympol />}
         </div>
     );
 }
