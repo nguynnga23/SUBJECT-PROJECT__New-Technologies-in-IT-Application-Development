@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from "@react-navigation/native";
 
 export default function PrivateCallScreen() {
@@ -10,52 +9,48 @@ export default function PrivateCallScreen() {
     const [isCameraOn, setIsCameraOn] = useState(true);
 
     return (
-        <SafeAreaView style={styles.container}>
-            <SafeAreaProvider>
-                {/* Nút quay lại */}
-                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                    <Ionicons name="arrow-back" size={30} color="white" />
+        <View style={styles.container}>
+            {/* Nút quay lại */}
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                <Ionicons name="arrow-back" size={30} color="white" />
+            </TouchableOpacity>
+
+            <View style={styles.profileContainer}>
+                <Image
+                    source={require("../../../../assets/icon.png")}
+                    style={styles.avatar}
+                />
+                <Text style={styles.name}>...</Text>
+                <Text style={styles.status}>Connection</Text>
+            </View>
+
+            {/* Các nút chức năng */}
+            <View style={styles.buttonContainer}>
+                {/* Nút Camera */}
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => setIsCameraOn(!isCameraOn)}
+                >
+                    <Ionicons name={isCameraOn ? "videocam" : "videocam-off"} size={30} color="white" />
+                    <Text style={styles.buttonText}>{isCameraOn ? "Camera on" : "Camera off"}</Text>
                 </TouchableOpacity>
 
-                {/* Avatar & Tên Nhóm gọi */}
-                <View style={styles.profileContainer}>
-                    <Image
-                        source={require("../../../../assets/icon.png")}
-                        style={styles.avatar}
-                    />
-                    <Text style={styles.name}>...</Text>
-                    <Text style={styles.status}>Connection</Text>
-                </View>
+                {/* Nút Mic */}
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => setIsMicOn(!isMicOn)}
+                >
+                    <Ionicons name={isMicOn ? "mic" : "mic-off"} size={30} color="white" />
+                    <Text style={styles.buttonText}>{isMicOn ? "Mic on" : "Mic off"}</Text>
+                </TouchableOpacity>
 
-                {/* Các nút chức năng */}
-                <View style={styles.buttonContainer}>
-                    {/* Nút Camera */}
-                    <TouchableOpacity
-                        style={styles.button}
-                        onPress={() => setIsCameraOn(!isCameraOn)}
-                    >
-                        <Ionicons name={isCameraOn ? "videocam" : "videocam-off"} size={30} color="white" />
-                        <Text style={styles.buttonText}>{isCameraOn ? "Camera on" : "Camera off"}</Text>
-                    </TouchableOpacity>
-
-                    {/* Nút Mic */}
-                    <TouchableOpacity
-                        style={styles.button}
-                        onPress={() => setIsMicOn(!isMicOn)}
-                    >
-                        <Ionicons name={isMicOn ? "mic" : "mic-off"} size={30} color="white" />
-                        <Text style={styles.buttonText}>{isMicOn ? "Mic on" : "Mic off"}</Text>
-                    </TouchableOpacity>
-
-                    {/* Nút Kết Thúc Cuộc Gọi */}
-                    <TouchableOpacity style={[styles.button, styles.endCallButton]}>
-                        <Ionicons name="call" size={30} color="white" />
-                        <Text style={styles.buttonText}>End</Text>
-                    </TouchableOpacity>
-                </View>
-
-            </SafeAreaProvider>
-        </SafeAreaView>
+                {/* Nút Kết Thúc Cuộc Gọi */}
+                <TouchableOpacity style={[styles.button, styles.endCallButton]}>
+                    <Ionicons name="call" size={30} color="white" />
+                    <Text style={styles.buttonText}>End</Text>
+                </TouchableOpacity>
+            </View>
+        </View>
     );
 };
 
