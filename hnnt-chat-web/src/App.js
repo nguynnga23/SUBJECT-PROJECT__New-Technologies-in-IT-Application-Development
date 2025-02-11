@@ -3,6 +3,7 @@ import { PiChatCircleTextFill } from 'react-icons/pi';
 import { RiContactsBook3Line } from 'react-icons/ri';
 import { IoSettingsOutline } from 'react-icons/io5';
 import { IoMdCloudOutline } from 'react-icons/io';
+import { CiShare1 } from 'react-icons/ci';
 
 import Messaging from './screens/Messaging';
 import Contacts from './screens/Contacts';
@@ -17,7 +18,48 @@ export default function ZaloUI() {
             {/* Sidebar */}
             <div className="w-16 h-screen bg-blue-600 flex flex-col items-center py-4 space-y-6">
                 {/* Avatar */}
-                <img src={avatar} alt="Avatar" className="w-12 h-12 rounded-full border-2 border-white" />
+                <div>
+                    <button
+                        id="dropdownUserAvatarButton"
+                        data-dropdown-toggle="dropdownAvatar"
+                        data-dropdown-placement="right-end"
+                        className="flex text-sm"
+                        type="button"
+                    >
+                        <img src={avatar} alt="Avatar" className="w-12 h-12 rounded-full border-2 border-white" />
+                    </button>
+                    {/* Dropdown menu */}
+                    <div
+                        id="dropdownAvatar"
+                        className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg ring-2 ring-gray-200"
+                    >
+                        <div className="px-4 py-3 text-sm text-black ">
+                            <p className="text-lg font-medium ">Nguyễn Thiên Tứ</p>
+                        </div>
+                        <ul
+                            className="py-2 text-sm text-gray-700 dark:text-gray-200"
+                            aria-labelledby="dropdownUserAvatarButton"
+                        >
+                            <li>
+                                <p className="block px-4 py-2 hover:bg-gray-100 text-black flex items-center gap-x-6">
+                                    Nâng cấp tài khoản
+                                    <CiShare1 />
+                                </p>
+                            </li>
+                            <li>
+                                <p className="block px-4 py-2 hover:bg-gray-100 text-black">Hồ sơ của bạn</p>
+                            </li>
+                            <li>
+                                <p className="block px-4 py-2 hover:bg-gray-100 text-black">Cài đặt</p>
+                            </li>
+                        </ul>
+                        <div className="">
+                            <a href="#" className="block px-4 py-2 hover:bg-gray-100 text-black">
+                                Đăng xuất
+                            </a>
+                        </div>
+                    </div>
+                </div>
 
                 {/* Menu Icons */}
                 <div className="flex flex-col space-y-6 text-white ">
