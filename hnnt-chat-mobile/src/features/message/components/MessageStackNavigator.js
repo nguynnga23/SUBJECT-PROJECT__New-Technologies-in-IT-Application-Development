@@ -5,6 +5,7 @@ import PrivateChatScreen from "../screens/privateChat/PrivateChatScreen";
 import GroupCallScreen from "../screens/groupChat/GroupCallScreen";
 import GroupInfoScreen from "../screens/groupChat/GroupInfoScreen";
 import MemberListScreen from "../screens/groupChat/MemberListScreen";
+import FindGrMessagesScreen from "../screens/groupChat/FindGrMessageScreen";
 
 const MessageStack = createNativeStackNavigator();
 
@@ -24,6 +25,7 @@ export default function MessageStackNavigator() {
       <MessageStack.Screen name="GroupCallScreen" component={GroupCallScreen} />
       <MessageStack.Screen name="GroupInfoScreen" component={GroupInfoScreen} />
       <MessageStack.Screen name="MemberListScreen" component={MemberListScreen} />
+      <MessageStack.Screen name="FindGrMessagesScreen" component={FindGrMessagesScreen} />
     </MessageStack.Navigator>
   );
 }

@@ -49,14 +49,16 @@ export default function GroupInfoScreen() {
                     />
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <Text style={styles.groupName}>{groupName}</Text>
-                        <AntDesign style={{ marginTop: 7 }} name="edit" size={24} color="black" />
+                        <TouchableOpacity>
+                            <AntDesign style={{ marginTop: 7 }} name="edit" size={24} color="black" />
+                        </TouchableOpacity>
                     </View>
 
                 </View>
 
                 {/* Actions */}
                 <View style={styles.actions}>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={() => navigation.navigate("FindGrMessagesScreen")}>
                         <ActionButton icon="search" label="Find messages" />
                     </TouchableOpacity>
 

@@ -11,7 +11,7 @@ const members = [
     { id: "4", name: "Nguyen Thien Tu", role: "Added by Huy Nguyen", avatar: "https://example.com/avatar4.png", isUser: false },
 ];
 
-const MemberListScreen = () => {
+export default function MemberListScreen() {
     const navigation = useNavigation();
     const [friendRequests, setFriendRequests] = useState({});
     const [selectedMember, setSelectedMember] = useState(null);
@@ -218,5 +218,3 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
 });
-
-export default MemberListScreen;
