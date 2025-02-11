@@ -25,6 +25,7 @@ import {
 } from '../../redux/slices/chatSlice';
 import PopupViewImage from '../Popup/PopupViewImage';
 import ChatText from '../Chat/ChatText';
+import ChatGif from '../Chat/ChatGif';
 
 function TabChat() {
     const [message, setMessage] = useState('');
@@ -171,18 +172,7 @@ function TabChat() {
                             {type === 'text' && (
                                 <ChatText index={index} message={message} setHoveredMessage={setHoveredMessage} />
                             )}
-                            {type === 'gif' && (
-                                <div
-                                    className="relative pb-2 mb-2"
-                                    onMouseEnter={() => setHoveredMessage(index)}
-                                    onMouseLeave={() => setHoveredMessage(null)}
-                                >
-                                    <img src={message.content} alt="GIF" className="max-w-[300px] rounded-lg mb-4 " />
-                                    <p className="absolute left-[8px] bottom-[2px] text-gray-500 text-[10px]">
-                                        {message.time}
-                                    </p>
-                                </div>
-                            )}
+                            {type === 'gif' && <ChatGif />}
                             {type === 'image' && (
                                 <div
                                     className="relative pb-2 mb-2"
