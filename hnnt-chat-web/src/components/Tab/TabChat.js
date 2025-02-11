@@ -30,6 +30,15 @@ function TabChat() {
 
     const textareaRef = useRef(null);
 
+    const fileInputRef = useRef(null); // Tạo tham chiếu đến input file
+    const chatContainerRef = useRef(null);
+
+    useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    }, [activeChat.messages]);
+
     // Hàm tự động điều chỉnh chiều cao
     const adjustHeight = () => {
         if (textareaRef.current) {
@@ -67,6 +76,25 @@ function TabChat() {
             dispatch(sendMessage({ chatId: activeChat.id, content: gifObject.url, time: currentTime, type: 'gif' }));
         }
     }, [gifObject]);
+
+    const handleImageChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const currentTime = new Date().toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+
+            dispatch(
+                sendMessage({
+                    chatId: activeChat.id,
+                    content: URL.createObjectURL(file),
+                    time: currentTime,
+                    type: 'image',
+                }),
+            );
+        }
+    };
 
     return (
         <>
@@ -118,12 +146,12 @@ function TabChat() {
                     )}
                 </div>
             </div>
-            <div className="flex-1 p-4 overflow-y-auto bg-gray-200 ">
+            <div className="flex-1 p-4 overflow-y-auto bg-gray-200 " ref={chatContainerRef}>
                 {activeChat.messages.map((message, index) => {
                     const type = message.type;
                     return (
                         <div className={` flex ${message.sender === 0 ? 'justify-end' : 'justify-start'}`}>
-                            {type == 'text' && (
+                            {type === 'text' && (
                                 <p
                                     key={index}
                                     className={` relative border border-blue-400 p-2 pb-6 rounded-lg w-fit mb-2 max-w-[500px] min-w-[40px] ${
@@ -136,17 +164,44 @@ function TabChat() {
                                     </p>
                                 </p>
                             )}
-                            {type == 'gif' && (
-                                <img src={message.content} alt="GIF" className="max-w-[300px] rounded-lg" />
+                            {type === 'gif' && (
+                                <div className="relative pb-2">
+                                    <img src={message.content} alt="GIF" className="max-w-[300px] rounded-lg mb-4 " />
+                                    <p className="absolute left-[8px] bottom-[2px] text-gray-500 text-[10px]">
+                                        {message.time}
+                                    </p>
+                                </div>
                             )}
-                            {type == 'image' && <img src={message.content} alt="GIF" className="max-w-[300px]" />}
+                            {type === 'image' && (
+                                <div className="relative pb-2">
+                                    <img src={message.content} alt="GIF" className="max-w-[500px] mb-4" />
+                                    <p className="absolute left-[8px] bottom-[2px] text-gray-500 text-[10px]">
+                                        {message.time}
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     );
                 })}
             </div>
             <div>
                 <div className="flex bg-white border-t p-2">
-                    <IoImageOutline className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-500" />
+                    <div>
+                        {/* Input chọn ảnh (ẩn đi) */}
+                        <input
+                            type="file"
+                            accept="image/*"
+                            ref={fileInputRef}
+                            onChange={handleImageChange}
+                            className="hidden"
+                        />
+
+                        {/* Icon mở thư mục chọn ảnh */}
+                        <IoImageOutline
+                            className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-500"
+                            onClick={() => fileInputRef.current.click()} // Kích hoạt input khi nhấn vào icon
+                        />
+                    </div>
                     <MdAttachFile className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-500" />
                     <FaRegAddressCard className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-500" />
                 </div>
@@ -162,6 +217,7 @@ function TabChat() {
                         className="flex-1 p-3 font-base text-[16px] rounded-lg focus:border-blue-500 focus:outline-none
                            h-[50px] max-h-[200px] overflow-y-auto resize-none"
                     />
+
                     <div className="flex items-center">
                         {message !== '' ? (
                             <IoMdSend

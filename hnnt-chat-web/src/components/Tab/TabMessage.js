@@ -64,6 +64,7 @@ function TabMesssage() {
                                         {chat.name}
                                     </h3>
                                     <p className="text-sm text-gray-600 text-xs mt-1 max-w-[270px] truncate">
+                                        {lastMessage?.sender === 0 ? 'You: ' : lastMessage.name}
                                         {lastMessage?.type === 'gif'
                                             ? 'GIF'
                                             : lastMessage?.type === 'image'

@@ -54,11 +54,13 @@ const data = [
             {
                 sender: 3,
                 content: 'Chào bạn',
+                type: 'text',
                 time: '10:00',
             },
             {
                 sender: 0,
                 content: 'Hẹn gặp bạn sau!',
+                type: 'text',
                 time: '11:00',
             },
         ],
