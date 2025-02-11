@@ -46,7 +46,7 @@ export default function BottomTabNavigator() {
                 name="Contacts"
                 component={ContactScreen}
                 options={{
-                    headerTitle: () => <Header iconName2="adduser" navigator="AddFriend" />,
+                    headerTitle: () => <Header iconName2="adduser" navigator="Add Friends" />,
                 }}
             />
             <Tab.Screen

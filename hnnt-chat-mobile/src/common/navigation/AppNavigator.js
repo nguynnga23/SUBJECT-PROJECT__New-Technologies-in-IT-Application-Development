@@ -27,7 +27,7 @@ export default function AppNavigator() {
 
                 <Stack.Screen name="FriendRequest" component={FriendRequestScreen} />
                 <Stack.Screen name="PhoneBook" component={PhoneBookScreen} />
-                <Stack.Screen name="AddFriend" component={AddFriendScreen} />
+                <Stack.Screen name="Add Friends" component={AddFriendScreen} />
                 <Stack.Screen name="AddGroup" component={AddGroupScreen} />
                 <Stack.Screen name="Search" component={SearchScreen} />
             </Stack.Navigator>
