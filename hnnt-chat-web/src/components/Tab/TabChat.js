@@ -12,6 +12,7 @@ import { MdAttachFile } from 'react-icons/md';
 import { FaRegAddressCard } from 'react-icons/fa6';
 import { CiFileOn } from 'react-icons/ci';
 import { MdOutlineEmojiEmotions } from 'react-icons/md';
+import { FiMoreVertical } from 'react-icons/fi';
 
 import PopupCategory from '../Popup/PopupCategory';
 
@@ -23,6 +24,7 @@ import {
     openEmojiTab,
 } from '../../redux/slices/chatSlice';
 import PopupViewImage from '../Popup/PopupViewImage';
+import ChatText from '../Chat/ChatText';
 
 function TabChat() {
     const [message, setMessage] = useState('');
@@ -43,6 +45,8 @@ function TabChat() {
     const chatContainerRef = useRef(null);
 
     const [selectedImage, setSelectedImage] = useState(null);
+
+    const [hoveredMessage, setHoveredMessage] = useState(null);
 
     useEffect(() => {
         if (chatContainerRef.current) {
@@ -163,22 +167,16 @@ function TabChat() {
                 {activeChat.messages.map((message, index) => {
                     const type = message.type;
                     return (
-                        <div className={` flex ${message.sender === 0 ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`relative flex ${message.sender === 0 ? 'justify-end' : 'justify-start'}`}>
                             {type === 'text' && (
-                                <p
-                                    key={index}
-                                    className={` relative border border-blue-400 p-2 pb-6 rounded-lg w-fit mb-2 max-w-[500px] min-w-[40px] ${
-                                        message.sender === 0 ? 'bg-blue-100' : 'bg-white'
-                                    }`}
-                                >
-                                    {message.content}
-                                    <p className="absolute left-[8px] bottom-[4px] text-gray-500 text-[10px]">
-                                        {message.time}
-                                    </p>
-                                </p>
+                                <ChatText index={index} message={message} setHoveredMessage={setHoveredMessage} />
                             )}
                             {type === 'gif' && (
-                                <div className="relative pb-2 mb-2">
+                                <div
+                                    className="relative pb-2 mb-2"
+                                    onMouseEnter={() => setHoveredMessage(index)}
+                                    onMouseLeave={() => setHoveredMessage(null)}
+                                >
                                     <img src={message.content} alt="GIF" className="max-w-[300px] rounded-lg mb-4 " />
                                     <p className="absolute left-[8px] bottom-[2px] text-gray-500 text-[10px]">
                                         {message.time}
@@ -186,7 +184,11 @@ function TabChat() {
                                 </div>
                             )}
                             {type === 'image' && (
-                                <div className="relative pb-2 mb-2">
+                                <div
+                                    className="relative pb-2 mb-2"
+                                    onMouseEnter={() => setHoveredMessage(index)}
+                                    onMouseLeave={() => setHoveredMessage(null)}
+                                >
                                     <img
                                         src={message.content}
                                         alt="GIF"
@@ -205,7 +207,11 @@ function TabChat() {
                                 </div>
                             )}
                             {type === 'file' && (
-                                <div className="relative pb-2 p-3 mb-2 border border-gray-300 rounded-lg bg-gray-100 max-w-[500px]">
+                                <div
+                                    className="relative pb-2 p-3 mb-2 border border-gray-300 rounded-lg bg-gray-100 max-w-[500px]"
+                                    onMouseEnter={() => setHoveredMessage(index)}
+                                    onMouseLeave={() => setHoveredMessage(null)}
+                                >
                                     <div className="flex items-center space-x-3 mb-4">
                                         {/* Nút tải file */}
                                         <a
@@ -228,6 +234,15 @@ function TabChat() {
                                         {message.time}
                                     </p>
                                 </div>
+                            )}
+                            {hoveredMessage === index && (
+                                <button
+                                    className="absolute top-2 left-2 p-1 rounded-full hover:bg-gray-300"
+                                    onMouseEnter={() => setHoveredMessage(index)}
+                                    onMouseLeave={() => setTimeout(() => setHoveredMessage(null), 200)}
+                                >
+                                    <FiMoreVertical size={18} />
+                                </button>
                             )}
                         </div>
                     );
@@ -294,7 +309,23 @@ function TabChat() {
                                 onClick={handleSendMessage}
                             />
                         ) : (
-                            <AiFillLike className="text-2xl cursor-pointer ml-3 text-yellow-500 mr-3" />
+                            <AiFillLike
+                                className="text-2xl cursor-pointer ml-3 text-yellow-500 mr-3"
+                                onClick={() => {
+                                    const currentTime = new Date().toLocaleTimeString([], {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                    });
+                                    return dispatch(
+                                        sendMessage({
+                                            chatId: activeChat.id,
+                                            content: '👍',
+                                            time: currentTime,
+                                            type: 'text',
+                                        }),
+                                    );
+                                }}
+                            />
                         )}
                     </div>
                 </div>
