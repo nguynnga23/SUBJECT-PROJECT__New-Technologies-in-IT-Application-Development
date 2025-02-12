@@ -25,6 +25,15 @@ const data = [
                 delete: false,
                 destroy: true,
             },
+            {
+                id: 3,
+                sender: 0,
+                content: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThyAh7n-Yc7cX6D-ZhFIq5L_IDvObDW-EMNQ&s',
+                type: 'image',
+                time: '11:00',
+                delete: false,
+                destroy: false,
+            },
         ],
     },
     {

@@ -213,7 +213,7 @@ function TabChat() {
                         />
                     </div>
                     <div>
-                        {/* Input chọn ảnh (ẩn đi) */}
+                        {/* Input chọn file (ẩn đi) */}
                         <input
                             type="file"
                             accept=".doc,.docx,.xls,.xlsx,.pdf,.txt,.ppt,.pptx,.csv"

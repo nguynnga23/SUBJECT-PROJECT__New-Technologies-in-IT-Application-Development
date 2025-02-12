@@ -9,7 +9,7 @@ function TabChatRightBar() {
     const [activeMessageTab, setActiveMessageTab] = useState(initTab);
 
     return (
-        <div className="w-1/4 flex flex-col bg-white min-w-[320px] border-l">
+        <div className="w-1/4 flex flex-col bg-white min-w-[350px] border-l">
             {/* Tabs */}
             <div className="flex">
                 <button

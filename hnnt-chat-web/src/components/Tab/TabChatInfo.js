@@ -4,21 +4,29 @@ import { GrPin } from 'react-icons/gr';
 import { AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { GoBellSlash } from 'react-icons/go';
 import { useDispatch, useSelector } from 'react-redux';
+import { IoIosArrowDropdown } from 'react-icons/io';
+import { IoIosArrowDropright } from 'react-icons/io';
 
 import { setOnOrOfPin, setOnOrOfNotify } from '../../redux/slices/chatSlice';
+import { useState } from 'react';
 
 function TabChatInfo() {
-    const activeChat = useSelector((state) => state.chat.activeChat);
+    const activeChat = useSelector((state) => state.chat.chats.find((chat) => chat.id === state.chat.activeChat?.id));
+
+    const [fileOpen, setFileOpen] = useState(false);
+    const [imageOpen, setImageOpen] = useState(false);
+    const [linkOpen, setLinkOpen] = useState(false);
+
     const dispatch = useDispatch();
 
     return (
-        <div className="">
+        <div className="overflow-auto">
             {/* Avatar + Tên nhóm */}
             <div className="flex flex-col items-center p-3">
                 <img src={activeChat.avatar} className="w-[55px] h-[55px] rounded-full border object-cover" />
                 <h3 className="font-bold text-lg mt-2 font-medium">{activeChat.name}</h3>
             </div>
-            <div className="flex item-center justify-center">
+            <div className="flex item-center justify-center border-b-[7px]">
                 <div className="m-4 mt-1 w-[50px] text-center">
                     <div className="flex justify-center">
                         {activeChat.notify ? (
@@ -64,41 +72,79 @@ function TabChatInfo() {
             </div>
 
             {/* Danh mục */}
-            <div className="space-y-2">
-                <div className="p-2 border-b-[7px]">
-                    <div className="flex justify-between items-center pl-2">
-                        <span className=" font-medium cursor-pointer text-base ">Ảnh/Video</span>
-                        <span className=" font-medium text-base">{'>'}</span>
+            <div className="space-y-2 ">
+                <div className="p-2 border-b-[7px] cursor-pointer ">
+                    <div className="flex justify-between items-center pl-2" onClick={() => setImageOpen(!imageOpen)}>
+                        <span className=" font-medium cursor-pointer text-base ">Ảnh</span>
+                        {imageOpen ? (
+                            <IoIosArrowDropdown className=" font-medium text-base text-gray-400" />
+                        ) : (
+                            <IoIosArrowDropright className=" font-medium text-base text-gray-400" />
+                        )}
                     </div>
-                    <p className="text-xs text-gray-400 mt-1 font-medium text-[10px] pl-2">
-                        Chưa có Ảnh/Video được chia sẻ trong hội thoại này
-                    </p>
+                    {imageOpen && (
+                        <div className="flex flex-wrap p-1 gap-2">
+                            {activeChat.messages
+                                .filter((msg) => msg.type === 'image')
+                                .map((msg) => (
+                                    <img
+                                        src={msg.content}
+                                        className="w-[75px] h-[75px] rounded-lg object-cover border"
+                                    />
+                                ))}
+                        </div>
+                    )}
                 </div>
                 <div className="p-2 border-b-[7px]">
-                    <div className="flex justify-between items-center pl-2">
-                        <span className="font-medium cursor-pointer text-base ">File</span>
-                        <span className=" font-medium text-base">{'>'}</span>
+                    <div className="flex justify-between items-center pl-2" onClick={() => setFileOpen(!fileOpen)}>
+                        <span className=" font-medium cursor-pointer text-base ">File</span>
+                        {fileOpen ? (
+                            <IoIosArrowDropdown className=" font-medium text-base text-gray-400" />
+                        ) : (
+                            <IoIosArrowDropright className=" font-medium text-base text-gray-400" />
+                        )}
                     </div>
-                    <p className="text-xs text-gray-400 mt-1 font-medium text-[10px] pl-2">
-                        Chưa có File được chia sẻ trong hội thoại này
-                    </p>
+                    {fileOpen && (
+                        <div className="flex flex-wrap p-1 gap-2">
+                            {activeChat.messages
+                                .filter((msg) => msg.type === 'file')
+                                .map((msg) => (
+                                    <img
+                                        src={msg.content}
+                                        className="w-[75px] h-[75px] rounded-lg object-cover border"
+                                    />
+                                ))}
+                        </div>
+                    )}
                 </div>
-                <div className="items-center p-2 border-b-[7px] cursor-pointer">
-                    <div className="flex justify-between items-center pl-2">
-                        <span className="text-gray-600 font-medium text-base">Link</span>
-                        <span className="font-medium text-base">{'>'}</span>
+                <div className="items-center p-2 border-b-[7px] cursor-pointer cursor-pointer">
+                    <div className="flex justify-between items-center pl-2" onClick={() => setLinkOpen(!linkOpen)}>
+                        <span className=" font-medium cursor-pointer text-base ">Link</span>
+                        {linkOpen ? (
+                            <IoIosArrowDropdown className=" font-medium text-base text-gray-400" />
+                        ) : (
+                            <IoIosArrowDropright className=" font-medium text-base text-gray-400" />
+                        )}
                     </div>
-
-                    <p className="text-xs text-gray-400 mt-1 font-medium text-[10px] pl-2">
-                        Chưa có Link được chia sẻ trong hội thoại này
-                    </p>
+                    {linkOpen && (
+                        <div className="flex flex-wrap p-1 gap-2">
+                            {activeChat.messages
+                                .filter((msg) => msg.type === 'link')
+                                .map((msg) => (
+                                    <img
+                                        src={msg.content}
+                                        className="w-[75px] h-[75px] rounded-lg object-cover border"
+                                    />
+                                ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
             {/* Xóa lịch sử trò chuyện */}
-            <div className="mt-4 text-red-500 flex items-center space-x-2 font-medium cursor-pointer text-base pl-2">
+            <div className="text-red-500 flex items-center space-x-2 py-3 font-medium cursor-pointer text-base pl-2">
                 <FaTrashAlt />
-                <span>Xóa lịch sử trò chuyện</span>
+                <span className="text-[12px]">Xóa lịch sử trò chuyện</span>
             </div>
         </div>
     );

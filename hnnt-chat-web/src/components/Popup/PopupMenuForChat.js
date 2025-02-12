@@ -56,7 +56,6 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
                     className="flex items-center px-4 py-2 text-red-500 hover:bg-gray-100 cursor-pointer"
                     onClick={() => {
                         handleToggleStatus('delete', message.id);
-                        console.log(chat);
                     }}
                 >
                     <MdDelete className="mr-3" />
