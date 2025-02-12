@@ -6,7 +6,7 @@ import PopupMenuForChat from '../Popup/PopupMenuForChat';
 
 function ChatImage({ index, message, setHoveredMessage, hoveredMessage, isPopupOpenIndex, setIsPopupOpenIndex }) {
     const [selectedImage, setSelectedImage] = useState(null);
-    const position = message.sender === 0 ? 'left' : 'right';
+    const position = message.sender === 0 ? 'right' : 'left';
 
     return (
         <div

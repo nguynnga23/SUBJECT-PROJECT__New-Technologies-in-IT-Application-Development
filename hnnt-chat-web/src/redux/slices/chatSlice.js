@@ -5,7 +5,7 @@ const chatSlice = createSlice({
     name: 'chat',
     initialState: {
         chats: data, //Danh sách các cuộc trò chuyện
-        activeChat: null, // ID cuộc trò chuyện đang mở
+        activeChat: null, // cuộc trò chuyện đang mở
         showRightBar: false,
         showRightBarSearch: false,
         activeTabMess: 'priority',
@@ -24,6 +24,8 @@ const chatSlice = createSlice({
                     content: content,
                     time: time,
                     type: type,
+                    delete: false,
+                    destroy: false,
                 };
                 // Nếu có fileName thì thêm vào object
                 if (fileName) {
@@ -70,6 +72,27 @@ const chatSlice = createSlice({
             state.showRightBar = true;
             state.rightBarTab = 'sympol';
         },
+        updateMessageStatus: (state, action) => {
+            const { chatId, messageId, statusType } = action.payload;
+
+            // Kiểm tra chat có tồn tại không
+            const chat = state.chats.find((chat) => chat.id === chatId);
+            if (!chat) return;
+
+            // Kiểm tra message có tồn tại không
+            const message = chat.messages.find((msg) => msg.id === messageId);
+            if (message) {
+                message[statusType] = !message[statusType]; // Đảo trạng thái true/false
+            }
+
+            // Cập nhật activeChat nếu nó là chat hiện tại
+            if (state.activeChat?.id === chatId) {
+                const activeMessage = state.activeChat.messages.find((msg) => msg.id === messageId);
+                if (activeMessage) {
+                    activeMessage[statusType] = !activeMessage[statusType];
+                }
+            }
+        },
     },
 });
 
@@ -85,5 +108,6 @@ export const {
     sendEmoji,
     sendGif,
     openEmojiTab,
+    updateMessageStatus,
 } = chatSlice.actions;
 export default chatSlice.reducer;

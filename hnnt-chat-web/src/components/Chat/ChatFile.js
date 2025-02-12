@@ -3,7 +3,7 @@ import { FiMoreHorizontal } from 'react-icons/fi';
 import PopupMenuForChat from '../Popup/PopupMenuForChat';
 
 function ChatFile({ index, message, setHoveredMessage, hoveredMessage, isPopupOpenIndex, setIsPopupOpenIndex }) {
-    const position = message.sender === 0 ? 'left' : 'right';
+    const position = message.sender === 0 ? 'right' : 'left';
 
     return (
         <div

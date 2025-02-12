@@ -16,7 +16,8 @@ function TabMesssage() {
     const chats = activeTab === 'priority' ? priorityChatsList : otherChatsList;
 
     const getLastMessage = (messages) => {
-        return messages.length > 0 ? messages.at(-1) : null;
+        const filteredMessages = messages.filter((msg) => !msg.delete && !msg.destroy);
+        return filteredMessages.length > 0 ? filteredMessages.at(-1) : null;
     };
 
     return (

@@ -14,7 +14,7 @@ import { MdOutlineEmojiEmotions } from 'react-icons/md';
 
 import PopupCategory from '../Popup/PopupCategory';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import {
     setShowOrOffRightBar,
     setShowOrOffRightBarSearch,
@@ -25,12 +25,16 @@ import ChatText from '../Chat/ChatText';
 import ChatGif from '../Chat/ChatGif';
 import ChatImage from '../Chat/ChatImage';
 import ChatFile from '../Chat/ChatFile';
+import ChatDestroy from '../Chat/ChatDestroy';
 
 function TabChat() {
     const [message, setMessage] = useState('');
     const [isOpenCategory, setIsOpenCategory] = useState(false);
 
-    const activeChat = useSelector((state) => state.chat.chats.find((chat) => chat.id === state.chat.activeChat?.id));
+    const activeChat = useSelector(
+        (state) => state.chat.chats.find((chat) => chat.id === state.chat.activeChat?.id),
+        shallowEqual,
+    );
 
     const dispatch = useDispatch();
     const showRightBar = useSelector((state) => state.chat.showRightBar);
@@ -46,6 +50,13 @@ function TabChat() {
 
     const [hoveredMessage, setHoveredMessage] = useState(null);
     const [isPopupOpenIndex, setIsPopupOpenIndex] = useState(null);
+
+    const MessageComponent = {
+        text: ChatText,
+        gif: ChatGif,
+        image: ChatImage,
+        file: ChatFile,
+    };
 
     useEffect(() => {
         if (chatContainerRef.current) {
@@ -163,53 +174,13 @@ function TabChat() {
             </div>
             <div className="flex-1 p-4 overflow-auto bg-gray-200 " ref={chatContainerRef}>
                 {activeChat.messages.map((message, index) => {
-                    const type = message.type;
+                    const isDeleted = message.delete;
+                    const Component = message.destroy ? ChatDestroy : MessageComponent[message.type];
+
                     return (
-                        <div
-                            className={` flex ${message.sender === 0 ? 'justify-end' : 'justify-start'}`}
-                            onMouseEnter={() => {
-                                setHoveredMessage(index);
-                            }}
-                            onMouseLeave={() => {
-                                setTimeout(() => setHoveredMessage(null), 2000);
-                                setHoveredMessage(null);
-                            }}
-                        >
-                            {type === 'text' && (
-                                <ChatText
-                                    key={index}
-                                    index={index}
-                                    message={message}
-                                    setHoveredMessage={setHoveredMessage}
-                                    hoveredMessage={hoveredMessage}
-                                    isPopupOpenIndex={isPopupOpenIndex}
-                                    setIsPopupOpenIndex={setIsPopupOpenIndex}
-                                />
-                            )}
-                            {type === 'gif' && (
-                                <ChatGif
-                                    key={index}
-                                    index={index}
-                                    message={message}
-                                    setHoveredMessage={setHoveredMessage}
-                                    hoveredMessage={hoveredMessage}
-                                    isPopupOpenIndex={isPopupOpenIndex}
-                                    setIsPopupOpenIndex={setIsPopupOpenIndex}
-                                />
-                            )}
-                            {type === 'image' && (
-                                <ChatImage
-                                    key={index}
-                                    index={index}
-                                    message={message}
-                                    setHoveredMessage={setHoveredMessage}
-                                    hoveredMessage={hoveredMessage}
-                                    isPopupOpenIndex={isPopupOpenIndex}
-                                    setIsPopupOpenIndex={setIsPopupOpenIndex}
-                                />
-                            )}
-                            {type === 'file' && (
-                                <ChatFile
+                        <div className={` flex ${message.sender === 0 ? 'justify-end' : 'justify-start'}`}>
+                            {!isDeleted && Component && (
+                                <Component
                                     key={index}
                                     index={index}
                                     message={message}

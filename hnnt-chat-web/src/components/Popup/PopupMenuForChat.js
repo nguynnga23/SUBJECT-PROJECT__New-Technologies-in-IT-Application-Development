@@ -1,10 +1,19 @@
 import { useEffect, useRef } from 'react';
 import { MdContentCopy, MdPushPin, MdDelete } from 'react-icons/md';
 import { FaRegStar } from 'react-icons/fa';
-import { HiOutlineInformationCircle } from 'react-icons/hi';
+import { IoReload } from 'react-icons/io5';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateMessageStatus } from '../../redux/slices/chatSlice';
 
-function PopupMenuForChat({ setIsPopupOpen, position }) {
+function PopupMenuForChat({ setIsPopupOpen, position, message }) {
     const popupRef = useRef(null);
+    const dispatch = useDispatch();
+    const chat = useSelector((state) => state.chat.activeChat);
+    const handleToggleStatus = (statusType, messageId) => {
+        if (!chat) return;
+        dispatch(updateMessageStatus({ chatId: chat.id, messageId, statusType }));
+        setIsPopupOpen(null);
+    };
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -23,27 +32,46 @@ function PopupMenuForChat({ setIsPopupOpen, position }) {
         <div
             ref={popupRef}
             className={`absolute ${
-                position === 'right' ? 'left-[-5px]' : 'right-[-5px]'
+                position === 'left' ? 'left-[-5px]' : 'right-[-5px]'
             }  w-52 bg-white shadow-lg rounded-lg border border-gray-200 z-50`}
         >
-            <ul className="py-2">
-                <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                    <MdContentCopy className="mr-3" />
-                    Copy tin nhắn
-                </li>
-                <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                    <MdPushPin className="mr-3" />
-                    Ghim tin nhắn
-                </li>
-                <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                    <FaRegStar className="mr-3" />
-                    Đánh dấu tin nhắn
-                </li>
-                <li className="flex items-center px-4 py-2 text-red-500 hover:bg-gray-100 cursor-pointer">
+            <div className="py-2">
+                {!message.destroy && (
+                    <ul>
+                        <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                            <MdContentCopy className="mr-3" />
+                            Copy tin nhắn
+                        </li>
+                        <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                            <MdPushPin className="mr-3" />
+                            Ghim tin nhắn
+                        </li>
+                        <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                            <FaRegStar className="mr-3" />
+                            Đánh dấu tin nhắn
+                        </li>
+                    </ul>
+                )}
+                <li
+                    className="flex items-center px-4 py-2 text-red-500 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => {
+                        handleToggleStatus('delete', message.id);
+                        console.log(chat);
+                    }}
+                >
                     <MdDelete className="mr-3" />
                     Xóa
                 </li>
-            </ul>
+                {position === 'right' && !message.destroy && (
+                    <li
+                        className="flex items-center px-4 py-2 text-red-500 hover:bg-gray-100 cursor-pointer"
+                        onClick={() => handleToggleStatus('destroy', message.id)}
+                    >
+                        <IoReload className="mr-3" />
+                        Thu hồi
+                    </li>
+                )}
+            </div>
         </div>
     );
 }

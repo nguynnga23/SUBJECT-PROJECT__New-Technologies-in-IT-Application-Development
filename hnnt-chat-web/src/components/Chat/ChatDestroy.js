@@ -1,12 +1,13 @@
 import { FiMoreHorizontal } from 'react-icons/fi';
 import PopupMenuForChat from '../Popup/PopupMenuForChat';
+import { useSelector } from 'react-redux';
 
-function ChatGif({ index, message, setHoveredMessage, hoveredMessage, isPopupOpenIndex, setIsPopupOpenIndex }) {
+function ChatDestroy({ index, message, setHoveredMessage, hoveredMessage, isPopupOpenIndex, setIsPopupOpenIndex }) {
     const position = message.sender === 0 ? 'right' : 'left';
-
     return (
         <div
-            className={`relative pb-2 mb-2 ${message.sender === 0 ? 'bg-blue-100' : 'bg-white'}`}
+            key={index}
+            className={`relative text-[12px] border border-gray-400 p-2 rounded-lg w-fit mb-2 max-w-[500px] min-w-[40px] break-all bg-gray-200 `}
             onMouseEnter={() => {
                 if (isPopupOpenIndex === null) setHoveredMessage(index);
             }}
@@ -16,8 +17,7 @@ function ChatGif({ index, message, setHoveredMessage, hoveredMessage, isPopupOpe
                 }, 3000);
             }}
         >
-            <img src={message.content} alt="GIF" className="max-w-[300px] rounded-lg mb-4 " />
-            <p className="absolute left-[8px] bottom-[2px] text-gray-500 text-[10px]">{message.time}</p>
+            <p className="text-gray-400 italic">Tin nhắn đã được thu hồi</p>
             {hoveredMessage === index && isPopupOpenIndex === null && (
                 <button
                     className={`absolute bottom-2 ${
@@ -31,10 +31,10 @@ function ChatGif({ index, message, setHoveredMessage, hoveredMessage, isPopupOpe
                 </button>
             )}
             {isPopupOpenIndex === index && (
-                <PopupMenuForChat setIsPopupOpen={setIsPopupOpenIndex} position={position} />
+                <PopupMenuForChat setIsPopupOpen={setIsPopupOpenIndex} position={position} message={message} />
             )}
         </div>
     );
 }
 
-export default ChatGif;
+export default ChatDestroy;
