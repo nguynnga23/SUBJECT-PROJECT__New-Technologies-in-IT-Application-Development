@@ -54,13 +54,13 @@ function TabChat() {
     }, [activeChat.messages]);
 
     // Hàm tự động điều chỉnh chiều cao
-    const adjustHeight = () => {
+    useEffect(() => {
         if (textareaRef.current) {
             textareaRef.current.style.height = '50px'; // Reset chiều cao trước khi tính toán
             const newHeight = Math.min(textareaRef.current.scrollHeight, 200);
             textareaRef.current.style.height = `${newHeight}px`;
         }
-    };
+    }, [message]);
 
     const handleSendMessage = () => {
         if (message.trim() !== '') {
@@ -76,7 +76,6 @@ function TabChat() {
     useEffect(() => {
         if (emojiObject != null) {
             setMessage((prev) => prev + emojiObject.emoji);
-            adjustHeight();
         }
     }, [emojiObject]);
 
@@ -162,7 +161,7 @@ function TabChat() {
                     )}
                 </div>
             </div>
-            <div className="flex-1 p-4 overflow-y-auto bg-gray-200 " ref={chatContainerRef}>
+            <div className="flex-1 p-4 overflow-auto bg-gray-200 " ref={chatContainerRef}>
                 {activeChat.messages.map((message, index) => {
                     const type = message.type;
                     return (
@@ -189,26 +188,35 @@ function TabChat() {
                             )}
                             {type === 'gif' && (
                                 <ChatGif
+                                    key={index}
                                     index={index}
                                     message={message}
                                     setHoveredMessage={setHoveredMessage}
                                     hoveredMessage={hoveredMessage}
+                                    isPopupOpenIndex={isPopupOpenIndex}
+                                    setIsPopupOpenIndex={setIsPopupOpenIndex}
                                 />
                             )}
                             {type === 'image' && (
                                 <ChatImage
+                                    key={index}
                                     index={index}
                                     message={message}
                                     setHoveredMessage={setHoveredMessage}
                                     hoveredMessage={hoveredMessage}
+                                    isPopupOpenIndex={isPopupOpenIndex}
+                                    setIsPopupOpenIndex={setIsPopupOpenIndex}
                                 />
                             )}
                             {type === 'file' && (
                                 <ChatFile
+                                    key={index}
                                     index={index}
                                     message={message}
                                     setHoveredMessage={setHoveredMessage}
                                     hoveredMessage={hoveredMessage}
+                                    isPopupOpenIndex={isPopupOpenIndex}
+                                    setIsPopupOpenIndex={setIsPopupOpenIndex}
                                 />
                             )}
                         </div>
@@ -258,10 +266,9 @@ function TabChat() {
                         value={message}
                         onChange={(e) => {
                             setMessage(e.target.value);
-                            adjustHeight();
                         }}
                         placeholder={`Nhập tin nhắn với ${activeChat.name}`}
-                        className="flex-1 p-3 font-base text-[16px] rounded-lg focus:border-blue-500 focus:outline-none
+                        className="flex-1 p-3 font-base text-[12px] rounded-lg focus:border-blue-500 focus:outline-none
                            h-[50px] max-h-[200px] overflow-y-auto resize-none"
                     />
 

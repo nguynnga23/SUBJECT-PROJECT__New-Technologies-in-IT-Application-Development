@@ -3,7 +3,7 @@ import { MdContentCopy, MdPushPin, MdDelete } from 'react-icons/md';
 import { FaRegStar } from 'react-icons/fa';
 import { HiOutlineInformationCircle } from 'react-icons/hi';
 
-function PopupMenuForChat({ setIsPopupOpen }) {
+function PopupMenuForChat({ setIsPopupOpen, position }) {
     const popupRef = useRef(null);
 
     useEffect(() => {
@@ -22,7 +22,9 @@ function PopupMenuForChat({ setIsPopupOpen }) {
     return (
         <div
             ref={popupRef}
-            className="absolute top-8 right-2 w-52 bg-white shadow-lg rounded-lg border border-gray-200 z-50"
+            className={`absolute ${
+                position === 'right' ? 'left-[-5px]' : 'right-[-5px]'
+            }  w-52 bg-white shadow-lg rounded-lg border border-gray-200 z-50`}
         >
             <ul className="py-2">
                 <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
@@ -36,10 +38,6 @@ function PopupMenuForChat({ setIsPopupOpen }) {
                 <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
                     <FaRegStar className="mr-3" />
                     Đánh dấu tin nhắn
-                </li>
-                <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                    <HiOutlineInformationCircle className="mr-3" />
-                    Xem chi tiết
                 </li>
                 <li className="flex items-center px-4 py-2 text-red-500 hover:bg-gray-100 cursor-pointer">
                     <MdDelete className="mr-3" />

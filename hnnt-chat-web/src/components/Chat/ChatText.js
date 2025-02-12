@@ -1,12 +1,12 @@
 import { FiMoreHorizontal } from 'react-icons/fi';
 import PopupMenuForChat from '../Popup/PopupMenuForChat';
-import { useState } from 'react';
 
 function ChatText({ index, message, setHoveredMessage, hoveredMessage, isPopupOpenIndex, setIsPopupOpenIndex }) {
+    const position = message.sender === 0 ? 'left' : 'right';
     return (
         <div
             key={index}
-            className={`relative border border-blue-400 p-2 pb-6 rounded-lg w-fit mb-2 max-w-[500px] min-w-[40px] ${
+            className={`relative text-[12px] border border-blue-400 p-2 pb-6 rounded-lg w-fit mb-2 max-w-[500px] min-w-[40px] break-all ${
                 message.sender === 0 ? 'bg-blue-100' : 'bg-white'
             }`}
             onMouseEnter={() => {
@@ -36,9 +36,7 @@ function ChatText({ index, message, setHoveredMessage, hoveredMessage, isPopupOp
             )}
 
             {isPopupOpenIndex === index && (
-                <div className="absolute top-8 right-2">
-                    <PopupMenuForChat setIsPopupOpen={setIsPopupOpenIndex} />
-                </div>
+                <PopupMenuForChat setIsPopupOpen={setIsPopupOpenIndex} position={position} />
             )}
         </div>
     );
