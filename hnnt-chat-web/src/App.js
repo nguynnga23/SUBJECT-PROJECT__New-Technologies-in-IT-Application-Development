@@ -10,9 +10,11 @@ import Contacts from './screens/Contacts';
 import Settings from './screens/Settings';
 
 import avatar from './public/avatar_sample.jpg';
+import Modal from './components/Modal';
 
 export default function ZaloUI() {
     const [selectedScreen, setSelectedScreen] = useState('messaging');
+    const [isOpenModel, setIsOpenModel] = useState(false);
     return (
         <div className="flex h-screen bg-gray-100">
             {/* Sidebar */}
@@ -41,22 +43,25 @@ export default function ZaloUI() {
                             aria-labelledby="dropdownUserAvatarButton"
                         >
                             <li>
-                                <p className="block px-4 py-2 hover:bg-gray-100 text-black flex items-center gap-x-6">
+                                <p className="block px-4 py-2 hover:bg-gray-100 text-black flex items-center gap-x-6 cursor-pointer">
                                     Nâng cấp tài khoản
                                     <CiShare1 />
                                 </p>
                             </li>
                             <li>
-                                <p className="block px-4 py-2 hover:bg-gray-100 text-black">Hồ sơ của bạn</p>
+                                <p
+                                    className="block px-4 py-2 hover:bg-gray-100 text-black cursor-pointer"
+                                    onClick={() => setIsOpenModel(true)}
+                                >
+                                    Hồ sơ của bạn
+                                </p>
                             </li>
                             <li>
-                                <p className="block px-4 py-2 hover:bg-gray-100 text-black">Cài đặt</p>
+                                <p className="block px-4 py-2 hover:bg-gray-100 text-black cursor-pointer">Cài đặt</p>
                             </li>
                         </ul>
                         <div className="">
-                            <a href="#" className="block px-4 py-2 hover:bg-gray-100 text-black">
-                                Đăng xuất
-                            </a>
+                            <p className="block px-4 py-2 hover:bg-gray-100 text-black cursor-pointer">Đăng xuất</p>
                         </div>
                     </div>
                 </div>
@@ -106,6 +111,8 @@ export default function ZaloUI() {
                 {selectedScreen === 'contacts' && <Contacts />}
                 {selectedScreen === 'settings' && <Settings />}
             </div>
+
+            <Modal isOpen={isOpenModel} onClose={() => setIsOpenModel(false)} />
         </div>
     );
 }
