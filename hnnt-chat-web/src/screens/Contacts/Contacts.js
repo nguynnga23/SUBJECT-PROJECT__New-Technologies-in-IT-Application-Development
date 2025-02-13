@@ -20,6 +20,7 @@ import Tooltip from '@mui/material/Tooltip';
 
 import avatar from '../../public/avatar_sample.jpg';
 import groupzalo from '../../public/groupzalo.png';
+import searchzalo from '../../public/searchzalo.png';
 
 const TabsContacts = [
     { id: 1, icon: <PiUserList size={25} />, title: 'Danh sách bạn bè', content: 'Bạn bè' },
@@ -173,7 +174,12 @@ function Contacts() {
                             <div
                                 key={tab.id}
                                 className={`p-3 cursor-pointer flex ${selectTab?.id === tab.id ? 'bg-blue-100' : ''}`}
-                                onClick={() => setSelectTab(tab)}
+                                onClick={() => {
+                                    setSelectTab(tab);
+                                    setSearch('');
+                                    setFilterName('AZ');
+                                    setFilter('all');
+                                }}
                             >
                                 <h3 className="font-bold">{tab.icon}</h3>
                                 <p className="text-base font-semibold pl-3 text-gray-600">{tab.title}</p>
@@ -267,6 +273,14 @@ function Contacts() {
                                         </div>
                                     </div>
                                 </div>
+
+                                {Object.keys(sortedGroupedData).length === 0 && (
+                                    <div className="w-full mt-10 pb-10 flex flex-col items-center justify-center text-center">
+                                        <img src={searchzalo} className="w-36 h-w-36" />
+                                        <p className="text-sm font-semibold">Không tìm thấy kết quả</p>
+                                        <p className="text-sm mt-2">Vui lòng thử lại từ khóa hoặc bộ lọc khác</p>
+                                    </div>
+                                )}
 
                                 {Object.entries(sortedGroupedData).map(([key, users]) => (
                                     <div key={key} className="mt-4">
@@ -370,6 +384,15 @@ function Contacts() {
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* không tìm thấy */}
+                                {Object.keys(sortedGroupedData).length === 0 && (
+                                    <div className="w-full mt-10 pb-10 flex flex-col items-center justify-center text-center">
+                                        <img src={searchzalo} className="w-36 h-w-36" />
+                                        <p className="text-sm font-semibold">Không tìm thấy kết quả</p>
+                                        <p className="text-sm mt-2">Vui lòng thử lại từ khóa hoặc bộ lọc khác</p>
+                                    </div>
+                                )}
 
                                 {/* item trong danh sách nhóm */}
 
