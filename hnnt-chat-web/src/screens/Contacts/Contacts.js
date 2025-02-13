@@ -19,6 +19,7 @@ import AvatarGroup from '@mui/material/AvatarGroup';
 import Tooltip from '@mui/material/Tooltip';
 
 import avatar from '../../public/avatar_sample.jpg';
+import groupzalo from '../../public/groupzalo.png';
 
 const TabsContacts = [
     { id: 1, icon: <PiUserList size={25} />, title: 'Danh sách bạn bè', content: 'Bạn bè' },
@@ -500,6 +501,20 @@ function Contacts() {
                                     ))}
                                 </div>
                             </>
+                        ) : selectTab.id === 4 ? (
+                            <div className="w-full h-screen flex flex-col items-center justify-center text-center translate-y-[-20%]">
+                                <img src={groupzalo} className="w-28 h-w-28" />
+                                <p className="text-sm">Không có lời mời vào nhóm và cộng đồng</p>
+                                <div className="flex">
+                                    <p className="text-sm">Khi nào tôi nhận được lời mời?</p>
+                                    <a
+                                        href="https://help.zalo.me/huong-dan/chuyen-muc/tro-chuyen-nhom/khi-nao-ban-nhan-duoc-loi-moi-vao-nhom-va-cong-dong/?gidzl=-efa5wbOcYZvasqHhK-VAFgVRn-p6PWbjibdJUHEb2NYdZHAiKt68BBAOahd7i1qkSfZ76LdvSOEhrUR80"
+                                        className="text-sm ml-1 text-blue-600 cursor-pointer hover:underline"
+                                    >
+                                        Tìm hiểu thêm
+                                    </a>
+                                </div>
+                            </div>
                         ) : null}
                     </div>
                 </div>
