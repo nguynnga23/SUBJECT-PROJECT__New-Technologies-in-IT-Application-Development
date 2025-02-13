@@ -12,6 +12,7 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
     const handleToggleStatus = (statusType, messageId) => {
         if (!chat) return;
         dispatch(updateMessageStatus({ chatId: chat.id, messageId, statusType }));
+
         setIsPopupOpen(null);
     };
 
@@ -36,7 +37,7 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
             }  w-52 bg-white shadow-lg rounded-lg border border-gray-200 z-50`}
         >
             <div className="py-2">
-                {!message.destroy && (
+                {!message?.destroy && (
                     <ul>
                         <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
                             <MdContentCopy className="mr-3" />
@@ -55,16 +56,16 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
                 <li
                     className="flex items-center px-4 py-2 text-red-500 hover:bg-gray-100 cursor-pointer"
                     onClick={() => {
-                        handleToggleStatus('delete', message.id);
+                        handleToggleStatus('delete', message?.id);
                     }}
                 >
                     <MdDelete className="mr-3" />
                     Xóa
                 </li>
-                {position === 'right' && !message.destroy && (
+                {position === 'right' && !message?.destroy && (
                     <li
                         className="flex items-center px-4 py-2 text-red-500 hover:bg-gray-100 cursor-pointer"
-                        onClick={() => handleToggleStatus('destroy', message.id)}
+                        onClick={() => handleToggleStatus('destroy', message?.id)}
                     >
                         <IoReload className="mr-3" />
                         Thu hồi

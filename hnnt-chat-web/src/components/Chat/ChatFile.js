@@ -52,7 +52,7 @@ function ChatFile({ index, message, setHoveredMessage, hoveredMessage, isPopupOp
             )}
 
             {isPopupOpenIndex === index && (
-                <PopupMenuForChat setIsPopupOpen={setIsPopupOpenIndex} position={position} />
+                <PopupMenuForChat setIsPopupOpen={setIsPopupOpenIndex} position={position} message={message} />
             )}
         </div>
     );

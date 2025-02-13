@@ -6,7 +6,7 @@ function ChatText({ index, message, setHoveredMessage, hoveredMessage, isPopupOp
     return (
         <div
             key={index}
-            className={`relative text-[12px] border border-blue-400 p-2 pb-6 rounded-lg w-fit mb-2 max-w-[500px] min-w-[40px] break-all ${
+            className={`relative text-[14px] border border-blue-400 p-2 pb-6 rounded-lg w-fit mb-2 max-w-[500px] min-w-[55px] break-all ${
                 message.sender === 0 ? 'bg-blue-100' : 'bg-white'
             }`}
             onMouseEnter={() => {

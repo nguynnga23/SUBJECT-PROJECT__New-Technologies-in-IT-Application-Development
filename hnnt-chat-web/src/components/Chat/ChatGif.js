@@ -31,7 +31,7 @@ function ChatGif({ index, message, setHoveredMessage, hoveredMessage, isPopupOpe
                 </button>
             )}
             {isPopupOpenIndex === index && (
-                <PopupMenuForChat setIsPopupOpen={setIsPopupOpenIndex} position={position} />
+                <PopupMenuForChat setIsPopupOpen={setIsPopupOpenIndex} position={position} message={message} />
             )}
         </div>
     );

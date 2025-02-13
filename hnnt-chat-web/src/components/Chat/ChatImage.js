@@ -41,7 +41,7 @@ function ChatImage({ index, message, setHoveredMessage, hoveredMessage, isPopupO
             )}
 
             {isPopupOpenIndex === index && (
-                <PopupMenuForChat setIsPopupOpen={setIsPopupOpenIndex} position={position} />
+                <PopupMenuForChat setIsPopupOpen={setIsPopupOpenIndex} position={position} message={message} />
             )}
 
             {selectedImage && <PopupViewImage selectedImage={selectedImage} setSelectedImage={setSelectedImage} />}

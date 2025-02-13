@@ -178,7 +178,7 @@ function TabChat() {
                     const Component = message.destroy ? ChatDestroy : MessageComponent[message.type];
 
                     return (
-                        <div className={` flex ${message.sender === 0 ? 'justify-end' : 'justify-start'}`}>
+                        <div className={` flex ${message.sender === 0 ? 'justify-end' : 'justify-start'}`} key={index}>
                             {!isDeleted && Component && (
                                 <Component
                                     key={index}
@@ -208,7 +208,7 @@ function TabChat() {
 
                         {/* Icon mở thư mục chọn ảnh */}
                         <IoImageOutline
-                            className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-500"
+                            className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600"
                             onClick={() => inputImageRef.current.click()} // Kích hoạt input khi nhấn vào icon
                         />
                     </div>
@@ -224,12 +224,12 @@ function TabChat() {
 
                         {/* Icon mở thư mục chọn file */}
                         <MdAttachFile
-                            className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-500"
+                            className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600"
                             onClick={() => inputFileRef.current.click()}
                         />
                     </div>
 
-                    <FaRegAddressCard className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-500" />
+                    <FaRegAddressCard className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600" />
                 </div>
                 <div className="flex items-center border-t p-2">
                     <textarea
@@ -239,7 +239,7 @@ function TabChat() {
                             setMessage(e.target.value);
                         }}
                         placeholder={`Nhập tin nhắn với ${activeChat.name}`}
-                        className="flex-1 p-3 font-base text-[12px] rounded-lg focus:border-blue-500 focus:outline-none
+                        className="flex-1 p-3 font-base text-[14px] rounded-lg focus:border-blue-500 focus:outline-none
                            h-[50px] max-h-[200px] overflow-y-auto resize-none"
                     />
 

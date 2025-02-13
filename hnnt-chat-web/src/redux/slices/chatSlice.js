@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { data } from '../../sample_data/listMess';
+import { v4 as uuidv4 } from 'uuid';
 
 const chatSlice = createSlice({
     name: 'chat',
@@ -20,6 +21,7 @@ const chatSlice = createSlice({
 
             if (chat) {
                 const message = {
+                    id: uuidv4(),
                     sender: 0,
                     content: content,
                     time: time,
