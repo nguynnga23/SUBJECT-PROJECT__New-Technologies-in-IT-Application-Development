@@ -6,7 +6,7 @@ function TabChatRightBarSearch() {
     const [searchTerm, setSearchTerm] = useState('');
 
     return (
-        <div className="w-1/4 h-screen bg-white border-l min-w-[320px] ">
+        <div className="w-1/4 h-screen bg-white border-l min-w-[350px] ">
             {/* Header */}
             <div className="relative flex justify-center items-center h-[62px] border-b">
                 <h2 className="text-lg font-semibold p-1">Tìm kiếm trong trò chuyện</h2>
