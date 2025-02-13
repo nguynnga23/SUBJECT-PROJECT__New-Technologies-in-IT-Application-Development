@@ -13,6 +13,9 @@ import { FaAngleRight } from 'react-icons/fa6';
 
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
+import Avatar from '@mui/material/Avatar';
+import AvatarGroup from '@mui/material/AvatarGroup';
+import Stack from '@mui/material/Stack';
 
 import avatar from '../../public/avatar_sample.jpg';
 
@@ -30,12 +33,64 @@ const userdata = [
     { id: 2, name: 'Anh Tài', avatar: avatar },
 ];
 
+const groupData = [
+    {
+        id: 1,
+        name: 'Công nghệ mới HK2-4',
+        members: [
+            { id: 3, name: 'Nga Nguyễn', avatar: avatar },
+            { id: 4, name: 'Huyền Trang', avatar: avatar },
+            { id: 1, name: 'Anh Huy', avatar: avatar },
+            { id: 2, name: 'Anh Tài', avatar: avatar },
+            { id: 4, name: 'Bảo Khánh', avatar: avatar },
+            { id: 5, name: 'Quang Huy', avatar: avatar },
+        ],
+    },
+    {
+        id: 2,
+        name: 'Công nghệ mới HK2-5',
+        members: [
+            { id: 1, name: 'Minh Tú', avatar: avatar },
+            { id: 2, name: 'Lan Phương', avatar: avatar },
+            { id: 3, name: 'Phương Linh', avatar: avatar },
+            { id: 4, name: 'Tuấn Anh', avatar: avatar },
+            { id: 5, name: 'Duy Khang', avatar: avatar },
+        ],
+    },
+    {
+        id: 3,
+        name: 'Công nghệ mới HK2-6',
+        members: [{ id: 1, name: 'Hoàng Yến', avatar: avatar }],
+    },
+    {
+        id: 4,
+        name: 'Công nghệ mới HK2-7',
+        members: [
+            { id: 1, name: 'Khánh Vy', avatar: avatar },
+            { id: 2, name: 'Mai Anh', avatar: avatar },
+            { id: 3, name: 'Đức Phúc', avatar: avatar },
+        ],
+    },
+    {
+        id: 5,
+        name: 'Công nghệ mới HK2-8',
+        members: [
+            { id: 3, name: 'Thanh Trúc', avatar: avatar },
+            { id: 4, name: 'Bảo Ngọc', avatar: avatar },
+            { id: 1, name: 'Hữu Nghĩa', avatar: avatar },
+            { id: 2, name: 'Minh Quân', avatar: avatar },
+            { id: 5, name: 'Gia Bảo', avatar: avatar },
+        ],
+    },
+];
+
 function Contacts() {
     const [selectTab, setSelectTab] = useState(TabsContacts[0]);
     const [search, setSearch] = useState('');
     const [filterName, setFilterName] = useState('AZ');
     const [filter, setFilter] = useState('all');
 
+    // Tab danh sách bạn bè ----------------------------
     // Lọc dữ liệu theo tên
     const filteredData = userdata.filter((user) => user.name.toLowerCase().includes(search.toLowerCase()));
 
@@ -54,6 +109,10 @@ function Contacts() {
             acc[key] = groupedData[key];
             return acc;
         }, {});
+    //---------------------------------------------------
+
+    // Tab danh sách nhóm và cộng đồng ------------------
+    // Lọc dữ liệu theo tên
 
     return (
         <div className="h-screen flex flex-col">
@@ -186,6 +245,116 @@ function Contacts() {
                                                 )}
                                             </>
                                         ))}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : selectTab.id === 2 ? (
+                            <div className="bg-white w-full rounded-lg">
+                                <div className="p-4">
+                                    <div className="flex">
+                                        <div className="w-1/2 flex items-center group hover:bg-gray-100 p-1 rounded-lg border-2 focus-within:border-blue-400">
+                                            <CiSearch size={20} />
+                                            <input
+                                                type="text"
+                                                placeholder="Tìm kiếm..."
+                                                className="w-full group-hover:bg-gray-100 border-none outline-none p-1"
+                                                value={search}
+                                                onChange={(e) => setSearch(e.target.value)}
+                                            />
+                                            {search ? (
+                                                <MdCancel
+                                                    size={20}
+                                                    className="text-gray-500 hover:text-blue-600"
+                                                    onClick={() => setSearch('')}
+                                                />
+                                            ) : null}
+                                        </div>
+
+                                        <div className="w-1/4 flex items-center group hover:bg-gray-100 p-1 rounded-lg border-2 focus-within:border-blue-400 text-gray-500 ml-2">
+                                            <IoSwapVertical size={20} />
+                                            <Select
+                                                value={filterName}
+                                                onChange={(e) => setFilterName(e.target.value)}
+                                                className="border-none outline-none p-1 w-full group-hover:bg-gray-100 "
+                                                sx={{
+                                                    boxShadow: 'none',
+                                                    color: 'gray',
+                                                    '.MuiOutlinedInput-notchedOutline': { border: 0 },
+                                                    '&.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+                                                        border: 0,
+                                                    },
+                                                    '&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
+                                                        {
+                                                            border: 0,
+                                                        },
+                                                    maxHeight: '30px',
+                                                }}
+                                            >
+                                                <MenuItem value="AZ">Tên (A-Z)</MenuItem>
+                                                <MenuItem value="ZA">Tên (Z-A)</MenuItem>
+                                                <MenuItem value="MC">Hoạt động (mới→cũ)</MenuItem>
+                                                <MenuItem value="CM">Hoạt động (cũ→mới)</MenuItem>
+                                            </Select>
+                                        </div>
+
+                                        <div className="w-1/4 flex items-center group hover:bg-gray-100 p-1 rounded-lg border-2 focus-within:border-blue-400 text-gray-500 ml-2">
+                                            <CiFilter size={20} />
+                                            <Select
+                                                value={filter}
+                                                onChange={(e) => setFilter(e.target.value)}
+                                                className="border-none outline-none p-1 w-full group-hover:bg-gray-100 "
+                                                sx={{
+                                                    boxShadow: 'none',
+                                                    color: 'gray',
+                                                    '.MuiOutlinedInput-notchedOutline': { border: 0 },
+                                                    '&.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+                                                        border: 0,
+                                                    },
+                                                    '&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
+                                                        {
+                                                            border: 0,
+                                                        },
+                                                    maxHeight: '30px',
+                                                }}
+                                            >
+                                                <MenuItem value="all">Tất cả</MenuItem>
+                                                <MenuItem value="phanloai">
+                                                    <div className="flex justify-between w-full">
+                                                        <p>Phân loại</p>
+                                                        <FaAngleRight />
+                                                    </div>
+                                                </MenuItem>
+                                                <MenuItem value="NTQL">Nhóm tôi quản lý</MenuItem>
+                                                <MenuItem value="CDTQL">Cộng đồng tôi quản lý</MenuItem>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* item trong danh sách nhóm */}
+
+                                {groupData.map((group, index) => (
+                                    <div className="mt-4">
+                                        <div className="flex items-center space-x-2 mt-3 px-4 cursor-pointer hover:bg-gray-100 py-2">
+                                            <AvatarGroup
+                                                total={group.members.length}
+                                                sx={{ '& .MuiAvatar-root': { width: 20, height: 20, fontSize: 10 } }}
+                                            >
+                                                <Avatar alt="Remy Sharp" src={avatar} sx={{ width: 20, height: 20 }} />
+                                                <Avatar
+                                                    alt="Travis Howard"
+                                                    src={avatar}
+                                                    sx={{ width: 20, height: 20 }}
+                                                />
+                                            </AvatarGroup>
+                                            <div>
+                                                <h4 className="text-sm font-medium">{group.name}</h4>
+                                                <p className="text-xs text-gray-500 hover:text-blue-500 hover:underline cursor-pointer">
+                                                    {group.members.length} thành viên
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="w-full bg-gray-200 h-[1px] mt-2 pl-4"></div>
                                     </div>
                                 ))}
                             </div>
