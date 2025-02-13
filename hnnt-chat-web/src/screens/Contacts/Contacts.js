@@ -15,7 +15,6 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Avatar from '@mui/material/Avatar';
 import AvatarGroup from '@mui/material/AvatarGroup';
-import Stack from '@mui/material/Stack';
 
 import avatar from '../../public/avatar_sample.jpg';
 
@@ -48,7 +47,7 @@ const groupData = [
     },
     {
         id: 2,
-        name: 'Công nghệ mới HK2-5',
+        name: 'Code Warriors',
         members: [
             { id: 1, name: 'Minh Tú', avatar: avatar },
             { id: 2, name: 'Lan Phương', avatar: avatar },
@@ -59,12 +58,12 @@ const groupData = [
     },
     {
         id: 3,
-        name: 'Công nghệ mới HK2-6',
+        name: 'Debuggers United',
         members: [{ id: 1, name: 'Hoàng Yến', avatar: avatar }],
     },
     {
         id: 4,
-        name: 'Công nghệ mới HK2-7',
+        name: 'Byte Busters',
         members: [
             { id: 1, name: 'Khánh Vy', avatar: avatar },
             { id: 2, name: 'Mai Anh', avatar: avatar },
@@ -73,13 +72,21 @@ const groupData = [
     },
     {
         id: 5,
-        name: 'Công nghệ mới HK2-8',
+        name: 'Tech Titans',
         members: [
             { id: 3, name: 'Thanh Trúc', avatar: avatar },
             { id: 4, name: 'Bảo Ngọc', avatar: avatar },
             { id: 1, name: 'Hữu Nghĩa', avatar: avatar },
             { id: 2, name: 'Minh Quân', avatar: avatar },
             { id: 5, name: 'Gia Bảo', avatar: avatar },
+        ],
+    },
+    {
+        id: 6,
+        name: 'Algorithm Masters',
+        members: [
+            { id: 1, name: 'Hồng Phúc', avatar: avatar },
+            { id: 2, name: 'Hồng Quân', avatar: avatar },
         ],
     },
 ];
@@ -112,7 +119,15 @@ function Contacts() {
     //---------------------------------------------------
 
     // Tab danh sách nhóm và cộng đồng ------------------
-    // Lọc dữ liệu theo tên
+    // search group by name
+    const filteredGroups = groupData.filter((group) => group.name.toLowerCase().includes(search.toLowerCase()));
+
+    // Sắp xếp theo bảng chữ cái
+    const sortGroupsByName = () => {
+        return [...filteredGroups].sort((a, b) =>
+            filterName === 'AZ' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name),
+        );
+    };
 
     return (
         <div className="h-screen flex flex-col">
@@ -333,7 +348,7 @@ function Contacts() {
 
                                 {/* item trong danh sách nhóm */}
 
-                                {groupData.map((group, index) => (
+                                {sortGroupsByName().map((group, index) => (
                                     <div className="mt-4">
                                         <div className="flex items-center space-x-2 mt-3 px-4 cursor-pointer hover:bg-gray-100 py-2">
                                             <AvatarGroup
