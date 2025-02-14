@@ -12,6 +12,7 @@ const chatSlice = createSlice({
         activeTabMess: 'priority',
         emojiObject: null,
         gifObject: null,
+        sticker: null,
         rightBarTab: 'info',
     },
     reducers: {
@@ -75,6 +76,9 @@ const chatSlice = createSlice({
         sendGif: (state, action) => {
             state.gifObject = action.payload;
         },
+        sendSticker: (state, action) => {
+            state.sticker = action.payload;
+        },
         openEmojiTab: (state) => {
             state.showRightBar = true;
             state.rightBarTab = 'sympol';
@@ -116,5 +120,6 @@ export const {
     sendGif,
     openEmojiTab,
     updateMessageStatus,
+    sendSticker,
 } = chatSlice.actions;
 export default chatSlice.reducer;

@@ -26,6 +26,7 @@ import ChatGif from '../Chat/ChatGif';
 import ChatImage from '../Chat/ChatImage';
 import ChatFile from '../Chat/ChatFile';
 import ChatDestroy from '../Chat/ChatDestroy';
+import ChatSticker from '../Chat/ChatSticker';
 
 function TabChat() {
     const [message, setMessage] = useState('');
@@ -41,6 +42,7 @@ function TabChat() {
     const showRightBarSearch = useSelector((state) => state.chat.showRightBarSearch);
     const emojiObject = useSelector((state) => state.chat.emojiObject);
     const gifObject = useSelector((state) => state.chat.gifObject);
+    const sticker = useSelector((state) => state.chat.sticker);
 
     const textareaRef = useRef(null);
 
@@ -56,6 +58,7 @@ function TabChat() {
         gif: ChatGif,
         image: ChatImage,
         file: ChatFile,
+        sticker: ChatSticker,
     };
 
     useEffect(() => {
@@ -67,7 +70,7 @@ function TabChat() {
     // Hàm tự động điều chỉnh chiều cao
     useEffect(() => {
         if (textareaRef.current) {
-            textareaRef.current.style.height = '50px'; // Reset chiều cao trước khi tính toán
+            textareaRef.current.style.height = '30px'; // Reset chiều cao trước khi tính toán
             const newHeight = Math.min(textareaRef.current.scrollHeight, 200);
             textareaRef.current.style.height = `${newHeight}px`;
         }
@@ -100,6 +103,17 @@ function TabChat() {
             dispatch(sendMessage({ chatId: activeChat.id, content: gifObject.url, time: currentTime, type: 'gif' }));
         }
     }, [gifObject]);
+
+    useEffect(() => {
+        if (sticker != null) {
+            const currentTime = new Date().toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+
+            dispatch(sendMessage({ chatId: activeChat.id, content: sticker, time: currentTime, type: 'sticker' }));
+        }
+    }, [sticker]);
 
     const handleFileChange = (event, type) => {
         const file = event.target.files[0];
@@ -180,7 +194,7 @@ function TabChat() {
 
                     return (
                         <div
-                            className={`relative flex ${message.sender === 0 ? 'justify-end' : 'justify-start'}`}
+                            className={`relative mb-2 flex ${message.sender === 0 ? 'justify-end' : 'justify-start'}`}
                             key={index}
                         >
                             {!isDeleted && Component && (
@@ -242,9 +256,15 @@ function TabChat() {
                         onChange={(e) => {
                             setMessage(e.target.value);
                         }}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault(); // Ngăn xuống dòng
+                                handleSendMessage(); // Gọi hàm gửi tin nhắn
+                            }
+                        }}
                         placeholder={`Nhập tin nhắn với ${activeChat.name}`}
-                        className="flex-1 p-3 font-base text-[14px] rounded-lg focus:border-blue-500 focus:outline-none
-                           h-[50px] max-h-[200px] overflow-y-auto resize-none"
+                        className="flex-1 p-1 font-base text-[14px] rounded-lg focus:border-blue-500 focus:outline-none
+                            h-[30px] max-h-[200px] overflow-y-auto resize-none"
                     />
 
                     <div className="flex items-center">

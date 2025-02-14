@@ -2,12 +2,13 @@ import { useState } from 'react';
 import Picker from 'emoji-picker-react';
 import GifPicker from 'gif-picker-react';
 import { useDispatch } from 'react-redux';
-import { sendEmoji, sendGif } from '../../redux/slices/chatSlice';
+import { sendEmoji, sendGif, sendSticker } from '../../redux/slices/chatSlice';
+import listSticker from '../../sample_data/listSticker';
 
 function TabChatSymbol() {
     const [activeTab, setActiveTab] = useState('emoji');
 
-    const stickers = ['/stickers/pepe1.png', '/stickers/pepe2.png', '/stickers/raccoon1.png', '/stickers/dog.png'];
+    const stickers = listSticker;
     const dispatch = useDispatch();
 
     const onEmojiClick = (emojiData) => {
@@ -17,6 +18,9 @@ function TabChatSymbol() {
         console.log(gifObject);
 
         dispatch(sendGif(gifObject));
+    };
+    const onStickerClick = (sticker) => {
+        dispatch(sendSticker(sticker));
     };
 
     return (
@@ -39,10 +43,19 @@ function TabChatSymbol() {
             {/* Content */}
             <div className="h-[400px]">
                 <div className=" grid gap-2 w-full max-h-[500px]">
-                    {activeTab === 'sticker' &&
-                        stickers.map((src, index) => (
-                            <img key={index} src={src} alt="sticker" className="w-16 h-16 cursor-pointer p-4" />
-                        ))}
+                    {activeTab === 'sticker' && (
+                        <div className="flex flex-wrap p-1 gap-2">
+                            {stickers.map((src, index) => (
+                                <img
+                                    key={index}
+                                    src={src.sticker}
+                                    alt="sticker"
+                                    className="w-20 h-20 cursor-pointer p-1"
+                                    onClick={() => onStickerClick(src.sticker)}
+                                />
+                            ))}
+                        </div>
+                    )}
 
                     {activeTab === 'emoji' && (
                         <div className="flex h-[calc(100vh-112px)]">

@@ -1,6 +1,10 @@
 import PopupCategoryAndState from '../../components/Popup/PopupCategoryAndState';
 import { useSelector, useDispatch } from 'react-redux';
 import { setActiveChat } from '../../redux/slices/chatSlice';
+import { MdOutlineGifBox } from 'react-icons/md';
+import { LuSticker } from 'react-icons/lu';
+import { IoImageOutline } from 'react-icons/io5';
+import { MdFilePresent } from 'react-icons/md';
 
 import { setActiveTabMessToOrther, setActiveTabMessToPriority } from '../../redux/slices/chatSlice';
 
@@ -64,15 +68,27 @@ function TabMesssage() {
                                     <h3 className="font-medium text-xs text-lg mt-1 max-w-[270px] truncate">
                                         {chat.name}
                                     </h3>
-                                    <p className="text-sm text-gray-600 text-xs mt-1 max-w-[270px] truncate">
+                                    <p className="flex items-center text-sm text-gray-600 text-xs mt-1 max-w-[270px] truncate">
                                         {lastMessage?.sender === 0 ? 'You: ' : lastMessage.name}
-                                        {lastMessage?.type === 'gif'
-                                            ? 'GIF'
-                                            : lastMessage?.type === 'image'
-                                            ? 'Hình ảnh'
-                                            : lastMessage?.type === 'file'
-                                            ? lastMessage?.fileName
-                                            : lastMessage?.content}
+                                        {lastMessage?.type === 'gif' ? (
+                                            <p className="flex items-center">
+                                                <MdOutlineGifBox size={15} className="m-[5px]" /> GIF
+                                            </p>
+                                        ) : lastMessage?.type === 'sticker' ? (
+                                            <p className="flex items-center">
+                                                <LuSticker size={15} className="m-[5px]" /> Sticker
+                                            </p>
+                                        ) : lastMessage?.type === 'image' ? (
+                                            <p className="flex items-center">
+                                                <IoImageOutline size={15} className="m-[5px]" /> Hình ảnh
+                                            </p>
+                                        ) : lastMessage?.type === 'file' ? (
+                                            <p className="flex items-center">
+                                                <MdFilePresent size={15} className="m-[5px]" /> {lastMessage?.fileName}
+                                            </p>
+                                        ) : (
+                                            lastMessage?.content
+                                        )}
                                     </p>
                                 </div>
                             </div>

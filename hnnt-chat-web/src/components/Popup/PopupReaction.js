@@ -8,7 +8,7 @@ function PopupReacttion({ position, setShowPopupReaction, reaction, setReaction 
 
     return (
         <div
-            className={`flex justify-between items-center p-4 absolute ${
+            className={`flex z-10 justify-between items-center p-4 py-5 absolute ${
                 position === 'right' ? 'right-[0]' : 'left-[0]'
             } bottom-[-10px] bg-white w-[240px] h-[30px] rounded-lg`}
             onMouseLeave={() => setTimeout(() => setShowPopupReaction(false), 500)}
@@ -31,7 +31,7 @@ function PopupReacttion({ position, setShowPopupReaction, reaction, setReaction 
             <button className="text-[20px] hover:text-[25px]" onClick={() => handleReaction('😡')}>
                 😡
             </button>
-            {reaction && (
+            {reaction.length > 0 && (
                 <button
                     className="text-[20px] hover:text-[25px]"
                     onClick={() => {
