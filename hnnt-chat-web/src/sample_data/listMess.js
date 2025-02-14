@@ -11,6 +11,18 @@ const data = [
                 id: 1,
                 sender: 1,
                 content: 'Chào bạn',
+                reactions: [
+                    {
+                        id: 1,
+                        reaction: '❤️',
+                        sum: 2,
+                    },
+                    {
+                        id: 0,
+                        reaction: '🤣',
+                        sum: 3,
+                    },
+                ],
                 type: 'text',
                 time: '10:00',
                 delete: false,
@@ -20,6 +32,19 @@ const data = [
                 id: 2,
                 sender: 0,
                 content: 'Chào nha',
+                reactions: [
+                    {
+                        id: 1,
+                        reaction: '❤️',
+                        sum: 2,
+                    },
+                    {
+                        id: 0,
+                        reaction: '🤣',
+                        sum: 3,
+                    },
+                ],
+
                 type: 'text',
                 time: '11:00',
                 delete: false,
@@ -29,6 +54,19 @@ const data = [
                 id: 3,
                 sender: 0,
                 content: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThyAh7n-Yc7cX6D-ZhFIq5L_IDvObDW-EMNQ&s',
+                reactions: [
+                    {
+                        id: 2,
+                        reaction: '❤️',
+                        sum: 2,
+                    },
+                    {
+                        id: 0,
+                        reaction: '🤣',
+                        sum: 3,
+                    },
+                ],
+
                 type: 'image',
                 time: '11:00',
                 delete: false,
@@ -48,6 +86,19 @@ const data = [
                 id: 1,
                 sender: 2,
                 content: 'Chào bạn',
+                reactions: [
+                    {
+                        id: 2,
+                        reaction: '❤️',
+                        sum: 2,
+                    },
+                    {
+                        id: 0,
+                        reaction: '🤣',
+                        sum: 3,
+                    },
+                ],
+
                 type: 'text',
                 time: '10:00',
                 delete: false,
@@ -57,6 +108,19 @@ const data = [
                 id: 2,
                 sender: 0,
                 content: 'Hôm nay bạn thế nào?',
+                reactions: [
+                    {
+                        id: 2,
+                        reaction: '❤️',
+                        sum: 2,
+                    },
+                    {
+                        id: 0,
+                        reaction: '🤣',
+                        sum: 3,
+                    },
+                ],
+
                 type: 'text',
                 time: '11:15',
                 delete: false,
@@ -76,6 +140,19 @@ const data = [
                 id: 1,
                 sender: 3,
                 content: 'Chào bạn',
+                reactions: [
+                    {
+                        id: 3,
+                        reaction: '❤️',
+                        sum: 2,
+                    },
+                    {
+                        id: 0,
+                        reaction: '🤣',
+                        sum: 3,
+                    },
+                ],
+
                 type: 'text',
                 time: '10:00',
                 delete: false,
@@ -85,6 +162,19 @@ const data = [
                 id: 2,
                 sender: 0,
                 content: 'Hẹn gặp bạn sau!',
+                reactions: [
+                    {
+                        id: 3,
+                        reaction: '❤️',
+                        sum: 2,
+                    },
+                    {
+                        id: 0,
+                        reaction: '🤣',
+                        sum: 3,
+                    },
+                ],
+
                 type: 'text',
                 time: '11:00',
                 delete: false,

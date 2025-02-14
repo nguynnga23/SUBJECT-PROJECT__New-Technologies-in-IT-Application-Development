@@ -115,6 +115,7 @@ function TabChat() {
                     content: URL.createObjectURL(file),
                     fileName: file.name, // Lấy tên file
                     fileSize: (file.size / 1024).toFixed(2) + ' KB',
+                    fileType: file.type,
                     time: currentTime,
                     type: type,
                 }),
@@ -172,13 +173,16 @@ function TabChat() {
                     )}
                 </div>
             </div>
-            <div className="flex-1 p-4 overflow-auto bg-gray-200 " ref={chatContainerRef}>
+            <div className="flex-1 p-5 overflow-auto bg-gray-200 " ref={chatContainerRef}>
                 {activeChat.messages.map((message, index) => {
                     const isDeleted = message.delete;
                     const Component = message.destroy ? ChatDestroy : MessageComponent[message.type];
 
                     return (
-                        <div className={` flex ${message.sender === 0 ? 'justify-end' : 'justify-start'}`} key={index}>
+                        <div
+                            className={`relative flex ${message.sender === 0 ? 'justify-end' : 'justify-start'}`}
+                            key={index}
+                        >
                             {!isDeleted && Component && (
                                 <Component
                                     key={index}

@@ -70,6 +70,8 @@ function TabMesssage() {
                                             ? 'GIF'
                                             : lastMessage?.type === 'image'
                                             ? 'Hình ảnh'
+                                            : lastMessage?.type === 'file'
+                                            ? lastMessage?.fileName
                                             : lastMessage?.content}
                                     </p>
                                 </div>

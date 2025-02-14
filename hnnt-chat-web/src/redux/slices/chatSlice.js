@@ -16,7 +16,7 @@ const chatSlice = createSlice({
     },
     reducers: {
         sendMessage: (state, action) => {
-            const { chatId, content, time, type, fileName, fileSize } = action.payload;
+            const { chatId, content, time, type, fileName, fileSize, fileType } = action.payload;
             const chat = state.chats.find((c) => c.id === chatId);
 
             if (chat) {
@@ -38,6 +38,11 @@ const chatSlice = createSlice({
                 if (fileSize) {
                     message.fileSize = fileSize;
                 }
+                // Nếu có fileType thì thêm vào object
+                if (fileType) {
+                    message.fileType = fileType;
+                }
+
                 chat.messages.push(message);
             }
         },

@@ -4,11 +4,10 @@ import { GrPin } from 'react-icons/gr';
 import { AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { GoBellSlash } from 'react-icons/go';
 import { useDispatch, useSelector } from 'react-redux';
-import { IoIosArrowDropdown } from 'react-icons/io';
-import { IoIosArrowDropright } from 'react-icons/io';
 
 import { setOnOrOfPin, setOnOrOfNotify } from '../../redux/slices/chatSlice';
 import { useState } from 'react';
+import Archive from '../Archive/Archive';
 
 function TabChatInfo() {
     const activeChat = useSelector((state) => state.chat.chats.find((chat) => chat.id === state.chat.activeChat?.id));
@@ -73,72 +72,27 @@ function TabChatInfo() {
 
             {/* Danh mục */}
             <div className="space-y-2 ">
-                <div className="p-2 border-b-[7px] cursor-pointer ">
-                    <div className="flex justify-between items-center pl-2" onClick={() => setImageOpen(!imageOpen)}>
-                        <span className=" font-medium cursor-pointer text-base ">Ảnh</span>
-                        {imageOpen ? (
-                            <IoIosArrowDropdown className=" font-medium text-base text-gray-400" />
-                        ) : (
-                            <IoIosArrowDropright className=" font-medium text-base text-gray-400" />
-                        )}
-                    </div>
-                    {imageOpen && (
-                        <div className="flex flex-wrap p-1 gap-2">
-                            {activeChat.messages
-                                .filter((msg) => msg.type === 'image')
-                                .map((msg) => (
-                                    <img
-                                        src={msg.content}
-                                        className="w-[75px] h-[75px] rounded-lg object-cover border"
-                                    />
-                                ))}
-                        </div>
-                    )}
-                </div>
-                <div className="p-2 border-b-[7px]">
-                    <div className="flex justify-between items-center pl-2" onClick={() => setFileOpen(!fileOpen)}>
-                        <span className=" font-medium cursor-pointer text-base ">File</span>
-                        {fileOpen ? (
-                            <IoIosArrowDropdown className=" font-medium text-base text-gray-400" />
-                        ) : (
-                            <IoIosArrowDropright className=" font-medium text-base text-gray-400" />
-                        )}
-                    </div>
-                    {fileOpen && (
-                        <div className="flex flex-wrap p-1 gap-2">
-                            {activeChat.messages
-                                .filter((msg) => msg.type === 'file')
-                                .map((msg) => (
-                                    <img
-                                        src={msg.content}
-                                        className="w-[75px] h-[75px] rounded-lg object-cover border"
-                                    />
-                                ))}
-                        </div>
-                    )}
-                </div>
-                <div className="items-center p-2 border-b-[7px] cursor-pointer cursor-pointer">
-                    <div className="flex justify-between items-center pl-2" onClick={() => setLinkOpen(!linkOpen)}>
-                        <span className=" font-medium cursor-pointer text-base ">Link</span>
-                        {linkOpen ? (
-                            <IoIosArrowDropdown className=" font-medium text-base text-gray-400" />
-                        ) : (
-                            <IoIosArrowDropright className=" font-medium text-base text-gray-400" />
-                        )}
-                    </div>
-                    {linkOpen && (
-                        <div className="flex flex-wrap p-1 gap-2">
-                            {activeChat.messages
-                                .filter((msg) => msg.type === 'link')
-                                .map((msg) => (
-                                    <img
-                                        src={msg.content}
-                                        className="w-[75px] h-[75px] rounded-lg object-cover border"
-                                    />
-                                ))}
-                        </div>
-                    )}
-                </div>
+                <Archive
+                    title="Ảnh"
+                    isOpen={imageOpen}
+                    toggleOpen={() => setImageOpen(!imageOpen)}
+                    messages={activeChat.messages}
+                    type="image"
+                />
+                <Archive
+                    title="File"
+                    isOpen={fileOpen}
+                    toggleOpen={() => setFileOpen(!fileOpen)}
+                    messages={activeChat.messages}
+                    type="file"
+                />
+                <Archive
+                    title="Link"
+                    isOpen={linkOpen}
+                    toggleOpen={() => setLinkOpen(!linkOpen)}
+                    messages={activeChat.messages}
+                    type="link"
+                />
             </div>
 
             {/* Xóa lịch sử trò chuyện */}
