@@ -29,6 +29,7 @@ const chatSlice = createSlice({
                     type: type,
                     delete: false,
                     destroy: false,
+                    reactions: [],
                 };
                 // Nếu có fileName thì thêm vào object
                 if (fileName) {
@@ -104,6 +105,35 @@ const chatSlice = createSlice({
                 }
             }
         },
+        addReaction: (state, action) => {
+            const { chatId, messageId, reaction, userId } = action.payload;
+
+            const chat = state.chats.find((chat) => chat.id === chatId);
+
+            if (chat) {
+                const message = chat.messages.find((mess) => mess.id === messageId);
+                if (message) {
+                    const existingReaction = message.reactions.find((r) => r.reaction === reaction);
+                    if (existingReaction) {
+                        existingReaction.sum += 1;
+                    } else {
+                        message.reactions = [...message.reactions, { id: userId, reaction, sum: 1 }];
+                    }
+                }
+            }
+        },
+        removeReaction: (state, action) => {
+            const { chatId, messageId, userId } = action.payload;
+
+            const chat = state.chats.find((chat) => chat.id === chatId);
+
+            if (chat) {
+                const message = chat.messages.find((mess) => mess.id === messageId);
+                if (message) {
+                    message.reactions = message.reactions.filter((reaction) => reaction.id !== userId);
+                }
+            }
+        },
     },
 });
 
@@ -121,5 +151,7 @@ export const {
     openEmojiTab,
     updateMessageStatus,
     sendSticker,
+    addReaction,
+    removeReaction,
 } = chatSlice.actions;
 export default chatSlice.reducer;

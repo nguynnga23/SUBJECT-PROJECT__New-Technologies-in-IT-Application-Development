@@ -201,11 +201,13 @@ function TabChat() {
                                 <Component
                                     key={index}
                                     index={index}
+                                    activeChat={activeChat}
                                     message={message}
                                     setHoveredMessage={setHoveredMessage}
                                     hoveredMessage={hoveredMessage}
                                     isPopupOpenIndex={isPopupOpenIndex}
                                     setIsPopupOpenIndex={setIsPopupOpenIndex}
+                                    reactions={message.reactions}
                                 />
                             )}
                         </div>

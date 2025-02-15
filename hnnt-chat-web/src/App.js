@@ -10,7 +10,7 @@ import Settings from './screens/Settings';
 
 import avatar from './public/avatar_sample.jpg';
 
-export default function ZaloUI() {
+export default function App() {
     const [selectedScreen, setSelectedScreen] = useState('messaging');
     return (
         <div className="flex h-screen bg-gray-100">

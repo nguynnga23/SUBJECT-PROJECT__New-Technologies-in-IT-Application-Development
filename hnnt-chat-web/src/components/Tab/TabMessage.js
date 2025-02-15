@@ -71,21 +71,21 @@ function TabMesssage() {
                                     <p className="flex items-center text-sm text-gray-600 text-xs mt-1 max-w-[270px] truncate">
                                         {lastMessage?.sender === 0 ? 'You: ' : lastMessage.name}
                                         {lastMessage?.type === 'gif' ? (
-                                            <p className="flex items-center">
+                                            <span className="flex items-center">
                                                 <MdOutlineGifBox size={15} className="m-[5px]" /> GIF
-                                            </p>
+                                            </span>
                                         ) : lastMessage?.type === 'sticker' ? (
-                                            <p className="flex items-center">
+                                            <span className="flex items-center">
                                                 <LuSticker size={15} className="m-[5px]" /> Sticker
-                                            </p>
+                                            </span>
                                         ) : lastMessage?.type === 'image' ? (
-                                            <p className="flex items-center">
+                                            <span className="flex items-center">
                                                 <IoImageOutline size={15} className="m-[5px]" /> Hình ảnh
-                                            </p>
+                                            </span>
                                         ) : lastMessage?.type === 'file' ? (
-                                            <p className="flex items-center">
+                                            <span className="flex items-center">
                                                 <MdFilePresent size={15} className="m-[5px]" /> {lastMessage?.fileName}
-                                            </p>
+                                            </span>
                                         ) : (
                                             lastMessage?.content
                                         )}

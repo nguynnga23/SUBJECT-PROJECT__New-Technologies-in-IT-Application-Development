@@ -6,10 +6,20 @@ import PopupMenuForChat from '../Popup/PopupMenuForChat';
 import { AiOutlineLike } from 'react-icons/ai';
 import PopupReacttion from '../Popup/PopupReaction';
 
-function ChatImage({ index, message, setHoveredMessage, hoveredMessage, isPopupOpenIndex, setIsPopupOpenIndex }) {
+function ChatImage({
+    index,
+    activeChat,
+    message,
+    setHoveredMessage,
+    hoveredMessage,
+    isPopupOpenIndex,
+    setIsPopupOpenIndex,
+    reactions,
+}) {
     const [selectedImage, setSelectedImage] = useState(null);
     const position = message.sender === 0 ? 'right' : 'left';
-    const [reaction, setReaction] = useState([]);
+    const sumReaction = reactions.reduce((total, reaction) => total + reaction.sum, 0);
+
     const [showPopupReaction, setShowPopupReaction] = useState(false);
 
     return (
@@ -32,12 +42,12 @@ function ChatImage({ index, message, setHoveredMessage, hoveredMessage, isPopupO
             />
             <p className="absolute left-[8px] bottom-[2px] text-gray-500 text-[10px]">{message.time}</p>
 
-            {reaction?.length > 0 && (
-                <div className="absolute flex items-center bottom-[15px] right-[15px] border rounded-full p-0.5 bg-white text-[12px]">
-                    {reaction.slice(0, 2).map((re, index) => (
-                        <div key={index}>{re}</div>
+            {sumReaction > 0 && (
+                <div className="absolute flex items-center bottom-[12px] right-[15px] border rounded-full p-0.5 bg-white text-[12px]">
+                    {reactions.slice(0, 2).map((re, index) => (
+                        <div key={index}>{re.reaction}</div>
                     ))}
-                    {reaction.length > 2 && <div className="text-gray-500 text-[10px]">{reaction.length}</div>}
+                    {sumReaction > 2 && <div className="text-gray-500 text-[10px]">{sumReaction}</div>}
                 </div>
             )}
 
@@ -72,8 +82,10 @@ function ChatImage({ index, message, setHoveredMessage, hoveredMessage, isPopupO
                 <PopupReacttion
                     position={position}
                     setShowPopupReaction={setShowPopupReaction}
-                    reaction={reaction}
-                    setReaction={setReaction}
+                    chatId={activeChat.id}
+                    message={message}
+                    reactions={reactions}
+                    userId={0}
                 />
             )}
         </div>

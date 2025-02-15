@@ -1,8 +1,14 @@
 import { IoHeartDislikeOutline } from 'react-icons/io5';
+import { addReaction, removeReaction } from '../../redux/slices/chatSlice';
+import { useDispatch } from 'react-redux';
 
-function PopupReacttion({ position, setShowPopupReaction, reaction, setReaction }) {
+function PopupReacttion({ position, setShowPopupReaction, chatId, message, reactions, userId }) {
+    const dispatch = useDispatch();
+
     const handleReaction = (reaction) => {
-        setReaction((preReactions) => [...preReactions, reaction]); // Truyền emoji vào state
+        const messageId = message.id;
+        dispatch(addReaction({ chatId, messageId, reaction, userId }));
+
         setShowPopupReaction(false); // Ẩn popup sau khi chọn
     };
 
@@ -31,12 +37,13 @@ function PopupReacttion({ position, setShowPopupReaction, reaction, setReaction 
             <button className="text-[20px] hover:text-[25px]" onClick={() => handleReaction('😡')}>
                 😡
             </button>
-            {reaction.length > 0 && (
+            {reactions.length > 0 && (
                 <button
                     className="text-[20px] hover:text-[25px]"
                     onClick={() => {
-                        setReaction([]);
                         setShowPopupReaction(false);
+                        const messageId = message.id;
+                        dispatch(removeReaction({ chatId, messageId, userId }));
                     }}
                 >
                     <IoHeartDislikeOutline />

@@ -13,14 +13,9 @@ const data = [
                 content: 'Chào bạn',
                 reactions: [
                     {
-                        id: 1,
+                        id: 0,
                         reaction: '❤️',
                         sum: 2,
-                    },
-                    {
-                        id: 0,
-                        reaction: '🤣',
-                        sum: 3,
                     },
                 ],
                 type: 'text',
@@ -39,7 +34,7 @@ const data = [
                         sum: 2,
                     },
                     {
-                        id: 0,
+                        id: 1,
                         reaction: '🤣',
                         sum: 3,
                     },
@@ -56,12 +51,12 @@ const data = [
                 content: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThyAh7n-Yc7cX6D-ZhFIq5L_IDvObDW-EMNQ&s',
                 reactions: [
                     {
-                        id: 2,
+                        id: 0,
                         reaction: '❤️',
                         sum: 2,
                     },
                     {
-                        id: 0,
+                        id: 1,
                         reaction: '🤣',
                         sum: 3,
                     },
@@ -88,12 +83,12 @@ const data = [
                 content: 'Chào bạn',
                 reactions: [
                     {
-                        id: 2,
+                        id: 0,
                         reaction: '❤️',
                         sum: 2,
                     },
                     {
-                        id: 0,
+                        id: 2,
                         reaction: '🤣',
                         sum: 3,
                     },
@@ -110,12 +105,12 @@ const data = [
                 content: 'Hôm nay bạn thế nào?',
                 reactions: [
                     {
-                        id: 2,
+                        id: 0,
                         reaction: '❤️',
                         sum: 2,
                     },
                     {
-                        id: 0,
+                        id: 2,
                         reaction: '🤣',
                         sum: 3,
                     },
@@ -142,12 +137,12 @@ const data = [
                 content: 'Chào bạn',
                 reactions: [
                     {
-                        id: 3,
+                        id: 0,
                         reaction: '❤️',
                         sum: 2,
                     },
                     {
-                        id: 0,
+                        id: 3,
                         reaction: '🤣',
                         sum: 3,
                     },
@@ -164,12 +159,12 @@ const data = [
                 content: 'Hẹn gặp bạn sau!',
                 reactions: [
                     {
-                        id: 3,
+                        id: 0,
                         reaction: '❤️',
                         sum: 2,
                     },
                     {
-                        id: 0,
+                        id: 3,
                         reaction: '🤣',
                         sum: 3,
                     },

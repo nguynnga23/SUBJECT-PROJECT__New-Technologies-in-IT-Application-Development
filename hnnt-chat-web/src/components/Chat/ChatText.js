@@ -4,15 +4,24 @@ import { AiOutlineLike } from 'react-icons/ai';
 import PopupReacttion from '../Popup/PopupReaction';
 import { useState } from 'react';
 
-function ChatText({ index, message, setHoveredMessage, hoveredMessage, isPopupOpenIndex, setIsPopupOpenIndex }) {
+function ChatText({
+    index,
+    activeChat,
+    message,
+    setHoveredMessage,
+    hoveredMessage,
+    isPopupOpenIndex,
+    setIsPopupOpenIndex,
+    reactions,
+}) {
     const position = message.sender === 0 ? 'right' : 'left';
     const [showPopupReaction, setShowPopupReaction] = useState(false);
-    const [reaction, setReaction] = useState([]);
+    const sumReaction = reactions.reduce((total, reaction) => total + reaction.sum, 0);
     return (
         <div
             key={index}
             className={`relative text-[14px] border border-blue-400 p-2 ${
-                reaction.length > 0 ? 'pb-8' : 'pb-6'
+                reactions.length > 0 ? 'pb-8' : 'pb-6'
             } rounded-lg w-fit mb-2 max-w-[500px] min-w-[60px] break-all ${
                 message.sender === 0 ? 'bg-blue-100' : 'bg-white'
             }`}
@@ -29,17 +38,17 @@ function ChatText({ index, message, setHoveredMessage, hoveredMessage, isPopupOp
 
             <p
                 className={`absolute left-[8px] ${
-                    reaction.length > 0 ? 'bottom-[16px]' : 'bottom-[5px]'
+                    reactions.length > 0 ? 'bottom-[16px]' : 'bottom-[5px]'
                 } text-gray-500 text-[10px]`}
             >
                 {message.time}
             </p>
-            {reaction?.length > 0 && (
+            {sumReaction > 0 && (
                 <div className="absolute flex items-center bottom-[-8px] right-[15px] border rounded-full p-0.5 bg-white text-[12px]">
-                    {reaction.slice(0, 2).map((re, index) => (
-                        <div key={index}>{re}</div>
-                    ))}
-                    {reaction.length > 2 && <div className="text-gray-500 text-[10px]">{reaction.length}</div>}
+                    {reactions.slice(0, 2).map((re, index) => {
+                        return <div key={index}>{re.reaction}</div>;
+                    })}
+                    {sumReaction >= 2 && <div className="text-gray-500 text-[10px]">{sumReaction}</div>}
                 </div>
             )}
 
@@ -73,8 +82,10 @@ function ChatText({ index, message, setHoveredMessage, hoveredMessage, isPopupOp
                 <PopupReacttion
                     position={position}
                     setShowPopupReaction={setShowPopupReaction}
-                    reaction={reaction}
-                    setReaction={setReaction}
+                    chatId={activeChat.id}
+                    message={message}
+                    reactions={reactions}
+                    userId={0}
                 />
             )}
         </div>
