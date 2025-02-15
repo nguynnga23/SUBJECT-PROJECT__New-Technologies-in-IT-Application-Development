@@ -11,6 +11,7 @@ import { IoImageOutline } from 'react-icons/io5';
 import { MdAttachFile } from 'react-icons/md';
 import { FaRegAddressCard } from 'react-icons/fa6';
 import { MdOutlineEmojiEmotions } from 'react-icons/md';
+import { LuSticker } from 'react-icons/lu';
 
 import PopupCategory from '../Popup/PopupCategory';
 
@@ -217,6 +218,12 @@ function TabChat() {
             <div>
                 <div className="flex bg-white border-t p-2">
                     <div>
+                        <LuSticker
+                            className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600"
+                            onClick={() => dispatch(openEmojiTab('sticker'))}
+                        />
+                    </div>
+                    <div>
                         {/* Input chọn ảnh (ẩn đi) */}
                         <input
                             type="file"
@@ -272,7 +279,7 @@ function TabChat() {
                     <div className="flex items-center">
                         <MdOutlineEmojiEmotions
                             className="text-2xl cursor-pointer ml-3 text-gray-500 mr-3 hover:text-blue-500"
-                            onClick={() => dispatch(openEmojiTab())}
+                            onClick={() => dispatch(openEmojiTab('emoji'))}
                         />
                         {message !== '' ? (
                             <IoMdSend

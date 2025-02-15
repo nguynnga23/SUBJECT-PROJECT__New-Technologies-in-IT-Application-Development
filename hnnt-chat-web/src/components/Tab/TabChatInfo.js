@@ -32,13 +32,13 @@ function TabChatInfo() {
                             <GoBell
                                 size={35}
                                 className="p-2 bg-gray-200 rounded-full cursor-pointer"
-                                onClick={() => dispatch(setOnOrOfNotify())}
+                                onClick={() => dispatch(setOnOrOfNotify(activeChat.id))}
                             />
                         ) : (
                             <GoBellSlash
                                 size={35}
                                 className="p-2 bg-gray-200 rounded-full cursor-pointer text-blue-500"
-                                onClick={() => dispatch(setOnOrOfNotify())}
+                                onClick={() => dispatch(setOnOrOfNotify(activeChat.id))}
                             />
                         )}
                     </div>
@@ -50,13 +50,13 @@ function TabChatInfo() {
                             <GrPin
                                 size={35}
                                 className="p-2 bg-gray-200 rounded-full cursor-pointer"
-                                onClick={() => dispatch(setOnOrOfPin())}
+                                onClick={() => dispatch(setOnOrOfPin(activeChat.id))}
                             />
                         ) : (
                             <GrPin
                                 size={35}
                                 className="p-2 bg-gray-200 rounded-full cursor-pointer text-blue-500"
-                                onClick={() => dispatch(setOnOrOfPin())}
+                                onClick={() => dispatch(setOnOrOfPin(activeChat.id))}
                             />
                         )}
                     </div>

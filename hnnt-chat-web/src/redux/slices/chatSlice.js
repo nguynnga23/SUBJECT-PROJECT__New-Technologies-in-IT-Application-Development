@@ -14,6 +14,7 @@ const chatSlice = createSlice({
         gifObject: null,
         sticker: null,
         rightBarTab: 'info',
+        rightBarTabSub: 'emoji',
     },
     reducers: {
         sendMessage: (state, action) => {
@@ -65,11 +66,21 @@ const chatSlice = createSlice({
         setActiveTabMessToOrther: (state) => {
             state.activeTabMess = 'other';
         },
-        setOnOrOfPin: (state) => {
-            state.activeChat.pin = !state.activeChat.pin;
+        setOnOrOfPin: (state, action) => {
+            const chatId = action.payload;
+
+            const message = state.chats.find((msg) => msg.id === chatId);
+            if (message) {
+                message.pin = !message.pin;
+            }
         },
-        setOnOrOfNotify: (state) => {
-            state.activeChat.notify = !state.activeChat.notify;
+        setOnOrOfNotify: (state, action) => {
+            const chatId = action.payload;
+
+            const message = state.chats.find((msg) => msg.id === chatId);
+            if (message) {
+                message.notify = !message.notify;
+            }
         },
         sendEmoji: (state, action) => {
             state.emojiObject = action.payload;
@@ -80,9 +91,10 @@ const chatSlice = createSlice({
         sendSticker: (state, action) => {
             state.sticker = action.payload;
         },
-        openEmojiTab: (state) => {
+        openEmojiTab: (state, action) => {
             state.showRightBar = true;
             state.rightBarTab = 'sympol';
+            state.rightBarTabSub = action.payload;
         },
         updateMessageStatus: (state, action) => {
             const { chatId, messageId, statusType } = action.payload;

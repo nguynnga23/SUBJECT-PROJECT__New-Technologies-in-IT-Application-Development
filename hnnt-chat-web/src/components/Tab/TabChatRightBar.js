@@ -4,8 +4,8 @@ import TabChatSympol from './TabChatSympol';
 import { useDispatch, useSelector } from 'react-redux';
 
 function TabChatRightBar() {
-    const dispatch = useDispatch();
     const initTab = useSelector((state) => state.chat.rightBarTab);
+
     const [activeMessageTab, setActiveMessageTab] = useState(initTab);
 
     return (

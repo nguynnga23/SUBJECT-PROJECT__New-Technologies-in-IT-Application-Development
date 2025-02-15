@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import Picker from 'emoji-picker-react';
 import GifPicker from 'gif-picker-react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { sendEmoji, sendGif, sendSticker } from '../../redux/slices/chatSlice';
 import listSticker from '../../sample_data/listSticker';
 
 function TabChatSymbol() {
-    const [activeTab, setActiveTab] = useState('emoji');
+    const subTab = useSelector((state) => state.chat.rightBarTabSub);
+
+    const [activeTab, setActiveTab] = useState(subTab);
 
     const stickers = listSticker;
     const dispatch = useDispatch();
