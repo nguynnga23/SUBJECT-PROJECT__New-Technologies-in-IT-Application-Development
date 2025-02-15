@@ -2,10 +2,14 @@ const data = [
     {
         id: 1,
         name: 'Nguyen Van A',
+        number: '111111111',
         avatar: 'https://www.catster.com/wp-content/uploads/2023/11/Beluga-Cat-e1714190563227.webp',
         pin: true,
         notify: true,
         kind: 'priority',
+        category: '',
+        categoryColor: '',
+        status: '',
         messages: [
             {
                 id: 1,
@@ -72,10 +76,14 @@ const data = [
     {
         id: 2,
         name: 'Tran Thi B',
+        number: '222222222',
         avatar: 'https://m.media-amazon.com/images/I/518K-+yYl2L._AC_SL1000_.jpg',
         pin: false,
         notify: true,
         kind: 'priority',
+        category: '',
+        categoryColor: '',
+        status: '',
         messages: [
             {
                 id: 1,
@@ -126,10 +134,14 @@ const data = [
     {
         id: 3,
         name: 'Le Van C',
+        number: '333333333',
         avatar: 'https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/474174ewO/anh-meme-meo-khoc-cuc-cute_042216244.jpg',
         pin: false,
         notify: true,
         kind: 'other',
+        category: '',
+        categoryColor: '',
+        status: '',
         messages: [
             {
                 id: 1,

@@ -1,22 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { MdLabel } from 'react-icons/md';
+import { addOrChangeCategory } from '../../redux/slices/chatSlice';
 
 import PopupManageCategory from './PopupManageCategory';
-
-const categories = [
-    { id: 1, name: 'Khách hàng', color: 'text-red-500' },
-    { id: 2, name: 'Gia đình', color: 'text-green-500' },
-    { id: 3, name: 'Công việc', color: 'text-orange-500' },
-    { id: 4, name: 'Bạn bè', color: 'text-purple-500' },
-    { id: 5, name: 'Trả lời sau', color: 'text-yellow-500' },
-    { id: 6, name: 'Đồng nghiệp', color: 'text-blue-500' },
-    { id: 7, name: 'Tin nhắn từ người lạ', color: 'text-gray-500' },
-];
+import { useDispatch, useSelector } from 'react-redux';
 
 function PopupCategory({ isOpen, setIsOpen }) {
+    const categories = useSelector((state) => state.category.categories);
     const [isOpenManageCategory, setIsOpenManageCategory] = useState(false);
+    const activeChat = useSelector((state) => state.chat.activeChat);
 
     const popupContainerRef = useRef(null);
+    const dispatch = useDispatch();
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -34,6 +29,8 @@ function PopupCategory({ isOpen, setIsOpen }) {
     }, [isOpen]);
 
     const chooseCategory = (category) => {
+        const chatId = activeChat.id;
+        dispatch(addOrChangeCategory({ chatId, category }));
         setIsOpen(false);
         return;
     };

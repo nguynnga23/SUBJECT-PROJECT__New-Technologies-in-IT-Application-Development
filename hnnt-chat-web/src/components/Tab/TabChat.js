@@ -12,6 +12,7 @@ import { MdAttachFile } from 'react-icons/md';
 import { FaRegAddressCard } from 'react-icons/fa6';
 import { MdOutlineEmojiEmotions } from 'react-icons/md';
 import { LuSticker } from 'react-icons/lu';
+import { MdLabel } from 'react-icons/md';
 
 import PopupCategory from '../Popup/PopupCategory';
 
@@ -148,11 +149,17 @@ function TabChat() {
                     />
                     <div>
                         <h3 className="font-medium text-base text-lg max-h-[28px]">{activeChat.name}</h3>
-                        <MdLabelOutline
-                            className="cursor-pointer"
-                            color="gray"
-                            onClick={() => setIsOpenCategory(!isOpenCategory)}
-                        />
+                        {activeChat.categoryColor ? (
+                            <MdLabel
+                                className={`cursor-pointer ${activeChat.categoryColor}`}
+                                onClick={() => setIsOpenCategory(!isOpenCategory)}
+                            />
+                        ) : (
+                            <MdLabelOutline
+                                className={`cursor-pointer text-gray-400`}
+                                onClick={() => setIsOpenCategory(!isOpenCategory)}
+                            />
+                        )}
                     </div>
                     {isOpenCategory && <PopupCategory isOpen={isOpenCategory} setIsOpen={setIsOpenCategory} />}
                 </div>

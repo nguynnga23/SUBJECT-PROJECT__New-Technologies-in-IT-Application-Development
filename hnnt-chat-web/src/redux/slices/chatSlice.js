@@ -1,11 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { data } from '../../sample_data/listMess';
 import { v4 as uuidv4 } from 'uuid';
+import categories from '../../sample_data/listCategory';
 
 const chatSlice = createSlice({
     name: 'chat',
     initialState: {
         chats: data, //Danh sách các cuộc trò chuyện
+        categories: categories,
         activeChat: null, // cuộc trò chuyện đang mở
         showRightBar: false,
         showRightBarSearch: false,
@@ -69,17 +71,17 @@ const chatSlice = createSlice({
         setOnOrOfPin: (state, action) => {
             const chatId = action.payload;
 
-            const message = state.chats.find((msg) => msg.id === chatId);
-            if (message) {
-                message.pin = !message.pin;
+            const chat = state.chats.find((c) => c.id === chatId);
+            if (chat) {
+                chat.pin = !chat.pin;
             }
         },
         setOnOrOfNotify: (state, action) => {
             const chatId = action.payload;
 
-            const message = state.chats.find((msg) => msg.id === chatId);
-            if (message) {
-                message.notify = !message.notify;
+            const chat = state.chats.find((c) => c.id === chatId);
+            if (chat) {
+                chat.notify = !chat.notify;
             }
         },
         sendEmoji: (state, action) => {
@@ -146,6 +148,17 @@ const chatSlice = createSlice({
                 }
             }
         },
+        addOrChangeCategory: (state, action) => {
+            const { chatId, category } = action.payload;
+            const chat = state.chats.find((msg) => msg.id === chatId);
+            if (chat) {
+                chat.category = category;
+                const cat = state.categories.find((c) => c.name === category.name);
+                if (cat) {
+                    chat.categoryColor = cat.color;
+                }
+            }
+        },
     },
 });
 
@@ -165,5 +178,6 @@ export const {
     sendSticker,
     addReaction,
     removeReaction,
+    addOrChangeCategory,
 } = chatSlice.actions;
 export default chatSlice.reducer;

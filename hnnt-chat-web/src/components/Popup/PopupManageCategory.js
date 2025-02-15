@@ -1,23 +1,20 @@
-import React, { useState } from 'react';
-import { MdLabel, MdDelete } from 'react-icons/md';
+import React, { useEffect, useState } from 'react';
+import { MdLabel, MdDelete, MdLabelOutline } from 'react-icons/md';
 import { IoMdClose } from 'react-icons/io';
 import { BsGripVertical } from 'react-icons/bs';
-
-let ID = 7;
-const initialCategories = [
-    { id: 1, name: 'Khách hàng', color: 'red-500' },
-    { id: 2, name: 'Gia đình', color: 'green-500' },
-    { id: 3, name: 'Công việc', color: 'orange-500' },
-    { id: 4, name: 'Bạn bè', color: 'purple-500' },
-    { id: 5, name: 'Trả lời sau', color: 'yellow-500' },
-    { id: 6, name: 'Đồng nghiệp', color: 'blue-500' },
-    { id: 7, name: 'Tin nhắn từ người lạ', color: 'text-gray-500' },
-];
+import categories from '../../sample_data/listCategory';
+import PopupCategory from './PopupCategoryColor';
+import PopupCategoryColor from './PopupCategoryColor';
+import { useDispatch, useSelector } from 'react-redux';
+import { addCategory, deleteCategory } from '../../redux/slices/categorySlice';
 
 const PopupManageCategory = ({ setIsOpenManageCategory }) => {
-    const [categories, setCategories] = useState(initialCategories);
+    const categories = useSelector((state) => state.category.categories);
     const [newCategory, setNewCategory] = useState('');
     const [hoveredId, setHoveredId] = useState(null);
+    const [showPopupColor, setShowPopupColor] = useState(false);
+    const [color, setColor] = useState('');
+    const dispatch = useDispatch();
 
     const handleClose = () => {
         setIsOpenManageCategory(false);
@@ -26,18 +23,19 @@ const PopupManageCategory = ({ setIsOpenManageCategory }) => {
     // Thêm phân loại mới
     const handleAddCategory = () => {
         if (newCategory.trim() === '') return;
+
         const newEntry = {
-            id: ID++,
             name: newCategory,
-            color: 'gray-500', // Mặc định màu xám
+            color: color,
         };
-        setCategories([...categories, newEntry]);
+        dispatch(addCategory(newEntry));
+
         setNewCategory('');
     };
 
     // Xóa phân loại
     const handleDeleteCategory = (id) => {
-        setCategories(categories.filter((category) => category.id !== id));
+        dispatch(deleteCategory({ id }));
     };
 
     return (
@@ -63,7 +61,7 @@ const PopupManageCategory = ({ setIsOpenManageCategory }) => {
                                 onMouseLeave={() => setHoveredId(null)}
                             >
                                 <BsGripVertical className="text-gray-500 mr-2" />
-                                <MdLabel className={`text-${category.color}`} size={18} />
+                                <MdLabel className={`${category.color}`} size={18} />
                                 <span className="ml-3 text-sm font-medium flex-1">{category.name}</span>
 
                                 {/* Hiển thị icon xóa khi hover */}
@@ -83,6 +81,24 @@ const PopupManageCategory = ({ setIsOpenManageCategory }) => {
                 {/* Thêm phân loại */}
                 <div className="p-4 border-t">
                     <div className="flex items-center space-x-2">
+                        <div className="relative">
+                            {color !== '' ? (
+                                <MdLabel
+                                    className={`cursor-pointer ${color} text-[20px]`}
+                                    onClick={() => setShowPopupColor(!showPopupColor)}
+                                />
+                            ) : (
+                                <MdLabelOutline
+                                    className={`cursor-pointer text-gray-400 text-[20px]`}
+                                    onClick={() => setShowPopupColor(!showPopupColor)}
+                                />
+                            )}
+
+                            {showPopupColor && (
+                                <PopupCategoryColor setColor={setColor} setShowPopupColor={setShowPopupColor} />
+                            )}
+                        </div>
+
                         <input
                             type="text"
                             className="border rounded-lg px-3 py-1 w-full focus:border-blue-500 focus:outline-none"
