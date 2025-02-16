@@ -15,7 +15,7 @@ function Messaging() {
             <div className="flex-1 flex min-h-0 ">
                 <TabChatLeftBar />
                 <div className={`flex flex-col bg-white ${showRightBar || showRightBarSearch ? 'w-2/4' : 'w-3/4'}`}>
-                    {activeChat ? (
+                    {!activeChat?.delete.includes(0) && activeChat ? (
                         <TabChat />
                     ) : (
                         <div className="flex-1 flex items-center justify-center text-gray-500">

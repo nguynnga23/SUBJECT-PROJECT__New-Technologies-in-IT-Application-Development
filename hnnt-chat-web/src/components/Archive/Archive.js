@@ -18,6 +18,7 @@ const getFileIcon = (fileType) => {
 };
 
 const Archive = ({ title, isOpen, toggleOpen, messages, type }) => {
+    const userId = 0;
     return (
         <div className="p-2 border-b-[7px] cursor-pointer">
             <div className="flex justify-between items-center pl-2" onClick={toggleOpen}>
@@ -31,7 +32,7 @@ const Archive = ({ title, isOpen, toggleOpen, messages, type }) => {
             {isOpen && (
                 <div className="flex flex-wrap p-1 gap-2">
                     {messages
-                        .filter((msg) => msg.type === type)
+                        .filter((msg) => msg.type === type && !msg.delete.some((m) => m.id === userId))
                         .map((msg, index) => {
                             if (type === 'image') {
                                 return (

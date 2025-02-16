@@ -30,7 +30,7 @@ const chatSlice = createSlice({
                     content: content,
                     time: time,
                     type: type,
-                    delete: false,
+                    delete: [],
                     destroy: false,
                     reactions: [],
                 };
@@ -49,6 +49,18 @@ const chatSlice = createSlice({
                 }
 
                 chat.messages.push(message);
+            }
+        },
+        deleteChatForUser: (state, action) => {
+            const { userId, chatId } = action.payload;
+            const chat = state.chats.find((c) => c.id === chatId);
+            if (chat) {
+                chat.messages.forEach((msg) => {
+                    // Kiểm tra nếu `userId` chưa tồn tại trong mảng
+                    if (!msg.delete.some((m) => m.id === userId)) {
+                        msg.delete.push({ id: userId });
+                    }
+                });
             }
         },
         setActiveChat: (state, action) => {
@@ -99,26 +111,30 @@ const chatSlice = createSlice({
             state.rightBarTabSub = action.payload;
         },
         updateMessageStatus: (state, action) => {
-            const { chatId, messageId, statusType } = action.payload;
+            const { chatId, messageId, statusType, userId } = action.payload;
 
             // Kiểm tra chat có tồn tại không
             const chat = state.chats.find((chat) => chat.id === chatId);
             if (!chat) return;
-
             // Kiểm tra message có tồn tại không
             const message = chat.messages.find((msg) => msg.id === messageId);
-            if (message) {
-                message[statusType] = !message[statusType]; // Đảo trạng thái true/false
-            }
+            if (statusType === 'delete') {
+                message[statusType].push({ id: userId });
+            } else {
+                if (message) {
+                    message[statusType] = !message[statusType]; // Đảo trạng thái true/false
+                }
 
-            // Cập nhật activeChat nếu nó là chat hiện tại
-            if (state.activeChat?.id === chatId) {
-                const activeMessage = state.activeChat.messages.find((msg) => msg.id === messageId);
-                if (activeMessage) {
-                    activeMessage[statusType] = !activeMessage[statusType];
+                // Cập nhật activeChat nếu nó là chat hiện tại
+                if (state.activeChat?.id === chatId) {
+                    const activeMessage = state.activeChat.messages.find((msg) => msg.id === messageId);
+                    if (activeMessage) {
+                        activeMessage[statusType] = !activeMessage[statusType];
+                    }
                 }
             }
         },
+
         addReaction: (state, action) => {
             const { chatId, messageId, reaction, userId } = action.payload;
 
@@ -179,5 +195,6 @@ export const {
     addReaction,
     removeReaction,
     addOrChangeCategory,
+    deleteChatForUser,
 } = chatSlice.actions;
 export default chatSlice.reducer;

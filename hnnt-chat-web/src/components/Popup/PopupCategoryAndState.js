@@ -48,7 +48,7 @@ function PopupCategoryAndState() {
     };
 
     return (
-        <div className="relative inline-block text-left" ref={popupContainerRef}>
+        <div className="relative inline-block text-left z-[1000]" ref={popupContainerRef}>
             {/* Nút mở dropdown */}
             <div className="h-full flex items-center">
                 <button

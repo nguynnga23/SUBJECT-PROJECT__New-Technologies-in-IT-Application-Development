@@ -9,7 +9,7 @@ const data = [
         kind: 'priority',
         category: '',
         categoryColor: '',
-        status: '',
+        delete: [],
         messages: [
             {
                 id: 1,
@@ -24,7 +24,7 @@ const data = [
                 ],
                 type: 'text',
                 time: '10:00',
-                delete: false,
+                delete: [],
                 destroy: false,
             },
             {
@@ -46,7 +46,7 @@ const data = [
 
                 type: 'text',
                 time: '11:00',
-                delete: false,
+                delete: [],
                 destroy: true,
             },
             {
@@ -68,7 +68,7 @@ const data = [
 
                 type: 'image',
                 time: '11:00',
-                delete: false,
+                delete: [],
                 destroy: false,
             },
         ],
@@ -83,7 +83,7 @@ const data = [
         kind: 'priority',
         category: '',
         categoryColor: '',
-        status: '',
+        delete: [],
         messages: [
             {
                 id: 1,
@@ -104,7 +104,7 @@ const data = [
 
                 type: 'text',
                 time: '10:00',
-                delete: false,
+                delete: [],
                 destroy: false,
             },
             {
@@ -126,7 +126,7 @@ const data = [
 
                 type: 'text',
                 time: '11:15',
-                delete: false,
+                delete: [],
                 destroy: false,
             },
         ],
@@ -141,7 +141,7 @@ const data = [
         kind: 'other',
         category: '',
         categoryColor: '',
-        status: '',
+        delete: [],
         messages: [
             {
                 id: 1,
@@ -162,7 +162,7 @@ const data = [
 
                 type: 'text',
                 time: '10:00',
-                delete: false,
+                delete: [],
                 destroy: false,
             },
             {
@@ -184,7 +184,7 @@ const data = [
 
                 type: 'text',
                 time: '11:00',
-                delete: false,
+                delete: [],
                 destroy: false,
             },
         ],

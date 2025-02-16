@@ -5,16 +5,18 @@ import { AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { GoBellSlash } from 'react-icons/go';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { setOnOrOfPin, setOnOrOfNotify } from '../../redux/slices/chatSlice';
+import { setOnOrOfPin, setOnOrOfNotify, deleteChatForUser } from '../../redux/slices/chatSlice';
 import { useState } from 'react';
 import Archive from '../Archive/Archive';
 
 function TabChatInfo() {
+    const userId = 0;
     const activeChat = useSelector((state) => state.chat.chats.find((chat) => chat.id === state.chat.activeChat?.id));
+    const chatId = activeChat.id;
 
-    const [fileOpen, setFileOpen] = useState(false);
-    const [imageOpen, setImageOpen] = useState(false);
-    const [linkOpen, setLinkOpen] = useState(false);
+    const [fileOpen, setFileOpen] = useState(true);
+    const [imageOpen, setImageOpen] = useState(true);
+    const [linkOpen, setLinkOpen] = useState(true);
 
     const dispatch = useDispatch();
 
@@ -98,7 +100,9 @@ function TabChatInfo() {
             {/* Xóa lịch sử trò chuyện */}
             <div className="text-red-500 flex items-center space-x-2 py-3 font-medium cursor-pointer text-base pl-2">
                 <FaTrashAlt />
-                <span className="text-[12px]">Xóa lịch sử trò chuyện</span>
+                <span className="text-[12px]" onClick={() => dispatch(deleteChatForUser({ userId, chatId }))}>
+                    Xóa lịch sử trò chuyện
+                </span>
             </div>
         </div>
     );

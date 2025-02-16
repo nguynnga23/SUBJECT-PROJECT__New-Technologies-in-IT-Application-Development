@@ -5,13 +5,22 @@ import { MdOutlineGifBox } from 'react-icons/md';
 import { LuSticker } from 'react-icons/lu';
 import { IoImageOutline } from 'react-icons/io5';
 import { MdFilePresent } from 'react-icons/md';
+import { MdLabel } from 'react-icons/md';
+import { HiBellSlash } from 'react-icons/hi2';
+import { TiPin } from 'react-icons/ti';
 
 import { setActiveTabMessToOrther, setActiveTabMessToPriority } from '../../redux/slices/chatSlice';
+import { useRef, useState } from 'react';
+import PopupMenuForMess from '../Popup/PopupMenuForMess';
+import { FiMoreHorizontal } from 'react-icons/fi';
 
 function TabMesssage() {
+    const userId = 0;
     const activeTab = useSelector((state) => state.chat.activeTabMess);
     const activeChat = useSelector((state) => state.chat.activeChat);
     const data = useSelector((state) => state.chat.chats);
+    const [hoveredMessage, setHoveredMessage] = useState(null);
+    const [showPopup, setShowPopup] = useState(false);
 
     const dispatch = useDispatch();
 
@@ -20,9 +29,10 @@ function TabMesssage() {
     const chats = activeTab === 'priority' ? priorityChatsList : otherChatsList;
 
     const getLastMessage = (messages) => {
-        const filteredMessages = messages.filter((msg) => !msg.delete && !msg.destroy);
+        const filteredMessages = messages.filter((msg) => !msg.delete.some((m) => m.id === userId) && !msg.destroy);
         return filteredMessages.length > 0 ? filteredMessages.at(-1) : null;
     };
+    const timeoutRef = useRef(null);
 
     return (
         <div>
@@ -47,54 +57,102 @@ function TabMesssage() {
                 </div>
                 <PopupCategoryAndState />
             </div>
-            <div>
-                {chats.map((chat) => {
-                    const lastMessage = getLastMessage(chat.messages);
+            <div className="overflow-y-auto h-[90vh] z-0">
+                {chats
+                    .filter((chat) => !chat.delete.some((item) => item.id === userId))
+                    .map((chat, index) => {
+                        const lastMessage = getLastMessage(chat.messages);
+                        return (
+                            <div
+                                key={chat.id}
+                                className={`relative p-3 cursor-pointer hover:bg-gray-200 ${
+                                    activeChat?.id === chat.id ? 'bg-blue-100' : ''
+                                }`}
+                                onClick={() => dispatch(setActiveChat(chat))}
+                                onMouseEnter={() => {
+                                    if (timeoutRef.current) {
+                                        // Hủy bỏ timeout nếu chuột quay lại
+                                        clearTimeout(timeoutRef.current);
+                                        !showPopup && setHoveredMessage(index);
+                                    }
+                                }}
+                                onMouseLeave={() => {
+                                    timeoutRef.current = setTimeout(() => {
+                                        setHoveredMessage(null);
+                                        setShowPopup(false);
+                                    }, 500);
+                                }}
+                            >
+                                <div className="absolute top-[5px] right-[0px]">
+                                    {hoveredMessage === index ? (
+                                        <div className="relative ">
+                                            <FiMoreHorizontal
+                                                size={13}
+                                                className="m-2 text-gray-500 hover:bg-blue-200 rounded-[2px]"
+                                                onClick={() => setShowPopup(true)}
+                                            />
+                                            {showPopup && hoveredMessage === index && (
+                                                <PopupMenuForMess
+                                                    setShowPopup={setShowPopup}
+                                                    setHoveredMessage={setHoveredMessage}
+                                                    chat={chat}
+                                                />
+                                            )}
+                                        </div>
+                                    ) : (
+                                        !chat.notify && <HiBellSlash size={13} className="m-2 text-gray-500" />
+                                    )}
+                                    {chat.pin && <TiPin size={13} className="m-2 text-gray-500" />}
+                                </div>
 
-                    return (
-                        <div
-                            key={chat.id}
-                            className={`p-3 overflow-y-auto cursor-pointer hover:bg-gray-200 ${
-                                activeChat?.id === chat.id ? 'bg-blue-100' : ''
-                            }`}
-                            onClick={() => dispatch(setActiveChat(chat))}
-                        >
-                            <div className="flex item-center">
-                                <img
-                                    src={chat.avatar} // Thay bằng avatar thật
-                                    className="w-[45px] h-[45px] rounded-full border mr-3 object-cover"
-                                />
-                                <div>
-                                    <h3 className="font-medium text-xs text-lg mt-1 max-w-[270px] truncate">
-                                        {chat.name}
-                                    </h3>
-                                    <p className="flex items-center text-sm text-gray-600 text-xs mt-1 max-w-[270px] truncate">
-                                        {lastMessage?.sender === 0 ? 'You: ' : lastMessage.name}
-                                        {lastMessage?.type === 'gif' ? (
-                                            <span className="flex items-center">
-                                                <MdOutlineGifBox size={15} className="m-[5px]" /> GIF
-                                            </span>
-                                        ) : lastMessage?.type === 'sticker' ? (
-                                            <span className="flex items-center">
-                                                <LuSticker size={15} className="m-[5px]" /> Sticker
-                                            </span>
-                                        ) : lastMessage?.type === 'image' ? (
-                                            <span className="flex items-center">
-                                                <IoImageOutline size={15} className="m-[5px]" /> Hình ảnh
-                                            </span>
-                                        ) : lastMessage?.type === 'file' ? (
-                                            <span className="flex items-center">
-                                                <MdFilePresent size={15} className="m-[5px]" /> {lastMessage?.fileName}
-                                            </span>
-                                        ) : (
-                                            lastMessage?.content
-                                        )}
-                                    </p>
+                                <div className="flex item-center">
+                                    <img
+                                        src={chat.avatar} // Thay bằng avatar thật
+                                        className="w-[45px] h-[45px] rounded-full border mr-3 object-cover"
+                                    />
+                                    <div>
+                                        <h3 className="font-medium text-xs text-lg mt-1 max-w-[270px] truncate">
+                                            {chat.name}
+                                        </h3>
+                                        <p className="flex items-center text-sm text-gray-600 text-xs mt-1 ">
+                                            {chat.category && (
+                                                <MdLabel className={`text-[18px] mr-1 ${chat.categoryColor}`} />
+                                            )}
+                                            {lastMessage?.sender === 0 ? (
+                                                <span className="mr-1">You: </span>
+                                            ) : (
+                                                lastMessage?.sender && <span className="mr-1">{chat.name}</span>
+                                            )}
+                                            {lastMessage?.type === 'gif' ? (
+                                                <span className="flex items-center">
+                                                    <MdOutlineGifBox size={15} className="m-[5px]" /> GIF
+                                                </span>
+                                            ) : lastMessage?.type === 'sticker' ? (
+                                                <span className="flex items-center">
+                                                    <LuSticker size={15} className="m-[5px]" /> Sticker
+                                                </span>
+                                            ) : lastMessage?.type === 'image' ? (
+                                                <span className="flex items-center">
+                                                    <IoImageOutline size={15} className="m-[5px]" /> Hình ảnh
+                                                </span>
+                                            ) : lastMessage?.type === 'file' ? (
+                                                <span className="flex items-center">
+                                                    <MdFilePresent size={15} className="m-[5px]" />{' '}
+                                                    {lastMessage?.fileName}
+                                                </span>
+                                            ) : lastMessage?.content ? (
+                                                <span className="max-w-[220px] truncate">{lastMessage?.content}</span>
+                                            ) : (
+                                                <span className="max-w-[220px] truncate italic">
+                                                    Hãy bắt đầu trò chuyện
+                                                </span>
+                                            )}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    );
-                })}
+                        );
+                    })}
             </div>
         </div>
     );

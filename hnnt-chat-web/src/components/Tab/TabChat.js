@@ -33,6 +33,7 @@ import ChatSticker from '../Chat/ChatSticker';
 function TabChat() {
     const [message, setMessage] = useState('');
     const [isOpenCategory, setIsOpenCategory] = useState(false);
+    const userId = 0;
 
     const activeChat = useSelector(
         (state) => state.chat.chats.find((chat) => chat.id === state.chat.activeChat?.id),
@@ -197,12 +198,14 @@ function TabChat() {
             </div>
             <div className="flex-1 p-5 overflow-auto bg-gray-200 " ref={chatContainerRef}>
                 {activeChat.messages.map((message, index) => {
-                    const isDeleted = message.delete;
+                    const isDeleted = message.delete.some((item) => item.id === userId);
                     const Component = message.destroy ? ChatDestroy : MessageComponent[message.type];
 
                     return (
                         <div
-                            className={`relative mb-2 flex ${message.sender === 0 ? 'justify-end' : 'justify-start'}`}
+                            className={`relative mb-2 flex ${
+                                message.sender === userId ? 'justify-end' : 'justify-start'
+                            }`}
                             key={index}
                         >
                             {!isDeleted && Component && (
