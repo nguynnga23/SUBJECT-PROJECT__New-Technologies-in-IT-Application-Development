@@ -1,12 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { data } from '../../sample_data/listMess';
+import chats from '../../sample_data/listMess';
 import { v4 as uuidv4 } from 'uuid';
 import categories from '../../sample_data/listCategory';
+import groups from '../../sample_data/listGroup';
 
 const chatSlice = createSlice({
     name: 'chat',
     initialState: {
-        chats: data, //Danh sách các cuộc trò chuyện
+        chats: chats, //Danh sách các cuộc trò chuyện
+        groups: groups,
+        data: chats.concat(groups),
         categories: categories,
         activeChat: null, // cuộc trò chuyện đang mở
         showRightBar: false,
@@ -21,7 +24,7 @@ const chatSlice = createSlice({
     reducers: {
         sendMessage: (state, action) => {
             const { chatId, content, time, type, fileName, fileSize, fileType } = action.payload;
-            const chat = state.chats.find((c) => c.id === chatId);
+            const chat = state.data.find((c) => c.id === chatId);
 
             if (chat) {
                 const message = {
@@ -53,7 +56,7 @@ const chatSlice = createSlice({
         },
         deleteChatForUser: (state, action) => {
             const { userId, chatId } = action.payload;
-            const chat = state.chats.find((c) => c.id === chatId);
+            const chat = state.data.find((c) => c.id === chatId);
             if (chat) {
                 chat.messages.forEach((msg) => {
                     // Kiểm tra nếu `userId` chưa tồn tại trong mảng
@@ -83,7 +86,7 @@ const chatSlice = createSlice({
         setOnOrOfPin: (state, action) => {
             const chatId = action.payload;
 
-            const chat = state.chats.find((c) => c.id === chatId);
+            const chat = state.data.find((c) => c.id === chatId);
             if (chat) {
                 chat.pin = !chat.pin;
             }
@@ -91,7 +94,7 @@ const chatSlice = createSlice({
         setOnOrOfNotify: (state, action) => {
             const chatId = action.payload;
 
-            const chat = state.chats.find((c) => c.id === chatId);
+            const chat = state.data.find((c) => c.id === chatId);
             if (chat) {
                 chat.notify = !chat.notify;
             }
@@ -114,7 +117,7 @@ const chatSlice = createSlice({
             const { chatId, messageId, statusType, userId } = action.payload;
 
             // Kiểm tra chat có tồn tại không
-            const chat = state.chats.find((chat) => chat.id === chatId);
+            const chat = state.data.find((chat) => chat.id === chatId);
             if (!chat) return;
             // Kiểm tra message có tồn tại không
             const message = chat.messages.find((msg) => msg.id === messageId);
@@ -138,7 +141,7 @@ const chatSlice = createSlice({
         addReaction: (state, action) => {
             const { chatId, messageId, reaction, userId } = action.payload;
 
-            const chat = state.chats.find((chat) => chat.id === chatId);
+            const chat = state.data.find((chat) => chat.id === chatId);
 
             if (chat) {
                 const message = chat.messages.find((mess) => mess.id === messageId);
@@ -155,7 +158,7 @@ const chatSlice = createSlice({
         removeReaction: (state, action) => {
             const { chatId, messageId, userId } = action.payload;
 
-            const chat = state.chats.find((chat) => chat.id === chatId);
+            const chat = state.data.find((chat) => chat.id === chatId);
 
             if (chat) {
                 const message = chat.messages.find((mess) => mess.id === messageId);
@@ -166,7 +169,7 @@ const chatSlice = createSlice({
         },
         addOrChangeCategory: (state, action) => {
             const { chatId, category } = action.payload;
-            const chat = state.chats.find((msg) => msg.id === chatId);
+            const chat = state.data.find((msg) => msg.id === chatId);
             if (chat) {
                 chat.category = category;
                 const cat = state.categories.find((c) => c.name === category.name);

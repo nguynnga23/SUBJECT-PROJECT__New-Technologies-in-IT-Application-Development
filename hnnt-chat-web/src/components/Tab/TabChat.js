@@ -13,6 +13,7 @@ import { FaRegAddressCard } from 'react-icons/fa6';
 import { MdOutlineEmojiEmotions } from 'react-icons/md';
 import { LuSticker } from 'react-icons/lu';
 import { MdLabel } from 'react-icons/md';
+import { CiUser } from 'react-icons/ci';
 
 import PopupCategory from '../Popup/PopupCategory';
 
@@ -34,9 +35,10 @@ function TabChat() {
     const [message, setMessage] = useState('');
     const [isOpenCategory, setIsOpenCategory] = useState(false);
     const userId = 0;
+    let preSender = null;
 
     const activeChat = useSelector(
-        (state) => state.chat.chats.find((chat) => chat.id === state.chat.activeChat?.id),
+        (state) => state.chat.data.find((chat) => chat.id === state.chat.activeChat?.id),
         shallowEqual,
     );
 
@@ -68,7 +70,7 @@ function TabChat() {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
         }
-    }, [activeChat.messages]);
+    }, [activeChat?.messages]);
 
     // Hàm tự động điều chỉnh chiều cao
     useEffect(() => {
@@ -145,22 +147,30 @@ function TabChat() {
             <div className="p-2 border-b flex justify-between items-center h-[62px] min-w-[600px] ">
                 <div className="flex justify-center ">
                     <img
-                        src={activeChat.avatar} // Thay bằng avatar thật
+                        src={activeChat?.avatar} // Thay bằng avatar thật
                         className="w-[45px] h-[45px] rounded-full border mr-2 object-cover"
                     />
                     <div>
-                        <h3 className="font-medium text-base text-lg max-h-[28px]">{activeChat.name}</h3>
-                        {activeChat.categoryColor ? (
-                            <MdLabel
-                                className={`cursor-pointer ${activeChat.categoryColor}`}
-                                onClick={() => setIsOpenCategory(!isOpenCategory)}
-                            />
-                        ) : (
-                            <MdLabelOutline
-                                className={`cursor-pointer text-gray-400`}
-                                onClick={() => setIsOpenCategory(!isOpenCategory)}
-                            />
-                        )}
+                        <h3 className="font-medium text-base text-lg max-h-[28px]">{activeChat?.name}</h3>
+                        <div className="flex items-center">
+                            {activeChat?.members && (
+                                <div className="flex text-[14px] text-gray-600 items-center">
+                                    <CiUser className={`cursor-pointer mr-1`} />
+                                    <p className="text-[10px] mr-1">{activeChat?.members.length} thành viên |</p>
+                                </div>
+                            )}
+                            {activeChat?.categoryColor ? (
+                                <MdLabel
+                                    className={`cursor-pointer ${activeChat?.categoryColor}`}
+                                    onClick={() => setIsOpenCategory(!isOpenCategory)}
+                                />
+                            ) : (
+                                <MdLabelOutline
+                                    className={`cursor-pointer text-gray-400`}
+                                    onClick={() => setIsOpenCategory(!isOpenCategory)}
+                                />
+                            )}
+                        </div>
                     </div>
                     {isOpenCategory && <PopupCategory isOpen={isOpenCategory} setIsOpen={setIsOpenCategory} />}
                 </div>
@@ -197,29 +207,45 @@ function TabChat() {
                 </div>
             </div>
             <div className="flex-1 p-5 overflow-auto bg-gray-200 " ref={chatContainerRef}>
-                {activeChat.messages.map((message, index) => {
+                {activeChat?.messages.map((message, index) => {
                     const isDeleted = message.delete.some((item) => item.id === userId);
                     const Component = message.destroy ? ChatDestroy : MessageComponent[message.type];
+                    const showAvatar = index === 0 || activeChat?.messages[index - 1].sender !== message.sender;
 
                     return (
                         <div
-                            className={`relative mb-2 flex ${
-                                message.sender === userId ? 'justify-end' : 'justify-start'
-                            }`}
+                            className={`relative flex ${message.sender === userId ? 'justify-end' : 'justify-start'}`}
                             key={index}
                         >
                             {!isDeleted && Component && (
-                                <Component
-                                    key={index}
-                                    index={index}
-                                    activeChat={activeChat}
-                                    message={message}
-                                    setHoveredMessage={setHoveredMessage}
-                                    hoveredMessage={hoveredMessage}
-                                    isPopupOpenIndex={isPopupOpenIndex}
-                                    setIsPopupOpenIndex={setIsPopupOpenIndex}
-                                    reactions={message.reactions}
-                                />
+                                <div className="flex">
+                                    {activeChat.group && (
+                                        <div className="w-[45px] h-[45px] mr-3 flex-shrink-0">
+                                            {message.sender !== userId && showAvatar && (
+                                                <img
+                                                    src={message.avatar}
+                                                    alt="avatar"
+                                                    className="w-full h-full rounded-full border object-cover"
+                                                />
+                                            )}
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <Component
+                                            key={index}
+                                            index={index}
+                                            activeChat={activeChat}
+                                            message={message}
+                                            setHoveredMessage={setHoveredMessage}
+                                            hoveredMessage={hoveredMessage}
+                                            isPopupOpenIndex={isPopupOpenIndex}
+                                            setIsPopupOpenIndex={setIsPopupOpenIndex}
+                                            reactions={message.reactions}
+                                            showName={message.sender !== userId && showAvatar}
+                                        />
+                                    </div>
+                                </div>
                             )}
                         </div>
                     );
@@ -281,7 +307,7 @@ function TabChat() {
                                 handleSendMessage(); // Gọi hàm gửi tin nhắn
                             }
                         }}
-                        placeholder={`Nhập tin nhắn với ${activeChat.name}`}
+                        placeholder={`Nhập tin nhắn với ${activeChat?.name}`}
                         className="flex-1 p-1 font-base text-[14px] rounded-lg focus:border-blue-500 focus:outline-none
                             h-[30px] max-h-[200px] overflow-y-auto resize-none"
                     />

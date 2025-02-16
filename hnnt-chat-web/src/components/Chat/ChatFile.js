@@ -29,7 +29,9 @@ function ChatFile({
     isPopupOpenIndex,
     setIsPopupOpenIndex,
     reactions,
+    showName,
 }) {
+    const userId = 0;
     const position = message.sender === 0 ? 'right' : 'left';
     const sumReaction = reactions.reduce((total, reaction) => total + reaction.sum, 0);
 
@@ -49,6 +51,8 @@ function ChatFile({
                 }, 3000);
             }}
         >
+            {showName && <p className="text-[10px] text-gray-400">{message?.sender !== userId && message?.name}</p>}
+
             <div className="flex items-center space-x-3 mb-4">
                 {/* Nút tải file */}
                 <a

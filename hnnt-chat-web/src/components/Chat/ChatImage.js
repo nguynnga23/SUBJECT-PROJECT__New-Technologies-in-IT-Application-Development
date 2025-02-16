@@ -15,7 +15,9 @@ function ChatImage({
     isPopupOpenIndex,
     setIsPopupOpenIndex,
     reactions,
+    showName,
 }) {
+    const userId = 0;
     const [selectedImage, setSelectedImage] = useState(null);
     const position = message.sender === 0 ? 'right' : 'left';
     const sumReaction = reactions.reduce((total, reaction) => total + reaction.sum, 0);
@@ -34,6 +36,8 @@ function ChatImage({
                 }, 3000);
             }}
         >
+            {showName && <p className="text-[10px] text-gray-400">{message?.sender !== userId && message?.name}</p>}
+
             <img
                 src={message.content}
                 alt="GIF"

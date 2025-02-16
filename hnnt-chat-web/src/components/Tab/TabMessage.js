@@ -18,7 +18,7 @@ function TabMesssage() {
     const userId = 0;
     const activeTab = useSelector((state) => state.chat.activeTabMess);
     const activeChat = useSelector((state) => state.chat.activeChat);
-    const data = useSelector((state) => state.chat.chats);
+    const data = useSelector((state) => state.chat.data);
     const [hoveredMessage, setHoveredMessage] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
 
@@ -35,7 +35,7 @@ function TabMesssage() {
     const timeoutRef = useRef(null);
 
     return (
-        <div>
+        <div className="">
             <div className="flex border-b justify-between p-4 pt-0 pb-0">
                 <div>
                     <button
@@ -57,9 +57,10 @@ function TabMesssage() {
                 </div>
                 <PopupCategoryAndState />
             </div>
-            <div className="overflow-y-auto h-[90vh] z-0">
+            <div className="overflow-y-auto h-[calc(100vh_-_100px)] z-0">
                 {chats
                     .filter((chat) => !chat.delete.some((item) => item.id === userId))
+                    .sort((a, b) => (b.pin ? 1 : 0) - (a.pin ? 1 : 0))
                     .map((chat, index) => {
                         const lastMessage = getLastMessage(chat.messages);
                         return (
@@ -121,23 +122,23 @@ function TabMesssage() {
                                             {lastMessage?.sender === 0 ? (
                                                 <span className="mr-1">You: </span>
                                             ) : (
-                                                lastMessage?.sender && <span className="mr-1">{chat.name}</span>
+                                                lastMessage?.sender && <span className="mr-1">{chat.name}:</span>
                                             )}
                                             {lastMessage?.type === 'gif' ? (
                                                 <span className="flex items-center">
-                                                    <MdOutlineGifBox size={15} className="m-[5px]" /> GIF
+                                                    <MdOutlineGifBox size={15} className="mr-[4px]" /> GIF
                                                 </span>
                                             ) : lastMessage?.type === 'sticker' ? (
                                                 <span className="flex items-center">
-                                                    <LuSticker size={15} className="m-[5px]" /> Sticker
+                                                    <LuSticker size={15} className="mr-[4px]" /> Sticker
                                                 </span>
                                             ) : lastMessage?.type === 'image' ? (
                                                 <span className="flex items-center">
-                                                    <IoImageOutline size={15} className="m-[5px]" /> Hình ảnh
+                                                    <IoImageOutline size={15} className="mr-[4px]" /> Hình ảnh
                                                 </span>
                                             ) : lastMessage?.type === 'file' ? (
                                                 <span className="flex items-center">
-                                                    <MdFilePresent size={15} className="m-[5px]" />{' '}
+                                                    <MdFilePresent size={15} className="mr-[4px]" />{' '}
                                                     {lastMessage?.fileName}
                                                 </span>
                                             ) : lastMessage?.content ? (

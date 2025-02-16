@@ -13,7 +13,9 @@ function ChatText({
     isPopupOpenIndex,
     setIsPopupOpenIndex,
     reactions,
+    showName,
 }) {
+    const userId = 0;
     const position = message.sender === 0 ? 'right' : 'left';
     const [showPopupReaction, setShowPopupReaction] = useState(false);
     const sumReaction = reactions.reduce((total, reaction) => total + reaction.sum, 0);
@@ -34,6 +36,7 @@ function ChatText({
                 }, 3000);
             }}
         >
+            {showName && <p className="text-[10px] text-gray-400">{message?.sender !== userId && message?.name}</p>}
             {message.content}
 
             <p

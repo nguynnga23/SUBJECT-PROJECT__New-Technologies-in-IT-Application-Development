@@ -11,7 +11,7 @@ import Archive from '../Archive/Archive';
 
 function TabChatInfo() {
     const userId = 0;
-    const activeChat = useSelector((state) => state.chat.chats.find((chat) => chat.id === state.chat.activeChat?.id));
+    const activeChat = useSelector((state) => state.chat.data.find((chat) => chat.id === state.chat.activeChat?.id));
     const chatId = activeChat.id;
 
     const [fileOpen, setFileOpen] = useState(true);
