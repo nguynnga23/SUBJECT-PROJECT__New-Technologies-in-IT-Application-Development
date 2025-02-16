@@ -4,7 +4,7 @@ import { FiMoreHorizontal } from 'react-icons/fi';
 import { useState } from 'react';
 import PopupMenuForChat from '../Popup/PopupMenuForChat';
 import { AiOutlineLike } from 'react-icons/ai';
-import PopupReacttion from '../Popup/PopupReaction';
+import PopupReaction from '../Popup/PopupReaction';
 
 function ChatImage({
     index,
@@ -79,7 +79,7 @@ function ChatImage({
 
             {selectedImage && <PopupViewImage selectedImage={selectedImage} setSelectedImage={setSelectedImage} />}
             {showPopupReaction && (
-                <PopupReacttion
+                <PopupReaction
                     position={position}
                     setShowPopupReaction={setShowPopupReaction}
                     chatId={activeChat.id}

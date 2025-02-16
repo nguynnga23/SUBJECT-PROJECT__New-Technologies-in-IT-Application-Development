@@ -1,10 +1,11 @@
 import { IoIosArrowDropdown, IoIosArrowDropright } from 'react-icons/io';
 import { MdFilePresent } from 'react-icons/md';
-
+import PopupViewImage from '../Popup/PopupViewImage';
 import { VscFilePdf } from 'react-icons/vsc';
 import { FaRegFileWord } from 'react-icons/fa';
 import { FaRegFileExcel } from 'react-icons/fa';
 import { FaRegFilePowerpoint } from 'react-icons/fa';
+import { useState } from 'react';
 
 const getFileIcon = (fileType) => {
     if (fileType.includes('pdf')) return <VscFilePdf className="text-3xl text-red-500 mr-2" />;
@@ -19,8 +20,9 @@ const getFileIcon = (fileType) => {
 
 const Archive = ({ title, isOpen, toggleOpen, messages, type }) => {
     const userId = 0;
+    const [selectedImage, setSelectedImage] = useState(null);
     return (
-        <div className="p-2 border-b-[7px] cursor-pointer">
+        <div className="p-2 relative border-b-[7px] cursor-pointer">
             <div className="flex justify-between items-center pl-2" onClick={toggleOpen}>
                 <span className="font-medium text-base">{title}</span>
                 {isOpen ? (
@@ -40,6 +42,7 @@ const Archive = ({ title, isOpen, toggleOpen, messages, type }) => {
                                         key={index}
                                         src={msg.content}
                                         className="w-[75px] h-[75px] rounded-lg object-cover border"
+                                        onClick={() => setSelectedImage(msg.content)}
                                     />
                                 );
                             } else if (type === 'file') {
@@ -64,6 +67,7 @@ const Archive = ({ title, isOpen, toggleOpen, messages, type }) => {
                         })}
                 </div>
             )}
+            {selectedImage && <PopupViewImage selectedImage={selectedImage} setSelectedImage={setSelectedImage} />}
         </div>
     );
 };
