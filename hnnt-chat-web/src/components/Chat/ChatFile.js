@@ -51,7 +51,9 @@ function ChatFile({
                 }, 3000);
             }}
         >
-            {showName && <p className="text-[10px] text-gray-400">{message?.sender !== userId && message?.name}</p>}
+            {showName && (
+                <p className="text-[10px] text-gray-400 pb-[2px]">{message?.sender !== userId && message?.name}</p>
+            )}
 
             <div className="flex items-center space-x-3 mb-4">
                 {/* Nút tải file */}

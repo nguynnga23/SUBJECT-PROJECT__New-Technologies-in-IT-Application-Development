@@ -36,7 +36,9 @@ function ChatImage({
                 }, 3000);
             }}
         >
-            {showName && <p className="text-[10px] text-gray-400">{message?.sender !== userId && message?.name}</p>}
+            {showName && (
+                <p className="text-[10px] text-gray-400 pb-[2px]">{message?.sender !== userId && message?.name}</p>
+            )}
 
             <img
                 src={message.content}
@@ -60,7 +62,7 @@ function ChatImage({
                     <button
                         className={`absolute bottom-2 ${
                             message.sender === 0 ? 'left-[-25px]' : 'right-[-25px]'
-                        } p-1 rounded-full hover:bg-gray-300`}
+                        } bottom-[30px] p-1 rounded-full hover:bg-gray-300`}
                         onClick={() => {
                             setIsPopupOpenIndex(index);
                         }}

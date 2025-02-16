@@ -31,7 +31,9 @@ function ChatGif({
                 }, 3000);
             }}
         >
-            {showName && <p className="text-[10px] text-gray-400">{message?.sender !== userId && message?.name}</p>}
+            {showName && (
+                <p className="text-[10px] text-gray-400 pb-[2px]">{message?.sender !== userId && message?.name}</p>
+            )}
 
             <img src={message.content} alt="GIF" className="max-w-[300px] rounded-lg mb-4 " />
             <p className="absolute left-[8px] bottom-[2px] text-gray-500 text-[10px]">{message.time}</p>

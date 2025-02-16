@@ -36,7 +36,9 @@ function ChatText({
                 }, 3000);
             }}
         >
-            {showName && <p className="text-[10px] text-gray-400">{message?.sender !== userId && message?.name}</p>}
+            {showName && (
+                <p className="text-[10px] text-gray-400 pb-[2px]">{message?.sender !== userId && message?.name}</p>
+            )}
             {message.content}
 
             <p

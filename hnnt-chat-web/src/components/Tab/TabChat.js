@@ -210,7 +210,11 @@ function TabChat() {
                 {activeChat?.messages.map((message, index) => {
                     const isDeleted = message.delete.some((item) => item.id === userId);
                     const Component = message.destroy ? ChatDestroy : MessageComponent[message.type];
-                    const showAvatar = index === 0 || activeChat?.messages[index - 1].sender !== message.sender;
+                    // Kiểm tra nếu tin nhắn trước đó bị xóa hoặc có sender khác
+                    const prevMessage = activeChat?.messages[index - 1];
+                    const prevMessageDeleted = prevMessage?.delete?.some((item) => item.id === userId);
+                    const showAvatar =
+                        index === 0 || !prevMessage || prevMessage.sender !== message.sender || prevMessageDeleted;
 
                     return (
                         <div

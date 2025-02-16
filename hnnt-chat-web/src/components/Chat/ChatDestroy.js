@@ -2,8 +2,17 @@ import { FiMoreHorizontal } from 'react-icons/fi';
 import PopupMenuForChat from '../Popup/PopupMenuForChat';
 import { useSelector } from 'react-redux';
 
-function ChatDestroy({ index, message, setHoveredMessage, hoveredMessage, isPopupOpenIndex, setIsPopupOpenIndex }) {
+function ChatDestroy({
+    index,
+    message,
+    setHoveredMessage,
+    hoveredMessage,
+    isPopupOpenIndex,
+    setIsPopupOpenIndex,
+    showName,
+}) {
     const position = message.sender === 0 ? 'right' : 'left';
+    const userId = 0;
     return (
         <div
             key={index}
@@ -17,6 +26,9 @@ function ChatDestroy({ index, message, setHoveredMessage, hoveredMessage, isPopu
                 }, 3000);
             }}
         >
+            {showName && (
+                <p className="text-[10px] text-gray-400 pb-[2px]">{message?.sender !== userId && message?.name}</p>
+            )}
             <p className="text-gray-400 italic">Tin nhắn đã được thu hồi</p>
             {hoveredMessage === index && isPopupOpenIndex === null && (
                 <button
