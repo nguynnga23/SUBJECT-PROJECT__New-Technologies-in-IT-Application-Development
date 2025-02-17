@@ -3,7 +3,7 @@ import React from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
-import PhoneInput from 'react-native-phone-number-input';
+// import PhoneInput from 'react-native-phone-number-input';
 import AntDesign from '@expo/vector-icons/AntDesign';
 const ActionItem = ({ title, onPress, iconName }) => (
     <TouchableOpacity style={styles.actionItem} onPress={onPress} activeOpacity={0.7}>
@@ -24,7 +24,7 @@ export default function AddFriendScreen() {
             <View style={styles.enterNumberPhoneWrapper}>
                 <View style={styles.phoneInputWrapper}>
                     <View>
-                        <PhoneInput
+                        {/* <PhoneInput
                             defaultCode="VN"
                             layout="second"
                             containerStyle={{
@@ -51,7 +51,7 @@ export default function AddFriendScreen() {
                             withDarkTheme
                             withShadow
                             autoFocus
-                        />
+                        /> */}
                     </View>
                     <TouchableOpacity style={styles.arrowRightButton}>
                         <AntDesign name="arrowright" size={24} color="black" />
