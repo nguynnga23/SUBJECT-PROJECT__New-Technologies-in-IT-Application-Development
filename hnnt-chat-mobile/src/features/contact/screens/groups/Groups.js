@@ -34,7 +34,7 @@ export default function Groups() {
         <View style={styles.container}>
             {/* Action Section */}
             <View style={styles.actionWrapper}>
-                <ActionItem title="Create Group" onPress={() => navigation.navigate('AddGroup')} iconName="users" />
+                <ActionItem title="Create Group" onPress={() => navigation.navigate('New Group')} iconName="users" />
             </View>
 
             {/* Nội dung tab */}
