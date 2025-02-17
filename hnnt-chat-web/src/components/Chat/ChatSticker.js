@@ -1,5 +1,6 @@
 import { FiMoreHorizontal } from 'react-icons/fi';
 import PopupMenuForChat from '../Popup/PopupMenuForChat';
+import userActive from '../../sample_data/userActive';
 
 function ChatSticker({
     index,
@@ -10,8 +11,9 @@ function ChatSticker({
     setIsPopupOpenIndex,
     showName,
 }) {
-    const position = message.sender === 0 ? 'right' : 'left';
-    const userId = 0;
+    const userId = userActive.id;
+
+    const position = message.sender === userId ? 'right' : 'left';
     return (
         <div
             className={`relative rounded-lg`}
@@ -32,7 +34,7 @@ function ChatSticker({
             {hoveredMessage === index && isPopupOpenIndex === null && (
                 <button
                     className={`absolute bottom-2 ${
-                        message.sender === 0 ? 'left-[-25px]' : 'right-[-25px]'
+                        message.sender === userId ? 'left-[-25px]' : 'right-[-25px]'
                     } p-1 rounded-full hover:bg-gray-300`}
                     onClick={() => {
                         setIsPopupOpenIndex(index);

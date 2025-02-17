@@ -3,13 +3,14 @@ import chats from '../../sample_data/listMess';
 import { v4 as uuidv4 } from 'uuid';
 import categories from '../../sample_data/listCategory';
 import groups from '../../sample_data/listGroup';
+import userActive from '../../sample_data/userActive';
 
 const chatSlice = createSlice({
     name: 'chat',
     initialState: {
         chats: chats, //Danh sách các cuộc trò chuyện
-        groups: groups,
-        data: chats.concat(groups),
+        groups: groups.filter((g) => g.members?.some((m) => m.id === userActive.id)),
+        data: chats.concat(groups.filter((g) => g.members?.some((m) => m.id === userActive.id))),
         categories: categories,
         activeChat: null, // cuộc trò chuyện đang mở
         showRightBar: false,
@@ -178,6 +179,25 @@ const chatSlice = createSlice({
                 }
             }
         },
+        createGroup: (state, action) => {
+            const { name, avatar, members } = action.payload;
+            const newGroup = {
+                id: uuidv4(), // Tạo ID ngẫu nhiên
+                name,
+                avatar: avatar,
+                pin: false,
+                notify: true,
+                kind: 'priority',
+                category: '',
+                categoryColor: '',
+                delete: [],
+                group: true,
+                members: [...members, userActive],
+                messages: [],
+            };
+            state.data.push(newGroup);
+            console.log(state.data.map((a) => console.log(a)));
+        },
     },
 });
 
@@ -199,5 +219,6 @@ export const {
     removeReaction,
     addOrChangeCategory,
     deleteChatForUser,
+    createGroup,
 } = chatSlice.actions;
 export default chatSlice.reducer;

@@ -1,25 +1,35 @@
 import { useState } from 'react';
 import { IoClose } from 'react-icons/io5';
-
-const members = [
-    { id: 1, name: 'Nguyễn Văn A', avatar: '' },
-    { id: 2, name: 'Nguyễn Văn B', avatar: '' },
-    { id: 3, name: 'Nguyễn Văn C', avatar: '' },
-    { id: 4, name: 'Nguyễn Văn D', avatar: '' },
-    { id: 5, name: 'Nguyễn Văn E', avatar: '' },
-    { id: 6, name: 'Nguyễn Văn F', avatar: '' },
-    { id: 7, name: 'Nguyễn Văn G', avatar: '' },
-];
+import { useDispatch, useSelector } from 'react-redux';
+import { createGroup } from '../../redux/slices/chatSlice';
 
 const PopupAddGroup = ({ isOpen, onClose }) => {
+    const dispatch = useDispatch();
+
+    const friend = useSelector((state) => state.friend.friends);
     const [groupName, setGroupName] = useState('');
-    const [search, setSearch] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
     const [selectedMembers, setSelectedMembers] = useState([]);
 
     if (!isOpen) return null;
 
-    const toggleMember = (id) => {
-        setSelectedMembers((prev) => (prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]));
+    const toggleMember = (member) => {
+        setSelectedMembers((prev) =>
+            prev.some((m) => m.id === member.id) ? prev.filter((m) => m.id !== member.id) : [...prev, member],
+        );
+    };
+
+    const filteredMembers = friend.filter((member) => member.name.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const handleCreateGroup = () => {
+        dispatch(
+            createGroup({
+                name: groupName,
+                avatar: 'https://cdn-icons-png.flaticon.com/512/6387/6387947.png',
+                members: selectedMembers, // Thêm tất cả bạn bè vào nhóm
+            }),
+        );
+        onClose();
     };
 
     return (
@@ -47,29 +57,33 @@ const PopupAddGroup = ({ isOpen, onClose }) => {
                     {/* Ô tìm kiếm */}
                     <input
                         type="text"
-                        placeholder="Nhập tên, số điện thoại..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Nhập tên để tìm kiếm..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full mt-3 border border-gray-300 p-2 rounded-lg focus:outline-none"
                     />
 
                     {/* Danh sách thành viên */}
                     <div className="mt-4 h-60 overflow-y-auto">
-                        {members
-                            .filter((m) => m.name.toLowerCase().includes(search.toLowerCase()))
+                        {filteredMembers
+                            .filter((m) => m.name.toLowerCase().includes(searchTerm.toLowerCase()))
                             .map((member) => (
                                 <div
                                     key={member.id}
                                     className="flex items-center p-2 border-b border-gray-200 cursor-pointer hover:bg-gray-100"
-                                    onClick={() => toggleMember(member.id)}
+                                    onClick={() => toggleMember(member)}
                                 >
                                     <input
                                         type="checkbox"
-                                        checked={selectedMembers.includes(member.id)}
+                                        checked={selectedMembers.some((m) => m.id === member.id)}
                                         className="mr-3"
                                         readOnly
                                     />
-                                    <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
+                                    <img
+                                        className="w-10 h-10 bg-gray-300 rounded-full object-cover"
+                                        src={member.avatar}
+                                        alt="avatar"
+                                    />
                                     <span className="ml-3">{member.name}</span>
                                 </div>
                             ))}
@@ -83,9 +97,12 @@ const PopupAddGroup = ({ isOpen, onClose }) => {
                     </button>
                     <button
                         className={`px-4 py-2 text-white rounded-lg ${
-                            selectedMembers.length > 0 ? 'bg-blue-600' : 'bg-gray-300 cursor-not-allowed'
+                            groupName.trim() && selectedMembers.length >= 2
+                                ? 'bg-blue-600'
+                                : 'bg-gray-300 cursor-not-allowed'
                         }`}
-                        disabled={selectedMembers.length === 0}
+                        disabled={!groupName.trim() || selectedMembers.length < 2}
+                        onClick={handleCreateGroup}
                     >
                         Tạo nhóm
                     </button>

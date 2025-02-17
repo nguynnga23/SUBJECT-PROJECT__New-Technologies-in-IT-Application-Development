@@ -4,6 +4,7 @@ import { GrPin } from 'react-icons/gr';
 import { AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { GoBellSlash } from 'react-icons/go';
 import { useDispatch, useSelector } from 'react-redux';
+import { IoIosLogOut } from 'react-icons/io';
 
 import { setOnOrOfPin, setOnOrOfNotify, deleteChatForUser } from '../../redux/slices/chatSlice';
 import { useState } from 'react';
@@ -68,7 +69,11 @@ function TabChatInfo() {
                     <div className="flex justify-center">
                         <AiOutlineUsergroupAdd size={35} className="p-2 bg-gray-200  rounded-full cursor-pointer" />
                     </div>
-                    <p className="text-[10px]">Tạo nhóm trò chuyện</p>
+                    {activeChat.group ? (
+                        <p className="text-[10px]">Thêm thành viên</p>
+                    ) : (
+                        <p className="text-[10px]">Tạo nhóm trò chuyện</p>
+                    )}
                 </div>
             </div>
 
@@ -104,6 +109,14 @@ function TabChatInfo() {
                     Xóa lịch sử trò chuyện
                 </span>
             </div>
+            {activeChat?.group && (
+                <div className="text-red-500 flex items-center space-x-2 py-3 font-medium cursor-pointer text-base pl-2">
+                    <IoIosLogOut />
+                    <span className="text-[12px]" onClick={() => dispatch(deleteChatForUser({ userId, chatId }))}>
+                        Rời nhóm
+                    </span>
+                </div>
+            )}
         </div>
     );
 }

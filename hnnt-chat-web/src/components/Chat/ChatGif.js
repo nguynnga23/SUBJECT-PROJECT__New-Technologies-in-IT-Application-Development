@@ -3,6 +3,7 @@ import PopupMenuForChat from '../Popup/PopupMenuForChat';
 import { AiOutlineLike } from 'react-icons/ai';
 import PopupReacttion from '../Popup/PopupReaction';
 import { useState } from 'react';
+import userActive from '../../sample_data/userActive';
 
 function ChatGif({
     index,
@@ -15,13 +16,13 @@ function ChatGif({
     reactions,
     showName,
 }) {
-    const userId = 0;
-    const position = message.sender === 0 ? 'right' : 'left';
+    const userId = userActive.id;
+    const position = message.sender === userId ? 'right' : 'left';
     const [showPopupReaction, setShowPopupReaction] = useState(false);
     const sumReaction = reactions.reduce((total, reaction) => total + reaction.sum, 0);
     return (
         <div
-            className={`relative pb-2 mb-2 ${message.sender === 0 ? 'bg-blue-100' : 'bg-white'}`}
+            className={`relative pb-2 mb-2 ${message.sender === userId ? 'bg-blue-100' : 'bg-white'}`}
             onMouseEnter={() => {
                 if (isPopupOpenIndex === null) setHoveredMessage(index);
             }}
@@ -50,7 +51,7 @@ function ChatGif({
                 <div>
                     <button
                         className={`absolute bottom-2 ${
-                            message.sender === 0 ? 'left-[-25px]' : 'right-[-25px]'
+                            message.sender === userId ? 'left-[-25px]' : 'right-[-25px]'
                         } p-1 rounded-full hover:bg-gray-300`}
                         onClick={() => {
                             setIsPopupOpenIndex(index);

@@ -14,6 +14,7 @@ import { MdOutlineEmojiEmotions } from 'react-icons/md';
 import { LuSticker } from 'react-icons/lu';
 import { MdLabel } from 'react-icons/md';
 import { CiUser } from 'react-icons/ci';
+import { AiOutlineUsergroupAdd } from 'react-icons/ai';
 
 import PopupCategory from '../Popup/PopupCategory';
 
@@ -175,10 +176,17 @@ function TabChat() {
                     {isOpenCategory && <PopupCategory isOpen={isOpenCategory} setIsOpen={setIsOpenCategory} />}
                 </div>
                 <div className="p-2 flex">
-                    <BsTelephone
-                        size={26}
-                        className="ml-1.5 p-1 hover:text-gray-500 hover:bg-gray-200  hover:rounded-[5px] cursor-pointer"
-                    />
+                    {activeChat.group ? (
+                        <AiOutlineUsergroupAdd
+                            size={26}
+                            className="ml-1.5 p-1 hover:text-gray-500 hover:bg-gray-200  hover:rounded-[5px] cursor-pointer"
+                        />
+                    ) : (
+                        <BsTelephone
+                            size={26}
+                            className="ml-1.5 p-1 hover:text-gray-500 hover:bg-gray-200  hover:rounded-[5px] cursor-pointer"
+                        />
+                    )}
                     <GoDeviceCameraVideo
                         size={26}
                         className="ml-1.5 p-1 hover:text-gray-500 hover:bg-gray-200  hover:rounded-[5px] cursor-pointer"

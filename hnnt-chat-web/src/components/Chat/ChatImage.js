@@ -5,6 +5,7 @@ import { useState } from 'react';
 import PopupMenuForChat from '../Popup/PopupMenuForChat';
 import { AiOutlineLike } from 'react-icons/ai';
 import PopupReaction from '../Popup/PopupReaction';
+import userActive from '../../sample_data/userActive';
 
 function ChatImage({
     index,
@@ -17,9 +18,9 @@ function ChatImage({
     reactions,
     showName,
 }) {
-    const userId = 0;
+    const userId = userActive.id;
     const [selectedImage, setSelectedImage] = useState(null);
-    const position = message.sender === 0 ? 'right' : 'left';
+    const position = message.sender === userId ? 'right' : 'left';
     const sumReaction = reactions.reduce((total, reaction) => total + reaction.sum, 0);
 
     const [showPopupReaction, setShowPopupReaction] = useState(false);
@@ -61,7 +62,7 @@ function ChatImage({
                 <div>
                     <button
                         className={`absolute bottom-2 ${
-                            message.sender === 0 ? 'left-[-25px]' : 'right-[-25px]'
+                            message.sender === userId ? 'left-[-25px]' : 'right-[-25px]'
                         } bottom-[30px] p-1 rounded-full hover:bg-gray-300`}
                         onClick={() => {
                             setIsPopupOpenIndex(index);
