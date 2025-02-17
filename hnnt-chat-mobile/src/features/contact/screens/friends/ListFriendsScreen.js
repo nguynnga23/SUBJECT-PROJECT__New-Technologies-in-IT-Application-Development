@@ -4,7 +4,6 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useState } from 'react';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
-import iconSet from '@expo/vector-icons/build/Fontisto';
 
 const ActionItem = ({ title, onPress, iconName }) => (
     <TouchableOpacity style={styles.actionItem} onPress={onPress} activeOpacity={0.7}>

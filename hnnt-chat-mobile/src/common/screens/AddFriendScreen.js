@@ -1,11 +1,9 @@
-import { View, Text, StyleSheet, TouchableOpacity, Button } from 'react-native';
-import React from 'react';
-import { useRef, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useRef, useState } from 'react';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-
-import PhoneInput from 'react-native-phone-number-input';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import PhoneInput from 'react-native-phone-number-input';
+
 const ActionItem = ({ title, onPress, iconName }) => (
     <TouchableOpacity style={styles.actionItem} onPress={onPress} activeOpacity={0.7}>
         <View style={styles.customIcon}>
@@ -14,24 +12,33 @@ const ActionItem = ({ title, onPress, iconName }) => (
         <Text style={styles.actionText}>{title}</Text>
     </TouchableOpacity>
 );
+
 export default function AddFriendScreen() {
     const phoneInputRef = useRef(null);
     const [phoneNumber, setPhoneNumber] = useState('');
     const [formattedPhoneNumber, setFormattedPhoneNumber] = useState('');
-    const [countryCode, setCountryCode] = useState('VN'); // Mặc định Việt Nam
-    const handleSubmit = () => {
+    const [countryCode] = useState('VN'); // Mặc định Việt Nam
+
+    // Hàm xử lý từng ActionItem
+    const handleScanQR = () => console.log('Scan QR Code');
+    const handlePhonebook = () => console.log('Open Phonebook');
+    const handlePeopleYouMayKnow = () => console.log('View People You May Know');
+    const handleSubmitPhoneNumber = () => {
         console.log('Số điện thoại nhập:', phoneNumber);
         console.log('Số điện thoại đã format:', formattedPhoneNumber);
     };
+
     return (
         <View style={styles.container}>
+            {/* QR Code Section */}
             <View style={styles.userQRWrapper}>
                 <View style={styles.userQR}>
-                    <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Nguyễn Nga</Text>
-                    <View></View>
-                    <Text style={{ color: '#fff' }}>Quét mã để thêm bạn Zalo với tôi</Text>
+                    <Text style={styles.userQRTitle}>Nguyễn Nga</Text>
+                    <Text style={styles.userQRText}>Quét mã để thêm bạn Zalo với tôi</Text>
                 </View>
             </View>
+
+            {/* Phone Input Section */}
             <View style={styles.enterNumberPhoneWrapper}>
                 <View style={styles.phoneInputWrapper}>
                     <View style={{ marginVertical: 10 }}>
@@ -46,19 +53,20 @@ export default function AddFriendScreen() {
                             withShadow
                         />
                     </View>
-                    <TouchableOpacity style={styles.arrowRightButton}>
+                    <TouchableOpacity style={styles.arrowRightButton} onPress={handleSubmitPhoneNumber}>
                         <AntDesign name="arrowright" size={24} color="black" />
                     </TouchableOpacity>
                 </View>
-                <View>
-                    <ActionItem title="Scan QR code" iconName="qrcode" />
-                </View>
-            </View>
-            <View style={styles.actionWrapper}>
-                <ActionItem title="Phonebook" iconName="address-book" />
-                <ActionItem title="People you may know" iconName="address-card" />
+                <ActionItem title="Scan QR code" iconName="qrcode" onPress={handleScanQR} />
             </View>
 
+            {/* Action Buttons */}
+            <View style={styles.actionWrapper}>
+                <ActionItem title="Phonebook" iconName="address-book" onPress={handlePhonebook} />
+                <ActionItem title="People you may know" iconName="address-card" onPress={handlePeopleYouMayKnow} />
+            </View>
+
+            {/* View Friend Requests */}
             <View style={styles.viewSendRequestWrapper}>
                 <Text style={{ textAlign: 'center' }}>View sent friend requests in Contacts</Text>
             </View>
@@ -67,15 +75,8 @@ export default function AddFriendScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    userQRWrapper: {
-        flex: 4,
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: 15,
-    },
+    container: { flex: 1 },
+    userQRWrapper: { flex: 4, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 15 },
     userQR: {
         height: 250,
         width: 250,
@@ -84,6 +85,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-around',
     },
+    userQRTitle: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+    userQRText: { color: '#fff' },
     enterNumberPhoneWrapper: {
         flex: 2,
         justifyContent: 'space-around',
@@ -106,7 +109,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    // Action Section
     actionWrapper: {
         flex: 2,
         backgroundColor: '#fff',
@@ -114,11 +116,7 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         paddingHorizontal: 15,
     },
-    actionItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 5,
-    },
+    actionItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 5 },
     customIcon: {
         width: 35,
         height: 35,
@@ -127,11 +125,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    actionText: {
-        textAlign: 'center',
-    },
-    viewSendRequestWrapper: {
-        flex: 1,
-        paddingHorizontal: 15,
-    },
+    actionText: { textAlign: 'center' },
+    viewSendRequestWrapper: { flex: 1, paddingHorizontal: 15 },
 });
