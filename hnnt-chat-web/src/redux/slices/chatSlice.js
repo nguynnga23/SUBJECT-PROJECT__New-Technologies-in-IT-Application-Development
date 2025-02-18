@@ -192,11 +192,21 @@ const chatSlice = createSlice({
                 categoryColor: '',
                 delete: [],
                 group: true,
+                leader: userActive.id,
                 members: [...members, userActive],
                 messages: [],
             };
             state.data.push(newGroup);
-            console.log(state.data.map((a) => console.log(a)));
+        },
+        addMemberToGroup: (state, action) => {
+            const { groupId, members } = action.payload;
+            const group = state.data.find((g) => g.id === groupId);
+            console.log('Trước khi thêm thành viên:', group.members);
+            group.members = [
+                ...group.members,
+                ...members.filter((newMember) => !group.members.some((member) => member.id === newMember.id)),
+            ];
+            console.log('Sau khi thêm thành viên:', group.members);
         },
     },
 });
@@ -220,5 +230,6 @@ export const {
     addOrChangeCategory,
     deleteChatForUser,
     createGroup,
+    addMemberToGroup,
 } = chatSlice.actions;
 export default chatSlice.reducer;
