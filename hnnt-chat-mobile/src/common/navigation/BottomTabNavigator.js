@@ -1,5 +1,5 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { Button, TextInput } from 'react-native';
 import ContactScreen from '../../features/contact/screens/ContactScreen';
@@ -11,6 +11,13 @@ import Header from '../components/Header';
 const Tab = createBottomTabNavigator();
 
 export default function BottomTabNavigator() {
+    const navigation = useNavigation();
+    const contactHandlePress = () => {
+        navigation.navigate('Add Friends');
+    };
+    const messageHandlePress = () => {
+        navigation.navigate('Add Friends');
+    };
     return (
         <Tab.Navigator
             screenOptions={({ route }) => ({
@@ -39,14 +46,16 @@ export default function BottomTabNavigator() {
                 name="Messages"
                 component={MessageStackNavigator}
                 options={{
-                    headerTitle: () => <Header iconName1="qrcode-scan" iconName2="plus" />,
+                    headerTitle: () => (
+                        <Header iconName1="qrcode-scan" iconName2="plus" onPress2={messageHandlePress} />
+                    ),
                 }}
             />
             <Tab.Screen
                 name="Contacts"
                 component={ContactScreen}
                 options={{
-                    headerTitle: () => <Header iconName2="adduser" navigator="Add Friends" />,
+                    headerTitle: () => <Header iconName2="adduser" onPress2={contactHandlePress} />,
                 }}
             />
             <Tab.Screen

@@ -4,7 +4,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 
-export default function Header({ iconName1, iconName2, navigator }) {
+export default function Header({ iconName1, iconName2, onPress1, onPress2 }) {
     const navigation = useNavigation();
     return (
         <View style={styles.container}>
@@ -14,10 +14,10 @@ export default function Header({ iconName1, iconName2, navigator }) {
             <View style={{ width: '60%' }}>
                 <TextInput style={styles.searchInput} placeholder="Search" placeholderTextColor="white" />
             </View>
-            <TouchableOpacity style={{ width: '10%', marginLeft: 30 }}>
+            <TouchableOpacity style={{ width: '10%', marginLeft: 30 }} onPress={onPress1}>
                 <MaterialCommunityIcons name={iconName1} size={20} color="white" />
             </TouchableOpacity>
-            <TouchableOpacity style={{ width: '10%' }} onPress={() => navigation.navigate(navigator)}>
+            <TouchableOpacity style={{ width: '10%' }} onPress={onPress2}>
                 <AntDesign name={iconName2} size={25} color="white" />
             </TouchableOpacity>
         </View>
