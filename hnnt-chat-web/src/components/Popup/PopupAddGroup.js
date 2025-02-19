@@ -6,7 +6,8 @@ import { createGroup, addMemberToGroup } from '../../redux/slices/chatSlice';
 const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
     const dispatch = useDispatch();
 
-    const friend = useSelector((state) => state.friend.friends);
+    const userActive = useSelector((state) => state.auth.userActive);
+    const friend = userActive?.friends;
     const [groupName, setGroupName] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
 

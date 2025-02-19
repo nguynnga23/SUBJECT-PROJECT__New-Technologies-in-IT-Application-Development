@@ -36,7 +36,8 @@ import PopupAddGroup from '../Popup/PopupAddGroup';
 function TabChat() {
     const [message, setMessage] = useState('');
     const [isOpenCategory, setIsOpenCategory] = useState(false);
-    const userId = 0;
+    const userActive = useSelector((state) => state.auth.userActive);
+    const userId = userActive.id;
     let preSender = null;
 
     const activeChat = useSelector(
@@ -164,7 +165,7 @@ function TabChat() {
                                     <p className="text-[10px] mr-1">{activeChat?.members.length} thành viên |</p>
                                 </div>
                             )}
-                            {activeChat?.categoryColor ? (
+                            {activeChat?.category.name ? (
                                 <div className="flex items-center">
                                     <MdLabel
                                         className={`cursor-pointer mr-1 ${activeChat?.category.color}`}
@@ -262,6 +263,7 @@ function TabChat() {
                                         <Component
                                             key={index}
                                             index={index}
+                                            userId={userId}
                                             activeChat={activeChat}
                                             message={message}
                                             setHoveredMessage={setHoveredMessage}

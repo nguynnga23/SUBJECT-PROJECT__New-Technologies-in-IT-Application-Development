@@ -3,14 +3,14 @@ import chats from '../../sample_data/listMess';
 import { v4 as uuidv4 } from 'uuid';
 import categories from '../../sample_data/listCategory';
 import groups from '../../sample_data/listGroup';
-import userActive from '../../sample_data/userActive';
 
 const chatSlice = createSlice({
     name: 'chat',
     initialState: {
-        chats: chats, //Danh sách các cuộc trò chuyện
-        groups: groups.filter((g) => g.members?.some((m) => m.id === userActive.id)),
-        data: chats.concat(groups.filter((g) => g.members?.some((m) => m.id === userActive.id))),
+        userActive: null,
+        chats: [], //Danh sách các cuộc trò chuyện
+        groups: [],
+        data: [],
         categories: categories,
         activeChat: null, // cuộc trò chuyện đang mở
         showRightBar: false,
@@ -23,6 +23,12 @@ const chatSlice = createSlice({
         rightBarTabSub: 'emoji',
     },
     reducers: {
+        setChats: (state, action) => {
+            state.userActive = action.payload.userActive;
+            state.chats = action.payload.chats;
+            state.groups = action.payload.groups;
+            state.data = [...action.payload.chats, ...action.payload.groups];
+        },
         sendMessage: (state, action) => {
             const { chatId, content, time, type, fileName, fileSize, fileType } = action.payload;
             const chat = state.data.find((c) => c.id === chatId);
@@ -30,7 +36,7 @@ const chatSlice = createSlice({
             if (chat) {
                 const message = {
                     id: uuidv4(),
-                    sender: 0,
+                    sender: state.userActive.id,
                     content: content,
                     time: time,
                     type: type,
@@ -173,10 +179,6 @@ const chatSlice = createSlice({
             const chat = state.data.find((msg) => msg.id === chatId);
             if (chat) {
                 chat.category = category;
-                const cat = state.categories.find((c) => c.name === category.name);
-                if (cat) {
-                    chat.categoryColor = cat.color;
-                }
             }
         },
         createGroup: (state, action) => {
@@ -192,8 +194,8 @@ const chatSlice = createSlice({
                 categoryColor: '',
                 delete: [],
                 group: true,
-                leader: userActive.id,
-                members: [...members, userActive],
+                leader: state.userActive.id,
+                members: [...members, state.userActive],
                 messages: [],
             };
             state.data.push(newGroup);
@@ -212,6 +214,7 @@ const chatSlice = createSlice({
 });
 
 export const {
+    setChats,
     sendMessage,
     setActiveChat,
     setShowOrOffRightBar,

@@ -9,7 +9,8 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
     const popupRef = useRef(null);
     const dispatch = useDispatch();
     const chat = useSelector((state) => state.chat.activeChat);
-    const userId = 0;
+    const userActive = useSelector((state) => state.auth.userActive);
+    const userId = userActive.id;
     const handleToggleStatus = (statusType, messageId) => {
         if (!chat) return;
         dispatch(updateMessageStatus({ chatId: chat.id, messageId, statusType, userId }));

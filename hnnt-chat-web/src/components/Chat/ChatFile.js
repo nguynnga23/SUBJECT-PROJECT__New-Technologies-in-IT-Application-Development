@@ -8,7 +8,6 @@ import { FaRegFilePowerpoint } from 'react-icons/fa';
 import { AiOutlineLike } from 'react-icons/ai';
 import PopupReacttion from '../Popup/PopupReaction';
 import { useState } from 'react';
-import userActive from '../../sample_data/userActive';
 
 const getFileIcon = (fileType) => {
     if (fileType.includes('pdf')) return <VscFilePdf className="text-3xl text-red-500 mr-2" />;
@@ -23,6 +22,7 @@ const getFileIcon = (fileType) => {
 
 function ChatFile({
     index,
+    userId,
     activeChat,
     message,
     setHoveredMessage,
@@ -32,7 +32,6 @@ function ChatFile({
     reactions,
     showName,
 }) {
-    const userId = userActive.id;
     const position = message.sender === userId ? 'right' : 'left';
     const sumReaction = reactions.reduce((total, reaction) => total + reaction.sum, 0);
 

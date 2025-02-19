@@ -1,9 +1,9 @@
 import { FiMoreHorizontal } from 'react-icons/fi';
 import PopupMenuForChat from '../Popup/PopupMenuForChat';
-import userActive from '../../sample_data/userActive';
 
 function ChatSticker({
     index,
+    userId,
     message,
     setHoveredMessage,
     hoveredMessage,
@@ -11,8 +11,6 @@ function ChatSticker({
     setIsPopupOpenIndex,
     showName,
 }) {
-    const userId = userActive.id;
-
     const position = message.sender === userId ? 'right' : 'left';
     return (
         <div

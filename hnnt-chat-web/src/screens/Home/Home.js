@@ -1,23 +1,47 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PiChatCircleTextFill } from 'react-icons/pi';
 import { RiContactsBook3Line } from 'react-icons/ri';
 import { IoSettingsOutline } from 'react-icons/io5';
 import { IoMdCloudOutline } from 'react-icons/io';
 
+import { setChats } from '../../redux/slices/chatSlice';
 import Messaging from '../Messaging';
 import Contacts from '../Contacts';
 import Settings from '../Settings';
 
-import avatar from '../../public/avatar_sample.jpg';
+import { useDispatch, useSelector } from 'react-redux';
+import groups from '../../sample_data/listGroup';
+import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
+    const navigate = useNavigate();
     const [selectedScreen, setSelectedScreen] = useState('messaging');
+    const dispatch = useDispatch();
+    const userActive = useSelector((state) => state.auth.userActive);
+    useEffect(() => {
+        if (userActive) {
+            dispatch(
+                setChats({
+                    userActive: userActive,
+                    chats: userActive.chats,
+                    groups: groups.filter((g) => g.members?.some((m) => m.id === userActive.id)),
+                }),
+            );
+        } else {
+            navigate('/');
+        }
+    }, [userActive, navigate]);
+
     return (
         <div className="flex h-screen bg-gray-100">
             {/* Sidebar */}
             <div className="w-16 h-screen bg-blue-600 flex flex-col items-center py-4 space-y-6">
                 {/* Avatar */}
-                <img src={avatar} alt="Avatar" className="w-12 h-12 rounded-full border-2 border-white object-cover" />
+                <img
+                    src={userActive?.avatar}
+                    alt="Avatar"
+                    className="w-12 h-12 rounded-full border-2 border-white object-cover"
+                />
 
                 {/* Menu Icons */}
                 <div className="flex flex-col space-y-6 text-white ">
