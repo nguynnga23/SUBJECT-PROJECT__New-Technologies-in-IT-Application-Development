@@ -29,6 +29,7 @@
     "react-native-pager-view": "6.5.1",
     "react-native-paper": "^5.13.1",
     "react-native-phone-number-input": "^2.1.0",
+    "react-native-popup-menu": "^0.16.1",
     "react-native-reanimated": "^3.16.7",
     "react-native-safe-area-context": "^5.2.0",
     "react-native-screens": "^4.6.0",

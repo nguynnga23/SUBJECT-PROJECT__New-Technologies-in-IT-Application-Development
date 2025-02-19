@@ -1,7 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { Button, TextInput } from 'react-native';
 import ContactScreen from '../../features/contact/screens/ContactScreen';
 import ProfileScreen from '../../features/profile/screens/ProfileScreen';
 import MessageStackNavigator from '../../features/message/components/MessageStackNavigator';
@@ -12,20 +11,17 @@ const Tab = createBottomTabNavigator();
 
 export default function BottomTabNavigator() {
     const navigation = useNavigation();
+
     const contactHandlePress = () => {
         navigation.navigate('Add Friends');
     };
-    const messageHandlePress = () => {
-        navigation.navigate('Add Friends');
-    };
+
     return (
         <Tab.Navigator
             screenOptions={({ route }) => ({
                 headerStyle: {
                     backgroundColor: '#005ae0',
                 },
-                headerRight: '',
-                headerLeft: '',
                 tabBarStyle: { backgroundColor: 'white', height: 60 },
                 tabBarIcon: ({ color, size }) => {
                     let iconName;
@@ -46,9 +42,7 @@ export default function BottomTabNavigator() {
                 name="Messages"
                 component={MessageStackNavigator}
                 options={{
-                    headerTitle: () => (
-                        <Header iconName1="qrcode-scan" iconName2="plus" onPress2={messageHandlePress} />
-                    ),
+                    headerTitle: () => <Header iconName1="qrcode-scan" iconName2="plus" showMenu={true} />,
                 }}
             />
             <Tab.Screen
