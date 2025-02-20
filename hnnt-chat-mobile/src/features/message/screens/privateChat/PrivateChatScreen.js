@@ -43,8 +43,8 @@ export default function PrivateChatScreen() {
     <SafeAreaView style={styles.container}>
       <SafeAreaProvider>
         <View style={styles.header}>
-          <TouchableOpacity style={{ paddingRight: 10 }} onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={30} color="black" />
+          <TouchableOpacity style={{ paddingRight: 20, paddingLeft: 10 }} onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={30} color="white" />
           </TouchableOpacity>
           <Text style={styles.recipientName}>{chatData.recipient_name}</Text>
           <TouchableOpacity style={{ position: 'absolute', right: 70 }}
@@ -73,16 +73,22 @@ export default function PrivateChatScreen() {
 
         <View style={styles.inputContainer}>
           <TouchableOpacity>
-            <Icon name="image" size={24} color="gray" />
+            <Icon name="file" size={30} color="gray" />
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <Icon name="image" size={30} color="gray" />
           </TouchableOpacity>
           <TextInput
             style={styles.input}
-            placeholder="Nhập tin nhắn..."
+            placeholder="Enter message..."
             value={message}
             onChangeText={setMessage}
           />
           <TouchableOpacity>
-            <Icon name="send" size={24} color="#007AFF" />
+            <Icon name="microphone" styles={{ paddingRight: 10 }} size={30} color="gray" />
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <Icon name="send" size={30} color="#007AFF" />
           </TouchableOpacity>
         </View>
       </SafeAreaProvider>
@@ -100,13 +106,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#1ba9ff',
   },
 
-  recipientName: { fontSize: 18, fontWeight: "bold" },
+  recipientName: { fontSize: 18, fontWeight: "bold", color: "white" },
 
   messageContainer: { padding: 10, marginVertical: 5, borderRadius: 5, maxWidth: "75%" },
 
-  myMessage: { backgroundColor: "#aae7f3", alignSelf: "flex-end" },
+  myMessage: { backgroundColor: "#aae7f3", alignSelf: "flex-end", marginRight: 10 },
 
-  otherMessage: { backgroundColor: "white", alignSelf: "flex-start" },
+  otherMessage: { backgroundColor: "white", alignSelf: "flex-start", marginLeft: 10 },
 
   message: { fontSize: 16, marginVertical: 3 },
 
