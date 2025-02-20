@@ -58,7 +58,7 @@ function TabMesssage() {
                 </div>
                 <PopupCategoryAndState />
             </div>
-            <div className="overflow-y-auto h-[calc(100vh_-_100px)] z-0">
+            <div className="overflow-y-auto min-h-[500px] z-0">
                 {chats
                     .filter((chat) => !chat.delete.some((item) => item.id === userId))
                     .sort((a, b) => (b.pin ? 1 : 0) - (a.pin ? 1 : 0))

@@ -31,8 +31,8 @@ function PopupCategoryAndState() {
                 }
             }
         }
-        document.addEventListener('click', handleClickOutside);
-        return () => document.removeEventListener('click', handleClickOutside);
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [isOpen]);
 
     const toggleCategory = (category) => {

@@ -10,11 +10,13 @@ import { setOnOrOfPin, setOnOrOfNotify, deleteChatForUser } from '../../redux/sl
 import { useState } from 'react';
 import Archive from '../Archive/Archive';
 
-function TabChatInfo() {
-    const userId = 0;
+function TabChatInfo({ setActiveMessageTab }) {
+    const userActive = useSelector((state) => state.auth.userActive);
+    const userId = userActive.id;
     const activeChat = useSelector((state) => state.chat.data.find((chat) => chat.id === state.chat.activeChat?.id));
     const chatId = activeChat.id;
 
+    const [memberOpen, setMemberOpen] = useState(true);
     const [fileOpen, setFileOpen] = useState(true);
     const [imageOpen, setImageOpen] = useState(true);
     const [linkOpen, setLinkOpen] = useState(true);
@@ -79,6 +81,17 @@ function TabChatInfo() {
 
             {/* Danh mục */}
             <div className="space-y-2 ">
+                {activeChat.group && (
+                    <Archive
+                        title="Thành viên"
+                        isOpen={memberOpen}
+                        toggleOpen={() => setMemberOpen(!memberOpen)}
+                        messages={activeChat.messages}
+                        type="member"
+                        group={activeChat.members}
+                        setActiveMessageTab={setActiveMessageTab}
+                    />
+                )}
                 <Archive
                     title="Ảnh"
                     isOpen={imageOpen}
@@ -103,14 +116,14 @@ function TabChatInfo() {
             </div>
 
             {/* Xóa lịch sử trò chuyện */}
-            <div className="text-red-500 flex items-center space-x-2 py-3 font-medium cursor-pointer text-base pl-2">
+            <div className="text-red-500 flex items-center space-x-2 py-3 font-medium cursor-pointer text-base pl-2 hover:bg-gray-100">
                 <FaTrashAlt />
                 <span className="text-[12px]" onClick={() => dispatch(deleteChatForUser({ userId, chatId }))}>
                     Xóa lịch sử trò chuyện
                 </span>
             </div>
             {activeChat?.group && (
-                <div className="text-red-500 flex items-center space-x-2 py-3 font-medium cursor-pointer text-base pl-2">
+                <div className="text-red-500 flex items-center space-x-2 py-3 font-medium cursor-pointer text-base pl-2 hover:bg-gray-100">
                     <IoIosLogOut />
                     <span className="text-[12px]" onClick={() => dispatch(deleteChatForUser({ userId, chatId }))}>
                         Rời nhóm

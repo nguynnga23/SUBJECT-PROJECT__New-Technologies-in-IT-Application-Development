@@ -195,7 +195,7 @@ const chatSlice = createSlice({
                 delete: [],
                 group: true,
                 leader: state.userActive.id,
-                members: [...members, state.userActive],
+                members: [state.userActive, ...members],
                 messages: [],
             };
             state.data.push(newGroup);
