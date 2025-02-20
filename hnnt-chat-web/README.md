@@ -17,10 +17,10 @@ npm start
 ```
 
 -   step 3: Login with password:
-    profile: Nguyễn Lê Nhật Huy - number: 0000000000
-    profile: Nguyễn Thị Nga - number: 1111111111
-    profile: Nguyễn Thiên Tứ - number: 2222222222
-    profile: Phạm Lê Thanh Nhiệt - number: 3333333333
+-    profile: Nguyễn Lê Nhật Huy - number: 0000000000
+-    profile: Nguyễn Thị Nga - number: 1111111111
+-   profile: Nguyễn Thiên Tứ - number: 2222222222
+-   profile: Phạm Lê Thanh Nhiệt - number: 3333333333
 
 password: 123
 
