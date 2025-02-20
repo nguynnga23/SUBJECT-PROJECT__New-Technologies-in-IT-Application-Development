@@ -17,6 +17,8 @@ import { useNavigate } from 'react-router-dom';
 import avatar from '../../public/avatar_sample.jpg';
 import Modal from '../../components/Modal';
 
+import { initFlowbite } from 'flowbite';
+
 export default function Home() {
     const navigate = useNavigate();
     const [selectedScreen, setSelectedScreen] = useState('messaging');
@@ -36,7 +38,11 @@ export default function Home() {
         }
     }, [userActive, navigate]);
 
+    // open modal
     const [isOpenModel, setIsOpenModel] = useState(false);
+    useEffect(() => {
+        initFlowbite();
+    }, []);
 
     return (
         <div className="flex h-screen bg-gray-100">
