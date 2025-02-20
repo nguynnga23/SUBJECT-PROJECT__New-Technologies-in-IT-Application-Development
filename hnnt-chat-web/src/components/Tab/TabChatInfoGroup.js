@@ -15,7 +15,8 @@ function TabChatInfoGroup({ setActiveMessageTab, group }) {
         <div className="overflow-auto">
             <div className="flex relative border-b p-4 items-center justify-center">
                 <IoChevronBack
-                    className="absolute left-[12px] top-[18px] "
+                    size={25}
+                    className="absolute left-[12px] top-[18px] rounded-full hover:bg-gray-100 p-1"
                     onClick={() => setActiveMessageTab('info')}
                 />
                 <p className="font-medium">Thành viên</p>
@@ -77,6 +78,8 @@ function TabChatInfoGroup({ setActiveMessageTab, group }) {
                                             setHoveredMember={setHoveredMember}
                                             userActive={userActive}
                                             leader={g.id === group?.leader}
+                                            member={g}
+                                            group={group}
                                         />
                                     )}
                                 </div>

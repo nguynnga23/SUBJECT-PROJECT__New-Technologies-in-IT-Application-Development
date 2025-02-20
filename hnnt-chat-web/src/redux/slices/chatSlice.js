@@ -203,12 +203,22 @@ const chatSlice = createSlice({
         addMemberToGroup: (state, action) => {
             const { groupId, members } = action.payload;
             const group = state.data.find((g) => g.id === groupId);
-            console.log('Trước khi thêm thành viên:', group.members);
             group.members = [
                 ...group.members,
                 ...members.filter((newMember) => !group.members.some((member) => member.id === newMember.id)),
             ];
-            console.log('Sau khi thêm thành viên:', group.members);
+        },
+        removeMemberOfGroup: (state, action) => {
+            const { memberId, groupId } = action.payload;
+
+            return {
+                ...state,
+                data: state.data.map((group) =>
+                    group.id === groupId
+                        ? { ...group, members: group.members.filter((m) => m.id !== memberId) }
+                        : group,
+                ),
+            };
         },
     },
 });
@@ -234,5 +244,6 @@ export const {
     deleteChatForUser,
     createGroup,
     addMemberToGroup,
+    removeMemberOfGroup,
 } = chatSlice.actions;
 export default chatSlice.reducer;

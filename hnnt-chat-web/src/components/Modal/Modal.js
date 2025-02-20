@@ -19,7 +19,7 @@ import { useSelector } from 'react-redux';
 
 function Modal({ isOpen, onClose }) {
     const userActive = useSelector((state) => state.auth.userActive);
-    const Avatar = userActive.avatar;
+    const Avatar = userActive?.avatar;
 
     const [isType, setIsType] = useState('profile');
     const [isName, setIsName] = useState('Nguyễn Thiên Tứ');

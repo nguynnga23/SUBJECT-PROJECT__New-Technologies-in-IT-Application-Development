@@ -1,6 +1,6 @@
 import PopupCategoryAndState from '../../components/Popup/PopupCategoryAndState';
 import { useSelector, useDispatch } from 'react-redux';
-import { setActiveChat } from '../../redux/slices/chatSlice';
+import { setActiveChat, setChats } from '../../redux/slices/chatSlice';
 import { MdOutlineGifBox } from 'react-icons/md';
 import { LuSticker } from 'react-icons/lu';
 import { IoImageOutline } from 'react-icons/io5';
@@ -10,9 +10,10 @@ import { HiBellSlash } from 'react-icons/hi2';
 import { TiPin } from 'react-icons/ti';
 
 import { setActiveTabMessToOrther, setActiveTabMessToPriority } from '../../redux/slices/chatSlice';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import PopupMenuForMess from '../Popup/PopupMenuForMess';
 import { FiMoreHorizontal } from 'react-icons/fi';
+import groups from '../../sample_data/listGroup';
 
 function TabMesssage() {
     const userActive = useSelector((state) => state.auth.userActive);
@@ -25,8 +26,12 @@ function TabMesssage() {
 
     const dispatch = useDispatch();
 
-    const priorityChatsList = data.filter((chat) => chat.kind === 'priority');
-    const otherChatsList = data.filter((chat) => chat.kind === 'other');
+    const priorityChatsList = data
+        .filter((chat) => chat.kind === 'priority')
+        .filter((chat) => !chat.group || chat.members?.some((m) => m?.id === userActive?.id));
+    const otherChatsList = data
+        .filter((chat) => chat.kind === 'other')
+        .filter((chat) => !chat.group || chat.members?.some((m) => m?.id === userActive?.id));
     const chats = activeTab === 'priority' ? priorityChatsList : otherChatsList;
 
     const getLastMessage = (messages) => {

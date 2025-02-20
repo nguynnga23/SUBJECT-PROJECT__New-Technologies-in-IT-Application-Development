@@ -1,7 +1,24 @@
 import { useState, useEffect, useRef } from 'react';
+import { useDispatch } from 'react-redux';
+import {
+    removeMemberOfGroup,
+    setActiveChat,
+    setShowOrOffRightBar,
+    setShowOrOffRightBarSearch,
+} from '../../redux/slices/chatSlice';
 
-function PopupMemberManage({ setShowPopup, setHoveredMember, userActive, leader }) {
-    const userId = userActive.id;
+function PopupMemberManage({ setShowPopup, setHoveredMember, userActive, leader, member, group }) {
+    const userId = userActive?.id;
+    const dispatch = useDispatch();
+
+    const handleRemoveMember = (isLeader) => {
+        dispatch(removeMemberOfGroup({ memberId: member.id, groupId: group.id }));
+        if (isLeader) {
+            dispatch(setActiveChat(null));
+            dispatch(setShowOrOffRightBar(false));
+            dispatch(setShowOrOffRightBarSearch(false));
+        }
+    };
 
     const popupRef = useRef(null);
 
@@ -25,9 +42,13 @@ function PopupMemberManage({ setShowPopup, setHoveredMember, userActive, leader 
                 className="flex items-center my-1 hover:bg-gray-100 rounded-lg cursor-pointer"
             >
                 {leader ? (
-                    <span className="flex-1 my-1 text-sm text-center">Rời nhóm</span>
+                    <span className="flex-1 my-1 text-sm text-center" onClick={handleRemoveMember}>
+                        Rời nhóm
+                    </span>
                 ) : (
-                    <span className="flex-1 my-1 text-sm text-center">Xóa khỏi nhóm</span>
+                    <span className="flex-1 my-1 text-sm text-center" onClick={() => handleRemoveMember(leader)}>
+                        Xóa khỏi nhóm
+                    </span>
                 )}
             </div>
         </div>
