@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { useNavigation } from '@react-navigation/native';
 
 // Component hiển thị thông tin
 const InfoItem = ({ icon, title, value }) => (
@@ -14,6 +15,7 @@ const InfoItem = ({ icon, title, value }) => (
 );
 
 export default function PersonalInformation() {
+    const navigation = useNavigation();
     return (
         <View style={styles.container}>
             {/* Avatar */}
@@ -25,7 +27,12 @@ export default function PersonalInformation() {
             <InfoItem icon="gender-male-female" title="Gender" value="Female" />
 
             {/* Edit Button */}
-            <TouchableOpacity style={styles.editButton}>
+            <TouchableOpacity
+                style={styles.editButton}
+                onPress={() => {
+                    navigation.navigate('Profile Information');
+                }}
+            >
                 <MaterialCommunityIcons name="pencil" size={20} color="gray" />
                 <Text style={styles.editText}>Edit</Text>
             </TouchableOpacity>
