@@ -18,7 +18,7 @@ export default function AppNavigator() {
         <NavigationContainer>
             <Stack.Navigator initialRouteName="HomeScreen">
                 <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false }} />
-                <Stack.Screen name="Login" component={LoginScreen} />
+                <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }}/>
                 <Stack.Screen name="HomeTab" component={BottomTabNavigator} options={{ headerShown: false }} />
 
                 <Stack.Screen name="PhoneNumSignUp" component={PhoneNumSignUpScreen} options={{ headerShown: false }} />
