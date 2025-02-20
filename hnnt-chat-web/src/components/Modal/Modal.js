@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import CoverPhoto from '../public/cover_photo_sample.jpg';
-import Avatar from '../public/avatar_sample.jpg';
+import CoverPhoto from '../../public/cover_photo_sample.jpg';
 
 import { CiCamera } from 'react-icons/ci';
 import { LuPencilLine } from 'react-icons/lu';
@@ -16,8 +15,12 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
+import { useSelector } from 'react-redux';
 
 function Modal({ isOpen, onClose }) {
+    const userActive = useSelector((state) => state.auth.userActive);
+    const Avatar = userActive.avatar;
+
     const [isType, setIsType] = useState('profile');
     const [isName, setIsName] = useState('Nguyễn Thiên Tứ');
     const [gender, setGender] = useState('male');

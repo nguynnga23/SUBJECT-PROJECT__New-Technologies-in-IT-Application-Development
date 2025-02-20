@@ -14,7 +14,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import groups from '../../sample_data/listGroup';
 import { useNavigate } from 'react-router-dom';
 
-import avatar from '../../public/avatar_sample.jpg';
 import Modal from '../../components/Modal';
 
 import { initFlowbite } from 'flowbite';
@@ -57,7 +56,11 @@ export default function Home() {
                         className="flex text-sm cursor-pointer"
                         type="button"
                     >
-                        <img src={avatar} alt="Avatar" className="w-12 h-12 rounded-full border-2 border-white" />
+                        <img
+                            src={userActive.avatar}
+                            alt="Avatar"
+                            className="w-12 h-12 rounded-full border-2 border-white object-cover"
+                        />
                     </button>
                     {/* Dropdown menu */}
                     <div
