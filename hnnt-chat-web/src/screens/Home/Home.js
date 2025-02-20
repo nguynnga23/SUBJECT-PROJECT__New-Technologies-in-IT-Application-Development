@@ -1,30 +1,22 @@
-<<<<<<< HEAD
-import { useState } from 'react';
-=======
 import { useEffect, useState } from 'react';
->>>>>>> 7ebb6621d4c30cf8d2c798c92dc65ca319dd0152
 import { PiChatCircleTextFill } from 'react-icons/pi';
 import { RiContactsBook3Line } from 'react-icons/ri';
 import { IoSettingsOutline } from 'react-icons/io5';
 import { IoMdCloudOutline } from 'react-icons/io';
+import { CiShare1 } from 'react-icons/ci';
 
-<<<<<<< HEAD
-=======
 import { setChats } from '../../redux/slices/chatSlice';
->>>>>>> 7ebb6621d4c30cf8d2c798c92dc65ca319dd0152
 import Messaging from '../Messaging';
 import Contacts from '../Contacts';
 import Settings from '../Settings';
 
-<<<<<<< HEAD
-import avatar from '../../public/avatar_sample.jpg';
-
-export default function Home() {
-    const [selectedScreen, setSelectedScreen] = useState('messaging');
-=======
 import { useDispatch, useSelector } from 'react-redux';
 import groups from '../../sample_data/listGroup';
 import { useNavigate } from 'react-router-dom';
+
+import Modal from '../../components/Modal';
+
+import { initFlowbite } from 'flowbite';
 
 export default function Home() {
     const navigate = useNavigate();
@@ -45,21 +37,66 @@ export default function Home() {
         }
     }, [userActive, navigate]);
 
->>>>>>> 7ebb6621d4c30cf8d2c798c92dc65ca319dd0152
+    // open modal
+    const [isOpenModel, setIsOpenModel] = useState(false);
+    useEffect(() => {
+        initFlowbite();
+    }, []);
+
     return (
         <div className="flex h-screen bg-gray-100">
             {/* Sidebar */}
             <div className="w-16 h-screen bg-blue-600 flex flex-col items-center py-4 space-y-6">
                 {/* Avatar */}
-<<<<<<< HEAD
-                <img src={avatar} alt="Avatar" className="w-12 h-12 rounded-full border-2 border-white" />
-=======
-                <img
-                    src={userActive?.avatar}
-                    alt="Avatar"
-                    className="w-12 h-12 rounded-full border-2 border-white object-cover"
-                />
->>>>>>> 7ebb6621d4c30cf8d2c798c92dc65ca319dd0152
+                <div>
+                    <button
+                        id="dropdownUserAvatarButton"
+                        data-dropdown-toggle="dropdownAvatar"
+                        data-dropdown-placement="right-end"
+                        className="flex text-sm cursor-pointer"
+                        type="button"
+                    >
+                        <img
+                            src={userActive.avatar}
+                            alt="Avatar"
+                            className="w-12 h-12 rounded-full border-2 border-white object-cover"
+                        />
+                    </button>
+                    {/* Dropdown menu */}
+                    <div
+                        id="dropdownAvatar"
+                        className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg ring-2 ring-gray-200"
+                    >
+                        <div className="px-4 py-3 text-sm text-black ">
+                            <p className="text-lg font-medium ">Nguyễn Thiên Tứ</p>
+                        </div>
+                        <ul
+                            className="py-2 text-sm text-gray-700 dark:text-gray-200"
+                            aria-labelledby="dropdownUserAvatarButton"
+                        >
+                            <li>
+                                <p className="block px-4 py-2 hover:bg-gray-100 text-black flex items-center gap-x-6 cursor-pointer">
+                                    Nâng cấp tài khoản
+                                    <CiShare1 />
+                                </p>
+                            </li>
+                            <li>
+                                <p
+                                    className="block px-4 py-2 hover:bg-gray-100 text-black cursor-pointer"
+                                    onClick={() => setIsOpenModel(true)}
+                                >
+                                    Hồ sơ của bạn
+                                </p>
+                            </li>
+                            <li>
+                                <p className="block px-4 py-2 hover:bg-gray-100 text-black cursor-pointer">Cài đặt</p>
+                            </li>
+                        </ul>
+                        <div className="">
+                            <p className="block px-4 py-2 hover:bg-gray-100 text-black cursor-pointer">Đăng xuất</p>
+                        </div>
+                    </div>
+                </div>
 
                 {/* Menu Icons */}
                 <div className="flex flex-col space-y-6 text-white ">
@@ -106,6 +143,8 @@ export default function Home() {
                 {selectedScreen === 'contacts' && <Contacts />}
                 {selectedScreen === 'settings' && <Settings />}
             </div>
+
+            <Modal isOpen={isOpenModel} onClose={() => setIsOpenModel(false)} />
         </div>
     );
 }
