@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { RiUserAddLine } from 'react-icons/ri';
 import { AiOutlineUsergroupAdd } from 'react-icons/ai';
@@ -23,6 +23,15 @@ import groupzalo from '../../public/groupzalo.png';
 import searchzalo from '../../public/searchzalo.png';
 
 import PopupCategoryContact from '../../components/Popup/PopupCategoryContact';
+import { useSelector } from 'react-redux';
+import { FaRegSquare } from 'react-icons/fa6';
+import { FaRegSquareCheck } from 'react-icons/fa6';
+import { MdLabel } from 'react-icons/md';
+import PopupManageCategory from '../../components/Popup/PopupManageCategory';
+
+import TabFriendsList from '../../components/Tab/TabFriendsList';
+import TabGroupList from '../../components/Tab/TabGroupList';
+import TabFriendRequest from '../../components/Tab/TabFriendRequest';
 
 const TabsContacts = [
     { id: 1, icon: <PiUserList size={25} />, title: 'Danh sách bạn bè', content: 'Bạn bè' },
@@ -123,7 +132,7 @@ function Contacts() {
     const [selectTab, setSelectTab] = useState(TabsContacts[0]);
     const [search, setSearch] = useState('');
     const [filterName, setFilterName] = useState('AZ');
-    const [filter, setFilter] = useState('all');
+    const [filter, setFilter] = useState('Tất cả');
 
     // Tab danh sách bạn bè ----------------------------
     // Lọc dữ liệu theo tên
@@ -157,6 +166,23 @@ function Contacts() {
         );
     };
 
+    // test dropdown
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isOpenManageCategory, setIsOpenManageCategory] = useState(false);
+    const categories = useSelector((state) => state.category.categories);
+
+    // Đóng dropdown khi click ra ngoài
+    const dropdownRef = useRef(null);
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     return (
         <div className="h-screen flex flex-col">
             <div className="flex-1 flex min-h-0">
@@ -180,7 +206,7 @@ function Contacts() {
                                     setSelectTab(tab);
                                     setSearch('');
                                     setFilterName('AZ');
-                                    setFilter('all');
+                                    setFilter('Tất cả');
                                 }}
                             >
                                 <h3 className="font-bold">{tab.icon}</h3>
@@ -198,338 +224,40 @@ function Contacts() {
                     <div className="flex-1 p-4 overflow-y-auto bg-gray-200">
                         <p className="bg-gray-200 p-2 rounded-lg w-fit mb-2 font-semibold">{selectTab.content}</p>
                         {selectTab.id === 1 ? (
-                            <div className="bg-white w-full rounded-lg relative">
-                                <div className="p-4">
-                                    <div className="flex">
-                                        <div className="w-1/2 flex items-center group hover:bg-gray-100 p-1 rounded-lg border-2 focus-within:border-blue-400">
-                                            <CiSearch size={20} />
-                                            <input
-                                                type="text"
-                                                placeholder="Tìm bạn"
-                                                className="w-full group-hover:bg-gray-100 border-none outline-none p-1"
-                                                value={search}
-                                                onChange={(e) => setSearch(e.target.value)}
-                                            />
-                                            {search ? (
-                                                <MdCancel
-                                                    size={20}
-                                                    className="text-gray-500 hover:text-blue-600"
-                                                    onClick={() => setSearch('')}
-                                                />
-                                            ) : null}
-                                        </div>
-
-                                        <div className="w-1/4 flex items-center group hover:bg-gray-100 p-1 rounded-lg border-2 focus-within:border-blue-400 text-gray-500 ml-2">
-                                            <IoSwapVertical size={20} />
-                                            <Select
-                                                value={filterName}
-                                                onChange={(e) => setFilterName(e.target.value)}
-                                                className="border-none outline-none p-1 w-full group-hover:bg-gray-100 "
-                                                sx={{
-                                                    boxShadow: 'none',
-                                                    color: 'gray',
-                                                    '.MuiOutlinedInput-notchedOutline': { border: 0 },
-                                                    '&.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
-                                                        border: 0,
-                                                    },
-                                                    '&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
-                                                        {
-                                                            border: 0,
-                                                        },
-                                                    maxHeight: '30px',
-                                                }}
-                                            >
-                                                <MenuItem value="AZ">Tên (A-Z)</MenuItem>
-                                                <MenuItem value="ZA">Tên (Z-A)</MenuItem>
-                                            </Select>
-                                        </div>
-
-                                        <div className="relative w-1/4 flex items-center group hover:bg-gray-100 p-1 rounded-lg border-2 focus-within:border-blue-400 text-gray-500 ml-2">
-                                            <CiFilter size={20} />
-                                            <Select
-                                                value={filter}
-                                                onChange={(e) => setFilter(e.target.value)}
-                                                className="border-none outline-none p-1 w-full group-hover:bg-gray-100 "
-                                                sx={{
-                                                    boxShadow: 'none',
-                                                    color: 'gray',
-                                                    '.MuiOutlinedInput-notchedOutline': { border: 0 },
-                                                    '&.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
-                                                        border: 0,
-                                                    },
-                                                    '&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
-                                                        {
-                                                            border: 0,
-                                                        },
-                                                    maxHeight: '30px',
-                                                }}
-                                            >
-                                                <MenuItem value="all">Tất cả</MenuItem>
-                                                {/* <MenuItem value="phanloai">
-                                                    <div className="flex justify-between w-full">
-                                                        <p>Phân loại</p>
-                                                        
-                                                        <FaAngleRight />
-                                                    </div>
-                                                </MenuItem> */}
-                                                <div className="absolute top-10 right-0">
-                                                    <PopupCategoryContact />
-                                                </div>
-                                            </Select>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {Object.keys(sortedGroupedData).length === 0 && (
-                                    <div className="w-full mt-10 pb-10 flex flex-col items-center justify-center text-center">
-                                        <img src={searchzalo} className="w-36 h-w-36" />
-                                        <p className="text-sm font-semibold">Không tìm thấy kết quả</p>
-                                        <p className="text-sm mt-2">Vui lòng thử lại từ khóa hoặc bộ lọc khác</p>
-                                    </div>
-                                )}
-
-                                {Object.entries(sortedGroupedData).map(([key, users]) => (
-                                    <div key={key} className="mt-4">
-                                        <h4 className="text-lg font-medium px-4">{key}</h4>
-                                        {users.map((user, index) => (
-                                            <>
-                                                <div
-                                                    key={user.id}
-                                                    className="flex items-center space-x-2 mt-3 px-4 cursor-pointer hover:bg-gray-100 py-2"
-                                                >
-                                                    <img src={user.avatar} className="w-12 h-12 rounded-full" />
-                                                    <h4 className="text-sm font-medium">{user.name}</h4>
-                                                </div>
-                                                {index !== users.length - 1 && (
-                                                    <div className="w-full bg-gray-200 h-[1px] mt-2 pl-4"></div>
-                                                )}
-                                            </>
-                                        ))}
-                                    </div>
-                                ))}
-                            </div>
+                            <TabFriendsList
+                                search={search}
+                                setSearch={setSearch}
+                                filterName={filterName}
+                                setFilterName={setFilterName}
+                                filter={filter}
+                                setFilter={setFilter}
+                                setIsDropdownOpen={setIsDropdownOpen}
+                                dropdownRef={dropdownRef}
+                                sortedGroupedData={sortedGroupedData}
+                                isDropdownOpen={isDropdownOpen}
+                            />
                         ) : selectTab.id === 2 ? (
-                            <div className="bg-white w-full rounded-lg">
-                                <div className="p-4">
-                                    <div className="flex">
-                                        <div className="w-1/2 flex items-center group hover:bg-gray-100 p-1 rounded-lg border-2 focus-within:border-blue-400">
-                                            <CiSearch size={20} />
-                                            <input
-                                                type="text"
-                                                placeholder="Tìm kiếm..."
-                                                className="w-full group-hover:bg-gray-100 border-none outline-none p-1"
-                                                value={search}
-                                                onChange={(e) => setSearch(e.target.value)}
-                                            />
-                                            {search ? (
-                                                <MdCancel
-                                                    size={20}
-                                                    className="text-gray-500 hover:text-blue-600"
-                                                    onClick={() => setSearch('')}
-                                                />
-                                            ) : null}
-                                        </div>
-
-                                        <div className="w-1/4 flex items-center group hover:bg-gray-100 p-1 rounded-lg border-2 focus-within:border-blue-400 text-gray-500 ml-2">
-                                            <IoSwapVertical size={20} />
-                                            <Select
-                                                value={filterName}
-                                                onChange={(e) => setFilterName(e.target.value)}
-                                                className="border-none outline-none p-1 w-full group-hover:bg-gray-100 "
-                                                sx={{
-                                                    boxShadow: 'none',
-                                                    color: 'gray',
-                                                    '.MuiOutlinedInput-notchedOutline': { border: 0 },
-                                                    '&.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
-                                                        border: 0,
-                                                    },
-                                                    '&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
-                                                        {
-                                                            border: 0,
-                                                        },
-                                                    maxHeight: '30px',
-                                                }}
-                                            >
-                                                <MenuItem value="AZ">Tên (A-Z)</MenuItem>
-                                                <MenuItem value="ZA">Tên (Z-A)</MenuItem>
-                                                <MenuItem value="MC">Hoạt động (mới→cũ)</MenuItem>
-                                                <MenuItem value="CM">Hoạt động (cũ→mới)</MenuItem>
-                                            </Select>
-                                        </div>
-
-                                        <div className="w-1/4 flex items-center group hover:bg-gray-100 p-1 rounded-lg border-2 focus-within:border-blue-400 text-gray-500 ml-2">
-                                            <CiFilter size={20} />
-                                            <Select
-                                                value={filter}
-                                                onChange={(e) => setFilter(e.target.value)}
-                                                className="border-none outline-none p-1 w-full group-hover:bg-gray-100 "
-                                                sx={{
-                                                    boxShadow: 'none',
-                                                    color: 'gray',
-                                                    '.MuiOutlinedInput-notchedOutline': { border: 0 },
-                                                    '&.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
-                                                        border: 0,
-                                                    },
-                                                    '&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
-                                                        {
-                                                            border: 0,
-                                                        },
-                                                    maxHeight: '30px',
-                                                }}
-                                            >
-                                                <MenuItem value="all">Tất cả</MenuItem>
-                                                <MenuItem value="phanloai">
-                                                    <div className="flex justify-between w-full">
-                                                        <p>Phân loại</p>
-                                                        <FaAngleRight />
-                                                    </div>
-                                                </MenuItem>
-                                                <MenuItem value="NTQL">Nhóm tôi quản lý</MenuItem>
-                                                <MenuItem value="CDTQL">Cộng đồng tôi quản lý</MenuItem>
-                                            </Select>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* không tìm thấy */}
-                                {Object.keys(sortedGroupedData).length === 0 && (
-                                    <div className="w-full mt-10 pb-10 flex flex-col items-center justify-center text-center">
-                                        <img src={searchzalo} className="w-36 h-w-36" />
-                                        <p className="text-sm font-semibold">Không tìm thấy kết quả</p>
-                                        <p className="text-sm mt-2">Vui lòng thử lại từ khóa hoặc bộ lọc khác</p>
-                                    </div>
-                                )}
-
-                                {/* item trong danh sách nhóm */}
-
-                                {sortGroupsByName().map((group, index) => (
-                                    <div className="mt-4">
-                                        <div className="flex items-center space-x-2 mt-3 px-4 cursor-pointer hover:bg-gray-100 py-2">
-                                            <AvatarGroup
-                                                total={group.members.length}
-                                                sx={{ '& .MuiAvatar-root': { width: 20, height: 20, fontSize: 10 } }}
-                                            >
-                                                <Avatar alt="Remy Sharp" src={avatar} sx={{ width: 20, height: 20 }} />
-                                                <Avatar
-                                                    alt="Travis Howard"
-                                                    src={avatar}
-                                                    sx={{ width: 20, height: 20 }}
-                                                />
-                                            </AvatarGroup>
-                                            <div>
-                                                <h4 className="text-sm font-medium">{group.name}</h4>
-                                                <p className="text-xs text-gray-500 hover:text-blue-500 hover:underline cursor-pointer">
-                                                    {group.members.length} thành viên
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="w-full bg-gray-200 h-[1px] mt-2 pl-4"></div>
-                                    </div>
-                                ))}
-                            </div>
+                            <TabGroupList
+                                search={search}
+                                setSearch={setSearch}
+                                filterName={filterName}
+                                setFilterName={setFilterName}
+                                filter={filter}
+                                setFilter={setFilter}
+                                sortedGroupedData={sortedGroupedData}
+                                sortGroupsByName={sortGroupsByName}
+                                isDropdownOpen={isDropdownOpen}
+                                setIsDropdownOpen={setIsDropdownOpen}
+                                dropdownRef={dropdownRef}
+                                isOpenManageCategory={isOpenManageCategory}
+                                setIsOpenManageCategory={setIsOpenManageCategory}
+                                categories={categories}
+                            />
                         ) : selectTab.id === 3 ? (
-                            <>
-                                <div className="grid grid-cols-3 gap-4 justify-items-end">
-                                    {friendResponsetData.map((user, index) => (
-                                        <div key={index} className="bg-white rounded-lg w-full cursor-pointer h-fit">
-                                            <div className="p-4 w-full">
-                                                <div className="flex justify-center">
-                                                    <img src={avatar} className="w-12 h-12 rounded-full" />
-                                                    <div className="ml-3 mr-20">
-                                                        <h4 className="text-sm font-medium">{user.name}</h4>
-                                                        <p className="text-xs text-gray-500">
-                                                            {user.time
-                                                                ? `${user.time} - Từ số điện thoại`
-                                                                : 'bạn đã nhận lời mời'}
-                                                        </p>
-                                                    </div>
-                                                    <Tooltip
-                                                        title="Nhắn tin"
-                                                        arrow
-                                                        componentsProps={{
-                                                            tooltip: {
-                                                                sx: {
-                                                                    bgcolor: '#2e66b7',
-                                                                    '& .MuiTooltip-arrow': {
-                                                                        color: '#2e66b7',
-                                                                    },
-                                                                },
-                                                            },
-                                                        }}
-                                                    >
-                                                        <AiOutlineMessage
-                                                            className="cursor-pointer text-gray-500"
-                                                            size={22}
-                                                        />
-                                                    </Tooltip>
-                                                </div>
-                                                <div className="bg-gray-200 border border-gray-300 p-2 mt-5 rounded-sm w-72">
-                                                    <p className="text-sm">
-                                                        Xin chào, mình là Nguyễn Nhật Huy. Kết bạn với mình nhé!
-                                                    </p>
-                                                </div>
-                                                <div className="flex justify-between mt-6">
-                                                    <button className="bg-gray-200 hover:bg-gray-300 text-black font-semibold w-full p-2 rounded-sm mr-2">
-                                                        Từ chối
-                                                    </button>
-                                                    <button className="bg-blue-200 hover:bg-blue-300 text-blue-800 font-semibold w-full p-2 rounded-sm ml-2">
-                                                        Đồng ý
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {/* lời mời đã gửi */}
-                                <p className="text-base font-semibold pl-3 text-gray-600 my-5">Lời mời đã gửi</p>
-
-                                <div className="grid grid-cols-3 gap-4 justify-items-end">
-                                    {friendRequestData.map((user, index) => (
-                                        <div
-                                            key={index}
-                                            className="bg-white rounded-lg p-4 cursor-pointer h-fit w-full"
-                                        >
-                                            <div className="p-4 w-full">
-                                                <div className="flex justify-center">
-                                                    <img src={avatar} className="w-12 h-12 rounded-full" />
-                                                    <div className="ml-3 mr-20">
-                                                        <h4 className="text-sm font-medium">{user.name}</h4>
-                                                        <p className="text-xs text-gray-500">
-                                                            {user.time || 'bạn đã gửi lời mời'}
-                                                        </p>
-                                                    </div>
-                                                    <Tooltip
-                                                        title="Nhắn tin"
-                                                        arrow
-                                                        componentsProps={{
-                                                            tooltip: {
-                                                                sx: {
-                                                                    bgcolor: '#2e66b7',
-                                                                    '& .MuiTooltip-arrow': {
-                                                                        color: '#2e66b7',
-                                                                    },
-                                                                },
-                                                            },
-                                                        }}
-                                                    >
-                                                        <AiOutlineMessage
-                                                            className="cursor-pointer text-gray-500"
-                                                            size={22}
-                                                        />
-                                                    </Tooltip>
-                                                </div>
-
-                                                <div className="flex justify-between mt-6">
-                                                    <button className="bg-gray-200 hover:bg-gray-300 text-black font-semibold w-full p-2 rounded-sm mr-2">
-                                                        Thu hồi lời mời
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </>
+                            <TabFriendRequest
+                                friendResponsetData={friendRequestData}
+                                friendRequestData={friendRequestData}
+                            />
                         ) : selectTab.id === 4 ? (
                             <div className="w-full h-screen flex flex-col items-center justify-center text-center translate-y-[-20%]">
                                 <img src={groupzalo} className="w-28 h-w-28" />
