@@ -18,7 +18,7 @@ export default function AppNavigator() {
         <NavigationContainer>
             <Stack.Navigator initialRouteName="HomeScreen">
                 <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false }} />
-                <Stack.Screen name="Login" component={LoginScreen} />
+                <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }}/>
                 <Stack.Screen name="HomeTab" component={BottomTabNavigator} options={{ headerShown: false }} />
 
                 <Stack.Screen name="PhoneNumSignUp" component={PhoneNumSignUpScreen} options={{ headerShown: false }} />
@@ -27,8 +27,8 @@ export default function AppNavigator() {
 
                 <Stack.Screen name="FriendRequest" component={FriendRequestScreen} />
                 <Stack.Screen name="PhoneBook" component={PhoneBookScreen} />
-                <Stack.Screen name="AddFriend" component={AddFriendScreen} />
-                <Stack.Screen name="AddGroup" component={AddGroupScreen} />
+                <Stack.Screen name="Add Friends" component={AddFriendScreen} />
+                <Stack.Screen name="New Group" component={AddGroupScreen} />
                 <Stack.Screen name="Search" component={SearchScreen} />
             </Stack.Navigator>
         </NavigationContainer>
