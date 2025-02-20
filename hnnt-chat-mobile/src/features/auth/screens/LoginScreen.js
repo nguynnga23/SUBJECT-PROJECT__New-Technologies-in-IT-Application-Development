@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Image } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Keyboard } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -63,6 +63,7 @@ export default function LoginScreen() {
               disabled={!isFormFilled} // Chỉ bấm khi đã điền đầy đủ thông tin
               onPress={() => {
                 if (isFormFilled) {
+                  Keyboard.dismiss(); // Ẩn bàn phím trước khi chuyển màn hình
                   // Điều hướng hoặc xử lý đăng nhập
                   navigation.navigate('HomeTab');
                 }

@@ -14,7 +14,7 @@ export default function MaterialTopTabNavigator() {
         <Tab.Navigator>
             <Tab.Screen name="Friends" component={Friends} />
             <Tab.Screen name="Groups" component={Groups} />
-            <Tab.Screen name="OA" component={OA} />
+            {/* <Tab.Screen name="OA" component={OA} /> */}
         </Tab.Navigator>
     );
 }
