@@ -22,6 +22,8 @@ import avatar from '../../public/avatar_sample.jpg';
 import groupzalo from '../../public/groupzalo.png';
 import searchzalo from '../../public/searchzalo.png';
 
+import PopupCategoryContact from '../../components/Popup/PopupCategoryContact';
+
 const TabsContacts = [
     { id: 1, icon: <PiUserList size={25} />, title: 'Danh sách bạn bè', content: 'Bạn bè' },
     { id: 2, icon: <GoPeople size={25} />, title: 'Danh sách nhóm và cộng đồng', content: 'Nhóm và cộng đồng' },
@@ -196,7 +198,7 @@ function Contacts() {
                     <div className="flex-1 p-4 overflow-y-auto bg-gray-200">
                         <p className="bg-gray-200 p-2 rounded-lg w-fit mb-2 font-semibold">{selectTab.content}</p>
                         {selectTab.id === 1 ? (
-                            <div className="bg-white w-full rounded-lg">
+                            <div className="bg-white w-full rounded-lg relative">
                                 <div className="p-4">
                                     <div className="flex">
                                         <div className="w-1/2 flex items-center group hover:bg-gray-100 p-1 rounded-lg border-2 focus-within:border-blue-400">
@@ -242,7 +244,7 @@ function Contacts() {
                                             </Select>
                                         </div>
 
-                                        <div className="w-1/4 flex items-center group hover:bg-gray-100 p-1 rounded-lg border-2 focus-within:border-blue-400 text-gray-500 ml-2">
+                                        <div className="relative w-1/4 flex items-center group hover:bg-gray-100 p-1 rounded-lg border-2 focus-within:border-blue-400 text-gray-500 ml-2">
                                             <CiFilter size={20} />
                                             <Select
                                                 value={filter}
@@ -263,12 +265,16 @@ function Contacts() {
                                                 }}
                                             >
                                                 <MenuItem value="all">Tất cả</MenuItem>
-                                                <MenuItem value="phanloai">
+                                                {/* <MenuItem value="phanloai">
                                                     <div className="flex justify-between w-full">
                                                         <p>Phân loại</p>
+                                                        
                                                         <FaAngleRight />
                                                     </div>
-                                                </MenuItem>
+                                                </MenuItem> */}
+                                                <div className="absolute top-10 right-0">
+                                                    <PopupCategoryContact />
+                                                </div>
                                             </Select>
                                         </div>
                                     </div>
