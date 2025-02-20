@@ -13,6 +13,7 @@ import PasswordSignUpScreen from '../../features/auth/screens/PasswordSignUpScre
 import HomeScreen from '../../features/auth/screens/HomeScreen';
 import AccountAndSecurity from '../../features/profile/screens/account-and-security/AccountAndSecurity';
 import Privacy from '../../features/profile/screens/privacy/Privacy';
+import PersonalInformation from '../../features/profile/screens/personal-information/PersonalInformation';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -35,6 +36,7 @@ export default function AppNavigator() {
 
                 <Stack.Screen name="Account and security" component={AccountAndSecurity} />
                 <Stack.Screen name="Privacy" component={Privacy} />
+                <Stack.Screen name="Personal Information" component={PersonalInformation} />
             </Stack.Navigator>
         </NavigationContainer>
     );

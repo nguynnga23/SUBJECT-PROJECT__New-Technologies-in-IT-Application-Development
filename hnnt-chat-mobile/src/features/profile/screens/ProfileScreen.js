@@ -16,7 +16,12 @@ export default function ProfileScreen() {
     return (
         <View style={styles.container}>
             <View style={styles.viewProfileWrapper}>
-                <TouchableOpacity style={styles.viewProfile}>
+                <TouchableOpacity
+                    style={styles.viewProfile}
+                    onPress={() => {
+                        navigation.navigate('Personal Information');
+                    }}
+                >
                     <Avatar.Image size={50} source={{ uri: 'https://i.pravatar.cc/150?img=20' }} />
                     <Text style={styles.username}>Nguyễn Nga</Text>
                     <MaterialCommunityIcons name="account-switch-outline" size={26} color="#396AA5" />
