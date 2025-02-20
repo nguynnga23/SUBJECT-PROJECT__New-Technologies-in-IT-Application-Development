@@ -9,7 +9,8 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
     const popupRef = useRef(null);
     const dispatch = useDispatch();
     const chat = useSelector((state) => state.chat.activeChat);
-    const userId = 0;
+    const userActive = useSelector((state) => state.auth.userActive);
+    const userId = userActive.id;
     const handleToggleStatus = (statusType, messageId) => {
         if (!chat) return;
         dispatch(updateMessageStatus({ chatId: chat.id, messageId, statusType, userId }));
@@ -34,8 +35,8 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
         <div
             ref={popupRef}
             className={`absolute ${
-                position === 'left' ? 'left-[-5px]' : 'right-[-5px]'
-            }  w-52 bg-white shadow-lg rounded-lg border border-gray-200 z-50`}
+                position === 'left' ? 'left-[20px]' : 'right-[20px]'
+            } top-[10px] w-52 bg-white shadow-lg rounded-lg border border-gray-200 z-50`}
         >
             <div className="py-2">
                 {!message?.destroy && (

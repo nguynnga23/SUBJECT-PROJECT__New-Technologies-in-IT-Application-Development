@@ -31,11 +31,13 @@ import ChatImage from '../Chat/ChatImage';
 import ChatFile from '../Chat/ChatFile';
 import ChatDestroy from '../Chat/ChatDestroy';
 import ChatSticker from '../Chat/ChatSticker';
+import PopupAddGroup from '../Popup/PopupAddGroup';
 
 function TabChat() {
     const [message, setMessage] = useState('');
     const [isOpenCategory, setIsOpenCategory] = useState(false);
-    const userId = 0;
+    const userActive = useSelector((state) => state.auth.userActive);
+    const userId = userActive.id;
     let preSender = null;
 
     const activeChat = useSelector(
@@ -58,6 +60,9 @@ function TabChat() {
 
     const [hoveredMessage, setHoveredMessage] = useState(null);
     const [isPopupOpenIndex, setIsPopupOpenIndex] = useState(null);
+
+    const [addFriendButton, setAddFriendButton] = useState(false);
+    const [addGroupButton, setAddGroupButton] = useState(false);
 
     const MessageComponent = {
         text: ChatText,
@@ -160,11 +165,14 @@ function TabChat() {
                                     <p className="text-[10px] mr-1">{activeChat?.members.length} thành viên |</p>
                                 </div>
                             )}
-                            {activeChat?.categoryColor ? (
-                                <MdLabel
-                                    className={`cursor-pointer ${activeChat?.categoryColor}`}
-                                    onClick={() => setIsOpenCategory(!isOpenCategory)}
-                                />
+                            {activeChat?.category.name ? (
+                                <div className="flex items-center">
+                                    <MdLabel
+                                        className={`cursor-pointer mr-1 ${activeChat?.category.color}`}
+                                        onClick={() => setIsOpenCategory(!isOpenCategory)}
+                                    />
+                                    <p className="text-[10px]">{activeChat?.category.name}</p>
+                                </div>
                             ) : (
                                 <MdLabelOutline
                                     className={`cursor-pointer text-gray-400`}
@@ -177,10 +185,18 @@ function TabChat() {
                 </div>
                 <div className="p-2 flex">
                     {activeChat.group ? (
-                        <AiOutlineUsergroupAdd
-                            size={26}
-                            className="ml-1.5 p-1 hover:text-gray-500 hover:bg-gray-200  hover:rounded-[5px] cursor-pointer"
-                        />
+                        <div className="flex items-center">
+                            <AiOutlineUsergroupAdd
+                                size={26}
+                                onClick={() => setAddGroupButton(true)}
+                                className="ml-1.5 p-1 hover:text-gray-500 hover:bg-gray-200  hover:rounded-[5px] cursor-pointer"
+                            />
+                            <PopupAddGroup
+                                isOpen={addGroupButton}
+                                onClose={() => setAddGroupButton(false)}
+                                activeChat={activeChat}
+                            />
+                        </div>
                     ) : (
                         <BsTelephone
                             size={26}
@@ -247,6 +263,7 @@ function TabChat() {
                                         <Component
                                             key={index}
                                             index={index}
+                                            userId={userId}
                                             activeChat={activeChat}
                                             message={message}
                                             setHoveredMessage={setHoveredMessage}

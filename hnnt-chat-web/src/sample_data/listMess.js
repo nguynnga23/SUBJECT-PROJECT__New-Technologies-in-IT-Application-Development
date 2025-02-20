@@ -6,8 +6,7 @@ const chats = [
         pin: true,
         notify: true,
         kind: 'priority',
-        category: '',
-        categoryColor: '',
+        category: {},
         delete: [],
         messages: [
             {
@@ -79,8 +78,7 @@ const chats = [
         pin: false,
         notify: true,
         kind: 'priority',
-        category: '',
-        categoryColor: '',
+        category: {},
         delete: [],
         messages: [
             {
@@ -136,8 +134,7 @@ const chats = [
         pin: false,
         notify: true,
         kind: 'other',
-        category: '',
-        categoryColor: '',
+        category: {},
         delete: [],
         messages: [
             {

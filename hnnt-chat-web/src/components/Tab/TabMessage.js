@@ -13,10 +13,10 @@ import { setActiveTabMessToOrther, setActiveTabMessToPriority } from '../../redu
 import { useRef, useState } from 'react';
 import PopupMenuForMess from '../Popup/PopupMenuForMess';
 import { FiMoreHorizontal } from 'react-icons/fi';
-import userActive from '../../sample_data/userActive';
 
 function TabMesssage() {
-    const userId = userActive.id;
+    const userActive = useSelector((state) => state.auth.userActive);
+    const userId = userActive?.id;
     const activeTab = useSelector((state) => state.chat.activeTabMess);
     const activeChat = useSelector((state) => state.chat.activeChat);
     const data = useSelector((state) => state.chat.data);
@@ -117,25 +117,26 @@ function TabMesssage() {
                                             {chat.name}
                                         </h3>
                                         <p className="flex items-center text-sm text-gray-600 text-xs mt-1 ">
-                                            {chat.category && (
-                                                <MdLabel className={`text-[18px] mr-1 ${chat.categoryColor}`} />
+                                            {chat.category?.name && (
+                                                <MdLabel className={`text-[18px] mr-1 ${chat.category?.color}`} />
                                             )}
                                             {lastMessage?.sender === userId ? (
                                                 <span className="mr-1">You: </span>
                                             ) : (
-                                                lastMessage?.sender && <span className="mr-1">{chat.name}:</span>
+                                                <span className="mr-1">{chat.name}:</span>
                                             )}
                                             {lastMessage?.type === 'gif' ? (
                                                 <span className="flex items-center">
-                                                    <MdOutlineGifBox size={15} className="mr-[4px]" /> GIF
+                                                    <MdOutlineGifBox size={15} className="mr-[4px]" /> [GIF]
                                                 </span>
                                             ) : lastMessage?.type === 'sticker' ? (
                                                 <span className="flex items-center">
-                                                    <LuSticker size={15} className="mr-[4px]" /> Sticker
+                                                    <LuSticker size={15} className="mr-[4px]" /> [Sticker]
                                                 </span>
                                             ) : lastMessage?.type === 'image' ? (
                                                 <span className="flex items-center">
-                                                    <IoImageOutline size={15} className="mr-[4px]" /> Hình ảnh
+                                                    <IoImageOutline size={15} className="mr-[4px]" />
+                                                    [Hình ảnh]
                                                 </span>
                                             ) : lastMessage?.type === 'file' ? (
                                                 <span className="flex items-center">

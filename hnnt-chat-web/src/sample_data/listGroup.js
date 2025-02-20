@@ -10,6 +10,7 @@ const groups = [
         categoryColor: '',
         delete: [],
         group: true,
+        leader: 0,
         members: [
             {
                 id: 0,

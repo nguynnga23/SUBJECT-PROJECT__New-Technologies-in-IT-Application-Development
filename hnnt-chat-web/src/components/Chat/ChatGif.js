@@ -3,10 +3,10 @@ import PopupMenuForChat from '../Popup/PopupMenuForChat';
 import { AiOutlineLike } from 'react-icons/ai';
 import PopupReacttion from '../Popup/PopupReaction';
 import { useState } from 'react';
-import userActive from '../../sample_data/userActive';
 
 function ChatGif({
     index,
+    userId,
     activeChat,
     message,
     setHoveredMessage,
@@ -16,7 +16,6 @@ function ChatGif({
     reactions,
     showName,
 }) {
-    const userId = userActive.id;
     const position = message.sender === userId ? 'right' : 'left';
     const [showPopupReaction, setShowPopupReaction] = useState(false);
     const sumReaction = reactions.reduce((total, reaction) => total + reaction.sum, 0);

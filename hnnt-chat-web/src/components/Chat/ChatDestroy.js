@@ -1,10 +1,9 @@
 import { FiMoreHorizontal } from 'react-icons/fi';
 import PopupMenuForChat from '../Popup/PopupMenuForChat';
-import { useSelector } from 'react-redux';
-import userActive from '../../sample_data/userActive';
 
 function ChatDestroy({
     index,
+    userId,
     message,
     setHoveredMessage,
     hoveredMessage,
@@ -12,8 +11,7 @@ function ChatDestroy({
     setIsPopupOpenIndex,
     showName,
 }) {
-    const position = message.sender === userActive.id ? 'right' : 'left';
-    const userId = userActive.id;
+    const position = message.sender === userId ? 'right' : 'left';
     return (
         <div
             key={index}

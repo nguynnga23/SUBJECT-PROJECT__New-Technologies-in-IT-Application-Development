@@ -5,10 +5,10 @@ import { useState } from 'react';
 import PopupMenuForChat from '../Popup/PopupMenuForChat';
 import { AiOutlineLike } from 'react-icons/ai';
 import PopupReaction from '../Popup/PopupReaction';
-import userActive from '../../sample_data/userActive';
 
 function ChatImage({
     index,
+    userId,
     activeChat,
     message,
     setHoveredMessage,
@@ -18,7 +18,6 @@ function ChatImage({
     reactions,
     showName,
 }) {
-    const userId = userActive.id;
     const [selectedImage, setSelectedImage] = useState(null);
     const position = message.sender === userId ? 'right' : 'left';
     const sumReaction = reactions.reduce((total, reaction) => total + reaction.sum, 0);
