@@ -11,6 +11,8 @@ import PhoneNumSignUpScreen from '../../features/auth/screens/PhoneNumSignUpScre
 import OTPConfirmScreen from '../../features/auth/screens/OTPConfirmScreen';
 import PasswordSignUpScreen from '../../features/auth/screens/PasswordSignUpScreen';
 import HomeScreen from '../../features/auth/screens/HomeScreen';
+import AccountAndSecurity from '../../features/profile/screens/account-and-security/AccountAndSecurity';
+import Privacy from '../../features/profile/screens/privacy/Privacy';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -30,6 +32,9 @@ export default function AppNavigator() {
                 <Stack.Screen name="AddFriend" component={AddFriendScreen} />
                 <Stack.Screen name="AddGroup" component={AddGroupScreen} />
                 <Stack.Screen name="Search" component={SearchScreen} />
+
+                <Stack.Screen name="Account and security" component={AccountAndSecurity} />
+                <Stack.Screen name="Privacy" component={Privacy} />
             </Stack.Navigator>
         </NavigationContainer>
     );
