@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Authentication from './screens/Authentication/Authentication';
 import Home from './screens/Home';
+import 'flowbite';
 
 export default function App() {
     return (
