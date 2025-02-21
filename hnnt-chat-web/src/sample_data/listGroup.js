@@ -11,11 +11,12 @@ const groups = [
         delete: [],
         group: true,
         leader: 0,
+        seem: false,
         members: [
             {
                 id: 0,
                 name: 'Nguyễn Lê Nhật Huy',
-                avatar: 'https://www.catster.com/wp-content/uploads/2023/11/Beluga-Cat-e1714190563227.webp',
+                avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMZIA8q5YZgirXxhzjkXkoVG1LuwLd4WYkjg&s',
             },
 
             {

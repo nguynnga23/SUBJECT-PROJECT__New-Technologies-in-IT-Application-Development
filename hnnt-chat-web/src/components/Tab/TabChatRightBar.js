@@ -1,12 +1,20 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import TabChatInfo from './TabChatInfo';
 import TabChatSympol from './TabChatSympol';
 import { useDispatch, useSelector } from 'react-redux';
+import TabChatInfoGroup from './TabChatInfoGroup';
 
 function TabChatRightBar() {
     const initTab = useSelector((state) => state.chat.rightBarTab);
+    const activeChat = useSelector((state) => state.chat.data.find((chat) => chat.id === state.chat.activeChat?.id));
 
     const [activeMessageTab, setActiveMessageTab] = useState(initTab);
+
+    useEffect(() => {
+        if (!activeChat?.group) {
+            setActiveMessageTab('info');
+        }
+    }, [activeChat]);
 
     return (
         <div className="w-1/4 flex flex-col bg-white min-w-[350px] border-l">
@@ -14,7 +22,7 @@ function TabChatRightBar() {
             <div className="flex">
                 <button
                     className={`flex-1 p-[18.5px] text-center font-medium w-[50%] ${
-                        activeMessageTab === 'info' ? 'bg-white' : 'bg-gray-200'
+                        activeMessageTab === 'info' || activeMessageTab === 'infoGroup' ? 'bg-white' : 'bg-gray-200'
                     }`}
                     onClick={() => setActiveMessageTab('info')}
                 >
@@ -31,9 +39,13 @@ function TabChatRightBar() {
             </div>
 
             {/* Nội dung */}
-            {activeMessageTab === 'info' && <TabChatInfo />}
+            {activeMessageTab === 'info' && <TabChatInfo setActiveMessageTab={setActiveMessageTab} />}
 
             {activeMessageTab === 'sympol' && <TabChatSympol />}
+
+            {activeMessageTab === 'infoGroup' && activeChat.group && (
+                <TabChatInfoGroup setActiveMessageTab={setActiveMessageTab} group={activeChat} />
+            )}
         </div>
     );
 }

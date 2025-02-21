@@ -6,6 +6,8 @@ import { FaRegFileWord } from 'react-icons/fa';
 import { FaRegFileExcel } from 'react-icons/fa';
 import { FaRegFilePowerpoint } from 'react-icons/fa';
 import { useState } from 'react';
+import { RiGroupLine } from 'react-icons/ri';
+import { useSelector } from 'react-redux';
 
 const getFileIcon = (fileType) => {
     if (fileType.includes('pdf')) return <VscFilePdf className="text-3xl text-red-500 mr-2" />;
@@ -18,9 +20,11 @@ const getFileIcon = (fileType) => {
     return <MdFilePresent className="text-3xl text-gray-500 mr-2" />; // Mặc định
 };
 
-const Archive = ({ title, isOpen, toggleOpen, messages, type }) => {
-    const userId = 0;
+const Archive = ({ title, isOpen, toggleOpen, messages, type, group, setActiveMessageTab }) => {
+    const userActive = useSelector((state) => state.auth.userActive);
+    const userId = userActive.id;
     const [selectedImage, setSelectedImage] = useState(null);
+
     return (
         <div className="p-2 relative border-b-[7px] cursor-pointer">
             <div className="flex justify-between items-center pl-2" onClick={toggleOpen}>
@@ -31,10 +35,19 @@ const Archive = ({ title, isOpen, toggleOpen, messages, type }) => {
                     <IoIosArrowDropright className="font-medium text-base text-gray-400" />
                 )}
             </div>
+            {isOpen && type === 'member' && (
+                <div
+                    className="w-full p-1 flex items-center hover:bg-gray-100"
+                    onClick={() => setActiveMessageTab('infoGroup')}
+                >
+                    <RiGroupLine size={16} className="m-2" />
+                    <p className="text-[12px]">{group.length} thành viên</p>
+                </div>
+            )}
             {isOpen && (
                 <div className="flex flex-wrap p-1 gap-2">
                     {messages
-                        .filter((msg) => msg.type === type && !msg.delete.some((m) => m.id === userId))
+                        ?.filter((msg) => msg.type === type && !msg.delete.some((m) => m.id === userId))
                         .map((msg, index) => {
                             if (type === 'image') {
                                 return (
@@ -47,7 +60,7 @@ const Archive = ({ title, isOpen, toggleOpen, messages, type }) => {
                                 );
                             } else if (type === 'file') {
                                 return (
-                                    <div className="w-full flex">
+                                    <div className="w-full flex ">
                                         <a
                                             href={msg.content}
                                             download={msg.content}

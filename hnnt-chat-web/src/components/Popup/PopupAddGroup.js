@@ -111,7 +111,6 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
                                     <input
                                         type="checkbox"
                                         checked={selectedMembers.some((m) => m.id === member.id) || isExistingMember}
-                                        onChange={() => toggleMember(member)}
                                         className="mr-3"
                                     />
                                     <img

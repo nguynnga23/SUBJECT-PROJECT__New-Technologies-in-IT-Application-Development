@@ -1,6 +1,6 @@
 import PopupCategoryAndState from '../../components/Popup/PopupCategoryAndState';
 import { useSelector, useDispatch } from 'react-redux';
-import { setActiveChat } from '../../redux/slices/chatSlice';
+import { setActiveChat, setSeemChat } from '../../redux/slices/chatSlice';
 import { MdOutlineGifBox } from 'react-icons/md';
 import { LuSticker } from 'react-icons/lu';
 import { IoImageOutline } from 'react-icons/io5';
@@ -22,11 +22,25 @@ function TabMesssage() {
     const data = useSelector((state) => state.chat.data);
     const [hoveredMessage, setHoveredMessage] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
+    const categories = useSelector((state) => state.category.currentCategory) || [];
+    const state = useSelector((state) => state.category.state);
 
     const dispatch = useDispatch();
+    const priorityChatsList = data.filter(
+        (chat) =>
+            chat.kind === 'priority' &&
+            (categories.length === 0 || categories?.some((cat) => cat.id === chat.category.id)) &&
+            (!chat.group || chat.members?.some((m) => m?.id === userActive?.id)) &&
+            (state !== 'Chưa đọc' || chat.seem === false),
+    );
+    const otherChatsList = data.filter(
+        (chat) =>
+            chat.kind === 'other' &&
+            (categories.length === 0 || categories?.some((cat) => cat.id === chat.category.id)) &&
+            (!chat.group || chat.members?.some((m) => m?.id === userActive?.id)) &&
+            (state !== 'Chưa đọc' || chat.seem === false),
+    );
 
-    const priorityChatsList = data.filter((chat) => chat.kind === 'priority');
-    const otherChatsList = data.filter((chat) => chat.kind === 'other');
     const chats = activeTab === 'priority' ? priorityChatsList : otherChatsList;
 
     const getLastMessage = (messages) => {
@@ -58,7 +72,7 @@ function TabMesssage() {
                 </div>
                 <PopupCategoryAndState />
             </div>
-            <div className="overflow-y-auto h-[calc(100vh_-_100px)] z-0">
+            <div className="overflow-y-auto min-h-[500px] z-0">
                 {chats
                     .filter((chat) => !chat.delete.some((item) => item.id === userId))
                     .sort((a, b) => (b.pin ? 1 : 0) - (a.pin ? 1 : 0))
@@ -70,7 +84,10 @@ function TabMesssage() {
                                 className={`relative p-3 cursor-pointer hover:bg-gray-200 ${
                                     activeChat?.id === chat.id ? 'bg-blue-100' : ''
                                 }`}
-                                onClick={() => dispatch(setActiveChat(chat))}
+                                onClick={() => {
+                                    dispatch(setActiveChat(chat));
+                                    dispatch(setSeemChat({ chatId: chat.id, seem: true }));
+                                }}
                                 onMouseEnter={() => {
                                     if (timeoutRef.current) {
                                         // Hủy bỏ timeout nếu chuột quay lại
@@ -116,7 +133,11 @@ function TabMesssage() {
                                         <h3 className="font-medium text-xs text-lg mt-1 max-w-[270px] truncate">
                                             {chat.name}
                                         </h3>
-                                        <p className="flex items-center text-sm text-gray-600 text-xs mt-1 ">
+                                        <p
+                                            className={`flex items-center text-sm  text-xs mt-1 ${
+                                                chat.seem ? 'text-gray-600' : 'font-medium text-black'
+                                            }`}
+                                        >
                                             {chat.category?.name && (
                                                 <MdLabel className={`text-[18px] mr-1 ${chat.category?.color}`} />
                                             )}

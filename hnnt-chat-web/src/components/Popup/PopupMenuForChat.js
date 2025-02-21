@@ -36,7 +36,7 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
             ref={popupRef}
             className={`absolute ${
                 position === 'left' ? 'left-[20px]' : 'right-[20px]'
-            } top-[10px] w-52 bg-white shadow-lg rounded-lg border border-gray-200 z-50`}
+            } top-[10px] w-52 bg-white shadow-lg rounded-lg border border-gray-200 z-50 text-[12px]`}
         >
             <div className="py-2">
                 {!message?.destroy && (
@@ -48,10 +48,6 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
                         <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
                             <MdPushPin className="mr-3" />
                             Ghim tin nhắn
-                        </li>
-                        <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                            <FaRegStar className="mr-3" />
-                            Đánh dấu tin nhắn
                         </li>
                     </ul>
                 )}

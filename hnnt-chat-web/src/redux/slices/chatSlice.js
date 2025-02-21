@@ -43,6 +43,7 @@ const chatSlice = createSlice({
                     delete: [],
                     destroy: false,
                     reactions: [],
+                    seem: true,
                 };
                 // Nếu có fileName thì thêm vào object
                 if (fileName) {
@@ -75,6 +76,16 @@ const chatSlice = createSlice({
         },
         setActiveChat: (state, action) => {
             state.activeChat = action.payload;
+        },
+        setSeemChat: (state, action) => {
+            const { chatId, seem } = action.payload;
+            const chat = state.data.find((c) => c.id === chatId);
+            if (chat) {
+                chat.seem = seem;
+            }
+        },
+        setSeemAllChat: (state) => {
+            state.data.filter((c) => (c.seem = true));
         },
         setShowOrOffRightBar: (state, action) => {
             state.showRightBar = action.payload;
@@ -195,26 +206,39 @@ const chatSlice = createSlice({
                 delete: [],
                 group: true,
                 leader: state.userActive.id,
-                members: [...members, state.userActive],
+                members: [state.userActive, ...members],
                 messages: [],
+                seem: true,
             };
             state.data.push(newGroup);
         },
         addMemberToGroup: (state, action) => {
             const { groupId, members } = action.payload;
             const group = state.data.find((g) => g.id === groupId);
-            console.log('Trước khi thêm thành viên:', group.members);
             group.members = [
                 ...group.members,
                 ...members.filter((newMember) => !group.members.some((member) => member.id === newMember.id)),
             ];
-            console.log('Sau khi thêm thành viên:', group.members);
+        },
+        removeMemberOfGroup: (state, action) => {
+            const { memberId, groupId } = action.payload;
+
+            return {
+                ...state,
+                data: state.data.map((group) =>
+                    group.id === groupId
+                        ? { ...group, members: group.members.filter((m) => m.id !== memberId) }
+                        : group,
+                ),
+            };
         },
     },
 });
 
 export const {
     setChats,
+    setSeemChat,
+    setSeemAllChat,
     sendMessage,
     setActiveChat,
     setShowOrOffRightBar,
@@ -234,5 +258,6 @@ export const {
     deleteChatForUser,
     createGroup,
     addMemberToGroup,
+    removeMemberOfGroup,
 } = chatSlice.actions;
 export default chatSlice.reducer;

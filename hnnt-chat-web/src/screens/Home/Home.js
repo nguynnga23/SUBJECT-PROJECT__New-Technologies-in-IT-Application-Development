@@ -24,18 +24,18 @@ export default function Home() {
     const dispatch = useDispatch();
     const userActive = useSelector((state) => state.auth.userActive);
     useEffect(() => {
-        if (userActive) {
+        if (userActive && userActive.id !== null) {
             dispatch(
                 setChats({
                     userActive: userActive,
-                    chats: userActive.chats,
-                    groups: groups.filter((g) => g.members?.some((m) => m.id === userActive.id)),
+                    chats: userActive?.chats,
+                    groups: groups.filter((g) => g.members?.some((m) => m?.id === userActive?.id)),
                 }),
             );
         } else {
             navigate('/');
         }
-    }, [userActive, navigate]);
+    }, [userActive]);
 
     // open modal
     const [isOpenModel, setIsOpenModel] = useState(false);
@@ -57,7 +57,7 @@ export default function Home() {
                         type="button"
                     >
                         <img
-                            src={userActive.avatar}
+                            src={userActive?.avatar}
                             alt="Avatar"
                             className="w-12 h-12 rounded-full border-2 border-white object-cover"
                         />
