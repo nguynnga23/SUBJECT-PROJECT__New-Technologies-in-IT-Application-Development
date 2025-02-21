@@ -108,6 +108,12 @@ function TabChatInfo({ setActiveMessageTab }) {
                                 <AiOutlineUsergroupAdd
                                     size={35}
                                     className="p-2 bg-gray-200  rounded-full cursor-pointer"
+                                    onClick={() => setAddGroupButton(true)}
+                                />
+                                <PopupAddGroup
+                                    isOpen={addGroupButton}
+                                    onClose={() => setAddGroupButton(false)}
+                                    activeChat={activeChat}
                                 />
                             </div>
                             <p className="text-[10px]">Tạo nhóm trò chuyện</p>

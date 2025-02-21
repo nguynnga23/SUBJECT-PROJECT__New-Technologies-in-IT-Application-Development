@@ -22,8 +22,8 @@ function Modal({ isOpen, onClose }) {
     const Avatar = userActive?.avatar;
 
     const [isType, setIsType] = useState('profile');
-    const [isName, setIsName] = useState('Nguyễn Thiên Tứ');
-    const [gender, setGender] = useState('male');
+    const [isName, setIsName] = useState(userActive?.name);
+    const [gender, setGender] = useState(userActive?.gender);
 
     // -----------------------------------------------------
     const currentYear = new Date().getFullYear();
@@ -207,13 +207,13 @@ function Modal({ isOpen, onClose }) {
                                     >
                                         <FormControlLabel
                                             className="text-gray-700"
-                                            value="male"
+                                            value="Nam"
                                             control={<Radio />}
                                             label="Nam"
                                         />
                                         <FormControlLabel
                                             className="text-gray-700"
-                                            value="female"
+                                            value="Nữ"
                                             control={<Radio />}
                                             label="Nữ"
                                         />
@@ -347,7 +347,7 @@ function Modal({ isOpen, onClose }) {
                                 className="absolute top-52 left-32 flex items-center justify-center"
                                 onClick={() => setIsType('edit')}
                             >
-                                <p className="font-semibold mr-3">Nguyễn Thiên Tứ</p>
+                                <p className="font-semibold mr-3">{userActive?.name}</p>
                                 <LuPencilLine className="cursor-pointer" />
                             </div>
 
@@ -358,13 +358,13 @@ function Modal({ isOpen, onClose }) {
 
                                 <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
                                     <p className="text-gray-500">Giới tính</p>
-                                    <p>Nam</p>
+                                    <p>{userActive?.gender}</p>
 
                                     <p className="text-gray-500">Ngày sinh</p>
-                                    <p>02 tháng 01, 2003</p>
+                                    <p>{userActive?.birthDate}</p>
 
                                     <p className="text-gray-500">Điện thoại</p>
-                                    <p>+84 935 019 843</p>
+                                    <p>(+84 ){userActive?.number}</p>
                                 </div>
 
                                 <p className="text-gray-500 mt-3 text-xs">

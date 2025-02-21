@@ -32,13 +32,13 @@ import ChatFile from '../Chat/ChatFile';
 import ChatDestroy from '../Chat/ChatDestroy';
 import ChatSticker from '../Chat/ChatSticker';
 import PopupAddGroup from '../Popup/PopupAddGroup';
+import PopupVideoCall from '../Popup/PopupVideoCall';
 
 function TabChat() {
     const [message, setMessage] = useState('');
     const [isOpenCategory, setIsOpenCategory] = useState(false);
     const userActive = useSelector((state) => state.auth.userActive);
     const userId = userActive.id;
-    let preSender = null;
 
     const activeChat = useSelector(
         (state) => state.chat.data.find((chat) => chat.id === state.chat.activeChat?.id),
@@ -63,6 +63,8 @@ function TabChat() {
 
     const [addFriendButton, setAddFriendButton] = useState(false);
     const [addGroupButton, setAddGroupButton] = useState(false);
+
+    const [videoCall, setVideoCall] = useState(false);
 
     const MessageComponent = {
         text: ChatText,
@@ -201,11 +203,13 @@ function TabChat() {
                         <BsTelephone
                             size={26}
                             className="ml-1.5 p-1 hover:text-gray-500 hover:bg-gray-200  hover:rounded-[5px] cursor-pointer"
+                            onClick={() => setVideoCall(true)}
                         />
                     )}
                     <GoDeviceCameraVideo
                         size={26}
                         className="ml-1.5 p-1 hover:text-gray-500 hover:bg-gray-200  hover:rounded-[5px] cursor-pointer"
+                        onClick={() => setVideoCall(true)}
                     />
                     <IoSearchOutline
                         size={26}
@@ -227,6 +231,10 @@ function TabChat() {
                             className="ml-1.5 text-gray-700 p-1 hover:text-gray-500 hover:rounded-[5px] hover:bg-gray-200 cursor-pointer"
                             onClick={() => dispatch(setShowOrOffRightBar(!showRightBar))}
                         />
+                    )}
+
+                    {videoCall && (
+                        <PopupVideoCall setVideoCall={setVideoCall} activeChat={activeChat} userActive={userActive} />
                     )}
                 </div>
             </div>

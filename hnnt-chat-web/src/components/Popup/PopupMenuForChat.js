@@ -49,10 +49,6 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
                             <MdPushPin className="mr-3" />
                             Ghim tin nhắn
                         </li>
-                        <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                            <FaRegStar className="mr-3" />
-                            Đánh dấu tin nhắn
-                        </li>
                     </ul>
                 )}
                 <li

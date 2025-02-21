@@ -7,7 +7,8 @@ import { MdLabel } from 'react-icons/md';
 
 import PopupReaded from './PopupReaded';
 import PopupManageCategory from './PopupManageCategory';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { setCategory } from '../../redux/slices/categorySlice';
 
 const states = [
     { id: 1, name: 'Tất cả' },
@@ -21,6 +22,8 @@ function PopupCategoryAndState() {
     const [isOpenManageCategory, setIsOpenManageCategory] = useState(false);
     const categories = useSelector((state) => state.category.categories);
     const popupContainerRef = useRef(null);
+
+    const dispatch = useDispatch();
 
     // Hàm đóng popup khi click bên ngoài
     useEffect(() => {
@@ -37,18 +40,21 @@ function PopupCategoryAndState() {
 
     const toggleCategory = (category) => {
         setSelectedCategories((prevSelected) => {
-            if (prevSelected.some((c) => c.id === category.id)) {
-                // Nếu danh mục đã được chọn, bỏ chọn nó
-                return prevSelected.filter((c) => c.id !== category.id);
-            } else {
-                // Nếu chưa chọn, thêm vào danh sách
-                return [...prevSelected, category];
-            }
+            const updatedCategories = prevSelected.some((c) => c.id === category.id)
+                ? prevSelected.filter((c) => c.id !== category.id)
+                : [...prevSelected, category];
+
+            // Cập nhật Redux sau khi state đã thay đổi
+            setTimeout(() => {
+                dispatch(setCategory(updatedCategories));
+            }, 0);
+
+            return updatedCategories; // Trả về giá trị mới cho state cục bộ
         });
     };
 
     return (
-        <div className="relative inline-block text-left z-[1000]" ref={popupContainerRef}>
+        <div className="relative inline-block text-left z-[10]" ref={popupContainerRef}>
             {/* Nút mở dropdown */}
             <div className="h-full flex items-center">
                 <button
@@ -88,7 +94,9 @@ function PopupCategoryAndState() {
                         {categories.map((category) => (
                             <div
                                 key={category.id}
-                                onClick={() => toggleCategory(category)}
+                                onClick={() => {
+                                    toggleCategory(category);
+                                }}
                                 className="flex items-center p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
                             >
                                 {selectedCategories.some((c) => c.id === category.id) ? (

@@ -43,6 +43,7 @@ const chatSlice = createSlice({
                     delete: [],
                     destroy: false,
                     reactions: [],
+                    seem: true,
                 };
                 // Nếu có fileName thì thêm vào object
                 if (fileName) {
@@ -75,6 +76,16 @@ const chatSlice = createSlice({
         },
         setActiveChat: (state, action) => {
             state.activeChat = action.payload;
+        },
+        setSeemChat: (state, action) => {
+            const { chatId, seem } = action.payload;
+            const chat = state.data.find((c) => c.id === chatId);
+            if (chat) {
+                chat.seem = seem;
+            }
+        },
+        setSeemAllChat: (state) => {
+            state.data.filter((c) => (c.seem = true));
         },
         setShowOrOffRightBar: (state, action) => {
             state.showRightBar = action.payload;
@@ -197,6 +208,7 @@ const chatSlice = createSlice({
                 leader: state.userActive.id,
                 members: [state.userActive, ...members],
                 messages: [],
+                seem: true,
             };
             state.data.push(newGroup);
         },
@@ -225,6 +237,8 @@ const chatSlice = createSlice({
 
 export const {
     setChats,
+    setSeemChat,
+    setSeemAllChat,
     sendMessage,
     setActiveChat,
     setShowOrOffRightBar,

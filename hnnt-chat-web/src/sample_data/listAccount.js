@@ -6,8 +6,9 @@ const Accounts = [
         password: '123',
         avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMZIA8q5YZgirXxhzjkXkoVG1LuwLd4WYkjg&s',
         status: 'string',
-        birthDate: 'date',
+        birthDate: '20/09/2003',
         location: 'string',
+        gender: 'Nam',
         friends: [
             {
                 id: 1,
@@ -38,6 +39,8 @@ const Accounts = [
                 kind: 'priority',
                 category: {},
                 delete: [],
+                seem: false,
+
                 messages: [
                     {
                         id: 1,
@@ -111,6 +114,8 @@ const Accounts = [
                 kind: 'priority',
                 category: {},
                 delete: [],
+                seem: false,
+
                 messages: [
                     {
                         id: 1,
@@ -167,6 +172,7 @@ const Accounts = [
                 kind: 'other',
                 category: {},
                 delete: [],
+                seem: false,
                 messages: [
                     {
                         id: 1,
@@ -223,8 +229,9 @@ const Accounts = [
         password: '123',
         avatar: 'https://www.catster.com/wp-content/uploads/2023/11/Beluga-Cat-e1714190563227.webp',
         status: 'string',
-        birthDate: 'date',
+        birthDate: '23/09/2003',
         location: 'string',
+        gender: 'Nữ',
         friends: [
             {
                 id: 0,
@@ -255,6 +262,7 @@ const Accounts = [
                 kind: 'priority',
                 category: {},
                 delete: [],
+                seem: false,
                 messages: [
                     {
                         id: 1,
@@ -328,6 +336,7 @@ const Accounts = [
                 kind: 'priority',
                 category: {},
                 delete: [],
+                seem: false,
                 messages: [
                     {
                         id: 1,
@@ -384,6 +393,7 @@ const Accounts = [
                 kind: 'other',
                 category: {},
                 delete: [],
+                seem: false,
                 messages: [
                     {
                         id: 1,
@@ -440,8 +450,9 @@ const Accounts = [
         password: '123',
         avatar: 'https://m.media-amazon.com/images/I/518K-+yYl2L._AC_SL1000_.jpg',
         status: 'string',
-        birthDate: 'date',
+        birthDate: '02/01/2003',
         location: 'string',
+        gender: 'Nam',
         friends: [
             {
                 id: 1,
@@ -472,6 +483,7 @@ const Accounts = [
                 kind: 'priority',
                 category: {},
                 delete: [],
+                seem: false,
                 messages: [
                     {
                         id: 1,
@@ -545,6 +557,7 @@ const Accounts = [
                 kind: 'priority',
                 category: {},
                 delete: [],
+                seem: false,
                 messages: [
                     {
                         id: 1,
@@ -601,6 +614,7 @@ const Accounts = [
                 kind: 'other',
                 category: {},
                 delete: [],
+                seem: false,
                 messages: [
                     {
                         id: 1,
@@ -658,8 +672,9 @@ const Accounts = [
         password: '123',
         avatar: 'https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/474174ewO/anh-meme-meo-khoc-cuc-cute_042216244.jpg',
         status: 'string',
-        birthDate: 'date',
+        birthDate: '00/00/2003',
         location: 'string',
+        gender: 'Nam',
         friends: [
             {
                 id: 1,
@@ -690,6 +705,7 @@ const Accounts = [
                 kind: 'priority',
                 category: {},
                 delete: [],
+                seem: false,
                 messages: [
                     {
                         id: 1,
@@ -763,6 +779,7 @@ const Accounts = [
                 kind: 'priority',
                 category: {},
                 delete: [],
+                seem: false,
                 messages: [
                     {
                         id: 1,
@@ -819,6 +836,7 @@ const Accounts = [
                 kind: 'other',
                 category: {},
                 delete: [],
+                seem: false,
                 messages: [
                     {
                         id: 1,

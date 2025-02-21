@@ -11,6 +11,7 @@ const groups = [
         delete: [],
         group: true,
         leader: 0,
+        seem: false,
         members: [
             {
                 id: 0,
