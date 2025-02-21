@@ -76,9 +76,9 @@ function PopupCategoryAndState() {
             {/* Dropdown Menu */}
             {isOpen && (
                 <div className="absolute right-0 mt-2 w-56 bg-white shadow-lg rounded-lg border">
-                    <div className="p-2">
+                    <p className="text-sm font-bold text-gray-700 mb-2">Theo trạng thái</p>
+                    <div className="p-2 ">
                         {/* Theo trạng thái */}
-                        <p className="text-sm font-bold text-gray-700 mb-2">Theo trạng thái</p>
                         {states.map((state) => (
                             <div
                                 key={state.id}
@@ -95,37 +95,43 @@ function PopupCategoryAndState() {
                         ))}
 
                         {/* Theo thẻ phân loại */}
-                        <p className="text-sm font-bold text-gray-700 mt-3 mb-2 border-t pt-1">Theo thẻ phân loại</p>
-                        {categories.map((category) => (
-                            <div
-                                key={category.id}
-                                onClick={() => {
-                                    toggleCategory(category);
-                                }}
-                                className="flex items-center p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
-                            >
-                                {selectedCategories.some((c) => c.id === category.id) ? (
-                                    <FaRegSquareCheck className="mr-3 text-blue-500" />
-                                ) : (
-                                    <FaRegSquare className="mr-3 text-gray-500" />
-                                )}
-                                <MdLabel className={`mr-3 ${category.color}`} size={18} />
-                                <span className="flex-1 text-sm">{category.name}</span>
+                        <div>
+                            <p className="text-sm font-bold text-gray-700 mt-3 mb-2 border-t pt-1">
+                                Theo thẻ phân loại
+                            </p>
+                            <div className=" overflow-auto max-h-[300px]">
+                                {categories.map((category) => (
+                                    <div
+                                        key={category.id}
+                                        onClick={() => {
+                                            toggleCategory(category);
+                                        }}
+                                        className="flex items-center p-2 hover:bg-gray-100 rounded-lg cursor-pointer "
+                                    >
+                                        {selectedCategories.some((c) => c.id === category.id) ? (
+                                            <FaRegSquareCheck className="mr-3 text-blue-500" />
+                                        ) : (
+                                            <FaRegSquare className="mr-3 text-gray-500" />
+                                        )}
+                                        <MdLabel className={`mr-3 ${category.color}`} size={18} />
+                                        <span className="flex-1 text-sm">{category.name}</span>
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                        <p
-                            className="flex justify-center item-center cursor-pointer py-2 text-sm font-bold hover:bg-gray-100 text-gray-700 border-t pt-1"
-                            onClick={() => setIsOpenManageCategory(true)}
-                        >
-                            Quản lý thẻ phân loại
-                        </p>
-                        {isOpenManageCategory && (
-                            <PopupManageCategory
-                                setIsOpenManageCategory={setIsOpenManageCategory}
-                                isOpenManageCategory={isOpenManageCategory}
-                            />
-                        )}
+                        </div>
                     </div>
+                    <p
+                        className="flex justify-center item-center cursor-pointer py-2 text-sm font-bold hover:bg-gray-100 text-gray-700 border-t pt-1"
+                        onClick={() => setIsOpenManageCategory(true)}
+                    >
+                        Quản lý thẻ phân loại
+                    </p>
+                    {isOpenManageCategory && (
+                        <PopupManageCategory
+                            setIsOpenManageCategory={setIsOpenManageCategory}
+                            isOpenManageCategory={isOpenManageCategory}
+                        />
+                    )}
                 </div>
             )}
         </div>

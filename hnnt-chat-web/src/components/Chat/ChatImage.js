@@ -91,7 +91,7 @@ function ChatImage({
                     chatId={activeChat.id}
                     message={message}
                     reactions={reactions}
-                    userId={0}
+                    userId={userId}
                 />
             )}
         </div>

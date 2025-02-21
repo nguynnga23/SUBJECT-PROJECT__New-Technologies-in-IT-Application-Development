@@ -39,7 +39,7 @@ function PopupCategory({ isOpen, setIsOpen }) {
         <div className="relative inline-block text-left" ref={popupContainerRef}>
             {isOpen && (
                 <div className="absolute mt-11 left-[-105px] w-56 bg-white shadow-lg rounded-lg border z-[10]">
-                    <div className="">
+                    <div className="overflow-auto max-h-[300px]">
                         {categories.map((category) => (
                             <div
                                 key={category.id}
@@ -50,19 +50,19 @@ function PopupCategory({ isOpen, setIsOpen }) {
                                 <span className="flex-1 text-sm">{category.name}</span>
                             </div>
                         ))}
-                        <p
-                            className="flex justify-center item-center cursor-pointer py-2 text-sm font-bold hover:bg-gray-100 text-gray-700 border-t pt-1"
-                            onClick={() => setIsOpenManageCategory(true)}
-                        >
-                            Quản lý thẻ phân loại
-                        </p>
-                        {isOpenManageCategory && (
-                            <PopupManageCategory
-                                setIsOpenManageCategory={setIsOpenManageCategory}
-                                isOpenManageCategory={isOpenManageCategory}
-                            />
-                        )}
                     </div>
+                    <p
+                        className="flex justify-center item-center cursor-pointer py-2 text-sm font-bold hover:bg-gray-100 text-gray-700 border-t pt-1"
+                        onClick={() => setIsOpenManageCategory(true)}
+                    >
+                        Quản lý thẻ phân loại
+                    </p>
+                    {isOpenManageCategory && (
+                        <PopupManageCategory
+                            setIsOpenManageCategory={setIsOpenManageCategory}
+                            isOpenManageCategory={isOpenManageCategory}
+                        />
+                    )}
                 </div>
             )}
         </div>

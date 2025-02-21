@@ -13,7 +13,7 @@ function TabFriendRequest(props) {
                     <div key={index} className="bg-white rounded-lg w-full cursor-pointer h-fit">
                         <div className="p-4 w-full">
                             <div className="flex justify-center">
-                                <img src={avatar} className="w-12 h-12 rounded-full" />
+                                <img src={avatar} alt="avatar" className="w-12 h-12 rounded-full" />
                                 <div className="ml-3 mr-20">
                                     <h4 className="text-sm font-medium">{user.name}</h4>
                                     <p className="text-xs text-gray-500">
@@ -61,7 +61,7 @@ function TabFriendRequest(props) {
                     <div key={index} className="bg-white rounded-lg p-4 cursor-pointer h-fit w-full">
                         <div className="p-4 w-full">
                             <div className="flex justify-center">
-                                <img src={avatar} className="w-12 h-12 rounded-full" />
+                                <img src={avatar} alt="avatar" className="w-12 h-12 rounded-full" />
                                 <div className="ml-3 mr-20">
                                     <h4 className="text-sm font-medium">{user.name}</h4>
                                     <p className="text-xs text-gray-500">{user.time || 'bạn đã gửi lời mời'}</p>

@@ -38,13 +38,14 @@ function TabChatRightBarSearch() {
             </div>
 
             {/* Empty Search Result */}
-            {searchTerm == '' && (
+            {searchTerm === '' && (
                 <div className="mt-20 text-center text-gray-500 p-4">
                     <div className="flex justify-center mb-4">
                         <div className="bg-blue-100 p-5 rounded-full">
                             <img
                                 src="https://chat.zalo.me/assets/search_empty_keyword_state.b291c6f32343a363d7bd2d062ba1cf04.png"
                                 className="w-[80px]"
+                                alt="zalo"
                             />
                         </div>
                     </div>

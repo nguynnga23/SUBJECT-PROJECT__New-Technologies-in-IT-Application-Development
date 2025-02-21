@@ -1,4 +1,4 @@
-import { use, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { IoClose } from 'react-icons/io5';
 import { useDispatch, useSelector } from 'react-redux';
 import { createGroup, addMemberToGroup } from '../../redux/slices/chatSlice';
@@ -39,7 +39,7 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
         onClose();
     };
     const handleAddMemberToGroup = () => {
-        const selectedFullMembers = selectedMembers.filter((member) => member.id !== 0); // Lọc các member hợp lệ
+        const selectedFullMembers = selectedMembers.filter((member) => member.id !== userActive.id); // Lọc các member hợp lệ
         dispatch(
             addMemberToGroup({
                 groupId: activeChat.id,

@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { MdContentCopy, MdPushPin, MdDelete } from 'react-icons/md';
-import { FaRegStar } from 'react-icons/fa';
 import { IoReload } from 'react-icons/io5';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateMessageStatus } from '../../redux/slices/chatSlice';

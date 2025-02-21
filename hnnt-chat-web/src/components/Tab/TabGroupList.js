@@ -17,7 +17,6 @@ function TabGroupList(props) {
         setFilterName,
         filter,
         setFilter,
-        sortedGroupedData,
         sortGroupsByName,
         isDropdownOpen,
         setIsDropdownOpen,
@@ -126,7 +125,7 @@ function TabGroupList(props) {
             {/* không tìm thấy */}
             {Array.isArray(sortGroupsByName()) && sortGroupsByName().length === 0 && (
                 <div className="w-full mt-10 pb-10 flex flex-col items-center justify-center text-center">
-                    <img src={searchzalo} className="w-36 h-w-36" />
+                    <img src={searchzalo} alt="avatar" className="w-36 h-w-36" />
                     <p className="text-sm font-semibold">Không tìm thấy kết quả</p>
                     <p className="text-sm mt-2">Vui lòng thử lại từ khóa hoặc bộ lọc khác</p>
                 </div>

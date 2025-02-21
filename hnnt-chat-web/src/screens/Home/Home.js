@@ -35,7 +35,7 @@ export default function Home() {
         } else {
             navigate('/');
         }
-    }, [userActive]);
+    }, [userActive, dispatch, navigate]);
 
     // open modal
     const [isOpenModel, setIsOpenModel] = useState(false);

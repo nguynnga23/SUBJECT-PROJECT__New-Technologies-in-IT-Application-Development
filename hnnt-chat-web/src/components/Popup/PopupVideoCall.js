@@ -1,4 +1,3 @@
-import { CiCircleRemove } from 'react-icons/ci';
 import { FaPhoneSlash } from 'react-icons/fa';
 import { CiMicrophoneOff } from 'react-icons/ci';
 
