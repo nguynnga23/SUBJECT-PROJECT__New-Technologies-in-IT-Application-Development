@@ -33,6 +33,7 @@ export default function PhoneNumber() {
                     textContainerStyle={styles.textContainer} // Chỉ có viền dưới
                     codeTextStyle={styles.codeText} // Đồng bộ màu cho mã quốc gia (+84)
                     flagButtonStyle={styles.flagButton} // Đồng bộ UI cho quốc kỳ
+                    autoFocus
                 />
             </View>
 
