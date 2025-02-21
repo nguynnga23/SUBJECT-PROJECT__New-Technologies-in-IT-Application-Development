@@ -8,7 +8,7 @@ import { MdLabel } from 'react-icons/md';
 import PopupReaded from './PopupReaded';
 import PopupManageCategory from './PopupManageCategory';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCategory } from '../../redux/slices/categorySlice';
+import { setCategory, setState } from '../../redux/slices/categorySlice';
 
 const states = [
     { id: 1, name: 'Tất cả' },
@@ -53,6 +53,11 @@ function PopupCategoryAndState() {
         });
     };
 
+    const toggleState = (state) => {
+        setSelectedState(state);
+        dispatch(setState(state.name));
+    };
+
     return (
         <div className="relative inline-block text-left z-[10]" ref={popupContainerRef}>
             {/* Nút mở dropdown */}
@@ -77,7 +82,7 @@ function PopupCategoryAndState() {
                         {states.map((state) => (
                             <div
                                 key={state.id}
-                                onClick={() => setSelectedState(state)}
+                                onClick={() => toggleState(state)}
                                 className="flex items-center p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
                             >
                                 {selectedState?.id === state.id ? (

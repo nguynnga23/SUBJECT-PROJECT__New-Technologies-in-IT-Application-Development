@@ -1,6 +1,6 @@
 import PopupCategoryAndState from '../../components/Popup/PopupCategoryAndState';
 import { useSelector, useDispatch } from 'react-redux';
-import { setActiveChat, setChats, setSeemChat } from '../../redux/slices/chatSlice';
+import { setActiveChat, setSeemChat } from '../../redux/slices/chatSlice';
 import { MdOutlineGifBox } from 'react-icons/md';
 import { LuSticker } from 'react-icons/lu';
 import { IoImageOutline } from 'react-icons/io5';
@@ -10,10 +10,9 @@ import { HiBellSlash } from 'react-icons/hi2';
 import { TiPin } from 'react-icons/ti';
 
 import { setActiveTabMessToOrther, setActiveTabMessToPriority } from '../../redux/slices/chatSlice';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import PopupMenuForMess from '../Popup/PopupMenuForMess';
 import { FiMoreHorizontal } from 'react-icons/fi';
-import groups from '../../sample_data/listGroup';
 
 function TabMesssage() {
     const userActive = useSelector((state) => state.auth.userActive);
@@ -24,19 +23,22 @@ function TabMesssage() {
     const [hoveredMessage, setHoveredMessage] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
     const categories = useSelector((state) => state.category.currentCategory) || [];
+    const state = useSelector((state) => state.category.state);
 
     const dispatch = useDispatch();
     const priorityChatsList = data.filter(
         (chat) =>
             chat.kind === 'priority' &&
             (categories.length === 0 || categories?.some((cat) => cat.id === chat.category.id)) &&
-            (!chat.group || chat.members?.some((m) => m?.id === userActive?.id)),
+            (!chat.group || chat.members?.some((m) => m?.id === userActive?.id)) &&
+            (state !== 'Chưa đọc' || chat.seem === false),
     );
     const otherChatsList = data.filter(
         (chat) =>
             chat.kind === 'other' &&
             (categories.length === 0 || categories?.some((cat) => cat.id === chat.category.id)) &&
-            (!chat.group || chat.members?.some((m) => m?.id === userActive?.id)),
+            (!chat.group || chat.members?.some((m) => m?.id === userActive?.id)) &&
+            (state !== 'Chưa đọc' || chat.seem === false),
     );
 
     const chats = activeTab === 'priority' ? priorityChatsList : otherChatsList;

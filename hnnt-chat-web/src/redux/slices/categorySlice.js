@@ -7,6 +7,7 @@ const categorySlice = createSlice({
     initialState: {
         categories: categories,
         currentCategory: [],
+        state: 'Tất cả',
     },
     reducers: {
         addCategory: (state, action) => {
@@ -33,8 +34,11 @@ const categorySlice = createSlice({
         setCategory: (state, action) => {
             state.currentCategory = action.payload;
         },
+        setState: (state, action) => {
+            state.state = action.payload;
+        },
     },
 });
 
-export const { addCategory, deleteCategory, setCategory } = categorySlice.actions;
+export const { addCategory, deleteCategory, setCategory, setState } = categorySlice.actions;
 export default categorySlice.reducer;
