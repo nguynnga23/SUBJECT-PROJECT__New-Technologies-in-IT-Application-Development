@@ -21,6 +21,7 @@ export default function AddEmail() {
                 autoCapitalize="none"
                 value={email}
                 onChangeText={setEmail}
+                autoFocus
             />
 
             {/* Lưu ý */}
