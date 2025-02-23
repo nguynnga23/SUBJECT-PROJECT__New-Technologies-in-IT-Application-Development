@@ -119,6 +119,7 @@ const chatSlice = createSlice({
 
         openEmojiTab: (state, action) => {
             state.showRightBar = true;
+            state.showRightBarSearch = false;
             state.rightBarTab = 'sympol';
             state.rightBarTabSub = action.payload;
         },
