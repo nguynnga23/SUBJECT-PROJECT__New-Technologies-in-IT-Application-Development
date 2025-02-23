@@ -11,6 +11,10 @@ import PhoneNumSignUpScreen from '../../features/auth/screens/PhoneNumSignUpScre
 import OTPConfirmScreen from '../../features/auth/screens/OTPConfirmScreen';
 import PasswordSignUpScreen from '../../features/auth/screens/PasswordSignUpScreen';
 import HomeScreen from '../../features/auth/screens/HomeScreen';
+import AccountAndSecurity from '../../features/profile/screens/account-and-security/AccountAndSecurity';
+import Privacy from '../../features/profile/screens/privacy/Privacy';
+import PersonalInformation from '../../features/profile/screens/personal-information/PersonalInformation';
+import EditPersonalInformation from '../../features/profile/screens/personal-information/EditPersonalInformation';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -30,6 +34,11 @@ export default function AppNavigator() {
                 <Stack.Screen name="Add Friends" component={AddFriendScreen} />
                 <Stack.Screen name="New Group" component={AddGroupScreen} />
                 <Stack.Screen name="Search" component={SearchScreen} />
+
+                <Stack.Screen name="Account and security" component={AccountAndSecurity} />
+                <Stack.Screen name="Privacy" component={Privacy} />
+                <Stack.Screen name="Personal Information" component={PersonalInformation} />
+                <Stack.Screen name="Profile Information" component={EditPersonalInformation} />
             </Stack.Navigator>
         </NavigationContainer>
     );
