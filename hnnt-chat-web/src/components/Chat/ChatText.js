@@ -3,6 +3,7 @@ import PopupMenuForChat from '../Popup/PopupMenuForChat';
 import { AiOutlineLike } from 'react-icons/ai';
 import PopupReacttion from '../Popup/PopupReaction';
 import { useState } from 'react';
+import PopupReactionChat from '../Popup/PopupReactionChat';
 
 function ChatText({
     index,
@@ -19,6 +20,7 @@ function ChatText({
     const position = message.sender === userId ? 'right' : 'left';
     const [showPopupReaction, setShowPopupReaction] = useState(false);
     const sumReaction = reactions.reduce((total, reaction) => total + reaction.sum, 0);
+    const [openReactionChat, setOpenReactionChat] = useState(false);
     return (
         <div
             key={index}
@@ -49,7 +51,10 @@ function ChatText({
                 {message.time}
             </p>
             {sumReaction > 0 && (
-                <div className="absolute flex items-center bottom-[-8px] right-[15px] border rounded-full p-0.5 bg-white text-[12px]">
+                <div
+                    className="absolute flex items-center bottom-[-8px] right-[15px] border rounded-full p-0.5 bg-white text-[12px] cursor-pointer"
+                    onClick={() => setOpenReactionChat(true)}
+                >
                     {reactions.slice(0, 2).map((re, index) => {
                         return <div key={index}>{re.reaction}</div>;
                     })}
@@ -93,6 +98,7 @@ function ChatText({
                     userId={userId}
                 />
             )}
+            {openReactionChat && <PopupReactionChat onClose={setOpenReactionChat} reactions={reactions} />}
         </div>
     );
 }

@@ -45,6 +45,8 @@ const groups = [
                 reactions: [
                     {
                         id: 0,
+                        name: 'Nguyễn Lê Nhật Huy',
+                        avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMZIA8q5YZgirXxhzjkXkoVG1LuwLd4WYkjg&s',
                         reaction: '❤️',
                         sum: 2,
                     },
@@ -63,11 +65,15 @@ const groups = [
                 reactions: [
                     {
                         id: 1,
+                        name: 'Nguyễn Thị Nga',
+                        avatar: 'https://www.catster.com/wp-content/uploads/2023/11/Beluga-Cat-e1714190563227.webp',
                         reaction: '❤️',
                         sum: 2,
                     },
                     {
                         id: 1,
+                        name: 'Nguyễn Thị Nga',
+                        avatar: 'https://www.catster.com/wp-content/uploads/2023/11/Beluga-Cat-e1714190563227.webp',
                         reaction: '🤣',
                         sum: 3,
                     },
@@ -87,11 +93,15 @@ const groups = [
                 reactions: [
                     {
                         id: 1,
+                        name: 'Nguyễn Thị Nga',
+                        avatar: 'https://www.catster.com/wp-content/uploads/2023/11/Beluga-Cat-e1714190563227.webp',
                         reaction: '❤️',
                         sum: 2,
                     },
                     {
-                        id: 1,
+                        id: 3,
+                        name: 'Phạm Lê Thanh Nhiệt',
+                        avatar: 'https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/474174ewO/anh-meme-meo-khoc-cuc-cute_042216244.jpg',
                         reaction: '🤣',
                         sum: 1,
                     },
@@ -111,11 +121,15 @@ const groups = [
                 reactions: [
                     {
                         id: 0,
+                        name: 'Nguyễn Lê Nhật Huy',
+                        avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMZIA8q5YZgirXxhzjkXkoVG1LuwLd4WYkjg&s',
                         reaction: '❤️',
                         sum: 2,
                     },
                     {
                         id: 1,
+                        name: 'Nguyễn Thị Nga',
+                        avatar: 'https://www.catster.com/wp-content/uploads/2023/11/Beluga-Cat-e1714190563227.webp',
                         reaction: '🤣',
                         sum: 3,
                     },

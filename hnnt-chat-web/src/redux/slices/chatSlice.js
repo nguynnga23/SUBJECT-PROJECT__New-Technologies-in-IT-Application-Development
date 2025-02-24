@@ -150,21 +150,41 @@ const chatSlice = createSlice({
 
         addReaction: (state, action) => {
             const { chatId, messageId, reaction, userId } = action.payload;
+            const userActive = state.userActive;
 
             const chat = state.data.find((chat) => chat.id === chatId);
+            if (!chat) return;
 
-            if (chat) {
-                const message = chat.messages.find((mess) => mess.id === messageId);
-                if (message) {
-                    const existingReaction = message.reactions.find((r) => r.reaction === reaction);
-                    if (existingReaction) {
-                        existingReaction.sum += 1;
-                    } else {
-                        message.reactions = [...message.reactions, { id: userId, reaction, sum: 1 }];
-                    }
+            const message = chat.messages.find((mess) => mess.id === messageId);
+            if (!message) return;
+
+            const existingUserReaction = message.reactions.find((r) => r.id === userId);
+
+            if (existingUserReaction) {
+                if (existingUserReaction.reaction === reaction) {
+                    // Nếu user đã thả reaction này rồi -> Cộng thêm
+                    existingUserReaction.sum += 1;
+                } else {
+                    message.reactions.push({
+                        id: userId,
+                        name: userActive.name,
+                        avatar: userActive.avatar,
+                        reaction,
+                        sum: 1,
+                    });
                 }
+            } else {
+                // Nếu reaction chưa tồn tại, thêm mới
+                message.reactions.push({
+                    id: userId,
+                    name: userActive.name,
+                    avatar: userActive.avatar,
+                    reaction,
+                    sum: 1,
+                });
             }
         },
+
         removeReaction: (state, action) => {
             const { chatId, messageId, userId } = action.payload;
 
