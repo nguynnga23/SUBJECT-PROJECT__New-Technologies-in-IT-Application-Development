@@ -2,10 +2,11 @@ import { useEffect, useRef } from 'react';
 import { HiBellSlash } from 'react-icons/hi2';
 import { TiPin } from 'react-icons/ti';
 import { MdDelete } from 'react-icons/md';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setOnOrOfPin, setOnOrOfNotify, deleteChatForUser } from '../../redux/slices/chatSlice';
 
 function PopupMenuForMess({ setShowPopup, setHoveredMessage, chat }) {
+    const userActive = useSelector((state) => state.auth.userActive);
     const popupRef = useRef(null);
     const dispatch = useDispatch();
 
@@ -54,7 +55,7 @@ function PopupMenuForMess({ setShowPopup, setHoveredMessage, chat }) {
                     </li>
                     <li
                         className="flex text-[12px] items-center text-red-500 px-4 py-2 hover:bg-gray-100 cursor-pointer rounded-lg"
-                        onClick={() => dispatch(deleteChatForUser({ userId: 0, chatId: chat.id }))}
+                        onClick={() => dispatch(deleteChatForUser({ userId: userActive.id, chatId: chat.id }))}
                     >
                         <MdDelete size={13} className="mr-2 text-red-500" />
                         Xóa tin nhắn

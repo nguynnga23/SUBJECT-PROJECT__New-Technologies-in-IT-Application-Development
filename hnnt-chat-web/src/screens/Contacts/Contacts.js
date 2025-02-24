@@ -5,29 +5,11 @@ import { AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { PiUserList } from 'react-icons/pi';
 import { GoPeople } from 'react-icons/go';
 import { PiUserPlus } from 'react-icons/pi';
-import { CiSearch } from 'react-icons/ci';
-import { MdCancel } from 'react-icons/md';
-import { IoSwapVertical } from 'react-icons/io5';
-import { CiFilter } from 'react-icons/ci';
-import { FaAngleRight } from 'react-icons/fa6';
-import { AiOutlineMessage } from 'react-icons/ai';
-
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import Avatar from '@mui/material/Avatar';
-import AvatarGroup from '@mui/material/AvatarGroup';
-import Tooltip from '@mui/material/Tooltip';
 
 import avatar from '../../public/avatar_sample.jpg';
 import groupzalo from '../../public/groupzalo.png';
-import searchzalo from '../../public/searchzalo.png';
 
-import PopupCategoryContact from '../../components/Popup/PopupCategoryContact';
 import { useSelector } from 'react-redux';
-import { FaRegSquare } from 'react-icons/fa6';
-import { FaRegSquareCheck } from 'react-icons/fa6';
-import { MdLabel } from 'react-icons/md';
-import PopupManageCategory from '../../components/Popup/PopupManageCategory';
 
 import TabFriendsList from '../../components/Tab/TabFriendsList';
 import TabGroupList from '../../components/Tab/TabGroupList';
@@ -107,17 +89,6 @@ const groupData = [
 ];
 
 const friendRequestData = [
-    { id: 1, name: 'Minh Tú', avatar: avatar, time: '1/2' },
-    { id: 2, name: 'Lan Phương', avatar: avatar, time: '3/2' },
-    { id: 3, name: 'Đức Anh', avatar: avatar, time: '4/6' },
-    { id: 4, name: 'Thanh Trúc', avatar: avatar, time: '21/1' },
-    { id: 5, name: 'Hoàng Yến', avatar: avatar, time: '' },
-    { id: 6, name: 'Hữu Nghĩa', avatar: avatar, time: '' },
-    { id: 7, name: 'Bảo Ngọc', avatar: avatar, time: '' },
-    { id: 8, name: 'Duy Khang', avatar: avatar, time: '' },
-];
-
-const friendResponsetData = [
     { id: 1, name: 'Minh Tú', avatar: avatar, time: '1/2' },
     { id: 2, name: 'Lan Phương', avatar: avatar, time: '3/2' },
     { id: 3, name: 'Đức Anh', avatar: avatar, time: '4/6' },
@@ -260,7 +231,7 @@ function Contacts() {
                             />
                         ) : selectTab.id === 4 ? (
                             <div className="w-full h-screen flex flex-col items-center justify-center text-center translate-y-[-20%]">
-                                <img src={groupzalo} className="w-28 h-w-28" />
+                                <img src={groupzalo} alt="avatar" className="w-28 h-w-28" />
                                 <p className="text-sm">Không có lời mời vào nhóm và cộng đồng</p>
                                 <div className="flex">
                                     <p className="text-sm">Khi nào tôi nhận được lời mời?</p>

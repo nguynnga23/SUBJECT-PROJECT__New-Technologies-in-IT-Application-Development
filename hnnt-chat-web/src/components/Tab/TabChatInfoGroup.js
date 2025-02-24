@@ -43,6 +43,7 @@ function TabChatInfoGroup({ setActiveMessageTab, group }) {
                         <div className="relative">
                             <img
                                 src={g.avatar} // Thay bằng avatar thật
+                                alt="avatar"
                                 className="w-[45px] h-[45px] rounded-full border mr-3 object-cover"
                             />
                             {g.id === group?.leader && (

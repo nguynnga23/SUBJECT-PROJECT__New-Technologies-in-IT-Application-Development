@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import TabChatInfo from './TabChatInfo';
 import TabChatSympol from './TabChatSympol';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import TabChatInfoGroup from './TabChatInfoGroup';
 
 function TabChatRightBar() {

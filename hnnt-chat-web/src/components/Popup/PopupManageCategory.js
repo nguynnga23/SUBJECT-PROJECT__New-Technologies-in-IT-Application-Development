@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { MdLabel, MdDelete, MdLabelOutline } from 'react-icons/md';
 import { IoMdClose } from 'react-icons/io';
 import { BsGripVertical } from 'react-icons/bs';
-import categories from '../../sample_data/listCategory';
-import PopupCategory from './PopupCategoryColor';
 import PopupCategoryColor from './PopupCategoryColor';
 import { useDispatch, useSelector } from 'react-redux';
 import { addCategory, deleteCategory } from '../../redux/slices/categorySlice';

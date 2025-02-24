@@ -1,8 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
-import chats from '../../sample_data/listMess';
 import { v4 as uuidv4 } from 'uuid';
 import categories from '../../sample_data/listCategory';
-import groups from '../../sample_data/listGroup';
 
 const chatSlice = createSlice({
     name: 'chat',
@@ -17,8 +15,6 @@ const chatSlice = createSlice({
         showRightBarSearch: false,
         activeTabMess: 'priority',
         emojiObject: null,
-        gifObject: null,
-        sticker: null,
         rightBarTab: 'info',
         rightBarTabSub: 'emoji',
     },
@@ -120,14 +116,10 @@ const chatSlice = createSlice({
         sendEmoji: (state, action) => {
             state.emojiObject = action.payload;
         },
-        sendGif: (state, action) => {
-            state.gifObject = action.payload;
-        },
-        sendSticker: (state, action) => {
-            state.sticker = action.payload;
-        },
+
         openEmojiTab: (state, action) => {
             state.showRightBar = true;
+            state.showRightBarSearch = false;
             state.rightBarTab = 'sympol';
             state.rightBarTabSub = action.payload;
         },
@@ -158,21 +150,30 @@ const chatSlice = createSlice({
 
         addReaction: (state, action) => {
             const { chatId, messageId, reaction, userId } = action.payload;
+            const userActive = state.userActive;
 
             const chat = state.data.find((chat) => chat.id === chatId);
+            if (!chat) return;
 
-            if (chat) {
-                const message = chat.messages.find((mess) => mess.id === messageId);
-                if (message) {
-                    const existingReaction = message.reactions.find((r) => r.reaction === reaction);
-                    if (existingReaction) {
-                        existingReaction.sum += 1;
-                    } else {
-                        message.reactions = [...message.reactions, { id: userId, reaction, sum: 1 }];
-                    }
-                }
+            const message = chat.messages.find((mess) => mess.id === messageId);
+            if (!message) return;
+
+            const existingUserReaction = message.reactions.find((r) => r.id === userId && r.reaction === reaction);
+
+            if (existingUserReaction) {
+                existingUserReaction.sum += 1;
+            } else {
+                // Nếu reaction chưa tồn tại, thêm mới
+                message.reactions.push({
+                    id: userId,
+                    name: userActive.name,
+                    avatar: userActive.avatar,
+                    reaction,
+                    sum: 1,
+                });
             }
         },
+
         removeReaction: (state, action) => {
             const { chatId, messageId, userId } = action.payload;
 
@@ -248,10 +249,8 @@ export const {
     setOnOrOfPin,
     setOnOrOfNotify,
     sendEmoji,
-    sendGif,
     openEmojiTab,
     updateMessageStatus,
-    sendSticker,
     addReaction,
     removeReaction,
     addOrChangeCategory,

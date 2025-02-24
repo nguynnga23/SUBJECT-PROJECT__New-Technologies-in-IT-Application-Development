@@ -1,4 +1,3 @@
-import { useState, useEffect, useRef } from 'react';
 import { Select, MenuItem } from '@mui/material';
 import { CiSearch, CiFilter } from 'react-icons/ci';
 import { IoSwapVertical } from 'react-icons/io5';
@@ -118,7 +117,7 @@ function TabFriendsList(props) {
 
             {Object.keys(sortedGroupedData).length === 0 && (
                 <div className="w-full mt-10 pb-10 flex flex-col items-center justify-center text-center">
-                    <img src={searchzalo} className="w-36 h-w-36" />
+                    <img src={searchzalo} alt="searchzalo" className="w-36 h-w-36" />
                     <p className="text-sm font-semibold">Không tìm thấy kết quả</p>
                     <p className="text-sm mt-2">Vui lòng thử lại từ khóa hoặc bộ lọc khác</p>
                 </div>
@@ -133,7 +132,7 @@ function TabFriendsList(props) {
                                 key={user.id}
                                 className="flex items-center space-x-2 mt-3 px-4 cursor-pointer hover:bg-gray-100 py-2"
                             >
-                                <img src={user.avatar} className="w-12 h-12 rounded-full" />
+                                <img src={user.avatar} alt="avatar" className="w-12 h-12 rounded-full" />
                                 <h4 className="text-sm font-medium">{user.name}</h4>
                             </div>
                             {index !== users.length - 1 && <div className="w-full bg-gray-200 h-[1px] mt-2 pl-4"></div>}

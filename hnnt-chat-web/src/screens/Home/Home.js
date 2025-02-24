@@ -21,6 +21,7 @@ import { initFlowbite } from 'flowbite';
 export default function Home() {
     const navigate = useNavigate();
     const [selectedScreen, setSelectedScreen] = useState('messaging');
+    const [settingScreen, setSettingScreen] = useState(false);
     const dispatch = useDispatch();
     const userActive = useSelector((state) => state.auth.userActive);
     useEffect(() => {
@@ -35,7 +36,7 @@ export default function Home() {
         } else {
             navigate('/');
         }
-    }, [userActive]);
+    }, [userActive, dispatch, navigate]);
 
     // open modal
     const [isOpenModel, setIsOpenModel] = useState(false);
@@ -68,7 +69,7 @@ export default function Home() {
                         className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg ring-2 ring-gray-200"
                     >
                         <div className="px-4 py-3 text-sm text-black ">
-                            <p className="text-lg font-medium ">Nguyễn Thiên Tứ</p>
+                            <p className="text-lg font-medium ">{userActive?.name}</p>
                         </div>
                         <ul
                             className="py-2 text-sm text-gray-700 dark:text-gray-200"
@@ -133,15 +134,15 @@ export default function Home() {
                             selectedScreen === 'settings' ? 'bg-white bg-opacity-20' : ''
                         }`}
                     >
-                        <IoSettingsOutline size={28} onClick={() => setSelectedScreen('settings')} />
+                        <IoSettingsOutline size={28} onClick={() => setSettingScreen(true)} />
                     </div>
                 </div>
             </div>
             {/* Screen open */}
-            <div className="flex-1 bg-white">
+            <div className="relative flex-1 bg-white ">
                 {selectedScreen === 'messaging' && <Messaging />}
                 {selectedScreen === 'contacts' && <Contacts />}
-                {selectedScreen === 'settings' && <Settings />}
+                {settingScreen && <Settings setSettingScreen={setSettingScreen} />}
             </div>
 
             <Modal isOpen={isOpenModel} onClose={() => setIsOpenModel(false)} />

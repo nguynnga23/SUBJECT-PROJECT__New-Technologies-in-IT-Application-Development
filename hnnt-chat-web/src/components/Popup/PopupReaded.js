@@ -5,7 +5,6 @@ import { setSeemAllChat } from '../../redux/slices/chatSlice';
 
 function PopupReaded() {
     const [isOpen, setIsOpen] = useState(false);
-    const [readed, setReaded] = useState(false);
     const popupRef = useRef(null);
     const dispatch = useDispatch();
 

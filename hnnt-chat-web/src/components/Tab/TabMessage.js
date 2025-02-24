@@ -127,6 +127,7 @@ function TabMesssage() {
                                 <div className="flex item-center">
                                     <img
                                         src={chat.avatar} // Thay bằng avatar thật
+                                        alt="avatar"
                                         className="w-[45px] h-[45px] rounded-full border mr-3 object-cover"
                                     />
                                     <div>

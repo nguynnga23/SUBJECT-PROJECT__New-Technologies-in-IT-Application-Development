@@ -44,7 +44,11 @@ function TabChatInfo({ setActiveMessageTab }) {
         <div className="overflow-auto">
             {/* Avatar + Tên nhóm */}
             <div className="flex flex-col items-center p-3">
-                <img src={activeChat?.avatar} className="w-[55px] h-[55px] rounded-full border object-cover" />
+                <img
+                    src={activeChat?.avatar}
+                    alt="avatar"
+                    className="w-[55px] h-[55px] rounded-full border object-cover"
+                />
                 <h3 className="font-bold text-lg mt-2 font-medium">{activeChat?.name}</h3>
             </div>
             <div className="flex item-center justify-center border-b-[7px]">

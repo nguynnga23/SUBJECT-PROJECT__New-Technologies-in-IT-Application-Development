@@ -24,6 +24,7 @@ import {
     setShowOrOffRightBarSearch,
     sendMessage,
     openEmojiTab,
+    sendEmoji,
 } from '../../redux/slices/chatSlice';
 import ChatText from '../Chat/ChatText';
 import ChatGif from '../Chat/ChatGif';
@@ -49,19 +50,13 @@ function TabChat() {
     const showRightBar = useSelector((state) => state.chat.showRightBar);
     const showRightBarSearch = useSelector((state) => state.chat.showRightBarSearch);
     const emojiObject = useSelector((state) => state.chat.emojiObject);
-    const gifObject = useSelector((state) => state.chat.gifObject);
-    const sticker = useSelector((state) => state.chat.sticker);
-
     const textareaRef = useRef(null);
-
     const inputImageRef = useRef(null); // Tạo tham chiếu đến input image
     const inputFileRef = useRef(null); // Tạo tham chiếu đến input image
     const chatContainerRef = useRef(null);
-
     const [hoveredMessage, setHoveredMessage] = useState(null);
     const [isPopupOpenIndex, setIsPopupOpenIndex] = useState(null);
 
-    const [addFriendButton, setAddFriendButton] = useState(false);
     const [addGroupButton, setAddGroupButton] = useState(false);
 
     const [videoCall, setVideoCall] = useState(false);
@@ -78,7 +73,7 @@ function TabChat() {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
         }
-    }, [activeChat?.messages]);
+    }, [activeChat?.id]);
 
     // Hàm tự động điều chỉnh chiều cao
     useEffect(() => {
@@ -98,35 +93,19 @@ function TabChat() {
             dispatch(sendMessage({ chatId: activeChat.id, content: message, time: currentTime, type: 'text' }));
             setMessage('');
         }
+        setTimeout(() => {
+            if (chatContainerRef.current) {
+                chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+            }
+        }, 100);
     };
 
     useEffect(() => {
         if (emojiObject != null) {
             setMessage((prev) => prev + emojiObject.emoji);
         }
-    }, [emojiObject]);
-
-    useEffect(() => {
-        if (gifObject != null) {
-            const currentTime = new Date().toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-            });
-
-            dispatch(sendMessage({ chatId: activeChat.id, content: gifObject.url, time: currentTime, type: 'gif' }));
-        }
-    }, [gifObject]);
-
-    useEffect(() => {
-        if (sticker != null) {
-            const currentTime = new Date().toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-            });
-
-            dispatch(sendMessage({ chatId: activeChat.id, content: sticker, time: currentTime, type: 'sticker' }));
-        }
-    }, [sticker]);
+        dispatch(sendEmoji(null));
+    }, [emojiObject, dispatch]);
 
     const handleFileChange = (event, type) => {
         const file = event.target.files[0];
@@ -148,6 +127,12 @@ function TabChat() {
                 }),
             );
         }
+        event.target.value = '';
+        setTimeout(() => {
+            if (chatContainerRef.current) {
+                chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+            }
+        }, 100);
     };
 
     return (
@@ -156,6 +141,7 @@ function TabChat() {
                 <div className="flex justify-center ">
                     <img
                         src={activeChat?.avatar} // Thay bằng avatar thật
+                        alt="avatar"
                         className="w-[45px] h-[45px] rounded-full border mr-2 object-cover"
                     />
                     <div>
