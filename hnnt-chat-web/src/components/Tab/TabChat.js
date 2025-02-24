@@ -73,7 +73,7 @@ function TabChat() {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
         }
-    }, [activeChat?.messages]);
+    }, [activeChat?.id]);
 
     // Hàm tự động điều chỉnh chiều cao
     useEffect(() => {
@@ -105,7 +105,7 @@ function TabChat() {
             setMessage((prev) => prev + emojiObject.emoji);
         }
         dispatch(sendEmoji(null));
-    }, [emojiObject]);
+    }, [emojiObject, dispatch]);
 
     const handleFileChange = (event, type) => {
         const file = event.target.files[0];
@@ -141,6 +141,7 @@ function TabChat() {
                 <div className="flex justify-center ">
                     <img
                         src={activeChat?.avatar} // Thay bằng avatar thật
+                        alt="avatar"
                         className="w-[45px] h-[45px] rounded-full border mr-2 object-cover"
                     />
                     <div>

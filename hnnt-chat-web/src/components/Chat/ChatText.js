@@ -30,7 +30,9 @@ function ChatText({
                 message.sender === userId ? 'bg-blue-100' : 'bg-white'
             }`}
             onMouseEnter={() => {
-                if (isPopupOpenIndex === null) setHoveredMessage(index);
+                setTimeout(() => {
+                    if (isPopupOpenIndex === null) setHoveredMessage(index);
+                }, 500);
             }}
             onMouseLeave={() => {
                 setTimeout(() => {

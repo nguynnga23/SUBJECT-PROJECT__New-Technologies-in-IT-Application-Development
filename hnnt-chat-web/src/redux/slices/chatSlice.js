@@ -158,21 +158,10 @@ const chatSlice = createSlice({
             const message = chat.messages.find((mess) => mess.id === messageId);
             if (!message) return;
 
-            const existingUserReaction = message.reactions.find((r) => r.id === userId);
+            const existingUserReaction = message.reactions.find((r) => r.id === userId && r.reaction === reaction);
 
             if (existingUserReaction) {
-                if (existingUserReaction.reaction === reaction) {
-                    // Nếu user đã thả reaction này rồi -> Cộng thêm
-                    existingUserReaction.sum += 1;
-                } else {
-                    message.reactions.push({
-                        id: userId,
-                        name: userActive.name,
-                        avatar: userActive.avatar,
-                        reaction,
-                        sum: 1,
-                    });
-                }
+                existingUserReaction.sum += 1;
             } else {
                 // Nếu reaction chưa tồn tại, thêm mới
                 message.reactions.push({

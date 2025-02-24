@@ -3,6 +3,7 @@ import PopupMenuForChat from '../Popup/PopupMenuForChat';
 import { AiOutlineLike } from 'react-icons/ai';
 import PopupReacttion from '../Popup/PopupReaction';
 import { useState } from 'react';
+import PopupReactionChat from '../Popup/PopupReactionChat';
 
 function ChatGif({
     index,
@@ -19,11 +20,15 @@ function ChatGif({
     const position = message.sender === userId ? 'right' : 'left';
     const [showPopupReaction, setShowPopupReaction] = useState(false);
     const sumReaction = reactions.reduce((total, reaction) => total + reaction.sum, 0);
+    const [openReactionChat, setOpenReactionChat] = useState(false);
+
     return (
         <div
             className={`relative pb-2 mb-2 ${message.sender === userId ? 'bg-blue-100' : 'bg-white'}`}
             onMouseEnter={() => {
-                if (isPopupOpenIndex === null) setHoveredMessage(index);
+                setTimeout(() => {
+                    if (isPopupOpenIndex === null) setHoveredMessage(index);
+                }, 500);
             }}
             onMouseLeave={() => {
                 setTimeout(() => {
@@ -38,7 +43,10 @@ function ChatGif({
             <img src={message.content} alt="GIF" className="max-w-[300px] rounded-lg mb-4 " />
             <p className="absolute left-[8px] bottom-[2px] text-gray-500 text-[10px]">{message.time}</p>
             {sumReaction > 0 && (
-                <div className="absolute flex items-center bottom-[-8px] right-[15px] border rounded-full p-0.5 bg-white text-[12px]">
+                <div
+                    className="absolute flex items-center bottom-[-8px] right-[15px] border rounded-full p-0.5 bg-white text-[12px] cursor-pointer"
+                    onClick={() => setOpenReactionChat(true)}
+                >
                     {reactions.slice(0, 2).map((re, index) => {
                         return <div key={index}>{re.reaction}</div>;
                     })}
@@ -80,6 +88,7 @@ function ChatGif({
                     userId={userId}
                 />
             )}
+            {openReactionChat && <PopupReactionChat onClose={setOpenReactionChat} reactions={reactions} />}
         </div>
     );
 }

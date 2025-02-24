@@ -1,17 +1,6 @@
-import { useState } from 'react';
 import { CiCircleRemove } from 'react-icons/ci';
 
 export default function PopupReactionChat({ onClose, reactions }) {
-    const users = [
-        {
-            id: 1,
-            name: 'Cố vấn/Chiến lược gia',
-            avatar: 'https://via.placeholder.com/40',
-            reaction: '❤️',
-            count: 1,
-        },
-    ];
-
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 text-[12px]">
             <div className="bg-white relative rounded-lg  w-[350px] shadow-lg">
@@ -25,9 +14,9 @@ export default function PopupReactionChat({ onClose, reactions }) {
                 </div>
 
                 {/* Danh sách người dùng */}
-                <div className="p-4">
-                    {reactions.map((user) => (
-                        <div key={user.id} className="flex items-center justify-between p-2">
+                <div className="p-4 max-h-[350px] overflow-auto">
+                    {reactions.map((user, index) => (
+                        <div key={index} className="flex items-center justify-between p-1">
                             <div className="flex items-center space-x-2">
                                 <img src={user.avatar} alt="Avatar" className="w-10 h-10 rounded-full object-cover" />
                                 <span className="text-[12px]">{user.name}</span>
