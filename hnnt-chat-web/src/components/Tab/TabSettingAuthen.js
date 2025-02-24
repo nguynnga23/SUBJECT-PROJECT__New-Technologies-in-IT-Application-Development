@@ -10,7 +10,7 @@ function TabSettingAuthen() {
 
     return (
         <div className="max-w-md mx-auto">
-            <h2 className="text-lg font-semibold">Đổi mật khẩu</h2>
+            <h2 className="text-[14px] font-semibold">Đổi mật khẩu</h2>
             <p className="text-[11px] text-gray-500 mb-4">
                 <strong>Lưu ý:</strong> Mật khẩu bao gồm chữ kèm theo số hoặc ký tự đặc biệt, tối thiểu 8 ký tự trở lên
                 & tối đa 32 ký tự.

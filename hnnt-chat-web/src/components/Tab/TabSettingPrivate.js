@@ -11,7 +11,7 @@ function TabSettingPrivate() {
         <div className="max-w-md mx-auto rounded-lg text-[12px] ">
             {/* Cá nhân */}
             <div className="mb-6">
-                <h2 className="text-lg font-semibold mb-2">Cá nhân</h2>
+                <h2 className="text-[14px] font-semibold mb-2">Cá nhân</h2>
                 <div className="bg-white p-4 rounded-lg shadow">
                     <div className="mb-4">
                         <label className="block">Hiện ngày sinh</label>
@@ -34,7 +34,7 @@ function TabSettingPrivate() {
 
             {/* Tin nhắn và cuộc gọi */}
             <div className="mb-6">
-                <h2 className="text-lg font-semibold mb-2">Tin nhắn và cuộc gọi</h2>
+                <h2 className="text-[14px] font-semibold mb-2">Tin nhắn và cuộc gọi</h2>
                 <div className="bg-white p-4 rounded-lg shadow">
                     <div className="flex items-center justify-between mb-4">
                         <span>Hiện trạng thái "Đã xem"</span>
@@ -66,7 +66,7 @@ function TabSettingPrivate() {
 
             {/* Chặn tin nhắn */}
             <div>
-                <h2 className="text-lg font-semibold mb-2">Chặn tin nhắn</h2>
+                <h2 className="text-[14px] font-semibold mb-2">Chặn tin nhắn</h2>
                 <div
                     className="bg-white p-4 rounded-lg shadow flex justify-between items-center cursor-pointer"
                     onClick={() => setShowBlockList(!showBlockList)}
