@@ -6,9 +6,9 @@ function PopupVideoCall({ setVideoCall, activeChat, userActive }) {
         <div className="w-full h-full">
             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50">
                 <div className="relative">
-                    <div className=" relative bg-gray-100 w-[90vw] h-[90vh] flex  justify-center rounded-lg ">
+                    <div className=" relative bg-gray-100 w-[90vw] h-[90vh] flex items-center justify-center rounded-lg ">
                         {activeChat?.group ? (
-                            <div className="flex w-[100%] flex-wrap gap-2 p-4 overflow-auto">
+                            <div className="flex w-[100%]  flex-wrap gap-2 p-4 overflow-auto">
                                 {activeChat.members
                                     .filter((member) => member.id !== userActive.id)
                                     .map((member, index) => (
