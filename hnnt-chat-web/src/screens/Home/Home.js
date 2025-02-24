@@ -69,7 +69,7 @@ export default function Home() {
                         className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg ring-2 ring-gray-200"
                     >
                         <div className="px-4 py-3 text-sm text-black ">
-                            <p className="text-lg font-medium ">{userActive.name}</p>
+                            <p className="text-lg font-medium ">{userActive?.name}</p>
                         </div>
                         <ul
                             className="py-2 text-sm text-gray-700 dark:text-gray-200"

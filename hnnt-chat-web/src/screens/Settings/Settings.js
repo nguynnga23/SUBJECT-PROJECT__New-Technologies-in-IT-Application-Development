@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { CiCircleRemove } from 'react-icons/ci';
 import TabSettingAuthen from '../../components/Tab/TabSettingAuthen';
+import TabSettingInterface from '../../components/Tab/TabSettingInterface';
+import TabSettingNotify from '../../components/Tab/TabSettingNotify';
+import TabSettingPrivate from '../../components/Tab/TabSettingPrivate';
 import { CiLock } from 'react-icons/ci';
 import { MdSecurity } from 'react-icons/md';
 import { HiOutlineBellAlert } from 'react-icons/hi2';
@@ -12,13 +15,13 @@ function Settings({ setSettingScreen }) {
     return (
         <div className="w-full flex">
             <div className="fixed inset-0 flex items-center justify-center bg-opacity-80 z-50 bg-gray-400 ">
-                <div className="flex relative h-[450px] w-[800px] border rounded-lg bg-white shadow-md text-[13px]">
+                <div className="flex relative h-[450px] w-[800px] border rounded-lg shadow-md text-[13px]  bg-gray-200">
                     <CiCircleRemove
                         className="absolute top-[-30px] right-[-30px] text-3xl text-white cursor-pointer"
                         onClick={() => setSettingScreen(false)}
                     />
                     {/* Sidebar */}
-                    <div className="w-1/3 p-4 border-r">
+                    <div className="w-1/3 p-4 border-r bg-white rounded-l-lg">
                         <h2 className="text-[20px] font-semibold mb-4">Cài đặt</h2>
                         <ul className="space-y-2">
                             <li
@@ -62,7 +65,12 @@ function Settings({ setSettingScreen }) {
 
                     {/* Content */}
 
-                    <div className="p-6 w-2/3 bg-gray-200 rounded-r-lg">{tab === 'authen' && <TabSettingAuthen />}</div>
+                    <div className="m-6 w-2/3 rounded-r-lg overflow-auto">
+                        {tab === 'authen' && <TabSettingAuthen />}
+                        {tab === 'private' && <TabSettingPrivate />}
+                        {tab === 'notify' && <TabSettingNotify />}
+                        {tab === 'interface' && <TabSettingInterface />}
+                    </div>
                 </div>
             </div>
         </div>
