@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 
 function PopupReacttion({ position, setShowPopupReaction, chatId, message, reactions, userId }) {
     const dispatch = useDispatch();
+    const hasUserReacted = Boolean(reactions.length > 0 && reactions.some((reaction) => reaction.id === userId));
 
     const handleReaction = (reaction) => {
         const messageId = message.id;
@@ -37,7 +38,7 @@ function PopupReacttion({ position, setShowPopupReaction, chatId, message, react
             <button className="text-[20px] hover:text-[25px]" onClick={() => handleReaction('😡')}>
                 😡
             </button>
-            {reactions.length > 0 && (
+            {reactions.length > 0 && hasUserReacted && (
                 <button
                     className="text-[20px] hover:text-[25px]"
                     onClick={() => {
