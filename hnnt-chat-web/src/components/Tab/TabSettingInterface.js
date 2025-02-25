@@ -1,10 +1,25 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import dark from '../../public/dark.png';
 import light from '../../public/light.png';
+import useDarkMode from '../../hook/useDarkMode';
 
 function TabSettingInterface() {
-    const [selected, setSelected] = useState(true);
+    const [darkMode, setDarkMode] = useDarkMode();
+    const [selected, setSelected] = useState(() => darkMode);
     const [avatarBg, setAvatarBg] = useState(true);
+
+    const handleSelection = (value) => {
+        setSelected(value);
+        setDarkMode(value);
+
+        if (value) {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+        }
+    };
 
     return (
         <div className="max-w-md mx-auto rounded-lg text-[10px] ">
@@ -18,15 +33,15 @@ function TabSettingInterface() {
                         <img
                             src={light}
                             alt="light"
-                            className={`w-[120px] rounded-lg p-1 ${selected ? 'border border-blue-500' : ''}`}
+                            className={`w-[120px] rounded-lg p-1 ${!selected ? 'border border-blue-500' : ''}`}
                         />
                         <div className="flex items-center p-2">
                             <input
                                 type="radio"
                                 name="options"
-                                value={true}
-                                checked={selected}
-                                onChange={() => setSelected(true)}
+                                value="light"
+                                checked={!selected}
+                                onChange={() => handleSelection(false)}
                                 className="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500 mr-1"
                             />
                             <span className="text-gray-700">Sáng</span>
@@ -36,15 +51,15 @@ function TabSettingInterface() {
                         <img
                             src={dark}
                             alt="dark"
-                            className={`w-[120px] rounded-lg p-1 ${!selected ? 'border border-blue-500' : ''}`}
+                            className={`w-[120px] rounded-lg p-1 ${selected ? 'border border-blue-500' : ''}`}
                         />
                         <div className="flex items-center p-2">
                             <input
                                 type="radio"
                                 name="options"
-                                value={false}
-                                checked={!selected}
-                                onChange={() => setSelected(false)}
+                                value="dark"
+                                checked={selected}
+                                onChange={() => handleSelection(true)}
                                 className="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500 mr-1"
                             />
                             <span className="text-gray-700">Tối</span>

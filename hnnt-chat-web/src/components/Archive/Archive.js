@@ -26,7 +26,7 @@ const Archive = ({ title, isOpen, toggleOpen, messages, type, group, setActiveMe
     const [selectedImage, setSelectedImage] = useState(null);
 
     return (
-        <div className="p-2 relative border-b-[7px] cursor-pointer">
+        <div className="p-2 relative border-b-[7px] dark:border-b-gray-900 cursor-pointer">
             <div className="flex justify-between items-center pl-2" onClick={toggleOpen}>
                 <span className="font-medium text-base">{title}</span>
                 {isOpen ? (

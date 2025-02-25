@@ -38,9 +38,9 @@ const PopupManageCategory = ({ setIsOpenManageCategory }) => {
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-lg w-[400px] shadow-lg">
+            <div className="bg-white dark:bg-gray-900 rounded-lg w-[400px] shadow-lg">
                 {/* Header */}
-                <div className="flex justify-between items-center p-4 border-b">
+                <div className="flex justify-between items-center p-4 border-b dark:border-b-black">
                     <h2 className="text-lg font-semibold">Quản lý thẻ phân loại</h2>
                     <button onClick={handleClose} className="text-gray-600 hover:text-black">
                         <IoMdClose size={22} />
@@ -54,7 +54,7 @@ const PopupManageCategory = ({ setIsOpenManageCategory }) => {
                         {categories.map((category) => (
                             <div
                                 key={category.id}
-                                className="flex items-center bg-gray-100 p-2 rounded-lg relative"
+                                className="flex items-center bg-gray-100 dark:bg-gray-800 p-2 rounded-lg relative"
                                 onMouseEnter={() => setHoveredId(category.id)}
                                 onMouseLeave={() => setHoveredId(null)}
                             >
@@ -99,7 +99,7 @@ const PopupManageCategory = ({ setIsOpenManageCategory }) => {
 
                         <input
                             type="text"
-                            className="border rounded-lg px-3 py-1 w-full focus:border-blue-500 focus:outline-none"
+                            className="border rounded-lg px-3 py-1 w-full focus:border-blue-500 focus:outline-none dark:bg-gray-800"
                             placeholder="Nhập tên phân loại..."
                             value={newCategory}
                             onChange={(e) => setNewCategory(e.target.value)}

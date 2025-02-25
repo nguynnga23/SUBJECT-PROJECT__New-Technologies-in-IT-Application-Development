@@ -51,7 +51,7 @@ function TabMesssage() {
 
     return (
         <div className="">
-            <div className="flex border-b justify-between p-4 pt-0 pb-0">
+            <div className="flex border-b dark:border-b-black justify-between p-4 pt-0 pb-0">
                 <div>
                     <button
                         className={`flex-1 py-2 mr-3 pt-4 text-xs text-center font-medium ${
@@ -81,8 +81,8 @@ function TabMesssage() {
                         return (
                             <div
                                 key={chat.id}
-                                className={`relative p-3 cursor-pointer hover:bg-gray-200 ${
-                                    activeChat?.id === chat.id ? 'bg-blue-100' : ''
+                                className={`relative p-3 cursor-pointer dark:bg-gray-800 hover:opacity-80 dark:text-gray-300${
+                                    activeChat?.id === chat.id ? 'bg-blue-100 dark:bg-[#2D336B] ' : ''
                                 }`}
                                 onClick={() => {
                                     dispatch(setActiveChat(chat));
@@ -131,12 +131,14 @@ function TabMesssage() {
                                         className="w-[45px] h-[45px] rounded-full border mr-3 object-cover"
                                     />
                                     <div>
-                                        <h3 className="font-medium text-xs text-lg mt-1 max-w-[270px] truncate">
+                                        <h3 className="font-medium text-xs text-lg mt-1 max-w-[270px] truncate dark:text-white">
                                             {chat.name}
                                         </h3>
                                         <p
-                                            className={`flex items-center text-sm  text-xs mt-1 ${
-                                                chat.seem ? 'text-gray-600' : 'font-medium text-black'
+                                            className={`flex items-center text-sm  text-xs mt-1  ${
+                                                chat.seem
+                                                    ? 'text-gray-600 dark:text-gray-400'
+                                                    : 'font-medium text-black dark:text-white'
                                             }`}
                                         >
                                             {chat.category?.name && (

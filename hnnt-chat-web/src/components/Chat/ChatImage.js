@@ -27,7 +27,7 @@ function ChatImage({
 
     return (
         <div
-            className={`relative rounded-lg pb-2 `}
+            className={`relative rounded-lg pb-2 cursor-pointer `}
             onMouseEnter={() => {
                 setTimeout(() => {
                     if (isPopupOpenIndex === null) setHoveredMessage(index);
@@ -53,7 +53,7 @@ function ChatImage({
 
             {sumReaction > 0 && (
                 <div
-                    className="absolute flex items-center bottom-[12px] right-[15px] border rounded-full p-0.5 bg-white text-[12px] cursor-pointer"
+                    className="absolute flex items-center bottom-[12px] right-[15px] rounded-full p-0.5 bg-white text-[12px] cursor-pointer dark:bg-gray-700"
                     onClick={() => setOpenReactionChat(true)}
                 >
                     {reactions.slice(0, 2).map((re, index) => (
@@ -66,7 +66,7 @@ function ChatImage({
             {hoveredMessage === index && isPopupOpenIndex === null && (
                 <div>
                     <button
-                        className={`absolute bottom-2 ${
+                        className={`absolute bottom-2 dark:bg-gray-700 ${
                             message.sender === userId ? 'left-[-25px]' : 'right-[-25px]'
                         } bottom-[30px] p-1 rounded-full hover:bg-gray-300`}
                         onClick={() => {
@@ -76,7 +76,7 @@ function ChatImage({
                         <FiMoreHorizontal size={15} />
                     </button>
                     <button
-                        className="absolute bottom-[15px] right-[-8px] border rounded-full p-0.5 text-[12px] bg-white"
+                        className="absolute bottom-[15px] right-[-8px] rounded-full p-0.5 text-[12px] bg-white dark:bg-gray-700"
                         onMouseEnter={() => setShowPopupReaction(true)}
                         onMouseLeave={() => !showPopupReaction && setTimeout(() => setShowPopupReaction(false), 500)}
                     >

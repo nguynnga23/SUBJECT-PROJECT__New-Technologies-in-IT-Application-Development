@@ -27,22 +27,22 @@ function PopupReaded() {
                     <MdOutlineMoreHoriz
                         size={24}
                         onClick={() => setIsOpen(!isOpen)}
-                        className={`cursor-pointer ${isOpen ? 'text-blue-500' : ''}`}
+                        className={`cursor-pointer ${isOpen ? 'text-blue-500' : ''} dark:text-gray-300`}
                     />
                 </div>
             </div>
 
             {/* Dropdown Menu */}
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg border">
+                <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 dark:text-gray-300 dark:border-black shadow-lg rounded-lg border">
                     <div
                         onClick={() => {
                             dispatch(setSeemAllChat());
                             setIsOpen(false);
                         }}
-                        className="flex items-center my-1 hover:bg-gray-100 rounded-lg cursor-pointer"
+                        className="flex items-center my-1 dark:bg-gray-800 hover:opacity-60 rounded-lg cursor-pointer"
                     >
-                        <span className="flex-1 my-1 text-sm text-center">Đánh dấu đã đọc</span>
+                        <span className="flex-1 my-1 text-sm text-center ">Đánh dấu đã đọc</span>
                     </div>
                 </div>
             )}

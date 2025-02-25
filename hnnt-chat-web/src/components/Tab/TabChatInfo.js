@@ -41,7 +41,7 @@ function TabChatInfo({ setActiveMessageTab }) {
     };
 
     return (
-        <div className="overflow-auto">
+        <div className="overflow-auto dark:text-gray-300">
             {/* Avatar + Tên nhóm */}
             <div className="flex flex-col items-center p-3">
                 <img
@@ -51,19 +51,19 @@ function TabChatInfo({ setActiveMessageTab }) {
                 />
                 <h3 className="font-bold text-lg mt-2 font-medium">{activeChat?.name}</h3>
             </div>
-            <div className="flex item-center justify-center border-b-[7px]">
+            <div className="flex item-center justify-center border-b-[7px] dark:border-b-gray-900 ">
                 <div className="m-4 mt-1 w-[50px] text-center">
                     <div className="flex justify-center">
                         {activeChat?.notify ? (
                             <GoBell
                                 size={35}
-                                className="p-2 bg-gray-200 rounded-full cursor-pointer"
+                                className="p-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer"
                                 onClick={() => dispatch(setOnOrOfNotify(activeChat?.id))}
                             />
                         ) : (
                             <GoBellSlash
                                 size={35}
-                                className="p-2 bg-gray-200 rounded-full cursor-pointer text-blue-500"
+                                className="p-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer text-blue-500"
                                 onClick={() => dispatch(setOnOrOfNotify(activeChat?.id))}
                             />
                         )}
@@ -75,13 +75,13 @@ function TabChatInfo({ setActiveMessageTab }) {
                         {!activeChat?.pin ? (
                             <GrPin
                                 size={35}
-                                className="p-2 bg-gray-200 rounded-full cursor-pointer"
+                                className="p-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer"
                                 onClick={() => dispatch(setOnOrOfPin(activeChat?.id))}
                             />
                         ) : (
                             <GrPin
                                 size={35}
-                                className="p-2 bg-gray-200 rounded-full cursor-pointer text-blue-500"
+                                className="p-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer text-blue-500"
                                 onClick={() => dispatch(setOnOrOfPin(activeChat?.id))}
                             />
                         )}
@@ -94,7 +94,7 @@ function TabChatInfo({ setActiveMessageTab }) {
                             <div className="flex justify-center">
                                 <AiOutlineUsergroupAdd
                                     size={35}
-                                    className="p-2 bg-gray-200  rounded-full cursor-pointer"
+                                    className="p-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer"
                                     onClick={() => setAddGroupButton(true)}
                                 />
                                 <PopupAddGroup
@@ -111,7 +111,7 @@ function TabChatInfo({ setActiveMessageTab }) {
                             <div className="flex justify-center">
                                 <AiOutlineUsergroupAdd
                                     size={35}
-                                    className="p-2 bg-gray-200  rounded-full cursor-pointer"
+                                    className="p-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer"
                                     onClick={() => setAddGroupButton(true)}
                                 />
                                 <PopupAddGroup

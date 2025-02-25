@@ -137,7 +137,7 @@ function TabChat() {
 
     return (
         <>
-            <div className="p-2 border-b flex justify-between items-center h-[62px] min-w-[600px] ">
+            <div className="p-2 border-b dark:border-b-black flex justify-between items-center h-[62px] min-w-[600px] dark:bg-gray-800">
                 <div className="flex justify-center ">
                     <img
                         src={activeChat?.avatar} // Thay bằng avatar thật
@@ -145,7 +145,9 @@ function TabChat() {
                         className="w-[45px] h-[45px] rounded-full border mr-2 object-cover"
                     />
                     <div>
-                        <h3 className="font-medium text-base text-lg max-h-[28px]">{activeChat?.name}</h3>
+                        <h3 className="font-medium text-base text-lg max-h-[28px] dark:text-gray-300">
+                            {activeChat?.name}
+                        </h3>
                         <div className="flex items-center">
                             {activeChat?.members && (
                                 <div className="flex text-[14px] text-gray-600 items-center">
@@ -171,7 +173,7 @@ function TabChat() {
                     </div>
                     {isOpenCategory && <PopupCategory isOpen={isOpenCategory} setIsOpen={setIsOpenCategory} />}
                 </div>
-                <div className="p-2 flex">
+                <div className="p-2 flex dark:text-gray-300">
                     {activeChat.group ? (
                         <div className="flex items-center">
                             <AiOutlineUsergroupAdd
@@ -214,7 +216,7 @@ function TabChat() {
                     ) : (
                         <VscLayoutSidebarRightOff
                             size={26}
-                            className="ml-1.5 text-gray-700 p-1 hover:text-gray-500 hover:rounded-[5px] hover:bg-gray-200 cursor-pointer"
+                            className="ml-1.5 p-1 hover:text-gray-500 hover:rounded-[5px] hover:bg-gray-200 cursor-pointer"
                             onClick={() => dispatch(setShowOrOffRightBar(!showRightBar))}
                         />
                     )}
@@ -224,7 +226,7 @@ function TabChat() {
                     )}
                 </div>
             </div>
-            <div className="flex-1 p-5 overflow-auto bg-gray-200 " ref={chatContainerRef}>
+            <div className="flex-1 p-5 overflow-auto bg-gray-200 dark:bg-gray-900" ref={chatContainerRef}>
                 {activeChat?.messages.map((message, index) => {
                     const isDeleted = message.delete.some((item) => item.id === userId);
                     const Component = message.destroy ? ChatDestroy : MessageComponent[message.type];
@@ -275,10 +277,10 @@ function TabChat() {
                 })}
             </div>
             <div>
-                <div className="flex bg-white border-t p-2">
+                <div className="flex bg-white dark:bg-gray-800 border-t dark:border-t-black p-2 ">
                     <div>
                         <LuSticker
-                            className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600"
+                            className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600 dark:text-gray-300"
                             onClick={() => dispatch(openEmojiTab('sticker'))}
                         />
                     </div>
@@ -294,7 +296,7 @@ function TabChat() {
 
                         {/* Icon mở thư mục chọn ảnh */}
                         <IoImageOutline
-                            className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600"
+                            className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600 dark:text-gray-300"
                             onClick={() => inputImageRef.current.click()} // Kích hoạt input khi nhấn vào icon
                         />
                     </div>
@@ -310,14 +312,14 @@ function TabChat() {
 
                         {/* Icon mở thư mục chọn file */}
                         <MdAttachFile
-                            className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600"
+                            className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600 dark:text-gray-300"
                             onClick={() => inputFileRef.current.click()}
                         />
                     </div>
 
-                    <FaRegAddressCard className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600" />
+                    <FaRegAddressCard className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600 dark:text-gray-300" />
                 </div>
-                <div className="flex items-center border-t p-2">
+                <div className="flex items-center border-t dark:border-t-black p-2">
                     <textarea
                         ref={textareaRef}
                         value={message}
@@ -332,12 +334,12 @@ function TabChat() {
                         }}
                         placeholder={`Nhập tin nhắn với ${activeChat?.name}`}
                         className="flex-1 p-1 font-base text-[14px] rounded-lg focus:border-blue-500 focus:outline-none
-                            h-[30px] max-h-[200px] overflow-y-auto resize-none"
+                            h-[30px] max-h-[200px] overflow-y-auto resize-none dark:bg-gray-900 dark:text-gray-300"
                     />
 
                     <div className="flex items-center">
                         <MdOutlineEmojiEmotions
-                            className="text-2xl cursor-pointer ml-3 text-gray-500 mr-3 hover:text-blue-500"
+                            className="text-2xl cursor-pointer ml-3 text-gray-500 mr-3 hover:text-blue-500 dark:text-gray-300"
                             onClick={() => dispatch(openEmojiTab('emoji'))}
                         />
                         {message !== '' ? (
