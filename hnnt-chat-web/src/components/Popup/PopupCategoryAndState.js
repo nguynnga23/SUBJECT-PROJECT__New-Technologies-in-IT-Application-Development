@@ -75,7 +75,7 @@ function PopupCategoryAndState() {
 
             {/* Dropdown Menu */}
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 shadow-lg rounded-lg border dark:border-gray-900 dark:text-gray-300">
+                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 shadow-lg rounded-t-lg border dark:border-gray-900 dark:text-gray-300">
                     <div className="p-2 ">
                         <p className="text-sm font-bold text-gray-700 pt-1 mb-2 dark:text-gray-300">Theo trạng thái</p>
 
@@ -84,7 +84,7 @@ function PopupCategoryAndState() {
                             <div
                                 key={state.id}
                                 onClick={() => toggleState(state)}
-                                className="flex items-center p-2 dark:bg-gray-900 hover:opacity-60 rounded-lg cursor-pointer"
+                                className="flex items-center p-2 dark:bg-gray-900 hover:bg-gray-300 hover:dark:bg-gray-700 rounded-lg cursor-pointer"
                             >
                                 {selectedState?.id === state.id ? (
                                     <FaCircle className={`mr-3 cursor-pointer text-blue-500`} />
@@ -107,7 +107,7 @@ function PopupCategoryAndState() {
                                         onClick={() => {
                                             toggleCategory(category);
                                         }}
-                                        className="flex items-center p-2  hover:opacity-60 rounded-lg cursor-pointer"
+                                        className="flex items-center p-2 hover:bg-gray-300 hover:dark:bg-gray-700 rounded-lg cursor-pointer"
                                     >
                                         {selectedCategories.some((c) => c.id === category.id) ? (
                                             <FaRegSquareCheck className="mr-3 text-blue-500" />

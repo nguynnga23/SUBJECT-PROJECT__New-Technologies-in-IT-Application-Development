@@ -16,7 +16,7 @@ function Messaging() {
             <div className="flex-1 flex min-h-0 ">
                 <TabChatLeftBar />
                 <div
-                    className={`flex flex-col bg-white dark:bg-gray-900 ${
+                    className={`flex flex-col bg-white dark:bg-[#16191d] ${
                         showRightBar || showRightBarSearch ? 'w-2/4' : 'w-3/4'
                     }`}
                 >

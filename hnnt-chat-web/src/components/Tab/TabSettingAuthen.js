@@ -16,18 +16,21 @@ function TabSettingAuthen() {
                 & tối đa 32 ký tự.
             </p>
 
-            <div className="bg-white p-6 rounded-lg">
+            <div className="bg-white p-6 rounded-lg dark:bg-gray-800 dark:text-gray-300">
                 <div className="mb-4">
-                    <label className="block text-gray-700">Mật khẩu hiện tại</label>
+                    <label className="block text-gray-700 dark:text-gray-300">Mật khẩu hiện tại</label>
                     <div className="flex border rounded-lg overflow-hidden">
                         <input
                             type={showCurrent ? 'text' : 'password'}
-                            className="w-full px-3 py-2 focus:outline-none"
+                            className="w-full px-3 py-2 focus:outline-none dark:bg-gray-800 dark:text-gray-300"
                             placeholder="Nhập mật khẩu hiện tại"
                             value={currentPassword}
                             onChange={(e) => setCurrentPassword(e.target.value)}
                         />
-                        <button className="px-3 bg-gray-200 text-gray-700" onClick={() => setShowCurrent(!showCurrent)}>
+                        <button
+                            className="px-3 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                            onClick={() => setShowCurrent(!showCurrent)}
+                        >
                             {showCurrent ? 'Ẩn' : 'Hiện'}
                         </button>
                     </div>
@@ -35,16 +38,19 @@ function TabSettingAuthen() {
 
                 {/* Mật khẩu mới */}
                 <div className="mb-4">
-                    <label className="block text-gray-700">Mật khẩu mới</label>
+                    <label className="block text-gray-700 dark:text-gray-300">Mật khẩu mới</label>
                     <div className="flex border rounded-lg overflow-hidden">
                         <input
                             type={showNew ? 'text' : 'password'}
-                            className="w-full px-3 py-2 focus:outline-none"
+                            className="w-full px-3 py-2 focus:outline-none dark:bg-gray-800 dark:text-gray-300"
                             placeholder="Nhập mật khẩu mới"
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
                         />
-                        <button className="px-3 bg-gray-200 text-gray-700" onClick={() => setShowNew(!showNew)}>
+                        <button
+                            className="px-3 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                            onClick={() => setShowNew(!showNew)}
+                        >
                             {showNew ? 'Ẩn' : 'Hiện'}
                         </button>
                     </div>
@@ -52,16 +58,19 @@ function TabSettingAuthen() {
 
                 {/* Nhập lại mật khẩu mới */}
                 <div className="mb-4">
-                    <label className="block text-gray-700">Nhập lại mật khẩu mới</label>
+                    <label className="block text-gray-700 dark:text-gray-300">Nhập lại mật khẩu mới</label>
                     <div className="flex border rounded-lg overflow-hidden">
                         <input
                             type={showConfirm ? 'text' : 'password'}
-                            className="w-full px-3 py-2 focus:outline-none"
+                            className="w-full px-3 py-2 focus:outline-none dark:bg-gray-800 dark:text-gray-300"
                             placeholder="Nhập lại mật khẩu mới"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                         />
-                        <button className="px-3 bg-gray-200 text-gray-700" onClick={() => setShowConfirm(!showConfirm)}>
+                        <button
+                            className="px-3 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                            onClick={() => setShowConfirm(!showConfirm)}
+                        >
                             {showConfirm ? 'Ẩn' : 'Hiện'}
                         </button>
                     </div>
@@ -69,9 +78,11 @@ function TabSettingAuthen() {
 
                 {/* Buttons */}
                 <div className="flex justify-end gap-2">
-                    <button className="px-4 py-2 bg-gray-300 rounded-lg">Hủy</button>
+                    <button className="px-4 py-2 bg-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-300">
+                        Hủy
+                    </button>
                     <button
-                        className={`px-4 py-2 rounded-lg ${
+                        className={`px-4 py-2 rounded-lg dark:bg-gray-700 dark:text-gray-300 ${
                             newPassword && confirmPassword ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-500'
                         }`}
                         disabled={!newPassword || !confirmPassword}

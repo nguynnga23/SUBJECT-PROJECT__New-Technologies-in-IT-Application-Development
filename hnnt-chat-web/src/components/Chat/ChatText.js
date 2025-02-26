@@ -24,10 +24,12 @@ function ChatText({
     return (
         <div
             key={index}
-            className={`relative text-[14px] border border-blue-400 p-2 dark:text-gray-200 cursor-pointer ${
+            className={`relative text-[14px] border p-2 dark:text-gray-200 cursor-pointer ${
                 reactions.length > 0 ? 'pb-8' : 'pb-6'
             } rounded-lg w-fit mb-2 max-w-[500px] min-w-[60px] break-all ${
-                message.sender === userId ? 'bg-blue-100 dark:bg-[#20344c]' : 'bg-white dark:bg-gray-700'
+                message.sender === userId
+                    ? 'bg-blue-100 dark:bg-[#20344c] border-blue-200 dark:border-blue-100'
+                    : 'bg-white dark:bg-[#20344c] border-gray-200 dark:border-gray-800'
             }`}
             onMouseEnter={() => {
                 setTimeout(() => {

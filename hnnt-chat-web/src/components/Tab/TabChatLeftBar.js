@@ -36,14 +36,18 @@ function TabChatLeftBar() {
                     />
                 )}
                 <div className="pl-3">
-                    <RiUserAddLine size={20} onClick={() => setAddFriendButton(true)} className="dark:text-gray-300" />
+                    <RiUserAddLine
+                        size={20}
+                        onClick={() => setAddFriendButton(true)}
+                        className="dark:text-gray-300 cursor-pointer"
+                    />
                     <PopupAddFriend isOpen={addFriendButton} onClose={() => setAddFriendButton(false)} />
                 </div>
                 <div className="pl-3">
                     <AiOutlineUsergroupAdd
                         size={20}
                         onClick={() => setAddGroupButton(true)}
-                        className="dark:text-gray-300"
+                        className="dark:text-gray-300 cursor-pointer"
                     />
                     <PopupAddGroup isOpen={addGroupButton} onClose={() => setAddGroupButton(false)} />
                 </div>

@@ -81,8 +81,8 @@ function TabMesssage() {
                         return (
                             <div
                                 key={chat.id}
-                                className={`relative p-3 cursor-pointer dark:bg-gray-800 hover:opacity-80 dark:text-gray-300${
-                                    activeChat?.id === chat.id ? 'bg-blue-100 dark:bg-[#2D336B] ' : ''
+                                className={`relative p-3 cursor-pointer hover:bg-gray-300 hover:dark:bg-gray-700 dark:text-gray-300 ${
+                                    activeChat?.id === chat.id ? 'bg-blue-100 dark:bg-[#20344c]' : ''
                                 }`}
                                 onClick={() => {
                                     dispatch(setActiveChat(chat));

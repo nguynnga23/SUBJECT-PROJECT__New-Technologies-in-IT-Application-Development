@@ -33,7 +33,7 @@ const PopupAddFriend = ({ isOpen, onClose }) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-[#fff] w-96 rounded-lg shadow-lg max-h-[90vh] flex flex-col">
+            <div className="bg-[#fff] w-96 rounded-lg shadow-lg max-h-[90vh] flex flex-col  dark:bg-gray-900 dark:text-gray-300">
                 {/* Header */}
                 <div className="flex justify-between items-center p-3 border-b border-gray-400">
                     <h2 className="text-lg font-semibold">Thêm bạn</h2>

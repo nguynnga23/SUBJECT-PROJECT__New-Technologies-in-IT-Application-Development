@@ -26,7 +26,7 @@ function PopupMenuForMess({ setShowPopup, setHoveredMessage, chat }) {
 
     return (
         <div
-            className={`absolute right-[0] top-[-10px] w-40 z-[10] bg-white shadow-lg rounded-lg border border-gray-200 z-999`}
+            className={`absolute right-[0] top-[-10px] w-40 z-[10] bg-white shadow-lg rounded-lg z-1000 dark:bg-gray-800 `}
             ref={popupRef}
         >
             <div className="">

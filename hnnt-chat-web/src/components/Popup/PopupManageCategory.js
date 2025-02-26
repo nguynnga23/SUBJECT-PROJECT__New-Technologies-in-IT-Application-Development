@@ -38,18 +38,18 @@ const PopupManageCategory = ({ setIsOpenManageCategory }) => {
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white dark:bg-gray-900 rounded-lg w-[400px] shadow-lg">
+            <div className="bg-white dark:bg-gray-900 rounded-lg w-[400px] shadow-lg dark:bg-gray-900 dark:text-gray-300">
                 {/* Header */}
                 <div className="flex justify-between items-center p-4 border-b dark:border-b-black">
-                    <h2 className="text-lg font-semibold">Quản lý thẻ phân loại</h2>
+                    <h2 className="text-lg font-semibold ">Quản lý thẻ phân loại</h2>
                     <button onClick={handleClose} className="text-gray-600 hover:text-black">
                         <IoMdClose size={22} />
                     </button>
                 </div>
 
                 {/* Danh sách thẻ phân loại */}
-                <div className="p-4  max-h-[350px] overflow-y-auto">
-                    <h3 className="text-sm text-gray-600 mb-2">Danh sách thẻ phân loại</h3>
+                <div className="p-4  max-h-[350px] overflow-y-auto ">
+                    <h3 className="text-sm mb-2">Danh sách thẻ phân loại</h3>
                     <div className="space-y-2">
                         {categories.map((category) => (
                             <div

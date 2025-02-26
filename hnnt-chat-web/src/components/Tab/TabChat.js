@@ -226,7 +226,7 @@ function TabChat() {
                     )}
                 </div>
             </div>
-            <div className="flex-1 p-5 overflow-auto bg-gray-200 dark:bg-gray-900" ref={chatContainerRef}>
+            <div className="flex-1 p-5 overflow-auto bg-gray-200 dark:bg-[#16191d]" ref={chatContainerRef}>
                 {activeChat?.messages.map((message, index) => {
                     const isDeleted = message.delete.some((item) => item.id === userId);
                     const Component = message.destroy ? ChatDestroy : MessageComponent[message.type];
