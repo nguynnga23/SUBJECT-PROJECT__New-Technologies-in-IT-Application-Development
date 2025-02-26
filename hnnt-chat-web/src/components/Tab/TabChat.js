@@ -243,17 +243,15 @@ function TabChat() {
                         >
                             {!isDeleted && Component && (
                                 <div className="flex">
-                                    {activeChat.group && (
-                                        <div className="w-[45px] h-[45px] mr-3 flex-shrink-0">
-                                            {message.sender !== userId && showAvatar && (
-                                                <img
-                                                    src={message.avatar}
-                                                    alt="avatar"
-                                                    className="w-full h-full rounded-full border object-cover"
-                                                />
-                                            )}
-                                        </div>
-                                    )}
+                                    <div className="w-[45px] h-[45px] mr-3 flex-shrink-0">
+                                        {message.sender !== userId && showAvatar && (
+                                            <img
+                                                src={message.avatar}
+                                                alt="avatar"
+                                                className="w-full h-full rounded-full border object-cover"
+                                            />
+                                        )}
+                                    </div>
 
                                     <div>
                                         <Component
@@ -267,7 +265,7 @@ function TabChat() {
                                             isPopupOpenIndex={isPopupOpenIndex}
                                             setIsPopupOpenIndex={setIsPopupOpenIndex}
                                             reactions={message.reactions}
-                                            showName={message.sender !== userId && showAvatar}
+                                            showName={message.sender !== userId && showAvatar && activeChat.group}
                                         />
                                     </div>
                                 </div>
