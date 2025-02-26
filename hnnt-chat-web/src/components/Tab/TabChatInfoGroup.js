@@ -13,10 +13,10 @@ function TabChatInfoGroup({ setActiveMessageTab, group }) {
     const timeoutRef = useRef(null);
     return (
         <div className="overflow-auto">
-            <div className="flex relative border-b p-4 items-center justify-center">
+            <div className="flex relative border-b p-4 items-center justify-center dark:bg-gray-800 dark:text-gray-300">
                 <IoChevronBack
                     size={25}
-                    className="absolute left-[12px] top-[18px] rounded-full hover:bg-gray-100 p-1"
+                    className="absolute left-[12px] top-[18px] rounded-full hover:bg-gray-100 hover:dark:bg-gray-700 p-1"
                     onClick={() => setActiveMessageTab('info')}
                 />
                 <p className="font-medium">Thành viên</p>
@@ -24,7 +24,7 @@ function TabChatInfoGroup({ setActiveMessageTab, group }) {
             <div>
                 {group?.members?.map((g, index) => (
                     <div
-                        className="relative flex item-center p-3  hover:bg-gray-100 cursor-pointer"
+                        className="relative flex item-center p-3 hover:bg-gray-100 hover:dark:bg-gray-700 cursor-pointer dark:text-gray-300"
                         key={index}
                         onMouseEnter={() => {
                             if (timeoutRef.current) {

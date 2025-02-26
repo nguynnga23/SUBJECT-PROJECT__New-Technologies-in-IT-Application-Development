@@ -14,7 +14,7 @@ function TabChatRightBar() {
         if (!activeChat?.group) {
             setActiveMessageTab('info');
         }
-    }, [activeChat]);
+    }, [activeChat.group]);
 
     return (
         <div className="w-1/4 flex flex-col bg-white dark:bg-gray-800  min-w-[350px] border-l dark:border-l-black">

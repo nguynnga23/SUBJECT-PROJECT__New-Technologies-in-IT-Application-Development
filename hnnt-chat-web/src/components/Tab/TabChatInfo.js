@@ -163,14 +163,14 @@ function TabChatInfo({ setActiveMessageTab }) {
             </div>
 
             {/* Xóa lịch sử trò chuyện */}
-            <div className="text-red-500 flex items-center space-x-2 py-3 font-medium cursor-pointer text-base pl-2 hover:bg-gray-100">
+            <div className="text-red-500 flex items-center space-x-2 py-3 font-medium cursor-pointer text-base pl-2 hover:bg-gray-100 hover:dark:bg-gray-700">
                 <FaTrashAlt />
                 <span className="text-[12px]" onClick={() => dispatch(deleteChatForUser({ userId, chatId }))}>
                     Xóa lịch sử trò chuyện
                 </span>
             </div>
             {activeChat?.group && (
-                <div className="text-red-500 flex items-center space-x-2 py-3 font-medium cursor-pointer text-base pl-2 hover:bg-gray-100">
+                <div className="text-red-500 flex items-center space-x-2 py-3 font-medium cursor-pointer text-base pl-2 hover:bg-gray-100 hover:dark:bg-gray-700">
                     <IoIosLogOut />
                     <span className="text-[12px]" onClick={handleRemoveMember}>
                         Rời nhóm
