@@ -1,4 +1,21 @@
-function ChatText({ index, userId, message, reactions, showName }) {
+import { MdFilePresent } from 'react-icons/md';
+import { VscFilePdf } from 'react-icons/vsc';
+import { FaRegFileWord } from 'react-icons/fa';
+import { FaRegFileExcel } from 'react-icons/fa';
+import { FaRegFilePowerpoint } from 'react-icons/fa';
+
+function ChatText({ index, userId, message, reactions, showName, replyMessage }) {
+    const getFileIcon = (fileType) => {
+        if (fileType.includes('pdf')) return <VscFilePdf className="text-3xl text-red-500 mr-2" />;
+        if (fileType.includes('excel') || fileType.includes('spreadsheet') || fileType.includes('xls'))
+            return <FaRegFileExcel className="text-3xl text-green-600 mr-2" />;
+        if (fileType.includes('powerpoint') || fileType.includes('presentation') || fileType.includes('ppt'))
+            return <FaRegFilePowerpoint className="text-3xl text-orange-500 mr-2" />;
+        if (fileType.includes('word') || fileType.includes('msword') || fileType.includes('document'))
+            return <FaRegFileWord className="text-3xl text-blue-600 mr-2" />;
+        return <MdFilePresent className="text-3xl text-gray-500 mr-2" />; // Mặc định
+    };
+
     return (
         <div
             key={index}
@@ -13,6 +30,35 @@ function ChatText({ index, userId, message, reactions, showName }) {
             {showName && (
                 <p className="text-[10px] text-gray-400 pb-[2px]">{message?.sender !== userId && message?.name}</p>
             )}
+            <div>
+                {replyMessage && (
+                    <div className="mb-1 bg-gray-300 dark:bg-gray-700  p-2 rounded-[5px]">
+                        <p className="text-[12px] font-medium text-gray-600 dark:text-gray-300 ">{replyMessage.name}</p>
+                        <div>
+                            <p className="text-[12px] text-gray-600 dark:text-gray-300 max-h-[50px] overflow-hidden text-ellipsis break-words whitespace-pre-wrap line-clamp-3">
+                                {replyMessage.type === 'file' ? (
+                                    <div className="flex items-center">
+                                        {getFileIcon(replyMessage.fileType)}
+                                        <div className="flex flex-col">
+                                            <p className="text-[12px] font-bold">{replyMessage.fileName}</p>
+                                            <p className="text-[12px] text-gray-500 pt-1">{replyMessage.fileSize}</p>
+                                        </div>
+                                    </div>
+                                ) : replyMessage.type === 'image' ? (
+                                    <img src={replyMessage.content} alt="content" className="max-w-[50px] rounded-lg" />
+                                ) : replyMessage.type === 'gif' ? (
+                                    <img src={replyMessage.content} alt="GIF" className="max-w-[50px] rounded-lg " />
+                                ) : replyMessage.type === 'sticker' ? (
+                                    <img src={replyMessage.content} alt="GIF" className="max-w-[50px] rounded-lg " />
+                                ) : (
+                                    replyMessage.content
+                                )}
+                            </p>
+                        </div>
+                    </div>
+                )}
+            </div>
+
             {message.content}
 
             <p

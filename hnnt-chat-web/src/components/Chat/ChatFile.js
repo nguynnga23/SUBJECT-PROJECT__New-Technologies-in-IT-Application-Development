@@ -1,14 +1,8 @@
-import { FiMoreHorizontal } from 'react-icons/fi';
 import { MdFilePresent } from 'react-icons/md';
-import PopupMenuForChat from '../Popup/PopupMenuForChat';
 import { VscFilePdf } from 'react-icons/vsc';
 import { FaRegFileWord } from 'react-icons/fa';
 import { FaRegFileExcel } from 'react-icons/fa';
 import { FaRegFilePowerpoint } from 'react-icons/fa';
-import { AiOutlineLike } from 'react-icons/ai';
-import PopupReacttion from '../Popup/PopupReaction';
-import { useState } from 'react';
-import PopupReactionChat from '../Popup/PopupReactionChat';
 
 const getFileIcon = (fileType) => {
     if (fileType.includes('pdf')) return <VscFilePdf className="text-3xl text-red-500 mr-2" />;
@@ -21,7 +15,7 @@ const getFileIcon = (fileType) => {
     return <MdFilePresent className="text-3xl text-gray-500 mr-2" />; // Mặc định
 };
 
-function ChatFile({ userId, message, showName }) {
+function ChatFile({ userId, message, showName, replyMessage }) {
     return (
         <div
             className={`relative pb-2 p-3 mb-2 border rounded-lg bg-gray-100 max-w-[500px] cursor-pointer ${
@@ -33,6 +27,19 @@ function ChatFile({ userId, message, showName }) {
             {showName && (
                 <p className="text-[10px] text-gray-400 pb-[2px]">{message?.sender !== userId && message?.name}</p>
             )}
+
+            <div>
+                {replyMessage && (
+                    <div className="mb-1 bg-gray-300 dark:bg-gray-700  p-2 rounded-[5px]">
+                        <p className="text-[12px] font-medium text-gray-600 dark:text-gray-300 ">{replyMessage.name}</p>
+                        <div>
+                            <p className="text-[12px] text-gray-600 dark:text-gray-300 max-h-[50px] overflow-hidden text-ellipsis break-words whitespace-pre-wrap line-clamp-3">
+                                {replyMessage.content}
+                            </p>
+                        </div>
+                    </div>
+                )}
+            </div>
 
             <div className="flex items-center space-x-3 mb-4">
                 {/* Nút tải file */}

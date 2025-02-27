@@ -26,7 +26,7 @@ const chatSlice = createSlice({
             state.data = [...action.payload.chats, ...action.payload.groups];
         },
         sendMessage: (state, action) => {
-            const { chatId, content, time, type, fileName, fileSize, fileType } = action.payload;
+            const { chatId, content, time, type, fileName, fileSize, fileType, reply } = action.payload;
             const chat = state.data.find((c) => c.id === chatId);
 
             if (chat) {
@@ -53,6 +53,10 @@ const chatSlice = createSlice({
                 // Nếu có fileType thì thêm vào object
                 if (fileType) {
                     message.fileType = fileType;
+                }
+
+                if (reply) {
+                    message.reply = reply;
                 }
 
                 chat.messages.push(message);

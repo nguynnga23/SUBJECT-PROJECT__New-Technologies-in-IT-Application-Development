@@ -45,7 +45,7 @@ export default function Home() {
     }, []);
 
     return (
-        <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
+        <div className="flex h-screen bg-gray-100 dark:bg-[#16191d]">
             {/* Sidebar */}
             <div className="w-16 h-screen bg-blue-600 dark:bg-gray-900 flex flex-col items-center py-4 space-y-6">
                 {/* Avatar */}
