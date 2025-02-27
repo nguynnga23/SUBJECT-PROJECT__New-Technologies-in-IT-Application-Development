@@ -159,7 +159,11 @@ function Contacts() {
             <div className="flex-1 flex min-h-0">
                 <div className="w-1/4 bg-white border-r p-4">
                     <div className="flex justify-between items-center pb-4 border-b relative my-4">
-                        <input type="text" placeholder="Tìm kiếm..." className="w-full pl-10 p-2 border rounded-lg" />
+                        <input
+                            type="text"
+                            placeholder="Tìm kiếm..."
+                            className="w-full pl-10 p-2 border rounded-lg placeholder:text-sm"
+                        />
                         <FaSearch className="absolute left-3 top-3 text-gray-500" />
                         <div className="pl-2">
                             <RiUserAddLine size={24} />
