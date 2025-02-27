@@ -9,6 +9,38 @@ const Accounts = [
         birthDate: '20/09/2003',
         location: 'string',
         gender: 'Nam',
+        currentAvatar: [
+            {
+                id: 1,
+                url: 'https://m.media-amazon.com/images/I/518K-+yYl2L._AC_SL1000_.jpg',
+                uploadedAt: '25/09/2025',
+            },
+            {
+                id: 2,
+                url: 'https://m.media-amazon.com/images/I/518K-+yYl2L._AC_SL1000_.jpg',
+                uploadedAt: '25/09/2025',
+            },
+            {
+                id: 3,
+                url: 'https://m.media-amazon.com/images/I/518K-+yYl2L._AC_SL1000_.jpg',
+                uploadedAt: '25/09/2025',
+            },
+            {
+                id: 4,
+                url: 'https://m.media-amazon.com/images/I/518K-+yYl2L._AC_SL1000_.jpg',
+                uploadedAt: '25/09/2025',
+            },
+            {
+                id: 5,
+                url: 'https://m.media-amazon.com/images/I/518K-+yYl2L._AC_SL1000_.jpg',
+                uploadedAt: '25/09/2025',
+            },
+            {
+                id: 6,
+                url: 'https://m.media-amazon.com/images/I/518K-+yYl2L._AC_SL1000_.jpg',
+                uploadedAt: '25/09/2025',
+            },
+        ],
         friends: [
             {
                 id: 1,
