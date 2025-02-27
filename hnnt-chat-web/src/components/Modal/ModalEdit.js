@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { motion } from 'framer-motion';
 
@@ -12,18 +12,36 @@ import { useSelector } from 'react-redux';
 
 function ModalEdit({ setIsType, onClose }) {
     const userActive = useSelector((state) => state.auth.userActive);
-    const Avatar = userActive?.avatar;
 
     const [isName, setIsName] = useState(userActive?.name);
     const [gender, setGender] = useState(userActive?.gender);
 
-    // ---------------------------------
+    // -----------------------------------------------------
     const currentYear = new Date().getFullYear();
 
-    const [day, setDay] = useState(31);
-    const [month, setMonth] = useState(1);
-    const [year, setYear] = useState(2025);
+    const [birthDay, birthMonth, birthYear] = userActive?.birthDate.split('/').map((num) => parseInt(num, 10));
+
+    const [day, setDay] = useState(birthDay);
+    const [month, setMonth] = useState(birthMonth);
+    const [year, setYear] = useState(birthYear);
     const [maxDays, setMaxDays] = useState(31);
+
+    // Hàm kiểm tra số ngày hợp lệ trong tháng
+    const getMaxDays = (month, year) => {
+        if ([4, 6, 9, 11].includes(month)) return 30; // Tháng 4, 6, 9, 11 có 30 ngày
+        if (month === 2) return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0) ? 29 : 28; // Tháng 2
+        return 31; // Các tháng còn lại có 31 ngày
+    };
+
+    // Cập nhật số ngày hợp lệ khi tháng hoặc năm thay đổi
+    useEffect(() => {
+        const newMaxDays = getMaxDays(month, year);
+        setMaxDays(newMaxDays);
+
+        if (day > newMaxDays) {
+            setDay(newMaxDays); // Giữ ngày trong phạm vi hợp lệ
+        }
+    }, [month, year]);
 
     return (
         <motion.div
