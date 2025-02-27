@@ -10,12 +10,12 @@
     }
 
     .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #9ca3af;
+        background: #b4b4b6;
         border-radius: 9999px; /* Bo tròn mạnh nhất */
     }
 
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #6b7280;
+        background: #9ca3af;
     }
 }
 

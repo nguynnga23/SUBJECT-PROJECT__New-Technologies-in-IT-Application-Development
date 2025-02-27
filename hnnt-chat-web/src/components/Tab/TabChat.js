@@ -156,7 +156,7 @@ function TabChat() {
                         </h3>
                         <div className="flex items-center">
                             {activeChat?.members && (
-                                <div className="flex text-[14px] text-gray-600 items-center">
+                                <div className="flex text-[14px] text-gray-600 items-center dark:text-gray-400">
                                     <CiUser className={`cursor-pointer mr-1`} />
                                     <p className="text-[10px] mr-1">{activeChat?.members.length} thành viên |</p>
                                 </div>
@@ -301,7 +301,7 @@ function TabChat() {
                                                     message={message}
                                                 />
                                             )}
-                                            {sumReaction > 0 && (
+                                            {sumReaction > 0 && !message.destroy && (
                                                 <div
                                                     className="absolute flex items-center bottom-[5px] right-[15px] rounded-full p-0.5 bg-white text-[12px] cursor-pointer dark:bg-gray-700"
                                                     onClick={() => setOpenReactionChat(true)}
@@ -314,17 +314,19 @@ function TabChat() {
                                                     )}
                                                 </div>
                                             )}
-                                            {hoveredMessage === index && isPopupOpenIndex === null && (
-                                                <button
-                                                    className="absolute bottom-[8px] right-[-8px] rounded-full p-0.5 text-[12px] bg-white dark:bg-gray-700"
-                                                    onMouseEnter={() => setShowPopupReaction(true)}
-                                                    onMouseLeave={() =>
-                                                        !showPopupReaction && setShowPopupReaction(false)
-                                                    }
-                                                >
-                                                    <AiOutlineLike className="text-gray-400 " size={13} />
-                                                </button>
-                                            )}
+                                            {hoveredMessage === index &&
+                                                isPopupOpenIndex === null &&
+                                                !message.destroy && (
+                                                    <button
+                                                        className="absolute bottom-[8px] right-[-8px] rounded-full p-0.5 text-[12px] bg-white dark:bg-gray-700"
+                                                        onMouseEnter={() => setShowPopupReaction(true)}
+                                                        onMouseLeave={() =>
+                                                            !showPopupReaction && setShowPopupReaction(false)
+                                                        }
+                                                    >
+                                                        <AiOutlineLike className="text-gray-400 " size={13} />
+                                                    </button>
+                                                )}
 
                                             {showPopupReaction &&
                                                 hoveredMessage === index &&

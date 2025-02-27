@@ -21,7 +21,7 @@ const getFileIcon = (fileType) => {
     return <MdFilePresent className="text-3xl text-gray-500 mr-2" />; // Mặc định
 };
 
-function ChatFile({ index, userId, message, isPopupOpenIndex, setIsPopupOpenIndex, showName }) {
+function ChatFile({ userId, message, showName }) {
     return (
         <div
             className={`relative pb-2 p-3 mb-2 border rounded-lg bg-gray-100 max-w-[500px] cursor-pointer ${
