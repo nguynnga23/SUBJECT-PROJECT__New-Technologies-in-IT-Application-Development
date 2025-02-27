@@ -29,7 +29,7 @@ function TabFriendsList(props) {
                         <input
                             type="text"
                             placeholder="Tìm bạn"
-                            className="w-full group-hover:bg-gray-100 border-none outline-none p-1"
+                            className="w-full group-hover:bg-gray-100 border-none outline-none p-1 placeholder:text-sm"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -59,10 +59,17 @@ function TabFriendsList(props) {
                                     border: 0,
                                 },
                                 maxHeight: '30px',
+                                '.MuiSelect-select': {
+                                    fontSize: '14px',
+                                },
                             }}
                         >
-                            <MenuItem value="AZ">Tên (A-Z)</MenuItem>
-                            <MenuItem value="ZA">Tên (Z-A)</MenuItem>
+                            <MenuItem value="AZ" sx={{ fontSize: '14px' }}>
+                                Tên (A-Z)
+                            </MenuItem>
+                            <MenuItem value="ZA" sx={{ fontSize: '14px' }}>
+                                Tên (Z-A)
+                            </MenuItem>
                         </Select>
                     </div>
 
@@ -83,10 +90,16 @@ function TabFriendsList(props) {
                                     border: 0,
                                 },
                                 maxHeight: '30px',
+                                '.MuiSelect-select': {
+                                    fontSize: '14px',
+                                },
                             }}
                         >
-                            <MenuItem value="Tất cả">Tất cả</MenuItem>
+                            <MenuItem value="Tất cả" sx={{ fontSize: '14px' }}>
+                                Tất cả
+                            </MenuItem>
                             <MenuItem
+                                sx={{ fontSize: '14px' }}
                                 value="Phân loại"
                                 onClick={() => setIsDropdownOpen(true)}
                                 className="relative"

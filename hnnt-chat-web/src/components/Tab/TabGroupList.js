@@ -32,7 +32,7 @@ function TabGroupList(props) {
                         <input
                             type="text"
                             placeholder="Tìm kiếm..."
-                            className="w-full group-hover:bg-gray-100 border-none outline-none p-1"
+                            className="w-full group-hover:bg-gray-100 border-none outline-none p-1 placeholder:text-sm"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -62,12 +62,23 @@ function TabGroupList(props) {
                                     border: 0,
                                 },
                                 maxHeight: '30px',
+                                '.MuiSelect-select': {
+                                    fontSize: '14px',
+                                },
                             }}
                         >
-                            <MenuItem value="AZ">Tên (A-Z)</MenuItem>
-                            <MenuItem value="ZA">Tên (Z-A)</MenuItem>
-                            <MenuItem value="MC">Hoạt động (mới→cũ)</MenuItem>
-                            <MenuItem value="CM">Hoạt động (cũ→mới)</MenuItem>
+                            <MenuItem value="AZ" sx={{ fontSize: '14px' }}>
+                                Tên (A-Z)
+                            </MenuItem>
+                            <MenuItem value="ZA" sx={{ fontSize: '14px' }}>
+                                Tên (Z-A)
+                            </MenuItem>
+                            <MenuItem value="MC" sx={{ fontSize: '14px' }}>
+                                Hoạt động (mới→cũ)
+                            </MenuItem>
+                            <MenuItem value="CM" sx={{ fontSize: '14px' }}>
+                                Hoạt động (cũ→mới)
+                            </MenuItem>
                         </Select>
                     </div>
 
@@ -88,10 +99,16 @@ function TabGroupList(props) {
                                     border: 0,
                                 },
                                 maxHeight: '30px',
+                                '.MuiSelect-select': {
+                                    fontSize: '14px',
+                                },
                             }}
                         >
-                            <MenuItem value="Tất cả">Tất cả</MenuItem>
+                            <MenuItem value="Tất cả" sx={{ fontSize: '14px' }}>
+                                Tất cả
+                            </MenuItem>
                             <MenuItem
+                                sx={{ fontSize: '14px' }}
                                 value="Phân loại"
                                 onClick={() => setIsDropdownOpen(true)}
                                 className="relative"
@@ -102,8 +119,12 @@ function TabGroupList(props) {
                                     <FaAngleRight />
                                 </div>
                             </MenuItem>
-                            <MenuItem value="Nhóm tôi quản lý">Nhóm tôi quản lý</MenuItem>
-                            <MenuItem value="Cộng đồng tôi quản lý">Cộng đồng tôi quản lý</MenuItem>
+                            <MenuItem sx={{ fontSize: '14px' }} value="Nhóm tôi quản lý">
+                                Nhóm tôi quản lý
+                            </MenuItem>
+                            <MenuItem sx={{ fontSize: '14px' }} value="Cộng đồng tôi quản lý">
+                                Cộng đồng tôi quản lý
+                            </MenuItem>
                             <MenuItem sx={{ display: 'none' }} value={filter}>
                                 {filter}
                             </MenuItem>

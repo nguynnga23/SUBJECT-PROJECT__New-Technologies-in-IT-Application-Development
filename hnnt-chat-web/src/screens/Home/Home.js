@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { PiChatCircleTextFill } from 'react-icons/pi';
 import { RiContactsBook3Line } from 'react-icons/ri';
 import { IoSettingsOutline } from 'react-icons/io5';
@@ -15,8 +15,6 @@ import groups from '../../sample_data/listGroup';
 import { useNavigate } from 'react-router-dom';
 
 import Modal from '../../components/Modal';
-
-import { initFlowbite } from 'flowbite';
 
 export default function Home() {
     const navigate = useNavigate();
@@ -40,8 +38,20 @@ export default function Home() {
 
     // open modal
     const [isOpenModel, setIsOpenModel] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    // Đóng dropdown khi click bên ngoài
     useEffect(() => {
-        initFlowbite();
+        function handleClickOutside(event) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
     }, []);
 
     return (
@@ -49,13 +59,14 @@ export default function Home() {
             {/* Sidebar */}
             <div className="w-16 h-screen bg-blue-600 dark:bg-gray-900 flex flex-col items-center py-4 space-y-6">
                 {/* Avatar */}
-                <div>
+                <div className="relative" ref={dropdownRef}>
                     <button
                         id="dropdownUserAvatarButton"
                         data-dropdown-toggle="dropdownAvatar"
                         data-dropdown-placement="right-end"
                         className="flex text-sm cursor-pointer"
                         type="button"
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     >
                         <img
                             src={userActive?.avatar}
@@ -66,7 +77,9 @@ export default function Home() {
                     {/* Dropdown menu */}
                     <div
                         id="dropdownAvatar"
-                        className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg ring-2 ring-gray-200"
+                        className={`z-10 bg-white divide-y divide-gray-100 rounded-lg ring-2 ring-gray-200 absolute top-0 left-14 min-w-64 z-20 ${
+                            isDropdownOpen ? 'block' : 'hidden'
+                        }`}
                     >
                         <div className="px-4 py-3 text-sm text-black ">
                             <p className="text-lg font-medium ">{userActive?.name}</p>
