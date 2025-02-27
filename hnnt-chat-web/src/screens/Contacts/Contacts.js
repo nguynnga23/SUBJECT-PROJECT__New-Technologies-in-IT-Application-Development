@@ -107,6 +107,7 @@ function Contacts() {
     const [addGroupButton, setAddGroupButton] = useState(false);
 
     const [selectTab, setSelectTab] = useState(TabsContacts[0]);
+    const [subSearch, setSubSearch] = useState('');
     const [search, setSearch] = useState('');
     const [filterName, setFilterName] = useState('AZ');
     const [filter, setFilter] = useState('Tất cả');
@@ -169,16 +170,16 @@ function Contacts() {
                             type="text"
                             placeholder="Tìm kiếm..."
                             className="w-full pl-8 pr-6 p-1.5 border bg-gray-200 rounded-lg text-[14px] focus:border-blue-500 focus:outline-none"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
+                            value={subSearch}
+                            onChange={(e) => setSubSearch(e.target.value)}
                         />
                         <FaSearch className="absolute left-2 top-3 text-gray-500 text-xs" />
-                        {search !== '' && (
+                        {subSearch !== '' && (
                             <TiDelete
-                                className="absolute right-[85px] top-6 text-gray-500 text-xs cursor-pointer bg-gray-200"
+                                className="absolute right-[70px] top-3 text-gray-500 text-xs cursor-pointer bg-gray-200"
                                 size={16}
                                 onClick={() => {
-                                    setSearch('');
+                                    setSubSearch('');
                                 }}
                             />
                         )}
