@@ -1,34 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
-import CoverPhoto from '../../public/cover_photo_sample.jpg';
 
-import { CiCamera } from 'react-icons/ci';
-import { LuPencilLine } from 'react-icons/lu';
 import { IoIosArrowBack } from 'react-icons/io';
-import { MdOutlineInsertPhoto } from 'react-icons/md';
 
 import { motion } from 'framer-motion';
 
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormControl from '@mui/material/FormControl';
-import { useSelector } from 'react-redux';
-
-import PopupViewImage from '../Popup/PopupViewImage';
 import ModalAccount from './ModalAccount';
 import ModalAvatar from './ModalAvatar';
 import ModalEdit from './ModalEdit';
 import ModalEditAvatar from './ModalEditAvatar';
 
 function Modal({ isOpen, onClose }) {
-    const userActive = useSelector((state) => state.auth.userActive);
-    const Avatar = userActive?.avatar;
-
     const [isType, setIsType] = useState('profile');
-    const [isName, setIsName] = useState(userActive?.name);
-    const [gender, setGender] = useState(userActive?.gender);
 
     // -----------------------------------------------------
     const currentYear = new Date().getFullYear();
@@ -55,18 +37,7 @@ function Modal({ isOpen, onClose }) {
         }
     }, [month, year]);
 
-    // lấy ảnh từ máy
-    const fileInputRef = useRef(null);
-
-    const handleTakePhoto = () => {
-        if (fileInputRef.current) {
-            fileInputRef.current.click();
-        }
-    };
-
     const [image, setImage] = useState(null);
-
-    const [selectedImage, setSelectedImage] = useState(null);
 
     // Đống mở modal
     if (!isOpen) return null;

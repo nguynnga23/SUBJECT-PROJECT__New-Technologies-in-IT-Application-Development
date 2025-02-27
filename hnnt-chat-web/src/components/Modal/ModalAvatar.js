@@ -1,23 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
-import CoverPhoto from '../../public/cover_photo_sample.jpg';
+import { useRef } from 'react';
 
-import { CiCamera } from 'react-icons/ci';
-import { LuPencilLine } from 'react-icons/lu';
-import { IoIosArrowBack } from 'react-icons/io';
 import { MdOutlineInsertPhoto } from 'react-icons/md';
 
 import { motion } from 'framer-motion';
 
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormControl from '@mui/material/FormControl';
 import { useSelector } from 'react-redux';
-
-import PopupViewImage from '../Popup/PopupViewImage';
-import ModalAccount from './ModalAccount';
 
 function ModalAvatar({ setImage, setIsType }) {
     const userActive = useSelector((state) => state.auth.userActive);
@@ -66,31 +53,25 @@ function ModalAvatar({ setImage, setIsType }) {
             <p className="font-semibold ml-4 mt-6">Ảnh đại diện của tôi</p>
 
             <div className="grid grid-cols-4 gap-4 w-full px-6 mt-3">
-                <img
-                    src={Avatar}
-                    alt="avatar"
-                    className="w-16 h-16 object-cover rounded-full border-1 border-black cursor-pointer"
-                />
-                <img
-                    src={Avatar}
-                    alt="avatar"
-                    className="w-16 h-16 object-cover rounded-full border-1 border-black cursor-pointer"
-                />
-                <img
-                    src={Avatar}
-                    alt="avatar"
-                    className="w-16 h-16 object-cover rounded-full border-1 border-black cursor-pointer"
-                />
-                <img
-                    src={Avatar}
-                    alt="avatar"
-                    className="w-16 h-16 object-cover rounded-full border-1 border-black cursor-pointer"
-                />
-                <img
-                    src={Avatar}
-                    alt="avatar"
-                    className="w-16 h-16 object-cover rounded-full border-1 border-black cursor-pointer"
-                />
+                {userActive?.currentAvatar?.map((avatar, index) => (
+                    <div className="flex relative group" key={index}>
+                        <img
+                            src={avatar.url}
+                            alt="avatar"
+                            className="w-16 h-16 object-cover rounded-full border-1 border-black cursor-pointer"
+                            onClick={() => {
+                                setIsType('editAvatar');
+                                setImage(avatar.url);
+                            }}
+                        />
+                        <button
+                            onClick={() => console.log(`xóa ảnh ${avatar.id} khỏi account`)}
+                            className="absolute top-0 right-2 w-5 h-5 flex items-center justify-center bg-gray-200 text-black rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-gray-300"
+                        >
+                            ⨉
+                        </button>
+                    </div>
+                ))}
             </div>
         </motion.div>
     );
