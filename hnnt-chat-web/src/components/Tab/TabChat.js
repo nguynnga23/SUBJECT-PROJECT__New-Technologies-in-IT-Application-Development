@@ -6,7 +6,7 @@ import { VscLayoutSidebarRight } from 'react-icons/vsc';
 import { BsTelephone } from 'react-icons/bs';
 import { GoDeviceCameraVideo } from 'react-icons/go';
 import { IoSearchOutline } from 'react-icons/io5';
-import { AiFillLike } from 'react-icons/ai';
+import { AiFillLike, AiOutlineLike } from 'react-icons/ai';
 import { IoImageOutline } from 'react-icons/io5';
 import { MdAttachFile } from 'react-icons/md';
 import { FaRegAddressCard } from 'react-icons/fa6';
@@ -34,6 +34,10 @@ import ChatDestroy from '../Chat/ChatDestroy';
 import ChatSticker from '../Chat/ChatSticker';
 import PopupAddGroup from '../Popup/PopupAddGroup';
 import PopupVideoCall from '../Popup/PopupVideoCall';
+import { FiMoreHorizontal } from 'react-icons/fi';
+import PopupReacttion from '../Popup/PopupReaction';
+import PopupReactionChat from '../Popup/PopupReactionChat';
+import PopupMenuForChat from '../Popup/PopupMenuForChat';
 
 function TabChat() {
     const [message, setMessage] = useState('');
@@ -60,6 +64,8 @@ function TabChat() {
     const [addGroupButton, setAddGroupButton] = useState(false);
 
     const [videoCall, setVideoCall] = useState(false);
+    const [showPopupReaction, setShowPopupReaction] = useState(false);
+    const [openReactionChat, setOpenReactionChat] = useState(false);
 
     const MessageComponent = {
         text: ChatText,
@@ -235,11 +241,21 @@ function TabChat() {
                     const prevMessageDeleted = prevMessage?.delete?.some((item) => item.id === userId);
                     const showAvatar =
                         index === 0 || !prevMessage || prevMessage.sender !== message.sender || prevMessageDeleted;
+                    const position = message.sender === userId ? 'right' : 'left';
+                    const sumReaction = message.reactions.reduce((total, reaction) => total + reaction.sum, 0);
 
                     return (
                         <div
                             className={`relative flex ${message.sender === userId ? 'justify-end' : 'justify-start'}`}
                             key={index}
+                            onMouseEnter={() => {
+                                if (isPopupOpenIndex === null) setHoveredMessage(index);
+                                setOpenReactionChat(false);
+                            }}
+                            onMouseLeave={() => {
+                                if (isPopupOpenIndex === null) setHoveredMessage(null);
+                                setOpenReactionChat(false);
+                            }}
                         >
                             {!isDeleted && Component && (
                                 <div className="flex">
@@ -253,20 +269,97 @@ function TabChat() {
                                         )}
                                     </div>
 
-                                    <div>
-                                        <Component
-                                            key={index}
-                                            index={index}
-                                            userId={userId}
-                                            activeChat={activeChat}
-                                            message={message}
-                                            setHoveredMessage={setHoveredMessage}
-                                            hoveredMessage={hoveredMessage}
-                                            isPopupOpenIndex={isPopupOpenIndex}
-                                            setIsPopupOpenIndex={setIsPopupOpenIndex}
-                                            reactions={message.reactions}
-                                            showName={message.sender !== userId && showAvatar && activeChat.group}
-                                        />
+                                    <div className="flex relative">
+                                        {hoveredMessage === index &&
+                                            isPopupOpenIndex === null &&
+                                            message.sender === userActive.id && (
+                                                <div className="relative">
+                                                    <button
+                                                        className={`absolute dark:bg-gray-700 left-[-25px] bottom-[30px] p-1 rounded-full hover:bg-gray-300`}
+                                                        onClick={() => {
+                                                            setIsPopupOpenIndex(index);
+                                                        }}
+                                                    >
+                                                        <FiMoreHorizontal size={15} />
+                                                    </button>
+                                                </div>
+                                            )}
+                                        <div className="relative">
+                                            <Component
+                                                key={index}
+                                                index={index}
+                                                userId={userId}
+                                                activeChat={activeChat}
+                                                message={message}
+                                                reactions={message.reactions}
+                                                showName={message.sender !== userId && showAvatar && activeChat.group}
+                                            />
+                                            {isPopupOpenIndex === index && (
+                                                <PopupMenuForChat
+                                                    setIsPopupOpen={setIsPopupOpenIndex}
+                                                    position={position}
+                                                    message={message}
+                                                />
+                                            )}
+                                            {sumReaction > 0 && (
+                                                <div
+                                                    className="absolute flex items-center bottom-[5px] right-[15px] rounded-full p-0.5 bg-white text-[12px] cursor-pointer dark:bg-gray-700"
+                                                    onClick={() => setOpenReactionChat(true)}
+                                                >
+                                                    {message.reactions.slice(0, 2).map((re, index) => {
+                                                        return <div key={index}>{re.reaction}</div>;
+                                                    })}
+                                                    {sumReaction >= 2 && (
+                                                        <div className="text-gray-500 text-[10px]">{sumReaction}</div>
+                                                    )}
+                                                </div>
+                                            )}
+                                            {hoveredMessage === index && isPopupOpenIndex === null && (
+                                                <button
+                                                    className="absolute bottom-[8px] right-[-8px] rounded-full p-0.5 text-[12px] bg-white dark:bg-gray-700"
+                                                    onMouseEnter={() => setShowPopupReaction(true)}
+                                                    onMouseLeave={() =>
+                                                        !showPopupReaction && setShowPopupReaction(false)
+                                                    }
+                                                >
+                                                    <AiOutlineLike className="text-gray-400 " size={13} />
+                                                </button>
+                                            )}
+
+                                            {showPopupReaction &&
+                                                hoveredMessage === index &&
+                                                isPopupOpenIndex === null && (
+                                                    <PopupReacttion
+                                                        position={position}
+                                                        setShowPopupReaction={setShowPopupReaction}
+                                                        chatId={activeChat.id}
+                                                        message={message}
+                                                        reactions={message.reactions}
+                                                        userId={userId}
+                                                    />
+                                                )}
+                                            {openReactionChat && hoveredMessage === index && (
+                                                <PopupReactionChat
+                                                    onClose={setOpenReactionChat}
+                                                    reactions={message.reactions}
+                                                />
+                                            )}
+                                        </div>
+
+                                        {hoveredMessage === index &&
+                                            isPopupOpenIndex === null &&
+                                            message.sender !== userActive.id && (
+                                                <div className="relative">
+                                                    <button
+                                                        className={`absolute dark:bg-gray-700 right-[-25px] bottom-[30px] p-1 rounded-full hover:bg-gray-300`}
+                                                        onClick={() => {
+                                                            setIsPopupOpenIndex(index);
+                                                        }}
+                                                    >
+                                                        <FiMoreHorizontal size={15} />
+                                                    </button>
+                                                </div>
+                                            )}
                                     </div>
                                 </div>
                             )}

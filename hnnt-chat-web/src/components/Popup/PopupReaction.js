@@ -17,8 +17,8 @@ function PopupReacttion({ position, setShowPopupReaction, chatId, message, react
         <div
             className={`flex z-10 justify-between items-center p-4 py-5 absolute ${
                 position === 'right' ? 'right-[-5px]' : 'left-[-5px]'
-            } bg-white w-[240px] h-[30px] rounded-lg`}
-            onMouseLeave={() => setTimeout(() => setShowPopupReaction(false), 500)}
+            } bottom-[2px] bg-white w-[240px] h-[30px] rounded-lg`}
+            onMouseLeave={() => setShowPopupReaction(false)}
         >
             <button className="text-[20px] hover:text-[25px]" onClick={() => handleReaction('👍')}>
                 👍
