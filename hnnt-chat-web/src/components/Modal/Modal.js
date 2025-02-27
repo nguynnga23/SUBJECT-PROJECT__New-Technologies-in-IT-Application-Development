@@ -14,8 +14,9 @@ import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
 import { useSelector } from 'react-redux';
+
+import PopupViewImage from '../Popup/PopupViewImage';
 
 function Modal({ isOpen, onClose }) {
     const userActive = useSelector((state) => state.auth.userActive);
@@ -60,6 +61,8 @@ function Modal({ isOpen, onClose }) {
     };
 
     const [image, setImage] = useState(null);
+
+    const [selectedImage, setSelectedImage] = useState(null);
 
     // Đống mở modal
     if (!isOpen) return null;
@@ -330,10 +333,22 @@ function Modal({ isOpen, onClose }) {
                 ) : (
                     <>
                         <div className="flex-1 overflow-auto relative">
-                            <img src={CoverPhoto} alt="Ảnh phụ" className="w-full h-[200px] cursor-pointer" />
+                            {/*Nhấn vào hình bật popup  */}
+                            {selectedImage && (
+                                <PopupViewImage selectedImage={selectedImage} setSelectedImage={setSelectedImage} />
+                            )}
+                            <img
+                                src={CoverPhoto}
+                                alt="Ảnh phụ"
+                                className="w-full h-[200px] cursor-pointer"
+                                onClick={() => setSelectedImage(CoverPhoto)}
+                            />
 
-                            <div className="absolute top-44 left-0 w-[80px] h-[80px] rounded-full shadow-lg overflow-hidden ml-6  border-4 border-gray-300 cursor-pointer">
-                                <img src={Avatar} alt="Ảnh phụ" className="w-full h-full object-cover" />
+                            <div
+                                className="absolute top-44 left-0 w-[80px] h-[80px] rounded-full shadow-lg overflow-hidden ml-6  border-4 border-gray-300 cursor-pointer"
+                                onClick={() => setSelectedImage(Avatar)}
+                            >
+                                <img src={Avatar} alt="Avartar" className="w-full h-full object-cover" />
                             </div>
 
                             <div
