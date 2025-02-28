@@ -26,7 +26,7 @@ function TabSearch({ keyword }) {
                     </button>
                 ))}
             </div>
-            <div>
+            <div className="overflow-auto max-h-[calc(100vh_-_110px)]">
                 {activeSearchTab === 'Tất cả' && <TabSearchAll results={searchResults} keyword={keyword} />}
                 {activeSearchTab === 'Tin nhắn' && <TabSearchMessage results={searchResults} keyword={keyword} />}
                 {activeSearchTab === 'File' && <TabSearchFile results={searchResults} keyword={keyword} />}

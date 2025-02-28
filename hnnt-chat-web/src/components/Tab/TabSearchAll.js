@@ -26,7 +26,7 @@ function TabSearchAll({ results, keyword }) {
                                     __html: highlightKeyword(type === 'text' ? r.content : r.fileName, keyword),
                                 }}
                             ></p>
-                            <p className="absolute right-[5px] top-[5px] text-[12px] mb-[2px]">{r.time}</p>
+                            <p className="absolute right-[10px] top-[5px] text-[12px] mb-[2px]">{r.time}</p>
                         </div>
                     </div>
                 ))}

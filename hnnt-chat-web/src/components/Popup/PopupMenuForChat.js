@@ -17,6 +17,12 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
         setIsPopupOpen(null);
     };
 
+    const handleCopy = () => {
+        const textToCopy = message.content;
+        navigator.clipboard.writeText(textToCopy).catch((err) => console.error('Lỗi sao chép: ', err));
+        setIsPopupOpen(null);
+    };
+
     useEffect(() => {
         function handleClickOutside(event) {
             if (popupRef.current && !popupRef.current.contains(event.target)) {
@@ -40,10 +46,15 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
             <div className="py-2">
                 {!message?.destroy && (
                     <ul>
-                        <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                            <MdContentCopy className="mr-3" />
-                            Copy tin nhắn
-                        </li>
+                        {message.type === 'text' && (
+                            <li
+                                className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                onClick={handleCopy}
+                            >
+                                <MdContentCopy className="mr-3" />
+                                Copy tin nhắn
+                            </li>
+                        )}
                         <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
                             <MdPushPin className="mr-3" />
                             Ghim tin nhắn
