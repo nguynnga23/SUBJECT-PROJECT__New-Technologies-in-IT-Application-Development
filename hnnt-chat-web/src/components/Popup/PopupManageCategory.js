@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { MdLabel, MdDelete, MdLabelOutline } from 'react-icons/md';
 import { IoMdClose } from 'react-icons/io';
 import { BsGripVertical } from 'react-icons/bs';
@@ -60,7 +60,9 @@ const PopupManageCategory = ({ setIsOpenManageCategory }) => {
                             >
                                 <BsGripVertical className="text-gray-500 mr-2" />
                                 <MdLabel className={`${category.color}`} size={18} />
-                                <span className="ml-3 text-sm font-medium flex-1">{category.name}</span>
+                                <span className="ml-3 text-sm font-medium flex-1 max-w-[270px] truncate">
+                                    {category.name}
+                                </span>
 
                                 {/* Hiển thị icon xóa khi hover */}
                                 {hoveredId === category.id && (

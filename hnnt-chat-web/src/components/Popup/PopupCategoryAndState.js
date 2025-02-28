@@ -36,7 +36,7 @@ function PopupCategoryAndState() {
         }
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [isOpen]);
+    }, [isOpen, isOpenManageCategory]);
 
     const toggleCategory = (category) => {
         setSelectedCategories((prevSelected) => {
@@ -115,7 +115,7 @@ function PopupCategoryAndState() {
                                             <FaRegSquare className="mr-3 text-gray-500" />
                                         )}
                                         <MdLabel className={`mr-3 ${category.color}`} size={18} />
-                                        <span className="flex-1 text-sm">{category.name}</span>
+                                        <span className="flex-1 text-sm max-w-[180px] truncate">{category.name}</span>
                                     </div>
                                 ))}
                             </div>

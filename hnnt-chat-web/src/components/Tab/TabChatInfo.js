@@ -5,12 +5,14 @@ import { AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { GoBellSlash } from 'react-icons/go';
 import { useDispatch, useSelector } from 'react-redux';
 import { IoIosLogOut } from 'react-icons/io';
+import { AiOutlineUsergroupDelete } from 'react-icons/ai';
 
 import {
     setOnOrOfPin,
     setOnOrOfNotify,
     deleteChatForUser,
     removeMemberOfGroup,
+    destroyGroup,
     setActiveChat,
     setShowOrOffRightBar,
     setShowOrOffRightBarSearch,
@@ -35,6 +37,13 @@ function TabChatInfo({ setActiveMessageTab }) {
 
     const handleRemoveMember = () => {
         dispatch(removeMemberOfGroup({ memberId: userId, groupId: chatId }));
+        dispatch(setActiveChat(null));
+        dispatch(setShowOrOffRightBar(false));
+        dispatch(setShowOrOffRightBarSearch(false));
+    };
+
+    const handleDeleteGroup = () => {
+        dispatch(destroyGroup({ groupId: chatId }));
         dispatch(setActiveChat(null));
         dispatch(setShowOrOffRightBar(false));
         dispatch(setShowOrOffRightBarSearch(false));
@@ -174,6 +183,14 @@ function TabChatInfo({ setActiveMessageTab }) {
                     <IoIosLogOut />
                     <span className="text-[12px]" onClick={handleRemoveMember}>
                         Rời nhóm
+                    </span>
+                </div>
+            )}
+            {userActive.id === activeChat.leader && (
+                <div className="text-red-500 flex items-center space-x-2 py-3 font-medium cursor-pointer text-base pl-2 hover:bg-gray-100 hover:dark:bg-gray-700">
+                    <AiOutlineUsergroupDelete />
+                    <span className="text-[12px]" onClick={handleDeleteGroup}>
+                        Giải tán nhóm
                     </span>
                 </div>
             )}

@@ -26,7 +26,7 @@ function PopupCategory({ isOpen, setIsOpen }) {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [isOpen]);
+    }, [isOpen, setIsOpen]);
 
     const chooseCategory = (category) => {
         const chatId = activeChat.id;
@@ -47,7 +47,7 @@ function PopupCategory({ isOpen, setIsOpen }) {
                                 className="flex items-center p-2 hover:bg-gray-300 hover:dark:bg-gray-700 rounded-lg cursor-pointer"
                             >
                                 <MdLabel className={`mr-3 ${category.color}`} size={18} />
-                                <span className="flex-1 text-sm">{category.name}</span>
+                                <span className="flex-1 text-sm max-w-[180px] truncate">{category.name}</span>
                             </div>
                         ))}
                     </div>
