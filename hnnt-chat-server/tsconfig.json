@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES6", // Biên dịch code TypeScript sang JavaScript ES6
+    "module": "CommonJS", // Sử dụng module theo chuẩn CommonJS (phù hợp với Node.js)
+    "rootDir": "src", // Thư mục chứa mã nguồn TypeScript
+    "outDir": "dist", // Thư mục chứa file sau khi biên dịch
+    "strict": true, // Bật chế độ kiểm tra kiểu chặt chẽ
+    "esModuleInterop": true, // Hỗ trợ import/export ES6 với CommonJS
+    "resolveJsonModule": true, // Cho phép import file JSON
+    "skipLibCheck": true, // Bỏ qua kiểm tra thư viện
+    "forceConsistentCasingInFileNames": true // Bắt buộc tên file nhất quán (Linux phân biệt hoa-thường)
+  },
+  "include": ["src"], // Chỉ biên dịch các file trong thư mục `src`
+  "exclude": ["node_modules", "dist"] // Bỏ qua thư mục `node_modules` và `dist`
+}
