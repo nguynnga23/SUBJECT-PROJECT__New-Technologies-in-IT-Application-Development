@@ -15,11 +15,15 @@ function Messaging() {
         <div className="h-screen flex flex-col">
             <div className="flex-1 flex min-h-0 ">
                 <TabChatLeftBar />
-                <div className={`flex flex-col bg-white ${showRightBar || showRightBarSearch ? 'w-2/4' : 'w-3/4'}`}>
+                <div
+                    className={`flex flex-col bg-white dark:bg-[#16191d] ${
+                        showRightBar || showRightBarSearch ? 'w-2/4' : 'w-3/4'
+                    }`}
+                >
                     {!activeChat?.delete.includes(userId) && activeChat ? (
                         <TabChat />
                     ) : (
-                        <div className="flex-1 flex items-center justify-center text-gray-500">
+                        <div className="flex-1 flex items-center justify-center text-gray-500 dark:text-white">
                             Chọn một cuộc trò chuyện để bắt đầu
                         </div>
                     )}

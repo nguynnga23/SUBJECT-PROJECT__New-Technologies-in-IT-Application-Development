@@ -6,7 +6,7 @@ import { VscLayoutSidebarRight } from 'react-icons/vsc';
 import { BsTelephone } from 'react-icons/bs';
 import { GoDeviceCameraVideo } from 'react-icons/go';
 import { IoSearchOutline } from 'react-icons/io5';
-import { AiFillLike } from 'react-icons/ai';
+import { AiFillLike, AiOutlineLike } from 'react-icons/ai';
 import { IoImageOutline } from 'react-icons/io5';
 import { MdAttachFile } from 'react-icons/md';
 import { FaRegAddressCard } from 'react-icons/fa6';
@@ -15,6 +15,13 @@ import { LuSticker } from 'react-icons/lu';
 import { MdLabel } from 'react-icons/md';
 import { CiUser } from 'react-icons/ci';
 import { AiOutlineUsergroupAdd } from 'react-icons/ai';
+import { MdOutlineReply } from 'react-icons/md';
+import { CiCircleRemove } from 'react-icons/ci';
+import { MdFilePresent } from 'react-icons/md';
+import { VscFilePdf } from 'react-icons/vsc';
+import { FaRegFileWord } from 'react-icons/fa';
+import { FaRegFileExcel } from 'react-icons/fa';
+import { FaRegFilePowerpoint } from 'react-icons/fa';
 
 import PopupCategory from '../Popup/PopupCategory';
 
@@ -34,6 +41,10 @@ import ChatDestroy from '../Chat/ChatDestroy';
 import ChatSticker from '../Chat/ChatSticker';
 import PopupAddGroup from '../Popup/PopupAddGroup';
 import PopupVideoCall from '../Popup/PopupVideoCall';
+import { FiMoreHorizontal } from 'react-icons/fi';
+import PopupReacttion from '../Popup/PopupReaction';
+import PopupReactionChat from '../Popup/PopupReactionChat';
+import PopupMenuForChat from '../Popup/PopupMenuForChat';
 
 function TabChat() {
     const [message, setMessage] = useState('');
@@ -60,6 +71,10 @@ function TabChat() {
     const [addGroupButton, setAddGroupButton] = useState(false);
 
     const [videoCall, setVideoCall] = useState(false);
+    const [showPopupReaction, setShowPopupReaction] = useState(false);
+    const [openReactionChat, setOpenReactionChat] = useState(false);
+
+    const [replyMessage, setReplyMessage] = useState(null);
 
     const MessageComponent = {
         text: ChatText,
@@ -67,6 +82,17 @@ function TabChat() {
         image: ChatImage,
         file: ChatFile,
         sticker: ChatSticker,
+    };
+
+    const getFileIcon = (fileType) => {
+        if (fileType.includes('pdf')) return <VscFilePdf className="text-3xl text-red-500 mr-2" />;
+        if (fileType.includes('excel') || fileType.includes('spreadsheet') || fileType.includes('xls'))
+            return <FaRegFileExcel className="text-3xl text-green-600 mr-2" />;
+        if (fileType.includes('powerpoint') || fileType.includes('presentation') || fileType.includes('ppt'))
+            return <FaRegFilePowerpoint className="text-3xl text-orange-500 mr-2" />;
+        if (fileType.includes('word') || fileType.includes('msword') || fileType.includes('document'))
+            return <FaRegFileWord className="text-3xl text-blue-600 mr-2" />;
+        return <MdFilePresent className="text-3xl text-gray-500 mr-2" />; // Mặc định
     };
 
     useEffect(() => {
@@ -90,8 +116,17 @@ function TabChat() {
                 hour: '2-digit',
                 minute: '2-digit',
             });
-            dispatch(sendMessage({ chatId: activeChat.id, content: message, time: currentTime, type: 'text' }));
+            dispatch(
+                sendMessage({
+                    chatId: activeChat.id,
+                    content: message,
+                    time: currentTime,
+                    type: 'text',
+                    reply: replyMessage,
+                }),
+            );
             setMessage('');
+            setReplyMessage(null);
         }
         setTimeout(() => {
             if (chatContainerRef.current) {
@@ -124,6 +159,7 @@ function TabChat() {
                     fileType: file.type,
                     time: currentTime,
                     type: type,
+                    reply: replyMessage,
                 }),
             );
         }
@@ -137,7 +173,7 @@ function TabChat() {
 
     return (
         <>
-            <div className="p-2 border-b flex justify-between items-center h-[62px] min-w-[600px] ">
+            <div className="p-2 border-b dark:border-b-black flex justify-between items-center h-[62px] min-w-[600px] dark:bg-gray-800">
                 <div className="flex justify-center ">
                     <img
                         src={activeChat?.avatar} // Thay bằng avatar thật
@@ -145,10 +181,12 @@ function TabChat() {
                         className="w-[45px] h-[45px] rounded-full border mr-2 object-cover"
                     />
                     <div>
-                        <h3 className="font-medium text-base text-lg max-h-[28px]">{activeChat?.name}</h3>
+                        <h3 className="font-medium text-base text-lg max-h-[28px] dark:text-gray-300">
+                            {activeChat?.name}
+                        </h3>
                         <div className="flex items-center">
                             {activeChat?.members && (
-                                <div className="flex text-[14px] text-gray-600 items-center">
+                                <div className="flex text-[14px] text-gray-600 items-center dark:text-gray-300">
                                     <CiUser className={`cursor-pointer mr-1`} />
                                     <p className="text-[10px] mr-1">{activeChat?.members.length} thành viên |</p>
                                 </div>
@@ -171,7 +209,7 @@ function TabChat() {
                     </div>
                     {isOpenCategory && <PopupCategory isOpen={isOpenCategory} setIsOpen={setIsOpenCategory} />}
                 </div>
-                <div className="p-2 flex">
+                <div className="p-2 flex dark:text-gray-300">
                     {activeChat.group ? (
                         <div className="flex items-center">
                             <AiOutlineUsergroupAdd
@@ -214,7 +252,7 @@ function TabChat() {
                     ) : (
                         <VscLayoutSidebarRightOff
                             size={26}
-                            className="ml-1.5 text-gray-700 p-1 hover:text-gray-500 hover:rounded-[5px] hover:bg-gray-200 cursor-pointer"
+                            className="ml-1.5 p-1 hover:text-gray-500 hover:rounded-[5px] hover:bg-gray-200 cursor-pointer"
                             onClick={() => dispatch(setShowOrOffRightBar(!showRightBar))}
                         />
                     )}
@@ -224,7 +262,7 @@ function TabChat() {
                     )}
                 </div>
             </div>
-            <div className="flex-1 p-5 overflow-auto bg-gray-200 " ref={chatContainerRef}>
+            <div className="flex-1 p-5 overflow-auto bg-gray-200 dark:bg-[#16191d]" ref={chatContainerRef}>
                 {activeChat?.messages.map((message, index) => {
                     const isDeleted = message.delete.some((item) => item.id === userId);
                     const Component = message.destroy ? ChatDestroy : MessageComponent[message.type];
@@ -233,40 +271,146 @@ function TabChat() {
                     const prevMessageDeleted = prevMessage?.delete?.some((item) => item.id === userId);
                     const showAvatar =
                         index === 0 || !prevMessage || prevMessage.sender !== message.sender || prevMessageDeleted;
+                    const position = message.sender === userId ? 'right' : 'left';
+                    const sumReaction = message.reactions.reduce((total, reaction) => total + reaction.sum, 0);
 
                     return (
                         <div
                             className={`relative flex ${message.sender === userId ? 'justify-end' : 'justify-start'}`}
                             key={index}
+                            onMouseEnter={() => {
+                                if (isPopupOpenIndex === null) setHoveredMessage(index);
+                                setOpenReactionChat(false);
+                            }}
+                            onMouseLeave={() => {
+                                if (isPopupOpenIndex === null) setHoveredMessage(null);
+                                setOpenReactionChat(false);
+                            }}
                         >
                             {!isDeleted && Component && (
                                 <div className="flex">
-                                    {activeChat.group && (
-                                        <div className="w-[45px] h-[45px] mr-3 flex-shrink-0">
-                                            {message.sender !== userId && showAvatar && (
-                                                <img
-                                                    src={message.avatar}
-                                                    alt="avatar"
-                                                    className="w-full h-full rounded-full border object-cover"
+                                    <div className="w-[45px] h-[45px] mr-3 flex-shrink-0">
+                                        {message.sender !== userId && showAvatar && (
+                                            <img
+                                                src={message.avatar}
+                                                alt="avatar"
+                                                className="w-full h-full rounded-full border object-cover"
+                                            />
+                                        )}
+                                    </div>
+
+                                    <div className="flex relative ">
+                                        {hoveredMessage === index &&
+                                            isPopupOpenIndex === null &&
+                                            message.sender === userActive.id && (
+                                                <div className="flex">
+                                                    <button
+                                                        className={`absolute left-[-25px] bottom-[30px] dark:bg-gray-700  p-1 rounded-full hover:bg-gray-300 mr-1`}
+                                                        onClick={() => {
+                                                            setIsPopupOpenIndex(index);
+                                                        }}
+                                                    >
+                                                        <FiMoreHorizontal size={15} />
+                                                    </button>
+                                                    {!message.destroy && (
+                                                        <button
+                                                            className={`absolute left-[-50px] bottom-[30px] dark:bg-gray-700  p-1 rounded-full hover:bg-gray-300`}
+                                                            onClick={() => {
+                                                                setReplyMessage(message);
+                                                            }}
+                                                        >
+                                                            <MdOutlineReply size={15} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )}
+                                        <div className="relative">
+                                            <Component
+                                                key={index}
+                                                index={index}
+                                                userId={userId}
+                                                activeChat={activeChat}
+                                                message={message}
+                                                reactions={message.reactions}
+                                                showName={message.sender !== userId && showAvatar && activeChat.group}
+                                                replyMessage={message?.reply}
+                                            />
+                                            {isPopupOpenIndex === index && (
+                                                <PopupMenuForChat
+                                                    setIsPopupOpen={setIsPopupOpenIndex}
+                                                    position={position}
+                                                    message={message}
+                                                />
+                                            )}
+                                            {sumReaction > 0 && !message.destroy && (
+                                                <div
+                                                    className="absolute flex items-center bottom-[5px] right-[15px] rounded-full p-0.5 bg-white text-[12px] cursor-pointer dark:bg-gray-700"
+                                                    onClick={() => setOpenReactionChat(true)}
+                                                >
+                                                    {message.reactions.slice(0, 2).map((re, index) => {
+                                                        return <div key={index}>{re.reaction}</div>;
+                                                    })}
+                                                    {sumReaction >= 2 && (
+                                                        <div className="text-gray-500 text-[10px]">{sumReaction}</div>
+                                                    )}
+                                                </div>
+                                            )}
+                                            {hoveredMessage === index &&
+                                                isPopupOpenIndex === null &&
+                                                !message.destroy && (
+                                                    <button
+                                                        className="absolute bottom-[8px] right-[-8px] rounded-full p-0.5 text-[12px] bg-white dark:bg-gray-700"
+                                                        onMouseEnter={() => setShowPopupReaction(true)}
+                                                        onMouseLeave={() =>
+                                                            !showPopupReaction && setShowPopupReaction(false)
+                                                        }
+                                                    >
+                                                        <AiOutlineLike className="text-gray-400 " size={13} />
+                                                    </button>
+                                                )}
+
+                                            {showPopupReaction &&
+                                                hoveredMessage === index &&
+                                                isPopupOpenIndex === null && (
+                                                    <PopupReacttion
+                                                        position={position}
+                                                        setShowPopupReaction={setShowPopupReaction}
+                                                        chatId={activeChat.id}
+                                                        message={message}
+                                                        reactions={message.reactions}
+                                                        userId={userId}
+                                                    />
+                                                )}
+                                            {openReactionChat && hoveredMessage === index && (
+                                                <PopupReactionChat
+                                                    onClose={setOpenReactionChat}
+                                                    reactions={message.reactions}
                                                 />
                                             )}
                                         </div>
-                                    )}
 
-                                    <div>
-                                        <Component
-                                            key={index}
-                                            index={index}
-                                            userId={userId}
-                                            activeChat={activeChat}
-                                            message={message}
-                                            setHoveredMessage={setHoveredMessage}
-                                            hoveredMessage={hoveredMessage}
-                                            isPopupOpenIndex={isPopupOpenIndex}
-                                            setIsPopupOpenIndex={setIsPopupOpenIndex}
-                                            reactions={message.reactions}
-                                            showName={message.sender !== userId && showAvatar}
-                                        />
+                                        {hoveredMessage === index &&
+                                            isPopupOpenIndex === null &&
+                                            message.sender !== userActive.id && (
+                                                <div className="relative flex ">
+                                                    <button
+                                                        className={`absolute dark:bg-gray-700 right-[-25px] bottom-[30px] p-1 rounded-full hover:bg-gray-300`}
+                                                        onClick={() => {
+                                                            setIsPopupOpenIndex(index);
+                                                        }}
+                                                    >
+                                                        <FiMoreHorizontal size={15} />
+                                                    </button>
+                                                    <button
+                                                        className={`absolute dark:bg-gray-700 right-[-50px] bottom-[30px] p-1 rounded-full hover:bg-gray-300`}
+                                                        onClick={() => {
+                                                            setReplyMessage(message);
+                                                        }}
+                                                    >
+                                                        <MdOutlineReply size={15} />
+                                                    </button>
+                                                </div>
+                                            )}
                                     </div>
                                 </div>
                             )}
@@ -275,10 +419,10 @@ function TabChat() {
                 })}
             </div>
             <div>
-                <div className="flex bg-white border-t p-2">
+                <div className="flex bg-white dark:bg-gray-800 border-t dark:border-t-black p-2 ">
                     <div>
                         <LuSticker
-                            className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600"
+                            className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600 dark:text-gray-300"
                             onClick={() => dispatch(openEmojiTab('sticker'))}
                         />
                     </div>
@@ -294,7 +438,7 @@ function TabChat() {
 
                         {/* Icon mở thư mục chọn ảnh */}
                         <IoImageOutline
-                            className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600"
+                            className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600 dark:text-gray-300"
                             onClick={() => inputImageRef.current.click()} // Kích hoạt input khi nhấn vào icon
                         />
                     </div>
@@ -310,60 +454,115 @@ function TabChat() {
 
                         {/* Icon mở thư mục chọn file */}
                         <MdAttachFile
-                            className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600"
+                            className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600 dark:text-gray-300"
                             onClick={() => inputFileRef.current.click()}
                         />
                     </div>
 
-                    <FaRegAddressCard className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600" />
+                    <FaRegAddressCard className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600 dark:text-gray-300" />
                 </div>
-                <div className="flex items-center border-t p-2">
-                    <textarea
-                        ref={textareaRef}
-                        value={message}
-                        onChange={(e) => {
-                            setMessage(e.target.value);
-                        }}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault(); // Ngăn xuống dòng
-                                handleSendMessage(); // Gọi hàm gửi tin nhắn
-                            }
-                        }}
-                        placeholder={`Nhập tin nhắn với ${activeChat?.name}`}
-                        className="flex-1 p-1 font-base text-[14px] rounded-lg focus:border-blue-500 focus:outline-none
-                            h-[30px] max-h-[200px] overflow-y-auto resize-none"
-                    />
+                <div className=" border-t dark:border-t-black p-2 dark:bg-gray-800">
+                    <div>
+                        {replyMessage && (
+                            <div className="relative mb-2 p-2 pl-[15px] bg-gray-100 dark:bg-gray-700 rounded-lg justify-between items-center">
+                                <CiCircleRemove
+                                    size={20}
+                                    className="absolute right-[10px] ml-2 text-gray-500 dark:text-gray-300 cursor-pointer hover:text-red-500"
+                                    onClick={() => setReplyMessage(null)}
+                                />
+                                <div className="flex mb-1">
+                                    <p className="text-[12px] text-gray-500 dark:text-gray-300 mr-1">Trả lời:</p>
 
-                    <div className="flex items-center">
-                        <MdOutlineEmojiEmotions
-                            className="text-2xl cursor-pointer ml-3 text-gray-500 mr-3 hover:text-blue-500"
-                            onClick={() => dispatch(openEmojiTab('emoji'))}
-                        />
-                        {message !== '' ? (
-                            <IoMdSend
-                                className="text-2xl cursor-pointer ml-3 text-blue-500 mr-3"
-                                onClick={handleSendMessage}
-                            />
-                        ) : (
-                            <AiFillLike
-                                className="text-2xl cursor-pointer ml-3 text-yellow-500 mr-3"
-                                onClick={() => {
-                                    const currentTime = new Date().toLocaleTimeString([], {
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                    });
-                                    return dispatch(
-                                        sendMessage({
-                                            chatId: activeChat.id,
-                                            content: '👍',
-                                            time: currentTime,
-                                            type: 'text',
-                                        }),
-                                    );
-                                }}
-                            />
+                                    <p className="text-[12px] font-medium text-gray-600 dark:text-gray-300">
+                                        {replyMessage.name}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-[12px] text-gray-600 dark:text-gray-300 max-w-[500px] truncate">
+                                        {replyMessage.type === 'file' ? (
+                                            <div className="flex items-center">
+                                                {getFileIcon(replyMessage.fileType)}
+                                                <div className="flex flex-col">
+                                                    <p className="text-[12px] font-bold">{replyMessage.fileName}</p>
+                                                    <p className="text-[12px] text-gray-500 dark:text-gray-300 pt-1">
+                                                        {replyMessage.fileSize}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ) : replyMessage.type === 'image' ? (
+                                            <img
+                                                src={replyMessage.content}
+                                                alt="content"
+                                                className="max-w-[80px] rounded-lg"
+                                            />
+                                        ) : replyMessage.type === 'gif' ? (
+                                            <img
+                                                src={replyMessage.content}
+                                                alt="GIF"
+                                                className="max-w-[80px] rounded-lg "
+                                            />
+                                        ) : replyMessage.type === 'sticker' ? (
+                                            <img
+                                                src={replyMessage.content}
+                                                alt="GIF"
+                                                className="max-w-[50px] rounded-lg "
+                                            />
+                                        ) : (
+                                            replyMessage.content
+                                        )}
+                                    </p>
+                                </div>
+                            </div>
                         )}
+                    </div>
+                    <div className="flex items-center">
+                        <textarea
+                            ref={textareaRef}
+                            value={message}
+                            onChange={(e) => {
+                                setMessage(e.target.value);
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault(); // Ngăn xuống dòng
+                                    handleSendMessage(); // Gọi hàm gửi tin nhắn
+                                }
+                            }}
+                            placeholder={`Nhập tin nhắn với ${activeChat?.name}`}
+                            className="flex-1 p-1 font-base text-[14px] rounded-lg focus:border-blue-500 focus:outline-none
+                            h-[30px] max-h-[200px] overflow-y-auto resize-none dark:bg-gray-800 dark:text-gray-300"
+                        />
+
+                        <div className="flex items-center">
+                            <MdOutlineEmojiEmotions
+                                className="text-2xl cursor-pointer ml-3 text-gray-500 mr-3 hover:text-blue-500 dark:text-gray-300"
+                                onClick={() => dispatch(openEmojiTab('emoji'))}
+                            />
+                            {message !== '' ? (
+                                <IoMdSend
+                                    className="text-2xl cursor-pointer ml-3 text-blue-500 mr-3"
+                                    onClick={handleSendMessage}
+                                />
+                            ) : (
+                                <AiFillLike
+                                    className="text-2xl cursor-pointer ml-3 text-yellow-500 mr-3"
+                                    onClick={() => {
+                                        const currentTime = new Date().toLocaleTimeString([], {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                        });
+                                        return dispatch(
+                                            sendMessage({
+                                                chatId: activeChat.id,
+                                                content: '👍',
+                                                time: currentTime,
+                                                type: 'text',
+                                            }),
+                                        );
+                                    }}
+                                />
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

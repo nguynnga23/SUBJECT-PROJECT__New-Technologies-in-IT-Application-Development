@@ -26,7 +26,7 @@ const Archive = ({ title, isOpen, toggleOpen, messages, type, group, setActiveMe
     const [selectedImage, setSelectedImage] = useState(null);
 
     return (
-        <div className="p-2 relative border-b-[7px] cursor-pointer">
+        <div className="p-2 relative border-b-[7px] dark:border-b-gray-900 cursor-pointer">
             <div className="flex justify-between items-center pl-2" onClick={toggleOpen}>
                 <span className="font-medium text-base">{title}</span>
                 {isOpen ? (
@@ -37,7 +37,7 @@ const Archive = ({ title, isOpen, toggleOpen, messages, type, group, setActiveMe
             </div>
             {isOpen && type === 'member' && (
                 <div
-                    className="w-full p-1 flex items-center hover:bg-gray-100"
+                    className="w-full p-1 flex items-center hover:bg-gray-100 hover:dark:bg-gray-700"
                     onClick={() => setActiveMessageTab('infoGroup')}
                 >
                     <RiGroupLine size={16} className="m-2" />
@@ -53,6 +53,7 @@ const Archive = ({ title, isOpen, toggleOpen, messages, type, group, setActiveMe
                                 return (
                                     <img
                                         key={index}
+                                        alt="content"
                                         src={msg.content}
                                         className="w-[75px] h-[75px] rounded-lg object-cover border"
                                         onClick={() => setSelectedImage(msg.content)}
@@ -77,6 +78,7 @@ const Archive = ({ title, isOpen, toggleOpen, messages, type, group, setActiveMe
                                     </div>
                                 );
                             }
+                            return null;
                         })}
                 </div>
             )}

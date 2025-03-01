@@ -55,9 +55,9 @@ export default function Home() {
     }, []);
 
     return (
-        <div className="flex h-screen bg-gray-100">
+        <div className="flex h-screen bg-gray-100 dark:bg-[#16191d]">
             {/* Sidebar */}
-            <div className="w-16 h-screen bg-blue-600 flex flex-col items-center py-4 space-y-6">
+            <div className="w-16 h-screen bg-blue-600 dark:bg-gray-900 flex flex-col items-center py-4 space-y-6">
                 {/* Avatar */}
                 <div className="relative" ref={dropdownRef}>
                     <button
@@ -96,7 +96,7 @@ export default function Home() {
                             </li>
                             <li>
                                 <p
-                                    className="block px-4 py-2 hover:bg-gray-100 text-black cursor-pointer"
+                                    className="block px-4 py-2 hover:bg-gray-100  text-black cursor-pointer"
                                     onClick={() => setIsOpenModel(true)}
                                 >
                                     Hồ sơ của bạn
@@ -116,7 +116,7 @@ export default function Home() {
                 <div className="flex flex-col space-y-6 text-white ">
                     {/* open Messaging */}
                     <div
-                        className={`w-10 h-10 rounded-[5px] flex items-center justify-center cursor-pointer ${
+                        className={`w-10 h-10 rounded-[5px] flex items-center justify-center cursor-pointer hover:bg-white hover:bg-opacity-20 ${
                             selectedScreen === 'messaging' ? 'bg-white bg-opacity-20' : ''
                         }`}
                     >
@@ -124,7 +124,7 @@ export default function Home() {
                     </div>
                     {/* open Contacts */}
                     <div
-                        className={`w-10 h-10 rounded-[5px] flex items-center justify-center cursor-pointer ${
+                        className={`w-10 h-10 rounded-[5px] flex items-center justify-center cursor-pointer hover:bg-white hover:bg-opacity-20 ${
                             selectedScreen === 'contacts' ? 'bg-white bg-opacity-20' : ''
                         }`}
                     >
@@ -137,13 +137,13 @@ export default function Home() {
                 <div className="w-10 border-t border-white"></div>
 
                 {/* More Icons */}
-                <div className="flex flex-col space-y-6 text-white">
-                    <div className="w-10 h-10 rounded-[5px] flex items-center justify-center">
+                <div className="flex flex-col space-y-6 text-white ">
+                    <div className="w-10 h-10 rounded-[5px] flex items-center justify-center hover:bg-white hover:bg-opacity-20">
                         <IoMdCloudOutline size={28} />
                     </div>
                     {/* open Settings */}
                     <div
-                        className={`w-10 h-10 rounded-[5px] flex items-center justify-center cursor-pointer ${
+                        className={`w-10 h-10 rounded-[5px] flex items-center justify-center cursor-pointer hover:bg-white hover:bg-opacity-20 ${
                             selectedScreen === 'settings' ? 'bg-white bg-opacity-20' : ''
                         }`}
                     >

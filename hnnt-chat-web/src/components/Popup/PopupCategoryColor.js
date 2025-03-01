@@ -8,7 +8,7 @@ function PopupCategoryColor({ setColor, setShowPopupColor }) {
     };
     return (
         <div
-            className={`flex z-10 justify-between items-center p-4 py-5 absolute border top-[30px] bg-white w-[240px] h-[30px] rounded-lg`}
+            className={`flex z-10 justify-between items-center p-4 py-5 absolute border top-[30px] bg-white w-[240px] h-[30px] rounded-lg dark:bg-gray-800`}
             // onMouseLeave={() => setTimeout(() => setShowPopupReaction(false), 500)}
         >
             {categorieColors.map((c, index) => (

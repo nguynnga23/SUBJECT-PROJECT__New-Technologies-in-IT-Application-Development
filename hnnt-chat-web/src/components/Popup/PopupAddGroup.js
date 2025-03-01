@@ -58,7 +58,7 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white w-[400px] rounded-lg shadow-lg">
+            <div className="bg-white w-[400px] rounded-lg shadow-lg  dark:bg-gray-900 dark:text-gray-300">
                 {/* Header */}
                 <div className="flex justify-between items-center p-3 border-b border-gray-300">
                     <h2 className="text-lg font-semibold">{activeChat?.group ? 'Thêm thành viên' : 'Tạo nhóm'}</h2>
@@ -81,7 +81,7 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
                             placeholder="Nhập tên nhóm..."
                             value={groupName}
                             onChange={(e) => setGroupName(e.target.value)}
-                            className="w-full border-b border-gray-300 p-2 focus:outline-none"
+                            className="w-full border-b border-gray-300 p-2 focus:outline-none dark:bg-gray-900 dark:text-gray-300"
                         />
                     )}
 
@@ -91,7 +91,7 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
                         placeholder="Nhập tên để tìm kiếm..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full mt-3 border border-gray-300 p-2 rounded-lg focus:outline-none"
+                        className="w-full mt-3 border border-gray-300 p-2 rounded-lg focus:outline-none  dark:bg-gray-900 dark:text-gray-300"
                     />
 
                     {/* Danh sách thành viên */}
@@ -101,10 +101,10 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
                             return (
                                 <div
                                     key={member.id}
-                                    className={`flex items-center p-2 border-b border-gray-200 ${
+                                    className={`flex items-center p-2 border-b border-gray-200 dark:border-b-black ${
                                         isExistingMember
-                                            ? 'cursor-not-allowed bg-gray-100'
-                                            : 'cursor-pointer hover:bg-gray-100'
+                                            ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700'
+                                            : 'cursor-pointer hover:bg-gray-100 hover:dark:bg-gray-700'
                                     }`}
                                     onClick={() => toggleMember(member)}
                                 >
