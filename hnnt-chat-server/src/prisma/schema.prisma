@@ -23,32 +23,57 @@ model Account {
   birthDate DateTime?
   location  String?
   gender    String   @db.VarChar(10) // "Nam", "Nữ", "Khác"
-  currentAvatar String[]
+  currentAvatars String[] @default([])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  sentFriendRequests    Friend[] @relation("SentFriends")
-  receivedFriendRequests Friend[] @relation("ReceivedFriends")
+  sentFriendRequests     FriendRequest[] @relation("SentRequests")
+  receivedFriendRequests FriendRequest[] @relation("ReceivedRequests")
+
+  friends1 Friend[] @relation("UserFriends1") // Quan hệ khi là user1
+  friends2 Friend[] @relation("UserFriends2") // Quan hệ khi là user2
 
   chatParticipants ChatParticipant[]
   messages        Message[]
   reactions       Reaction[]
 }
 
-model Friend {
-  id        String   @id @default(uuid()) // ID dạng UUID
-  account   Account @relation("SentFriends", fields: [accountId], references: [id], onDelete: Cascade)
-  friend    Account @relation("ReceivedFriends", fields: [friendId], references: [id], onDelete: Cascade)
-  accountId String
-  friendId  String
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
 
-  @@unique([accountId, friendId]) // Đảm bảo không bị trùng lặp bạn bè
+model FriendRequest {
+  id        String   @id @default(uuid())
+  sender    Account  @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver  Account  @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+  senderId  String
+  receiverId String
+  status    RequestStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+
+  @@unique([senderId, receiverId]) // Đảm bảo chỉ có một lời mời giữa 2 người
+}
+
+model Friend {
+  id         String  @id @default(uuid())
+  user1      Account @relation("UserFriends1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2      Account @relation("UserFriends2", fields: [user2Id], references: [id], onDelete: Cascade)
+  user1Id    String
+  user2Id    String
+
+  createdAt DateTime @default(now())
+
+  @@unique([user1Id, user2Id]) // Đảm bảo không có cặp bạn bè trùng nhau
 }
 
 model Chat {
   id        String   @id @default(uuid()) // ID dạng UUID
   isGroup   Boolean  @default(false) // true nếu là group chat
   name      String?  @db.VarChar(255) // Tên nhóm nếu là group chat
+  avatar    String?  @db.VarChar(255) // Avatar nếu là group chat
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

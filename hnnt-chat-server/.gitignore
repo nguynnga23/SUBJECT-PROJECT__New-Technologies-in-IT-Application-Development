@@ -44,3 +44,6 @@ test-results/
 # Temporary files
 *.tmp
 *.temp
+
+## Prisma migrations
+migrations/

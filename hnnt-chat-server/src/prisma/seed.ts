@@ -18,7 +18,7 @@ async function main() {
             birthDate: new Date('2003-09-20'),
             location: 'Tây Ninh',
             gender: 'Nam',
-            currentAvatar: [],
+            currentAvatars: [],
         },
     });
     const user2 = await prisma.account.create({
@@ -32,7 +32,7 @@ async function main() {
             birthDate: new Date('2003-09-23'),
             location: 'Ninh Bình',
             gender: 'Nữ',
-            currentAvatar: [],
+            currentAvatars: [],
         },
     });
     const user3 = await prisma.account.create({
@@ -46,7 +46,7 @@ async function main() {
             birthDate: new Date('2003-01-02'),
             location: 'Tp. Hồ Chí Minh',
             gender: 'Nam',
-            currentAvatar: [],
+            currentAvatars: [],
         },
     });
     const user4 = await prisma.account.create({
@@ -60,16 +60,16 @@ async function main() {
             birthDate: new Date('2003-04-20'),
             location: 'Tp. Hồ Chí Minh',
             gender: 'Nam',
-            currentAvatar: [],
+            currentAvatars: [],
         },
     });
 
     //Friend
-    await prisma.friend.create({
+    const sendFriendRequestUser1ToUser2 = await prisma.friendRequest.create({
         data: {
-            id: uuidv4(),
-            accountId: user1.id,
-            friendId: user2.id,
+            senderId: user1.id,
+            receiverId: user2.id,
+            status: 'PENDING',
         },
     });
 
