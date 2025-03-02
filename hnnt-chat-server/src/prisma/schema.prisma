@@ -38,19 +38,12 @@ model Account {
   reactions       Reaction[]
 }
 
-enum RequestStatus {
-  PENDING
-  ACCEPTED
-  DECLINED
-}
-
 model FriendRequest {
   id        String   @id @default(uuid())
   sender    Account  @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
   receiver  Account  @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
   senderId  String
   receiverId String
-  status    RequestStatus @default(PENDING)
 
   createdAt DateTime @default(now())
 
