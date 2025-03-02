@@ -1,6 +1,7 @@
-import express, { Request, Response } from "express";
-import dotenv from "dotenv";
-import cors from "cors";
+import express, { Request, Response } from 'express';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import pool from './db';
 
 // Load environment variables
 dotenv.config();
@@ -13,12 +14,22 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello, TypeScript with Node.js!");
-});
+// // Connect PostgreSQL
+// pool.connect()
+//     .then(() => {
+//         console.log('✅ Connected to PostgreSQL');
 
-// Start server
+//         app.listen(PORT, () => {
+//             console.log(`🚀 Server is running on http://localhost:${PORT}`);
+//         });
+//     })
+//     .catch((err) => {
+//         console.error('❌ Database connection error:', err);
+//         process.exit(1);
+//     });
+
+// Routes
+
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Server đang chạy trên cổng ${PORT}`);
 });
