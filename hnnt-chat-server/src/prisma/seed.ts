@@ -1,0 +1,137 @@
+import { PrismaClient } from '@prisma/client';
+import { log } from 'node:console';
+import { v4 as uuidv4 } from 'uuid';
+
+const prisma = new PrismaClient();
+
+async function main() {
+    console.log('🌱 Seeding database...');
+
+    const user1 = await prisma.account.create({
+        data: {
+            id: uuidv4(),
+            name: 'Nguyễn Lê Nhật Huy',
+            number: '1111111111',
+            password: '123',
+            avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMZIA8q5YZgirXxhzjkXkoVG1LuwLd4WYkjg&s',
+            status: 'active',
+            birthDate: new Date('2003-09-20'),
+            location: 'Tây Ninh',
+            gender: 'Nam',
+            currentAvatar: [],
+        },
+    });
+    const user2 = await prisma.account.create({
+        data: {
+            id: uuidv4(),
+            name: 'Nguyễn Thị Nga',
+            number: '2222222222',
+            password: '123',
+            avatar: 'https://www.catster.com/wp-content/uploads/2023/11/Beluga-Cat-e1714190563227.webp',
+            status: 'active',
+            birthDate: new Date('2003-09-23'),
+            location: 'Ninh Bình',
+            gender: 'Nữ',
+            currentAvatar: [],
+        },
+    });
+    const user3 = await prisma.account.create({
+        data: {
+            id: uuidv4(),
+            name: 'Nguyễn Thiên Tứ',
+            number: '3333333333',
+            password: '123',
+            avatar: 'https://m.media-amazon.com/images/I/518K-+yYl2L._AC_SL1000_.jpg',
+            status: 'active',
+            birthDate: new Date('2003-01-02'),
+            location: 'Tp. Hồ Chí Minh',
+            gender: 'Nam',
+            currentAvatar: [],
+        },
+    });
+    const user4 = await prisma.account.create({
+        data: {
+            id: uuidv4(),
+            name: 'Phạm Lê Thanh Nhiệt',
+            number: '4444444444',
+            password: '123',
+            avatar: 'https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/474174ewO/anh-meme-meo-khoc-cuc-cute_042216244.jpg',
+            status: 'active',
+            birthDate: new Date('2003-04-20'),
+            location: 'Tp. Hồ Chí Minh',
+            gender: 'Nam',
+            currentAvatar: [],
+        },
+    });
+
+    //Friend
+    await prisma.friend.create({
+        data: {
+            id: uuidv4(),
+            accountId: user1.id,
+            friendId: user2.id,
+        },
+    });
+
+    // Chat (Group Chat)
+    const groupChat = await prisma.chat.create({
+        data: {
+            id: uuidv4(),
+            isGroup: true,
+            name: 'Dev Team',
+            participants: {
+                create: [
+                    {
+                        accountId: user1.id,
+                        role: 'LEADER', // User1 là chủ nhóm
+                    },
+                    {
+                        accountId: user2.id,
+                        role: 'MEMBER', // User2 là thành viên
+                    },
+                ],
+            },
+        },
+    });
+
+    //Chat
+    const chat = await prisma.chat.create({
+        data: {
+            id: uuidv4(),
+            isGroup: false,
+            participants: {
+                create: [
+                    {
+                        accountId: user1.id,
+                    },
+                    {
+                        accountId: user2.id,
+                    },
+                ],
+            },
+        },
+    });
+
+    // Message
+    await prisma.message.create({
+        data: {
+            id: uuidv4(),
+            chatId: chat.id,
+            senderId: user1.id,
+            content: 'Xin chào!',
+            type: 'text',
+            time: new Date().toISOString(),
+        },
+    });
+
+    console.log('✅ Seeding completed!');
+}
+
+main()
+    .catch((e) => {
+        console.error(e);
+        process.exit(1);
+    })
+    .finally(async () => {
+        await prisma.$disconnect();
+    });

@@ -4,18 +4,22 @@
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "npx nodemon --ext ts --exec ts-node server.ts"
+        "start": "npx nodemon --ext ts --exec ts-node server.ts",
+        "migrate": "prisma migrate dev --name init --schema=src/prisma/schema.prisma",
+        "seed": "ts-node src/prisma/seed.ts"
     },
     "author": "",
     "license": "ISC",
     "description": "",
     "dependencies": {
+        "@prisma/client": "^6.4.1",
         "cors": "^2.8.5",
         "date-fns": "^4.1.0",
         "dotenv": "^16.4.7",
         "express": "^4.21.2",
         "pg": "^8.13.3",
-        "react-datepicker": "^8.0.0"
+        "react-datepicker": "^8.0.0",
+        "uuid": "^11.1.0"
     },
     "devDependencies": {
         "@types/cors": "^2.8.17",
