@@ -12,3 +12,116 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Account {
+  id        String   @id @default(uuid()) // ID dạng UUID
+  name      String   @db.VarChar(255)
+  number    String   @unique @db.VarChar(20)
+  password  String
+  avatar    String?
+  status    String?
+  birthDate DateTime?
+  location  String?
+  gender    String   @db.VarChar(10) // "Nam", "Nữ", "Khác"
+  currentAvatars String[] @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sentFriendRequests     FriendRequest[] @relation("SentRequests")
+  receivedFriendRequests FriendRequest[] @relation("ReceivedRequests")
+
+  friends1 Friend[] @relation("UserFriends1") // Quan hệ khi là user1
+  friends2 Friend[] @relation("UserFriends2") // Quan hệ khi là user2
+
+  chatParticipants ChatParticipant[]
+  messages        Message[]
+  reactions       Reaction[]
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model FriendRequest {
+  id        String   @id @default(uuid())
+  sender    Account  @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver  Account  @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+  senderId  String
+  receiverId String
+  status    RequestStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+
+  @@unique([senderId, receiverId]) // Đảm bảo chỉ có một lời mời giữa 2 người
+}
+
+model Friend {
+  id         String  @id @default(uuid())
+  user1      Account @relation("UserFriends1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2      Account @relation("UserFriends2", fields: [user2Id], references: [id], onDelete: Cascade)
+  user1Id    String
+  user2Id    String
+
+  createdAt DateTime @default(now())
+
+  @@unique([user1Id, user2Id]) // Đảm bảo không có cặp bạn bè trùng nhau
+}
+
+model Chat {
+  id        String   @id @default(uuid()) // ID dạng UUID
+  isGroup   Boolean  @default(false) // true nếu là group chat
+  name      String?  @db.VarChar(255) // Tên nhóm nếu là group chat
+  avatar    String?  @db.VarChar(255) // Avatar nếu là group chat
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  participants ChatParticipant[]
+  messages    Message[]
+}
+
+enum ChatRole {
+  MEMBER
+  LEADER
+}
+
+model ChatParticipant {
+  id        String   @id @default(uuid()) // ID dạng UUID
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  chatId    String
+  accountId String
+
+  pin       Boolean  @default(false) // User có ghim chat này không?
+  notify    Boolean  @default(true)  // User có bật thông báo cho chat này không?
+  role      ChatRole @default(MEMBER) // Vai trò của người dùng trong chat
+
+  @@unique([chatId, accountId]) // Đảm bảo mỗi user chỉ có 1 trạng thái trong mỗi chat
+}
+
+model Message {
+  id        String   @id @default(uuid()) // ID dạng UUID
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender    Account  @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  chatId    String
+  senderId  String
+
+  content   String?
+  type      String   @db.VarChar(20) // 'text', 'image', 'video', 'file'
+  time      DateTime @default(now())
+  deletedBy String[] // Danh sách UUID của các user đã xóa tin nhắn này
+  destroy   Boolean  @default(false) // Tin nhắn tự hủy?
+
+  reactions Reaction[]
+}
+
+model Reaction {
+  id        String   @id @default(uuid()) // ID dạng UUID
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      Account  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messageId String
+  userId    String
+  reaction  String   @db.VarChar(10)
+  sum       Int      @default(1)
+}
