@@ -1,7 +1,4 @@
 -- CreateEnum
-CREATE TYPE "RequestStatus" AS ENUM ('PENDING', 'ACCEPTED', 'DECLINED');
-
--- CreateEnum
 CREATE TYPE "ChatRole" AS ENUM ('MEMBER', 'LEADER');
 
 -- CreateTable
@@ -27,7 +24,7 @@ CREATE TABLE "FriendRequest" (
     "id" TEXT NOT NULL,
     "senderId" TEXT NOT NULL,
     "receiverId" TEXT NOT NULL,
-    "status" "RequestStatus" NOT NULL DEFAULT 'PENDING',
+    "block" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "FriendRequest_pkey" PRIMARY KEY ("id")

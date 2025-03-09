@@ -69,7 +69,6 @@ async function main() {
         data: {
             senderId: user1.id,
             receiverId: user2.id,
-            status: 'PENDING',
         },
     });
 
