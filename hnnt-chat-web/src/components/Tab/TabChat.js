@@ -197,7 +197,7 @@ function TabChat() {
                                         className={`cursor-pointer mr-1 ${activeChat?.category.color}`}
                                         onClick={() => setIsOpenCategory(!isOpenCategory)}
                                     />
-                                    <p className="text-[10px]">{activeChat?.category.name}</p>
+                                    <p className="text-[10px] dark:text-gray-300">{activeChat?.category.name}</p>
                                 </div>
                             ) : (
                                 <MdLabelOutline
@@ -305,7 +305,7 @@ function TabChat() {
                                             message.sender === userActive.id && (
                                                 <div className="flex">
                                                     <button
-                                                        className={`absolute left-[-25px] bottom-[30px] dark:bg-gray-700  p-1 rounded-full hover:bg-gray-300 mr-1`}
+                                                        className={`absolute left-[-25px] bottom-[30px] dark:bg-gray-700  p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 mr-1 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
                                                         onClick={() => {
                                                             setIsPopupOpenIndex(index);
                                                         }}
@@ -314,7 +314,7 @@ function TabChat() {
                                                     </button>
                                                     {!message.destroy && (
                                                         <button
-                                                            className={`absolute left-[-50px] bottom-[30px] dark:bg-gray-700  p-1 rounded-full hover:bg-gray-300`}
+                                                            className={`absolute left-[-50px] bottom-[30px] dark:bg-gray-700  p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
                                                             onClick={() => {
                                                                 setReplyMessage(message);
                                                             }}
@@ -394,7 +394,7 @@ function TabChat() {
                                             message.sender !== userActive.id && (
                                                 <div className="relative flex ">
                                                     <button
-                                                        className={`absolute dark:bg-gray-700 right-[-25px] bottom-[30px] p-1 rounded-full hover:bg-gray-300`}
+                                                        className={`absolute dark:bg-gray-700 right-[-25px] bottom-[30px] p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
                                                         onClick={() => {
                                                             setIsPopupOpenIndex(index);
                                                         }}
@@ -402,7 +402,7 @@ function TabChat() {
                                                         <FiMoreHorizontal size={15} />
                                                     </button>
                                                     <button
-                                                        className={`absolute dark:bg-gray-700 right-[-50px] bottom-[30px] p-1 rounded-full hover:bg-gray-300`}
+                                                        className={`absolute dark:bg-gray-700 right-[-50px] bottom-[30px] p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
                                                         onClick={() => {
                                                             setReplyMessage(message);
                                                         }}
