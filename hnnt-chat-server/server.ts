@@ -30,7 +30,8 @@ app.use(express.urlencoded({ extended: true }));
 //     });
 
 // Routes
-app.use('/friend', friendRouterer);
+app.use('/api/friends', friendRouterer);
+
 app.listen(PORT, () => {
     console.log(`Server đang chạy trên cổng ${PORT}`);
 });

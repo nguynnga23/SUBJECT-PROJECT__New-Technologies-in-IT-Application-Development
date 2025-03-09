@@ -44,6 +44,7 @@ model FriendRequest {
   receiver  Account  @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
   senderId  String
   receiverId String
+  block     Boolean @default(false)
 
   createdAt DateTime @default(now())
 
