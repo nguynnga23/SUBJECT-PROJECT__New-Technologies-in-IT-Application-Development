@@ -288,7 +288,7 @@ function TabChat() {
                             }}
                         >
                             {!isDeleted && Component && (
-                                <div className="flex">
+                                <div className="flex ">
                                     <div className="w-[45px] h-[45px] mr-3 flex-shrink-0">
                                         {message.sender !== userId && showAvatar && (
                                             <img
