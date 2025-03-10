@@ -5,6 +5,7 @@ import { AiOutlineUsergroupAdd } from 'react-icons/ai';
 import { PiUserList } from 'react-icons/pi';
 import { GoPeople } from 'react-icons/go';
 import { PiUserPlus } from 'react-icons/pi';
+import { TiDelete } from 'react-icons/ti';
 
 import avatar from '../../public/avatar_sample.jpg';
 import groupzalo from '../../public/groupzalo.png';
@@ -14,6 +15,8 @@ import { useSelector } from 'react-redux';
 import TabFriendsList from '../../components/Tab/TabFriendsList';
 import TabGroupList from '../../components/Tab/TabGroupList';
 import TabFriendRequest from '../../components/Tab/TabFriendRequest';
+import PopupAddFriend from '../../components/Popup/PopupAddFriend';
+import PopupAddGroup from '../../components/Popup/PopupAddGroup';
 
 const TabsContacts = [
     { id: 1, icon: <PiUserList size={25} />, title: 'Danh sách bạn bè', content: 'Bạn bè' },
@@ -100,7 +103,11 @@ const friendRequestData = [
 ];
 
 function Contacts() {
+    const [addFriendButton, setAddFriendButton] = useState(false);
+    const [addGroupButton, setAddGroupButton] = useState(false);
+
     const [selectTab, setSelectTab] = useState(TabsContacts[0]);
+    const [subSearch, setSubSearch] = useState('');
     const [search, setSearch] = useState('');
     const [filterName, setFilterName] = useState('AZ');
     const [filter, setFilter] = useState('Tất cả');
@@ -158,14 +165,31 @@ function Contacts() {
         <div className="h-screen flex flex-col">
             <div className="flex-1 flex min-h-0">
                 <div className="w-1/4 bg-white border-r p-4">
-                    <div className="flex justify-between items-center pb-4 border-b relative my-4">
-                        <input type="text" placeholder="Tìm kiếm..." className="w-full pl-10 p-2 border rounded-lg" />
-                        <FaSearch className="absolute left-3 top-3 text-gray-500" />
-                        <div className="pl-2">
-                            <RiUserAddLine size={24} />
+                    <div className="flex justify-between items-center relative pb-2">
+                        <input
+                            type="text"
+                            placeholder="Tìm kiếm..."
+                            className="w-full pl-8 pr-6 p-1.5 border bg-gray-200 rounded-lg text-[14px] focus:border-blue-500 focus:outline-none"
+                            value={subSearch}
+                            onChange={(e) => setSubSearch(e.target.value)}
+                        />
+                        <FaSearch className="absolute left-2 top-3 text-gray-500 text-xs" />
+                        {subSearch !== '' && (
+                            <TiDelete
+                                className="absolute right-[70px] top-3 text-gray-500 text-xs cursor-pointer bg-gray-200"
+                                size={16}
+                                onClick={() => {
+                                    setSubSearch('');
+                                }}
+                            />
+                        )}
+                        <div className="pl-3">
+                            <RiUserAddLine size={20} onClick={() => setAddFriendButton(true)} />
+                            <PopupAddFriend isOpen={addFriendButton} onClose={() => setAddFriendButton(false)} />
                         </div>
-                        <div className="pl-2">
-                            <AiOutlineUsergroupAdd size={24} />
+                        <div className="pl-3">
+                            <AiOutlineUsergroupAdd size={20} onClick={() => setAddGroupButton(true)} />
+                            <PopupAddGroup isOpen={addGroupButton} onClose={() => setAddGroupButton(false)} />
                         </div>
                     </div>
                     <div>
@@ -231,7 +255,7 @@ function Contacts() {
                             />
                         ) : selectTab.id === 4 ? (
                             <div className="w-full h-screen flex flex-col items-center justify-center text-center translate-y-[-20%]">
-                                <img src={groupzalo} alt="avatar" className="w-28 h-w-28" />
+                                <img src={groupzalo} alt="avatar" className="w-28 h-w-28 object-cover" />
                                 <p className="text-sm">Không có lời mời vào nhóm và cộng đồng</p>
                                 <div className="flex">
                                     <p className="text-sm">Khi nào tôi nhận được lời mời?</p>
