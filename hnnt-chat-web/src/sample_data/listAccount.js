@@ -431,8 +431,8 @@ const Accounts = [
                         reactions: [
                             {
                                 id: 0,
-                                name: 'Nguyễn Lê Nhật Huy',
-                                avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMZIA8q5YZgirXxhzjkXkoVG1LuwLd4WYkjg&s',
+                                name: 'Nguyễn Thị Nga',
+                                avatar: 'https://www.catster.com/wp-content/uploads/2023/11/Beluga-Cat-e1714190563227.webp',
                                 reaction: '❤️',
                                 sum: 2,
                             },
@@ -452,15 +452,15 @@ const Accounts = [
                     },
                     {
                         id: 2,
-                        sender: 0,
-                        name: 'Nguyễn Lê Nhật Huy',
-                        avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMZIA8q5YZgirXxhzjkXkoVG1LuwLd4WYkjg&s',
+                        sender: 1,
+                        name: 'Nguyễn Thị Nga',
+                        avatar: 'https://www.catster.com/wp-content/uploads/2023/11/Beluga-Cat-e1714190563227.webp',
                         content: 'Hôm nay bạn thế nào?',
                         reactions: [
                             {
-                                id: 0,
-                                name: 'Nguyễn Lê Nhật Huy',
-                                avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMZIA8q5YZgirXxhzjkXkoVG1LuwLd4WYkjg&s',
+                                id: 1,
+                                name: 'Nguyễn Thị Nga',
+                                avatar: 'https://www.catster.com/wp-content/uploads/2023/11/Beluga-Cat-e1714190563227.webp',
                                 reaction: '❤️',
                                 sum: 2,
                             },
@@ -499,9 +499,9 @@ const Accounts = [
                         content: 'Chào bạn',
                         reactions: [
                             {
-                                id: 0,
-                                name: 'Nguyễn Lê Nhật Huy',
-                                avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMZIA8q5YZgirXxhzjkXkoVG1LuwLd4WYkjg&s',
+                                id: 1,
+                                name: 'Nguyễn Thị Nga',
+                                avatar: 'https://www.catster.com/wp-content/uploads/2023/11/Beluga-Cat-e1714190563227.webp',
                                 reaction: '❤️',
                                 sum: 2,
                             },
@@ -521,15 +521,15 @@ const Accounts = [
                     },
                     {
                         id: 2,
-                        sender: 0,
-                        name: 'Nguyễn Lê Nhật Huy',
-                        avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMZIA8q5YZgirXxhzjkXkoVG1LuwLd4WYkjg&s',
+                        sender: 1,
+                        name: 'Nguyễn Thị Nga',
+                        avatar: 'https://www.catster.com/wp-content/uploads/2023/11/Beluga-Cat-e1714190563227.webp',
                         content: 'Hẹn gặp bạn sau!',
                         reactions: [
                             {
-                                id: 0,
-                                name: 'Nguyễn Lê Nhật Huy',
-                                avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMZIA8q5YZgirXxhzjkXkoVG1LuwLd4WYkjg&s',
+                                id: 1,
+                                name: 'Nguyễn Thị Nga',
+                                avatar: 'https://www.catster.com/wp-content/uploads/2023/11/Beluga-Cat-e1714190563227.webp',
                                 reaction: '❤️',
                                 sum: 2,
                             },
