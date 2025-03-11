@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: 'center',
     paddingVertical: 10,
-    backgroundColor: '#1ba9ff',
+    backgroundColor: '#005ae0',
   },
 
   recipientName: { fontSize: 18, fontWeight: "bold", color: "white" },
