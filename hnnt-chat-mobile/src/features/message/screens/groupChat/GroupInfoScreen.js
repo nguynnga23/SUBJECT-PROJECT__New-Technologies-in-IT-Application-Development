@@ -76,7 +76,7 @@ export default function GroupInfoScreen() {
                     <OptionItem label="Member (4)" />
                 </TouchableOpacity>
 
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate("AddMemberScreen")}>
                     <OptionItem label="Add member" />
                 </TouchableOpacity>
 
