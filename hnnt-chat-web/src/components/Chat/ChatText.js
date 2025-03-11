@@ -32,7 +32,11 @@ function ChatText({ index, userId, message, reactions, showName, replyMessage })
             )}
             <div>
                 {replyMessage && (
-                    <div className="mb-1 bg-gray-300 dark:bg-gray-700  p-2 rounded-[5px]">
+                    <div
+                        className={`mb-1 border-l-[4px] border-blue-500 ${
+                            message.sender === userId ? 'bg-blue-200' : 'bg-gray-300'
+                        } dark:bg-gray-700  p-2 rounded-[3px]`}
+                    >
                         <p className="text-[12px] font-medium text-gray-600 dark:text-gray-300 mb-1">
                             {replyMessage.name}
                         </p>
