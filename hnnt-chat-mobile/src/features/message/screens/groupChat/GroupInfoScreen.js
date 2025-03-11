@@ -1,35 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Image, TouchableOpacity, ScrollView, Linking, StyleSheet, Modal, TextInput, Button } from "react-native";
+import { View, Text, Image, TouchableOpacity, ScrollView, Linking, StyleSheet, Modal, TextInput, Button, Alert } from "react-native";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import * as ImagePicker from 'expo-image-picker';
+import { handleReport, handleLeaveGroup, toggleMute, handleEditGroupName, handleChangeAvatar } from "../../services/GroupInfoService";
 
 export default function GroupInfoScreen() {
     const navigation = useNavigation();
     const route = useRoute();
     const groupName = route.params?.groupName || "null";
     const [isMuted, setIsMuted] = useState(false);
+    const [editVisible, setEditVisible] = useState(false);
+    const [newGroupName, setNewGroupName] = useState("");
     const [reportVisible, setReportVisible] = useState(false);
     const [leaveVisible, setLeaveVisible] = useState(false);
     const [reportReason, setReportReason] = useState("");
+    const [avatar, setAvatar] = useState(null);
 
-    const handleReport = () => {
-        if (reportReason === "") {
-            return;
-        }
-        console.log("Report reason:", reportReason);
-        setReportVisible(false);
-    };
-
-    const handleLeaveGroup = () => {
-        console.log("User confirmed leaving group");
-        setLeaveVisible(false);
-    };
-
-    const toggleMute = () => {
-        setIsMuted(!isMuted);
-    };
     return (
         <SafeAreaView style={styles.container}>
             <SafeAreaProvider>
@@ -43,13 +32,15 @@ export default function GroupInfoScreen() {
 
                 {/* Group Info */}
                 <View style={styles.groupInfo}>
-                    <Image
-                        source={require("../../../../assets/icon.png")}
+                    {avatar && <Image
+
+                        // source={require("../../../../assets/icon.png")}
+                        source={{ uri: avatar }}
                         style={styles.groupImage}
-                    />
+                    />}
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Text style={styles.groupName}>{groupName}</Text>
-                        <TouchableOpacity>
+                        <Text style={styles.groupName}>{newGroupName.trim() ? newGroupName : groupName}</Text>
+                        <TouchableOpacity onPress={() => setEditVisible(true)}>
                             <AntDesign style={{ marginTop: 7 }} name="edit" size={24} color="black" />
                         </TouchableOpacity>
                     </View>
@@ -59,14 +50,14 @@ export default function GroupInfoScreen() {
                 {/* Actions */}
                 <View style={styles.actions}>
                     <TouchableOpacity onPress={() => navigation.navigate("FindGrMessagesScreen")}>
-                        <ActionButton icon="search" label="Find messages" />
+                        <ActionButton icon="search" label="Find      message" />
                     </TouchableOpacity>
 
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={() => handleChangeAvatar(setAvatar)}>
                         <ActionButton icon="image" label="Change avatar" />
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.actionButton} onPress={toggleMute}>
+                    <TouchableOpacity style={styles.actionButton} onPress={() => toggleMute(isMuted, setIsMuted)}>
                         <Ionicons name={isMuted ? "notifications" : "notifications-off"} size={24} color="black" />
                         <Text style={styles.actionText}>{isMuted ? "Unmute" : "Mute"}</Text>
                     </TouchableOpacity>
@@ -106,6 +97,24 @@ export default function GroupInfoScreen() {
                     <OptionItem label="Leave group" textColor="red" />
                 </TouchableOpacity>
 
+                {/* edit groupname modal */}
+                <Modal visible={editVisible} transparent animationType="slide">
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalContent}>
+                            <Text style={styles.modalTitle}>Edit Group Name</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={newGroupName}
+                                onChangeText={setNewGroupName}
+                            />
+                            <View style={styles.modalActions}>
+                                <Button title="Cancel" color="red" onPress={() => setEditVisible(false)} />
+                                <Button title="Apply" onPress={() => handleEditGroupName(setEditVisible, newGroupName, setNewGroupName)} />
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
                 {/* Report Modal */}
                 <Modal visible={reportVisible} transparent animationType="slide">
                     <View style={styles.modalContainer}>
@@ -125,7 +134,7 @@ export default function GroupInfoScreen() {
                             />
                             <View style={styles.modalActions}>
                                 <Button title="Cancel" onPress={() => setReportVisible(false)} />
-                                <Button title="Submit" onPress={handleReport} />
+                                <Button title="Submit" onPress={() => handleReport(reportReason, setReportVisible)} />
                             </View>
                         </View>
                     </View>
@@ -139,7 +148,7 @@ export default function GroupInfoScreen() {
                             <Text>Are you sure you want to leave this group?</Text>
                             <View style={styles.modalActions}>
                                 <Button title="Cancel" onPress={() => setLeaveVisible(false)} />
-                                <Button title="Leave" color="red" onPress={handleLeaveGroup} />
+                                <Button title="Leave" color="red" onPress={() => handleLeaveGroup(setLeaveVisible, navigation)} />
                             </View>
                         </View>
                     </View>

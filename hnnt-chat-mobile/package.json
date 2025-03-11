@@ -25,7 +25,6 @@
     "react-native": "^0.76.6",
     "react-native-emoji-selector": "^0.2.0",
     "react-native-gesture-handler": "^2.23.0",
-    "react-native-image-picker": "^8.1.0",
     "react-native-pager-view": "6.5.1",
     "react-native-paper": "^5.13.1",
     "react-native-phone-number-input": "^2.1.0",
