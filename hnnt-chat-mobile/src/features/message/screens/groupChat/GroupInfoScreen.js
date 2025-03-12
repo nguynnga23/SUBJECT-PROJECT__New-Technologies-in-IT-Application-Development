@@ -4,8 +4,7 @@ import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import * as ImagePicker from 'expo-image-picker';
-import { handleReport, handleLeaveGroup, toggleMute, handleEditGroupName, handleChangeAvatar } from "../../services/GroupInfoService";
+import { handleReport, handleLeaveGroup, toggleMute, handleEditGroupName, handleChangeAvatar, handleDisbandGroup } from "../../services/GroupInfoService";
 
 export default function GroupInfoScreen() {
     const navigation = useNavigation();
@@ -18,6 +17,8 @@ export default function GroupInfoScreen() {
     const [leaveVisible, setLeaveVisible] = useState(false);
     const [reportReason, setReportReason] = useState("");
     const [avatar, setAvatar] = useState(null);
+    const [userRole, setUserRole] = useState("Leader");
+    const [disbandVisible, setDisbandVisible] = useState(false);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -96,6 +97,11 @@ export default function GroupInfoScreen() {
                 <TouchableOpacity onPress={() => setLeaveVisible(true)}>
                     <OptionItem label="Leave group" textColor="red" />
                 </TouchableOpacity>
+                {userRole === "Leader" && (
+                    <TouchableOpacity onPress={() => setDisbandVisible(true)}>
+                        <OptionItem label="Disband group" textColor="red" />
+                    </TouchableOpacity>
+                )}
 
                 {/* edit groupname modal */}
                 <Modal visible={editVisible} transparent animationType="slide">
@@ -149,6 +155,20 @@ export default function GroupInfoScreen() {
                             <View style={styles.modalActions}>
                                 <Button title="Cancel" onPress={() => setLeaveVisible(false)} />
                                 <Button title="Leave" color="red" onPress={() => handleLeaveGroup(setLeaveVisible, navigation)} />
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+                {/* Disband Group Modal */}
+                <Modal visible={disbandVisible} transparent animationType="slide">
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalContent}>
+                            <Text style={styles.modalTitle}>Disband Group</Text>
+                            <Text>Are you sure you want to disband this group? This action cannot be undone.</Text>
+                            <View style={styles.modalActions}>
+                                <Button title="Cancel" onPress={() => setDisbandVisible(false)} />
+                                <Button title="Disband" color="red" onPress={() => handleDisbandGroup(setDisbandVisible, navigation)} />
                             </View>
                         </View>
                     </View>

@@ -52,3 +52,12 @@ export const handleChangeAvatar = async (setAvatar) => {
         setAvatar(result.assets[0].uri);
     }
 };
+
+export const handleDisbandGroup = (setDisbandVisible, navigation) => {
+    console.log("Group has been disbanded.");
+    setDisbandVisible(false);
+    navigation.reset({
+        index: 0,
+        routes: [{ name: "MessageScreen" }],
+    });
+};
