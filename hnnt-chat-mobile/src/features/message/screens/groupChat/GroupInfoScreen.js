@@ -69,9 +69,9 @@ export default function GroupInfoScreen() {
                     <OptionItem label="Image, file, link" />
                 </TouchableOpacity>
 
-                {/* <TouchableOpacity>
+                <TouchableOpacity>
                     <OptionItem label="Pinned message" />
-                </TouchableOpacity> */}
+                </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => navigation.navigate("MemberListScreen")}>
                     <OptionItem label="Member (4)" />
