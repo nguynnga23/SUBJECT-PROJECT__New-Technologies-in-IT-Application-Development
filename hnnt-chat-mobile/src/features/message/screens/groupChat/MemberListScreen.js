@@ -3,12 +3,13 @@ import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, Modal } from
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from "@react-navigation/native";
+import { handleAddFriend, handleCancelAddFriend, handleDeleteMember } from "../../services/MemberListService";
 
-const members = [
+const membersData = [
     { id: "1", name: "Huy Nguyen", role: "Leader", avatar: "https://example.com/avatar1.png", isUser: true },
-    { id: "2", name: "Nguyen Nga", role: "Vice Leader", avatar: "https://example.com/avatar2.png", isUser: false },
-    { id: "3", name: "Nhiet Pham", role: "Added by Huy Nguyen", avatar: "https://example.com/avatar3.png", isUser: false },
-    { id: "4", name: "Nguyen Thien Tu", role: "Added by Huy Nguyen", avatar: "https://example.com/avatar4.png", isUser: false },
+    { id: "2", name: "Nguyen Nga", role: "member", avatar: "https://example.com/avatar2.png", isUser: false },
+    { id: "3", name: "Nhiet Pham", role: "member", avatar: "https://example.com/avatar3.png", isUser: false },
+    { id: "4", name: "Nguyen Thien Tu", role: "member", avatar: "https://example.com/avatar4.png", isUser: false },
 ];
 
 export default function MemberListScreen() {
@@ -17,17 +18,7 @@ export default function MemberListScreen() {
     const [selectedMember, setSelectedMember] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [modalAction, setModalAction] = useState("");
-
-    const handleAddFriend = (id) => {
-        setFriendRequests((prev) => ({
-            ...prev,
-            [id]: !prev[id],
-        }));
-    };
-
-    const handleDeleteMember = (id) => {
-        console.log(`Deleting member: ${id}`);
-    };
+    const [members, setMembers] = useState(membersData);
 
     const openModal = (member, action) => {
         setSelectedMember(member);
@@ -39,22 +30,17 @@ export default function MemberListScreen() {
         if (!selectedMember) return;
 
         if (modalAction === "add") {
-            const isCancelRequest = friendRequests[selectedMember.id]; // Kiểm tra nếu đã gửi trước đó
-            const logMessage = isCancelRequest
-                ? `Friend request to ${selectedMember.name} has been canceled.`
-                : `Friend request sent to ${selectedMember.name}.`;
-
-            handleAddFriend(selectedMember.id);
-            console.log(logMessage);
+            if (friendRequests[selectedMember.id]) {
+                handleCancelAddFriend(selectedMember.id, setFriendRequests);
+            } else {
+                handleAddFriend(selectedMember.id, setFriendRequests);
+            }
         } else if (modalAction === "delete") {
-            console.log(`Member ${selectedMember.name} has been removed.`);
-            handleDeleteMember(selectedMember.id);
+            handleDeleteMember(selectedMember.id, setMembers);
         }
 
         setModalVisible(false);
     };
-
-
 
     return (
         <SafeAreaView style={styles.container}>
@@ -65,6 +51,7 @@ export default function MemberListScreen() {
                     </TouchableOpacity>
                     <Text style={styles.headerText}>Member List</Text>
                 </View>
+
                 <FlatList
                     data={members}
                     keyExtractor={(item) => item.id}
@@ -76,7 +63,6 @@ export default function MemberListScreen() {
                                 <Text style={styles.role}>{item.role}</Text>
                             </View>
                             <View style={styles.actions}>
-                                {/* Add Friend Button - Chỉ hiển thị nếu không phải là chính mình */}
                                 {!item.isUser && (
                                     <TouchableOpacity onPress={() => openModal(item, "add")}>
                                         <Ionicons
@@ -87,7 +73,6 @@ export default function MemberListScreen() {
                                     </TouchableOpacity>
                                 )}
 
-                                {/* Delete Member Button - Chỉ leader mới có thể xóa người khác */}
                                 {members.some((m) => m.isUser && m.role === "Leader") && !item.isUser && (
                                     <TouchableOpacity onPress={() => openModal(item, "delete")}>
                                         <Ionicons name="trash-outline" size={24} color="red" style={styles.deleteIcon} />
@@ -120,7 +105,6 @@ export default function MemberListScreen() {
                         </View>
                     </View>
                 </Modal>
-
             </SafeAreaProvider>
         </SafeAreaView>
     );
