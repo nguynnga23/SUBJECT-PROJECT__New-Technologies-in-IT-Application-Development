@@ -1,0 +1,248 @@
+import { Alert } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { Audio } from "expo-av";
+import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system";
+
+let recording = null;
+let chatData = {
+    group_name: "CNMOI-HK2-24-25",
+    members: [
+        { id: 1, name: "Nga Nguyễn", username: "@nganguyen92", avatar: "avatar1.png" },
+        { id: 2, name: "Huy Nguyễn", username: "@huynh503", avatar: "avatar2.png" },
+        { id: 3, name: "Nhiệt Phạm", username: "@nhietpham", avatar: "avatar3.png", isMe: true },
+        { id: 4, name: "nguyenthientu413", username: "@nguyenthientu413", avatar: "avatar4.png" },
+    ],
+    messages: [
+        { id: 101, sender: "@nganguyen92", name: "Nga Nguyễn", message: "Trello có đủ tài liệu nha!", time: "18:55", reactions: { "❤️": 1 } },
+        { id: 102, sender: "@nganguyen92", name: "Nga Nguyễn", message: "Mn nhớ update task trên Trello nhé!", time: "18:56" },
+        { id: 103, sender: "@huynh503", name: "Huy Nguyễn", message: "ok", time: "18:57" },
+        { id: 104, sender: "@nhietpham", name: "Nhiệt Phạm", message: "yup", time: "19:00", reactions: { "😂": 1 }, isMe: true },
+        { id: 105, sender: "@nguyenthientu413", name: "Tứ Nguyễn", message: "got it", time: "19:05" },
+    ],
+};
+
+//Hiển thị menu khi nhấn giữ tin nhắn
+export function handleLongPressMessage(messageId, messages, setMessages, setReplyingMessage, setModalVisible) {
+    const message = messages.find((msg) => msg.id === messageId);
+    if (!message) return;
+
+    let options = [
+        { text: "📌 Pin", onPress: () => pinMessage(messageId) },
+        {
+            text: "↩️ Answer",
+            onPress: () => {
+                setReplyingMessage(message);
+                setModalVisible(true); // Chỉ bật modal khi chọn Answer
+            }
+        },
+    ];
+
+    if (message.isMe) {
+        options.splice(1, 0, { text: "🗑️ Delete", onPress: () => handleDeleteMessage(messageId, messages, setMessages) });
+    }
+
+    Alert.alert("Select an action", "What do you want to do with this message?", options, { cancelable: true });
+}
+
+//Ghim tin nhắn
+function pinMessage(messageId) {
+    console.log("Ghim tin nhắn ID:", messageId);
+}
+
+//Xóa tin nhắn
+export function handleDeleteMessage(messageId, messages, setMessages) {
+    setMessages(messages.filter(msg => msg.id !== messageId));  // Cập nhật state
+}
+
+//Trả lời tin nhắn
+function answerMessage(messageId, messages, setReplyingMessage) {
+    const message = messages.find((msg) => msg.id === messageId);
+    if (message) {
+        console.log("Trả lời tin nhắn:", message?.message);
+        setReplyingMessage(message);
+    }
+}
+
+//Gửi tin nhắn
+export function handleSendMessage(text, messages, setMessages, replyingMessage, setReplyingMessage) {
+    if (!text.trim()) return;
+    const newMessage = {
+        id: Date.now(),
+        sender: "@nhietpham",
+        name: "Nhiệt Phạm",
+        message: text,
+        time: new Date().toLocaleTimeString().slice(0, 5),
+        isMe: true,
+        replyTo: replyingMessage ? { name: replyingMessage.name, message: replyingMessage.message } : null,
+    };
+    setMessages([...messages, newMessage]);
+    setReplyingMessage(null);
+}
+
+//Gửi ảnh
+export async function sendImage(messages, setMessages) {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permission.status !== "granted") {
+        alert("Permission to access media library is required!");
+        return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        quality: 1,
+    });
+
+    if (!result.canceled) {
+        const newMessage = {
+            id: Date.now(),
+            sender: "@nhietpham",
+            name: "Nhiệt Phạm",
+            image: result.assets[0].uri, // Lưu đường dẫn ảnh
+            time: new Date().toLocaleTimeString().slice(0, 5),
+            isMe: true,
+        };
+        setMessages([...messages, newMessage]);
+    }
+}
+
+//Gửi tài liệu
+export async function sendFile(messages, setMessages) {
+    try {
+        const result = await DocumentPicker.getDocumentAsync({
+            type: "*/*", // Cho phép tất cả loại file
+        });
+
+        if (result.canceled || !result.assets) return;
+
+        const fileUri = result.assets[0].uri;
+        const fileName = result.assets[0].name;
+        const fileSize = result.assets[0].size;
+
+        const newMessage = {
+            id: Date.now(),
+            sender: "@nhietpham",
+            name: "Nhiệt Phạm",
+            message: "📄 File: " + fileName,
+            fileUri,
+            fileName,
+            fileSize,
+            time: new Date().toLocaleTimeString().slice(0, 5),
+            isMe: true,
+        };
+
+        setMessages([...messages, newMessage]);
+    } catch (error) {
+        console.error("Lỗi khi gửi file:", error);
+    }
+}
+
+export async function downloadFile(fileUri, fileName) {
+    try {
+        if (fileUri.startsWith("file://")) {
+            Alert.alert("Không thể tải file", "File đã có sẵn trên thiết bị.");
+            return;
+        }
+
+        const fileDest = FileSystem.documentDirectory + fileName;
+        const downloadResumable = FileSystem.createDownloadResumable(
+            fileUri,
+            fileDest,
+            {},
+            (downloadProgress) => {
+                const progress =
+                    downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite;
+                console.log(`Tải xuống: ${Math.round(progress * 100)}%`);
+            }
+        );
+
+        const { uri } = await downloadResumable.downloadAsync();
+        Alert.alert("Tải xuống hoàn tất", `File đã được lưu tại: ${uri}`);
+    } catch (error) {
+        console.error("Lỗi khi tải file:", error);
+        Alert.alert("Lỗi", "Không thể tải file.");
+    }
+}
+
+// Bắt đầu ghi âm
+export async function startRecording(setRecording) {
+    try {
+        const { granted } = await Audio.requestPermissionsAsync();
+        if (!granted) {
+            Alert.alert("Permission denied", "Please allow microphone access.");
+            return;
+        }
+
+        await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+
+        recording = new Audio.Recording();
+        await recording.prepareToRecordAsync(Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY);
+        await recording.startAsync();
+
+        setRecording(true);
+        console.log("Bắt đầu ghi âm...");
+    } catch (error) {
+        console.error("Lỗi khi ghi âm:", error);
+    }
+}
+
+// Dừng ghi âm
+export async function stopRecording(setRecording, setRecordingUri, setRecordingSaved) {
+    try {
+        if (!recording) return;
+
+        await recording.stopAndUnloadAsync();
+        const uri = recording.getURI();
+        console.log("Tệp ghi âm đã lưu tại:", uri);
+
+        setRecording(false);
+        setRecordingUri(uri);
+        setRecordingSaved(true);  // Cập nhật trạng thái đã lưu
+        Alert.alert("Ghi âm đã lưu", "Tệp ghi âm của bạn đã được lưu thành công.");
+
+        recording = null;
+    } catch (error) {
+        console.error("Lỗi khi dừng ghi âm:", error);
+    }
+}
+
+// Gửi tin nhắn âm thanh
+export async function sendVoiceMessage(recordingUri, setRecording, setRecordingUri, setRecordingSaved, messages, setMessages) {
+    if (!recordingUri) {
+        Alert.alert("Không có file ghi âm", "Vui lòng ghi âm trước khi gửi.");
+        return;
+    }
+
+    if (recording) {
+        await stopRecording(setRecording, setRecordingUri, setRecordingSaved);
+    }
+
+    const newMessage = {
+        id: Date.now(),
+        sender: "@nhietpham",
+        name: "Nhiệt Phạm",
+        message: "🎤 Voice message",
+        time: new Date().toLocaleTimeString().slice(0, 5),
+        isMe: true,
+        audioUri: recordingUri,
+    };
+
+    setMessages([...messages, newMessage]);
+    setRecordingUri(null);
+    setRecordingSaved(false); // Reset trạng thái sau khi gửi
+}
+
+
+// Phát lại tin nhắn âm thanh
+export async function playAudio(uri) {
+    try {
+        const { sound } = await Audio.Sound.createAsync({ uri });
+        await sound.playAsync();
+    } catch (error) {
+        console.error("Lỗi khi phát âm thanh:", error);
+    }
+}
+
+
+export default chatData;
