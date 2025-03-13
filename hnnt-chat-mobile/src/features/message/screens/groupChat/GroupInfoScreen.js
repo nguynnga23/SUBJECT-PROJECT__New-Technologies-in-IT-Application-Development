@@ -4,7 +4,7 @@ import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { handleReport, handleLeaveGroup, toggleMute, handleEditGroupName, handleChangeAvatar, handleDisbandGroup } from "../../services/GroupInfoService";
+import { handleReport, handleLeaveGroup, toggleMute, handleEditGroupName, handleChangeAvatar, handleDisbandGroup } from "../../services/GroupChat/GroupInfoService";
 
 export default function GroupInfoScreen() {
     const navigation = useNavigation();

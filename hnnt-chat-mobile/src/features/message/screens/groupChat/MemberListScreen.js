@@ -3,7 +3,7 @@ import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, Modal } from
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from "@react-navigation/native";
-import { handleAddFriend, handleCancelAddFriend, handleDeleteMember } from "../../services/MemberListService";
+import { handleAddFriend, handleCancelAddFriend, handleDeleteMember } from "../../services/GroupChat/MemberListService";
 
 const membersData = [
     { id: "1", name: "Huy Nguyen", role: "Leader", avatar: "https://example.com/avatar1.png", isUser: true },

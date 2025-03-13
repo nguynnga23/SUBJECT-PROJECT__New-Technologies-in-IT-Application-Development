@@ -20,7 +20,7 @@ import chatData, {
   handleDeleteMessage,
   handleSendMessage, sendImage, sendFile, downloadFile,
   startRecording, stopRecording, sendVoiceMessage, playAudio
-} from "../../services/GroupChatService";
+} from "../../services/GroupChat/GroupChatService";
 
 export default function GroupChatScreen() {
   const navigation = useNavigation();
