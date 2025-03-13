@@ -141,7 +141,7 @@ export async function sendFile(messages, setMessages) {
 export async function downloadFile(fileUri, fileName) {
     try {
         if (fileUri.startsWith("file://")) {
-            Alert.alert("Không thể tải file", "File đã có sẵn trên thiết bị.");
+            Alert.alert("Warning", "Device already had this file.");
             return;
         }
 
@@ -158,10 +158,10 @@ export async function downloadFile(fileUri, fileName) {
         );
 
         const { uri } = await downloadResumable.downloadAsync();
-        Alert.alert("Tải xuống hoàn tất", `File đã được lưu tại: ${uri}`);
+        Alert.alert("Download complete", `File is saved at: ${uri}`);
     } catch (error) {
         console.error("Lỗi khi tải file:", error);
-        Alert.alert("Lỗi", "Không thể tải file.");
+        Alert.alert("Error", "Can't down file.");
     }
 }
 
@@ -199,7 +199,7 @@ export async function stopRecording(setRecording, setRecordingUri, setRecordingS
         setRecording(false);
         setRecordingUri(uri);
         setRecordingSaved(true);  // Cập nhật trạng thái đã lưu
-        Alert.alert("Ghi âm đã lưu", "Tệp ghi âm của bạn đã được lưu thành công.");
+        Alert.alert("Recording is saved", "Saving recording suscessful.");
 
         recording = null;
     } catch (error) {
@@ -210,7 +210,7 @@ export async function stopRecording(setRecording, setRecordingUri, setRecordingS
 // Gửi tin nhắn âm thanh
 export async function sendVoiceMessage(recordingUri, setRecording, setRecordingUri, setRecordingSaved, messages, setMessages) {
     if (!recordingUri) {
-        Alert.alert("Không có file ghi âm", "Vui lòng ghi âm trước khi gửi.");
+        Alert.alert("No recording file available", "Please press start and stop then before sending.");
         return;
     }
 
