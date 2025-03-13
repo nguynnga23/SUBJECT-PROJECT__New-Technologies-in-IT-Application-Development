@@ -173,6 +173,18 @@ export default function GroupInfoScreen() {
                         </View>
                     </View>
                 </Modal>
+
+                {/* Pin Modal */}
+                <Modal visible={pinVisible} transparent animationType="slide">
+                    <TouchableWithoutFeedback onPress={() => sePinVisible(false)}>
+                        <View style={styles.modalContainer}>
+                            <View style={styles.modalContent}>
+                                <Text style={styles.modalTitle}>Pin messenge</Text>
+                                <Text>...</Text>
+                            </View>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </Modal>
             </SafeAreaProvider>
         </SafeAreaView>
     );
