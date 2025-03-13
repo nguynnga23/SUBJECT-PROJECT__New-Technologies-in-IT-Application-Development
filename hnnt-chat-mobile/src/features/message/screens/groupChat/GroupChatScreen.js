@@ -53,16 +53,14 @@ export default function GroupChatScreen() {
     };
   }, [navigation]);
 
-  const messagesWithReactions = chatData.messages.map((message) => {
-    const reactions = chatData.reaction
-      .filter((reaction) => reaction.messageId === parseInt(message.id)) // Lọc các reaction thuộc về message này
-      .reduce((acc, reaction) => {
-        acc[reaction.reaction] = (acc[reaction.reaction] || 0) + reaction.sum; // Gom nhóm reaction
+  const getReactionsForMessage = (messageId) => {
+    return chatData.reaction
+      .filter((reaction) => reaction.messageId.toString() === messageId.toString())
+      .reduce((acc, curr) => {
+        acc[curr.reaction] = (acc[curr.reaction] || 0) + curr.sum;
         return acc;
       }, {});
-
-    return { ...message, reactions };
-  });
+  };
 
   const sendMessage = (text) => {
     handleSendMessage(text, messages, setMessages, replyingMessage, setReplyingMessage);
@@ -110,12 +108,40 @@ export default function GroupChatScreen() {
 
         {/* Danh sách tin nhắn */}
         <FlatList
-          data={messagesWithReactions}
+          data={messages}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <TouchableOpacity>
+            <TouchableOpacity onLongPress={() => handleLongPressMessage(item.id, messages, setMessages, setReplyingMessage, setModalVisible)}>
               <View style={[styles.messageContainer, item.isMe ? styles.myMessage : styles.otherMessage]}>
+
+                {item.replyTo && (
+                  <View style={styles.replyBox}>
+                    <Text style={styles.replyUser}>Replying to {item.replyTo.name}</Text>
+                    <Text style={styles.replyMessage}>{item.replyTo.message}</Text>
+                  </View>
+                )}
+
                 <Text style={styles.sender}>{item.name}</Text>
+
+                {item.audioUri && (
+                  <TouchableOpacity onPress={() => playAudio(item.audioUri)} style={styles.playButton}>
+                    <Ionicons name="play-circle" size={30} color="blue" />
+                  </TouchableOpacity>
+                )}
+
+                {item.image && (
+                  <TouchableOpacity onPress={() => setSelectedImage(item.image)}>
+                    <Image source={{ uri: item.image }} style={{ width: 200, height: 200, borderRadius: 10 }} />
+                  </TouchableOpacity>
+                )}
+
+                {item.fileUri && (
+                  <TouchableOpacity onPress={() => downloadFile(item.fileUri, item.fileName)} style={styles.fileContainer}>
+                    <Ionicons name="document-text-outline" size={24} color="blue" />
+                    <Text style={styles.fileName}>{item.fileName} ({(item.fileSize / 1024).toFixed(2)} KB)</Text>
+                  </TouchableOpacity>
+                )}
+
 
                 {/* Nội dung tin nhắn */}
                 <Text style={styles.message}>{item.message}</Text>
@@ -124,12 +150,11 @@ export default function GroupChatScreen() {
                 <View style={styles.timeReactionContainer}>
                   <Text style={styles.time}>{item.time}</Text>
 
-                  {/* Hiển thị reaction nếu có */}
-                  {Object.keys(item.reactions).length > 0 && (
+                  {Object.keys(getReactionsForMessage(item.id)).length > 0 && (
                     <View style={styles.reactionContainer}>
-                      {Object.entries(item.reactions).map(([emoji, count]) => (
-                        <TouchableOpacity onPress={() => deleteReaction(item.id, emoji)} key={emoji}>
-                          <Text key={emoji} style={styles.reactionText}>
+                      {Object.entries(getReactionsForMessage(item.id)).map(([emoji, count]) => (
+                        <TouchableOpacity key={emoji} onPress={() => deleteReaction(item.id, emoji)}>
+                          <Text style={styles.reactionText}>
                             {emoji} {count}
                           </Text>
                         </TouchableOpacity>
