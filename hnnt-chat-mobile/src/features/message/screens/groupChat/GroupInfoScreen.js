@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Image, TouchableOpacity, ScrollView, Linking, StyleSheet, Modal, TextInput, Button, Alert } from "react-native";
+import { View, Text, Image, TouchableOpacity, ScrollView, Linking, StyleSheet, Modal, TextInput, Button, Alert, TouchableWithoutFeedback } from "react-native";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
@@ -19,6 +19,7 @@ export default function GroupInfoScreen() {
     const [avatar, setAvatar] = useState(null);
     const [userRole, setUserRole] = useState("Leader");
     const [disbandVisible, setDisbandVisible] = useState(false);
+    const [pinVisible, setPinVisible] = useState(false);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -69,7 +70,7 @@ export default function GroupInfoScreen() {
                     <OptionItem label="Image, file, link" />
                 </TouchableOpacity>
 
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => setPinVisible(true)}>
                     <OptionItem label="Pinned message" />
                 </TouchableOpacity>
 
@@ -83,7 +84,7 @@ export default function GroupInfoScreen() {
 
                 {/* Group Links */}
                 <OptionItem
-                    label="Link to join group" s
+                    label="Link to join group"
                     textColor="black"
                     links={[
                         { text: "https://zalo.me/g/deuqlw127", url: "https://zalo.me/g/deuqlw127" },
@@ -176,7 +177,7 @@ export default function GroupInfoScreen() {
 
                 {/* Pin Modal */}
                 <Modal visible={pinVisible} transparent animationType="slide">
-                    <TouchableWithoutFeedback onPress={() => sePinVisible(false)}>
+                    <TouchableWithoutFeedback onPress={() => setPinVisible(false)}>
                         <View style={styles.modalContainer}>
                             <View style={styles.modalContent}>
                                 <Text style={styles.modalTitle}>Pin messenge</Text>
