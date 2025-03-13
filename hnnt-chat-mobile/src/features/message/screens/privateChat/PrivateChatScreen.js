@@ -6,26 +6,46 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  TouchableWithoutFeedback
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import Header from "../../../../common/components/Header";
+import {
+  handleSendMessage, handleDeleteMessage,
+  sendVoiceMessage, handleReaction, handleLongPressMessage
+} from "../../services/privateChat/PrivateChatService";
 
 const chatData = {
   recipient_name: "Nga Nguyễn",
   messages: [
-    { id: 201, sender: "me", message: "Chào Nga!", time: "18:55" },
-    { id: 202, sender: "Nga Nguyễn", message: "Chào bạn!", time: "18:56" },
-    { id: 203, sender: "me", message: "Bạn đã hoàn thành task chưa?", time: "18:57" },
-    { id: 204, sender: "Nga Nguyễn", message: "Tôi đang làm, sắp xong rồi!", time: "19:00" },
+    { id: 201, sender: "@nhietpham", name: "Nhiệt Phạm", message: "Chào Nga!", time: "18:55", isMe: true },
+    { id: 202, sender: "@nganguyen", name: "Nga Nguyễn", message: "Chào bạn!", time: "18:56" },
+    { id: 203, sender: "@nhietpham", name: "Nhiệt Phạm", message: "Bạn đã hoàn thành task chưa?", time: "18:57", isMe: true },
+    { id: 204, sender: "@nganguten", name: "Nga Nguyễn", message: "Tôi đang làm, sắp xong rồi!", time: "19:00" },
   ],
+  reaction: [
+    { id: 1, reaction: "❤️", messageId: 204, userId: "@nhietpham", sum: 1 },
+  ]
 };
 
 export default function PrivateChatScreen() {
   const navigation = useNavigation();
   const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState(chatData.messages);
+  const [replyingMessage, setReplyingMessage] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalRecordVisible, setModalRecordVisible] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingUri, setRecordingUri] = useState(null);
+  const [recordingSaved, setRecordingSaved] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedMessage, setSelectedMessage] = useState(null);
+  const reactionsList = ["❤️", "😂", "👍", "😮", "😢"];
+  const [reactVisible, setReactVisible] = useState(false);
+  const [messageId, setMessageId] = useState(null);
 
   useEffect(() => {
     const parentNav = navigation.getParent();
@@ -38,6 +58,35 @@ export default function PrivateChatScreen() {
       });
     };
   }, [navigation]);
+
+  const messagesWithReactions = chatData.messages.map((message) => {
+    const reactions = chatData.reaction
+      .filter((reaction) => reaction.messageId === parseInt(message.id)) // Lọc các reaction thuộc về message này
+      .reduce((acc, reaction) => {
+        acc[reaction.reaction] = (acc[reaction.reaction] || 0) + reaction.sum; // Gom nhóm reaction
+        return acc;
+      }, {});
+
+    return { ...message, reactions };
+  });
+
+  const sendMessage = (text) => {
+    handleSendMessage(text, messages, setMessages, replyingMessage, setReplyingMessage);
+    Keyboard.dismiss();
+  };
+
+  const deleteMessage = (messageId) => {
+    handleDeleteMessage(messageId, messages, setMessages);
+  };
+
+  const sendVoice = async () => {
+    await sendVoiceMessage(recordingUri, setIsRecording, setRecordingUri, setRecordingSaved, messages, setMessages);
+  };
+
+  function showReactionOptions(messageId) {
+    setSelectedMessage(messageId);
+    setReactVisible(true);
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -61,13 +110,41 @@ export default function PrivateChatScreen() {
         </View>
 
         <FlatList
-          data={chatData.messages}
+          data={messagesWithReactions}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <View style={[styles.messageContainer, item.sender === "me" ? styles.myMessage : styles.otherMessage]}>
-              <Text style={styles.message}>{item.message}</Text>
-              <Text style={styles.time}>{item.time}</Text>
-            </View>
+            <TouchableOpacity onLongPress={() => handleLongPressMessage(item.id, messages, setMessages, setReplyingMessage, setModalVisible)}>
+              <View style={[styles.messageContainer, item.isMe ? styles.myMessage : styles.otherMessage]}>
+                {/* Nội dung tin nhắn */}
+                <Text style={styles.message}>{item.message}</Text>
+
+                {/* Hiển thị reaction và thời gian */}
+                <View style={styles.timeReactionContainer}>
+                  <Text style={styles.time}>{item.time}</Text>
+
+                  {/* Hiển thị reaction nếu có */}
+                  {Object.keys(item.reactions).length > 0 && (
+                    <View style={styles.reactionContainer}>
+                      {Object.entries(item.reactions).map(([emoji, count]) => (
+                        <TouchableOpacity onPress={() => deleteReaction(item.id, emoji)} key={emoji}>
+                          <Text key={emoji} style={styles.reactionText}>
+                            {emoji} {count}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+                </View>
+
+                {/* Nút thả reaction */}
+                <TouchableOpacity
+                  onPress={() => { showReactionOptions(item.id); setMessageId(item.id) }}
+                  style={{ position: "absolute", right: 5, bottom: 10 }}
+                >
+                  <FontAwesome name="smile-o" size={20} color="gray" />
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
           )}
         />
 
@@ -133,5 +210,88 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     height: 40,
     marginHorizontal: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "90%",
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+    elevation: 5,
+  },
+
+  modalRecordContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalRecordTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+    color: "#fff",
+  },
+  recordingText: {
+    fontSize: 16,
+    color: "red",
+    marginBottom: 10,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  button: {
+    backgroundColor: "#3498db",
+    padding: 10,
+    margin: 10,
+    borderRadius: 5,
+  },
+  cancelButton: {
+    backgroundColor: "red",
+    padding: 10,
+    margin: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  fullImage: {
+    width: "90%",
+    height: "80%",
+  },
+  fileContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f0f0f0",
+    padding: 10,
+    borderRadius: 8,
+    marginVertical: 5,
+    maxWidth: "80%",
+  },
+  timeReactionContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between", // Căn time và reaction về hai phía
+    alignItems: "center",
+    marginTop: 5,
+  },
+
+  reactionContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16
+  },
+
+  reactionText: {
+    marginLeft: 5, // Tạo khoảng cách giữa các reaction
+    fontSize: 14,
+    color: "gray",
   },
 });
