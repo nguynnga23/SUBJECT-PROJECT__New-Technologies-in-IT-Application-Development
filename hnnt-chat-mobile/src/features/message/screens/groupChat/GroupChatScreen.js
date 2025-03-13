@@ -8,18 +8,21 @@ import {
   StyleSheet,
   Modal,
   TouchableWithoutFeedback,
-  Image
+  Image,
+  Keyboard,
+  Alert
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Header from "../../../../common/components/Header";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import chatData, {
   handleLongPressMessage,
   handleDeleteMessage,
   handleSendMessage, sendImage, sendFile, downloadFile,
-  startRecording, stopRecording, sendVoiceMessage, playAudio
+  startRecording, stopRecording, sendVoiceMessage, playAudio,
+  handleReaction
 } from "../../services/GroupChat/GroupChatService";
 
 export default function GroupChatScreen() {
@@ -33,6 +36,10 @@ export default function GroupChatScreen() {
   const [recordingUri, setRecordingUri] = useState(null);
   const [recordingSaved, setRecordingSaved] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedMessage, setSelectedMessage] = useState(null);
+  const reactionsList = ["❤️", "😂", "👍", "😮", "😢"];
+  const [reactVisible, setReactVisible] = useState(false);
+  const [messageId, setMessageId] = useState(null);
 
   useEffect(() => {
     const parentNav = navigation.getParent();
@@ -46,8 +53,20 @@ export default function GroupChatScreen() {
     };
   }, [navigation]);
 
+  const messagesWithReactions = chatData.messages.map((message) => {
+    const reactions = chatData.reaction
+      .filter((reaction) => reaction.messageId === parseInt(message.id)) // Lọc các reaction thuộc về message này
+      .reduce((acc, reaction) => {
+        acc[reaction.reaction] = (acc[reaction.reaction] || 0) + reaction.sum; // Gom nhóm reaction
+        return acc;
+      }, {});
+
+    return { ...message, reactions };
+  });
+
   const sendMessage = (text) => {
     handleSendMessage(text, messages, setMessages, replyingMessage, setReplyingMessage);
+    Keyboard.dismiss();
   };
 
   const deleteMessage = (messageId) => {
@@ -57,6 +76,17 @@ export default function GroupChatScreen() {
   const sendVoice = async () => {
     await sendVoiceMessage(recordingUri, setIsRecording, setRecordingUri, setRecordingSaved, messages, setMessages);
   };
+
+  function showReactionOptions(messageId) {
+    setSelectedMessage(messageId);
+    setReactVisible(true);
+  }
+
+  // function handleSelectReaction(emoji) {
+  //   handleReaction(userId, emoji, messageId);
+  //   setReactVisible(false);
+  //   //Render lai man hinh
+  // }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -80,40 +110,41 @@ export default function GroupChatScreen() {
 
         {/* Danh sách tin nhắn */}
         <FlatList
-          data={messages}
+          data={messagesWithReactions}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <TouchableOpacity onLongPress={() => handleLongPressMessage(item.id, messages, setMessages, setReplyingMessage, setModalVisible)}>
+            <TouchableOpacity>
               <View style={[styles.messageContainer, item.isMe ? styles.myMessage : styles.otherMessage]}>
-                {item.replyTo && (
-                  <View style={styles.replyBox}>
-                    <Text style={styles.replyUser}>Replying to {item.replyTo.name}</Text>
-                    <Text style={styles.replyMessage}>{item.replyTo.message}</Text>
-                  </View>
-                )}
                 <Text style={styles.sender}>{item.name}</Text>
-                {item.audioUri && (
-                  <TouchableOpacity onPress={() => playAudio(item.audioUri)} style={styles.playButton}>
-                    <Ionicons name="play-circle" size={30} color="blue" />
-                  </TouchableOpacity>
-                )}
 
-                {item.image && (
-                  <TouchableOpacity onPress={() => setSelectedImage(item.image)}>
-                    <Image source={{ uri: item.image }} style={{ width: 200, height: 200, borderRadius: 10 }} />
-                  </TouchableOpacity>
-                )}
-
-                {item.fileUri && (
-                  <TouchableOpacity onPress={() => downloadFile(item.fileUri, item.fileName)} style={styles.fileContainer}>
-                    <Ionicons name="document-text-outline" size={24} color="blue" />
-                    <Text style={styles.fileName}>{item.fileName} ({(item.fileSize / 1024).toFixed(2)} KB)</Text>
-                  </TouchableOpacity>
-                )}
-
+                {/* Nội dung tin nhắn */}
                 <Text style={styles.message}>{item.message}</Text>
-                <Text style={styles.time}>{item.time}</Text>
 
+                {/* Hiển thị reaction và thời gian */}
+                <View style={styles.timeReactionContainer}>
+                  <Text style={styles.time}>{item.time}</Text>
+
+                  {/* Hiển thị reaction nếu có */}
+                  {Object.keys(item.reactions).length > 0 && (
+                    <View style={styles.reactionContainer}>
+                      {Object.entries(item.reactions).map(([emoji, count]) => (
+                        <TouchableOpacity onPress={() => deleteReaction(item.id, emoji)} key={emoji}>
+                          <Text key={emoji} style={styles.reactionText}>
+                            {emoji} {count}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+                </View>
+
+                {/* Nút thả reaction */}
+                <TouchableOpacity
+                  onPress={() => { showReactionOptions(item.id); setMessageId(item.id) }}
+                  style={{ position: "absolute", right: 5, bottom: 5 }}
+                >
+                  <FontAwesome name="smile-o" size={20} color="gray" />
+                </TouchableOpacity>
               </View>
             </TouchableOpacity>
           )}
@@ -221,6 +252,34 @@ export default function GroupChatScreen() {
           </TouchableOpacity>
         </Modal>
 
+        {/* Modal hiển thị reaction */}
+        <Modal visible={reactVisible} transparent={true} animationType="fade">
+          <TouchableWithoutFeedback onPress={() => setReactVisible(false)}>
+            <View style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "rgba(0,0,0,0.5)",
+            }}>
+              <View style={{
+                backgroundColor: "white",
+                padding: 20,
+                borderRadius: 10,
+                flexDirection: "row",
+              }}>
+                {reactionsList.map((emoji) => (
+                  <TouchableOpacity key={emoji} onPress={() => handleSelectReaction(emoji)}>
+                    <Text style={{
+                      fontSize: 20,
+                      marginHorizontal: 10,
+                    }}>{emoji}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+
       </SafeAreaProvider>
     </SafeAreaView>
   );
@@ -238,7 +297,7 @@ const styles = StyleSheet.create({
 
   groupName: { fontSize: 18, fontWeight: "bold", color: "white" },
 
-  messageContainer: { padding: 10, marginVertical: 5, borderRadius: 5, maxWidth: "75%" },
+  messageContainer: { padding: 10, marginVertical: 5, borderRadius: 5, maxWidth: "75%", paddingRight: 30 },
 
   myMessage: { backgroundColor: "#aae7f3", alignSelf: "flex-end", marginRight: 10 },
 
@@ -362,5 +421,22 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginVertical: 5,
     maxWidth: "80%",
+  },
+  timeReactionContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between", // Căn time và reaction về hai phía
+    alignItems: "center",
+    marginTop: 5,
+  },
+
+  reactionContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  reactionText: {
+    marginLeft: 5, // Tạo khoảng cách giữa các reaction
+    fontSize: 14,
+    color: "gray",
   },
 });

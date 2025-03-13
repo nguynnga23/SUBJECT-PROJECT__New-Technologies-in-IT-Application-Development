@@ -14,12 +14,17 @@ let chatData = {
         { id: 4, name: "nguyenthientu413", username: "@nguyenthientu413", avatar: "avatar4.png" },
     ],
     messages: [
-        { id: 101, sender: "@nganguyen92", name: "Nga Nguyễn", message: "Trello có đủ tài liệu nha!", time: "18:55", reactions: { "❤️": 1 } },
-        { id: 102, sender: "@nganguyen92", name: "Nga Nguyễn", message: "Mn nhớ update task trên Trello nhé!", time: "18:56" },
-        { id: 103, sender: "@huynh503", name: "Huy Nguyễn", message: "ok", time: "18:57" },
-        { id: 104, sender: "@nhietpham", name: "Nhiệt Phạm", message: "yup", time: "19:00", reactions: { "😂": 1 }, isMe: true },
-        { id: 105, sender: "@nguyenthientu413", name: "Tứ Nguyễn", message: "got it", time: "19:05" },
+        { id: "101", sender: "@nganguyen92", name: "Nga Nguyễn", message: "Trello có đủ tài liệu nha!", time: "18:55" },
+        { id: "102", sender: "@nganguyen92", name: "Nga Nguyễn", message: "Mn nhớ update task trên Trello nhé!", time: "18:56" },
+        { id: "103", sender: "@huynh503", name: "Huy Nguyễn", message: "ok", time: "18:57" },
+        { id: "104", sender: "@nhietpham", name: "Nhiệt Phạm", message: "yup", time: "19:00", isMe: true },
+        { id: "105", sender: "@nguyenthientu413", name: "Tứ Nguyễn", message: "got it", time: "19:05" },
     ],
+    reaction: [
+        { id: "1", reaction: "❤️", messageId: 101, userId: "@nganguyen92", sum: 1 },
+        { id: "2", reaction: "😂", messageId: 104, userId: "@nhietpham", sum: 1 },
+        { id: "3", reaction: "😂", messageId: 101, userId: "@nhietpham", sum: 2 },
+    ]
 };
 
 //Hiển thị menu khi nhấn giữ tin nhắn
@@ -244,5 +249,9 @@ export async function playAudio(uri) {
     }
 }
 
+//reaction
+export function handleReaction(userId, emoji, messageId) {
+
+}
 
 export default chatData;
