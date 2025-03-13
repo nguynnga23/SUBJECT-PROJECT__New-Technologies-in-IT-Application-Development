@@ -166,7 +166,7 @@ export default function GroupChatScreen() {
                 {/* Nút thả reaction */}
                 <TouchableOpacity
                   onPress={() => { showReactionOptions(item.id); setMessageId(item.id) }}
-                  style={{ position: "absolute", right: 5, bottom: 5 }}
+                  style={{ position: "absolute", right: 5, bottom: 9 }}
                 >
                   <FontAwesome name="smile-o" size={20} color="gray" />
                 </TouchableOpacity>
