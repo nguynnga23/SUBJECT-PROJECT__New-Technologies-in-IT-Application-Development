@@ -45,7 +45,8 @@ export default function AddFriendScreen() {
                         <PhoneInput
                             ref={phoneInputRef}
                             defaultValue={phoneNumber}
-                            defaultCode={countryCode}
+                            defaultCode={countryCode ?? 'VN'}
+                            withFlag={false}
                             layout="second"
                             onChangeText={(text) => setPhoneNumber(text)}
                             onChangeFormattedText={(text) => setFormattedPhoneNumber(text)}
