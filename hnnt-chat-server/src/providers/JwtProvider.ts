@@ -1,9 +1,11 @@
-import jwt from 'jsonwebtoken';
+// Author: TrungQuanDev: https://youtube.com/@trungquandev
+
+import jwt, { JwtPayload, Secret, SignOptions } from 'jsonwebtoken';
 
 interface UserInfo {
     id: string;
-    number: string;
-    [key: string]: any; // Cho phép thêm các trường khác
+    name: string;
+    [key: string]: any;
 }
 
 const generateToken = async (
@@ -12,10 +14,16 @@ const generateToken = async (
     tokenLife: string | number,
 ): Promise<string> => {
     try {
-        return jwt.sign(userInfo, secretSignature, {
+        if (!secretSignature) {
+            throw new Error('Thiếu khóa bí mật để tạo token!');
+        }
+
+        const options: SignOptions = {
             algorithm: 'HS256',
-            expiresIn: tokenLife,
-        });
+            expiresIn: typeof tokenLife === 'string' ? parseInt(tokenLife) : tokenLife,
+        };
+
+        return jwt.sign(userInfo, secretSignature, options);
     } catch (error) {
         throw new Error((error as Error).message);
     }
@@ -23,7 +31,17 @@ const generateToken = async (
 
 const verifyToken = async (token: string, secretSignature: string): Promise<UserInfo | null> => {
     try {
-        return jwt.verify(token, secretSignature) as UserInfo;
+        if (!secretSignature) {
+            throw new Error('Thiếu khóa bí mật để xác thực token!');
+        }
+
+        const decoded = jwt.verify(token, secretSignature);
+
+        if (typeof decoded === 'string') {
+            return null; // Tránh lỗi khi verify trả về string thay vì object
+        }
+
+        return decoded as UserInfo;
     } catch (error) {
         throw new Error((error as Error).message);
     }

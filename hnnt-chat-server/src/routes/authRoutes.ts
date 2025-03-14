@@ -7,7 +7,7 @@ authRouter.post('/register', register);
 
 authRouter.post('/login', login);
 
-authRouter.post('/logout', logout);
+authRouter.delete('/logout', logout);
 
 authRouter.post('/forgot-password', forgotPassword);
 
