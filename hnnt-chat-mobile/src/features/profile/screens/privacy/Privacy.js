@@ -17,17 +17,21 @@ export default function Privacy() {
         {
             title: 'Me',
             items: [
-                { icon: 'calendar-outline', title: 'Birthday', screen: 'PhoneNumberScreen' },
-                { icon: 'account-circle-outline', title: 'Show online status', screen: 'EmailScreen' },
+                { icon: 'calendar-outline', title: 'Birthday', screen: 'BLock messages' },
+                { icon: 'account-circle-outline', title: 'Show online status', screen: 'BLock messages' },
             ],
         },
         {
             title: 'Messages and calls',
             items: [
-                { icon: 'account-eye-outline', title: 'Show "Seen" status', screen: 'SecurityCheckupScreen' },
-                { icon: 'message-text-outline', title: 'Allow messaging', screen: 'LockZaloScreen' },
-                { icon: 'phone', title: 'Allow calling', screen: 'LockZaloScreen' },
+                { icon: 'account-eye-outline', title: 'Show "Seen" status', screen: 'BLock messages' },
+                { icon: 'message-text-outline', title: 'Allow messaging', screen: 'BLock messages' },
+                { icon: 'phone', title: 'Allow calling', screen: 'BLock messages' },
             ],
+        },
+        {
+            title: 'Timeline',
+            items: [{ icon: 'block-helper', title: 'Block', screen: 'BLock messages' }],
         },
     ];
 

@@ -18,6 +18,7 @@ import EditPersonalInformation from '../../features/profile/screens/personal-inf
 import PhoneNumber from '../../features/profile/screens/account-and-security/phone-number/PhoneNumber';
 import AddEmail from '../../features/profile/screens/account-and-security/email/AddEmail';
 import ChangePassword from '../../features/profile/screens/account-and-security/password/ChangePassword';
+import BlockMessage from '../../features/profile/screens/privacy/block-message/BlockMessage';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -46,6 +47,7 @@ export default function AppNavigator() {
                 <Stack.Screen name="Change phone number" component={PhoneNumber} />
                 <Stack.Screen name="Add your email" component={AddEmail} />
                 <Stack.Screen name="Change password" component={ChangePassword} />
+                <Stack.Screen name="BLock messages" component={BlockMessage} />
             </Stack.Navigator>
         </NavigationContainer>
     );
