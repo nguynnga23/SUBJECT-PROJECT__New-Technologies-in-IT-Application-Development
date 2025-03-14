@@ -31,6 +31,10 @@ const chatData = {
     { id: 202, sender: "@nganguyen", name: "Nga Nguyễn", message: "Chào bạn!", time: "18:56" },
     { id: 203, sender: "@nhietpham", name: "Nhiệt Phạm", message: "Bạn đã hoàn thành task chưa?", time: "18:57", isMe: true },
     { id: 204, sender: "@nganguten", name: "Nga Nguyễn", message: "Tôi đang làm, sắp xong rồi!", time: "19:00" },
+    { id: 205, sender: "@nhietpham", name: "Nhiệt Phạm", message: "Chào Nga!", time: "19:55", isMe: true },
+    { id: 206, sender: "@nganguyen", name: "Nga Nguyễn", message: "Chào bạn!", time: "20:56" },
+    { id: 207, sender: "@nhietpham", name: "Nhiệt Phạm", message: "Bạn đã hoàn thành task chưa?", time: "21:57", isMe: true },
+    { id: 208, sender: "@nganguten", name: "Nga Nguyễn", message: "Tôi đang làm, sắp xong rồi!", time: "22:00" }
   ],
   reaction: [
     { id: 1, reaction: "❤️", messageId: 204, userId: "@nhietpham", sum: 1 },
@@ -288,7 +292,7 @@ const styles = StyleSheet.create({
 
   recipientName: { fontSize: 18, fontWeight: "bold", color: "white" },
 
-  messageContainer: { padding: 10, marginVertical: 5, borderRadius: 5, maxWidth: "75%" },
+  messageContainer: { padding: 10, marginVertical: 5, borderRadius: 5, maxWidth: "75%", paddingRight: 30 },
 
   myMessage: { backgroundColor: "#aae7f3", alignSelf: "flex-end", marginRight: 10 },
 
