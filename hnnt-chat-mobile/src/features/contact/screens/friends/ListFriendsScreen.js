@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 
 // Sample data for the friends list
 const allFriends = [
-    { id: '1', name: 'Nguyễn Lê Nhật Huy', avatar: 'https://i.pravatar.cc/150?img=13' },
+    { id: '1', name: 'Nguyễn Lê Nhật Huy', avatar: 'https://i.pravatar.cc/150?img=20' },
     { id: '2', name: 'Nguyễn Thị Nga', avatar: 'https://i.pravatar.cc/150?img=10' },
     { id: '3', name: 'Nguyễn Thiên Tứ', avatar: 'https://i.pravatar.cc/150?img=14' },
     { id: '4', name: 'Thanh Nhiệt', avatar: 'https://i.pravatar.cc/150?img=12' },
