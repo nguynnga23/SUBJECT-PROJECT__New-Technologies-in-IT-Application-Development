@@ -12,7 +12,7 @@ export default function Header({ iconName1, iconName2, onPress1, onPress2, showM
             <TouchableOpacity style={{ paddingRight: 15 }}>
                 <AntDesign name="search1" size={25} color="white" />
             </TouchableOpacity>
-            <View style={{ width: '60%' }}>
+            <View style={{ width: '55%' }}>
                 <TextInput style={styles.searchInput} placeholder="Search" placeholderTextColor="white" />
             </View>
 
@@ -92,12 +92,12 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 10,
         marginTop: 60,
-        marginLeft: 6,
-        elevation: 10, // Bóng đổ trên Android
+        marginLeft: 0,
+        elevation: 100, // Bóng đổ trên Android
         shadowColor: '#000', // Màu bóng trên iOS
         shadowOffset: { width: 0, height: 4 }, // Đổ bóng phía dưới
         shadowOpacity: 0.3, // Độ mờ của bóng
-        shadowRadius: 5, // Độ lan tỏa của bóng
+        shadowRadius: 5, // Độ lan tỏa của 0bóng
         zIndex: 1000, // Đảm bảo hiển thị trên top
         position: 'absolute', // Định vị tuyệt đối
         right: 10, // Điều chỉnh vị trí theo chiều ngang

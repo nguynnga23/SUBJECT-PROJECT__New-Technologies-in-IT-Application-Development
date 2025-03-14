@@ -49,8 +49,6 @@ export default function AddFriendScreen() {
                             layout="second"
                             onChangeText={(text) => setPhoneNumber(text)}
                             onChangeFormattedText={(text) => setFormattedPhoneNumber(text)}
-                            withDarkTheme
-                            withShadow
                         />
                     </View>
                     <TouchableOpacity style={styles.arrowRightButton} onPress={handleSubmitPhoneNumber}>
