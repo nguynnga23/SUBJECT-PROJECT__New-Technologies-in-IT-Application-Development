@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Image, TouchableOpacity, ScrollView, Linking, StyleSheet, Modal, TextInput, Button } from "react-native";
+import { View, Text, Image, TouchableOpacity, ScrollView, Linking, StyleSheet, Modal, TextInput, Button, TouchableWithoutFeedback } from "react-native";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { handleBlock, handleReport, toggleMute } from "../../services/privateChat/PrivateChatInfoService";
 
 export default function PrivateChatInfoScreen() {
     const navigation = useNavigation();
@@ -13,23 +14,8 @@ export default function PrivateChatInfoScreen() {
     const [reportVisible, setReportVisible] = useState(false);
     const [blockVisible, setBlockVisible] = useState(false);
     const [reportReason, setReportReason] = useState("");
+    const [pinVisible, setPinVisible] = useState(false);
 
-    const handleReport = () => {
-        if (reportReason === "") {
-            return;
-        }
-        console.log("Report reason:", reportReason);
-        setReportVisible(false);
-    };
-
-    const handleBlock = () => {
-        console.log("Confirmed blocking user");
-        setBlockVisible(false);
-    };
-
-    const toggleMute = () => {
-        setIsMuted(!isMuted);
-    };
     return (
         <SafeAreaView style={styles.container}>
             <SafeAreaProvider>
@@ -55,7 +41,7 @@ export default function PrivateChatInfoScreen() {
                         <ActionButton icon="search" label="Find messages" />
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.actionButton} onPress={toggleMute}>
+                    <TouchableOpacity style={styles.actionButton} onPress={() => toggleMute(isMuted, setIsMuted)}>
                         <Ionicons name={isMuted ? "notifications" : "notifications-off"} size={24} color="black" />
                         <Text style={styles.actionText}>{isMuted ? "Unmute" : "Mute"}</Text>
                     </TouchableOpacity>
@@ -64,6 +50,9 @@ export default function PrivateChatInfoScreen() {
                 {/* Other Options */}
                 <TouchableOpacity>
                     <OptionItem label="Image, file, link" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setPinVisible(true)}>
+                    <OptionItem label="Pin messenge" />
                 </TouchableOpacity>
 
                 {/* Danger Zone */}
@@ -93,13 +82,13 @@ export default function PrivateChatInfoScreen() {
                             />
                             <View style={styles.modalActions}>
                                 <Button title="Cancel" onPress={() => setReportVisible(false)} />
-                                <Button title="Submit" onPress={handleReport} />
+                                <Button title="Submit" onPress={() => { handleReport(reportReason, setReportReason); setReportVisible(false) }} />
                             </View>
                         </View>
                     </View>
                 </Modal>
 
-                {/* Leave Group Modal */}
+                {/* Block modal */}
                 <Modal visible={blockVisible} transparent animationType="slide">
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
@@ -107,10 +96,22 @@ export default function PrivateChatInfoScreen() {
                             <Text>Are you sure you want to block this user?</Text>
                             <View style={styles.modalActions}>
                                 <Button title="Cancel" onPress={() => setBlockVisible(false)} />
-                                <Button title="Yes" color="red" onPress={handleBlock} />
+                                <Button title="Yes" color="red" onPress={() => handleBlock(setBlockVisible, navigation)} />
                             </View>
                         </View>
                     </View>
+                </Modal>
+
+                {/* Pin messenge modal */}
+                <Modal visible={pinVisible} transparent animationType="slide">
+                    <TouchableWithoutFeedback onPress={() => setPinVisible(false)}>
+                        <View style={styles.modalContainer}>
+                            <View style={styles.modalContent}>
+                                <Text style={styles.modalTitle}>Pin messenge</Text>
+                                <Text>...</Text>
+                            </View>
+                        </View>
+                    </TouchableWithoutFeedback>
                 </Modal>
             </SafeAreaProvider>
         </SafeAreaView>
@@ -143,7 +144,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#f2f2f2",
     },
     header: {
-        backgroundColor: "#0084ff",
+        backgroundColor: "#005ae0",
         padding: 15,
         flexDirection: "row",
         alignItems: "center",
