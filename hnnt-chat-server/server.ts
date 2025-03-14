@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import pool from './db';
 import friendRouterer from './src/routes/friendRoutes';
+import authRouter from './src/routes/authRoutes';
 
 // Load environment variables
 dotenv.config();
@@ -31,6 +32,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/friends', friendRouterer);
+app.use('/api/auth', authRouter);
 
 app.listen(PORT, () => {
     console.log(`Server đang chạy trên cổng ${PORT}`);
