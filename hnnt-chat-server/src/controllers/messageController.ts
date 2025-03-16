@@ -1,0 +1,74 @@
+import { Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+export const GetMessageOfChat = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { chatId, userId } = req.params;
+
+        // Kiểm tra xem user có trong chat không
+        const participant = await prisma.chatParticipant.findFirst({
+            where: { chatId, accountId: userId },
+        });
+        if (!participant) {
+            res.status(403).json({ message: 'Bạn không có quyền truy cập chat này.' });
+            return;
+        }
+
+        // Lấy tin nhắn từ chat
+        const messages = await prisma.message.findMany({
+            where: {
+                chatId,
+                OR: [
+                    { deletedBy: { equals: null } }, // Nếu deletedBy là null (không có ai xóa)
+                    { NOT: { deletedBy: { has: userId } } }, // Hoặc không chứa userId
+                ],
+            },
+            include: {
+                sender: { select: { id: true, name: true, avatar: true } },
+                reactions: true,
+            },
+            orderBy: { time: 'asc' },
+        });
+        console.log(messages);
+        res.json(messages);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server.' });
+    }
+};
+
+export const SendMessage = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { chatId } = req.params;
+        const { senderId, content, type = 'text' } = req.body;
+
+        // Kiểm tra xem user có trong chat không
+        const participant = await prisma.chatParticipant.findFirst({
+            where: { chatId, accountId: senderId },
+        });
+        if (!participant) {
+            res.status(403).json({ message: 'Bạn không có quyền gửi tin nhắn trong chat này.' });
+            return;
+        }
+
+        // Tạo tin nhắn mới
+        const message = await prisma.message.create({
+            data: {
+                chatId,
+                senderId,
+                content,
+                type,
+            },
+            include: {
+                sender: { select: { id: true, name: true, avatar: true } },
+            },
+        });
+
+        res.status(201).json(message);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server.' });
+    }
+};

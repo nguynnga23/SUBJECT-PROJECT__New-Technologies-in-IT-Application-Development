@@ -2,7 +2,9 @@ import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import pool from './db';
-import friendRouterer from './src/routes/friendRoutes';
+import friendRouter from './src/routes/friendRoutes';
+import chatRouter from './src/routes/chatRoutes';
+import messageRouter from './src/routes/messageRoutes';
 
 // Load environment variables
 dotenv.config();
@@ -30,7 +32,9 @@ app.use(express.urlencoded({ extended: true }));
 //     });
 
 // Routes
-app.use('/api/friends', friendRouterer);
+app.use('/api/friends', friendRouter);
+app.use('/api/chats', chatRouter);
+app.use('/api/messages', messageRouter);
 
 app.listen(PORT, () => {
     console.log(`Server đang chạy trên cổng ${PORT}`);
