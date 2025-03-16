@@ -21,7 +21,7 @@ function Messaging() {
                         showRightBar || showRightBarSearch ? 'w-2/4' : 'w-3/4'
                     }`}
                 >
-                    {!activeChat?.delete.includes(userId) && activeChat ? (
+                    {activeChat ? (
                         <TabMessage />
                     ) : (
                         <div className="flex-1 flex items-center justify-center text-gray-500 dark:text-white">

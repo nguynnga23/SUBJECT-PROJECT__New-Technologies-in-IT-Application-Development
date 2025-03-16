@@ -4,7 +4,7 @@ import { AuthRequest } from '../types/authRequest';
 
 const prisma = new PrismaClient();
 
-export const getChatOfUser = async (req: AuthRequest, res: Response): Promise<void> => {
+export const GetChatOfUser = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const userId = req.user.id;
 

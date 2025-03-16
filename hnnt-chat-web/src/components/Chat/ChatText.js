@@ -21,20 +21,20 @@ function ChatText({ index, userId, message, reactions, showName, replyMessage })
             key={index}
             className={`relative text-[14px] border p-2 dark:text-gray-200 cursor-pointer ${
                 reactions.length > 0 ? 'pb-8' : 'pb-6'
-            } rounded-lg w-fit mb-2 max-w-[500px] min-w-[60px] break-all ${
-                message.sender === userId
+            } rounded-[7px] w-fit mb-2 max-w-[500px] min-w-[60px] break-all ${
+                message.sender.id === userId
                     ? 'bg-blue-100 dark:bg-[#20344c] border-blue-200 dark:border-blue-500'
                     : 'bg-white dark:bg-[#20344c] border-gray-200 dark:border-gray-800'
             }`}
         >
             {showName && (
-                <p className="text-[10px] text-gray-400 pb-[2px]">{message?.sender !== userId && message?.name}</p>
+                <p className="text-[10px] text-gray-400 pb-[2px]">{message?.sender.id !== userId && message?.name}</p>
             )}
             <div>
                 {replyMessage && (
                     <div
                         className={`mb-1 border-l-[4px] border-blue-500 ${
-                            message.sender === userId ? 'bg-blue-200' : 'bg-gray-300'
+                            message.sender.id === userId ? 'bg-blue-200' : 'bg-gray-300'
                         } dark:bg-gray-700  p-2 rounded-[3px]`}
                     >
                         <p className="text-[12px] font-medium text-gray-600 dark:text-gray-300 mb-1">
@@ -72,7 +72,7 @@ function ChatText({ index, userId, message, reactions, showName, replyMessage })
                     reactions.length > 0 ? 'bottom-[16px]' : 'bottom-[5px]'
                 } text-gray-500 text-[10px]`}
             >
-                {message.time}
+                {new Date(message.time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
             </p>
         </div>
     );

@@ -22,7 +22,7 @@ function TabChatInfoGroup({ setActiveMessageTab, group }) {
                 <p className="font-medium">Thành viên</p>
             </div>
             <div>
-                {group?.members?.map((g, index) => (
+                {group?.participants?.map((g, index) => (
                     <div
                         className="relative flex item-center p-3 hover:bg-gray-100 hover:dark:bg-gray-700 cursor-pointer dark:text-gray-300"
                         key={index}
@@ -46,7 +46,7 @@ function TabChatInfoGroup({ setActiveMessageTab, group }) {
                                 alt="avatar"
                                 className="w-[45px] h-[45px] rounded-full border mr-3 object-cover"
                             />
-                            {g.id === group?.leader && (
+                            {g.role === 'LEADER' && (
                                 <RiKey2Line
                                     size={15}
                                     color="yellow"
@@ -61,30 +61,33 @@ function TabChatInfoGroup({ setActiveMessageTab, group }) {
                             ) : (
                                 <h3 className="font-medium text-xs text-lg mt-1 max-w-[270px] truncate">{g.name}</h3>
                             )}
-                            {g.id === group?.leader && (
+                            {g.role === 'LEADER' && (
                                 <p className=" text-xs text-lg mt-1 max-w-[270px] truncate">Trưởng nhóm</p>
                             )}
                         </div>
                         <div className="absolute top-[5px] right-[0px]">
-                            {hoveredMember === index && userId === group.leader && (
-                                <div className="relative ">
-                                    <FiMoreHorizontal
-                                        size={13}
-                                        className="m-2 text-gray-500 hover:bg-blue-200 rounded-[2px]"
-                                        onClick={() => setShowPopup(true)}
-                                    />
-                                    {showPopup && hoveredMember === index && (
-                                        <PopupMemberManage
-                                            setShowPopup={setShowPopup}
-                                            setHoveredMember={setHoveredMember}
-                                            userActive={userActive}
-                                            leader={g.id === group?.leader}
-                                            member={g}
-                                            group={group}
-                                        />
+                            {hoveredMember === index &&
+                                userId === g.accountId &&
+                                g.role ===
+                                    'LEADER'(
+                                        <div className="relative ">
+                                            <FiMoreHorizontal
+                                                size={13}
+                                                className="m-2 text-gray-500 hover:bg-blue-200 rounded-[2px]"
+                                                onClick={() => setShowPopup(true)}
+                                            />
+                                            {showPopup && hoveredMember === index && (
+                                                <PopupMemberManage
+                                                    setShowPopup={setShowPopup}
+                                                    setHoveredMember={setHoveredMember}
+                                                    userActive={userActive}
+                                                    leader={userId === g.accountId && g.role === 'LEADER'}
+                                                    member={g}
+                                                    group={group}
+                                                />
+                                            )}
+                                        </div>,
                                     )}
-                                </div>
-                            )}
                         </div>
                     </div>
                 ))}

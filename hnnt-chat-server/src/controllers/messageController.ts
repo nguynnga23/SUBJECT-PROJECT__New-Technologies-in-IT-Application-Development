@@ -33,7 +33,6 @@ export const GetMessageOfChat = async (req: AuthRequest, res: Response): Promise
             },
             orderBy: { time: 'asc' },
         });
-        console.log(messages);
         res.json(messages);
     } catch (error) {
         console.error(error);

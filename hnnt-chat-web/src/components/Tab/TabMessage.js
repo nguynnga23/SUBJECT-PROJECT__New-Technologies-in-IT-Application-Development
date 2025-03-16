@@ -25,11 +25,10 @@ import { FaRegFilePowerpoint } from 'react-icons/fa';
 
 import PopupCategory from '../Popup/PopupCategory';
 
-import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
     setShowOrOffRightBar,
     setShowOrOffRightBarSearch,
-    sendMessage,
     openEmojiTab,
     sendEmoji,
 } from '../../redux/slices/chatSlice';
@@ -45,6 +44,7 @@ import { FiMoreHorizontal } from 'react-icons/fi';
 import PopupReacttion from '../Popup/PopupReaction';
 import PopupReactionChat from '../Popup/PopupReactionChat';
 import PopupMenuForChat from '../Popup/PopupMenuForChat';
+import { getMessage, sendMessage } from '../../screens/Messaging/api';
 
 function TabMessage() {
     const [message, setMessage] = useState('');
@@ -52,10 +52,8 @@ function TabMessage() {
     const userActive = useSelector((state) => state.auth.userActive);
     const userId = userActive.id;
 
-    const activeChat = useSelector(
-        (state) => state.chat.data.find((chat) => chat.id === state.chat.activeChat?.id),
-        shallowEqual,
-    );
+    const activeChat = useSelector((state) => state.chat.activeChat);
+    const chatId = activeChat.id;
 
     const dispatch = useDispatch();
     const showRightBar = useSelector((state) => state.chat.showRightBar);
@@ -75,6 +73,22 @@ function TabMessage() {
     const [openReactionChat, setOpenReactionChat] = useState(false);
 
     const [replyMessage, setReplyMessage] = useState(null);
+
+    const [data, setData] = useState([]);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchMessages = async () => {
+            try {
+                const chats = await getMessage(chatId);
+                setData(chats);
+            } catch (err) {
+                setError(err.message);
+            }
+        };
+
+        fetchMessages(); // Gọi hàm async bên trong useEffect
+    }, [chatId, data]);
 
     const MessageComponent = {
         text: ChatText,
@@ -110,21 +124,9 @@ function TabMessage() {
         }
     }, [message]);
 
-    const handleSendMessage = () => {
+    const handleSendMessage = async () => {
         if (message.trim() !== '') {
-            const currentTime = new Date().toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-            });
-            dispatch(
-                sendMessage({
-                    chatId: activeChat.id,
-                    content: message,
-                    time: currentTime,
-                    type: 'text',
-                    reply: replyMessage,
-                }),
-            );
+            await sendMessage(chatId, message, 'text');
             setMessage('');
             setReplyMessage(null);
         }
@@ -176,13 +178,20 @@ function TabMessage() {
             <div className="p-2 border-b dark:border-b-black flex justify-between items-center h-[62px] min-w-[600px] dark:bg-gray-800">
                 <div className="flex justify-center ">
                     <img
-                        src={activeChat?.avatar} // Thay bằng avatar thật
+                        src={
+                            activeChat?.isGroup
+                                ? activeChat?.avatar
+                                : activeChat?.participants?.find((user) => user.accountId !== userId)?.account.avatar
+                        } // Thay bằng avatar thật
                         alt="avatar"
                         className="w-[45px] h-[45px] rounded-full border mr-2 object-cover"
                     />
                     <div>
                         <h3 className="font-medium text-base text-lg max-h-[28px] dark:text-gray-300">
-                            {activeChat?.name}
+                            {activeChat?.isGroup
+                                ? activeChat?.name
+                                : activeChat?.participants?.find((user) => user.accountId !== userId)?.account?.name ||
+                                  'Người dùng'}
                         </h3>
                         <div className="flex items-center">
                             {activeChat?.members && (
@@ -191,13 +200,13 @@ function TabMessage() {
                                     <p className="text-[10px] mr-1">{activeChat?.members.length} thành viên |</p>
                                 </div>
                             )}
-                            {activeChat?.category.name ? (
+                            {activeChat?.category?.name ? (
                                 <div className="flex items-center">
                                     <MdLabel
                                         className={`cursor-pointer mr-1 ${activeChat?.category.color}`}
                                         onClick={() => setIsOpenCategory(!isOpenCategory)}
                                     />
-                                    <p className="text-[10px] dark:text-gray-300">{activeChat?.category.name}</p>
+                                    <p className="text-[10px] dark:text-gray-300">{activeChat?.category?.name}</p>
                                 </div>
                             ) : (
                                 <MdLabelOutline
@@ -210,7 +219,7 @@ function TabMessage() {
                     {isOpenCategory && <PopupCategory isOpen={isOpenCategory} setIsOpen={setIsOpenCategory} />}
                 </div>
                 <div className="p-2 flex dark:text-gray-300">
-                    {activeChat?.group ? (
+                    {activeChat?.isGroup ? (
                         <div className="flex items-center">
                             <AiOutlineUsergroupAdd
                                 size={26}
@@ -263,20 +272,25 @@ function TabMessage() {
                 </div>
             </div>
             <div className="flex-1 p-5 overflow-auto bg-gray-200 dark:bg-[#16191d]" ref={chatContainerRef}>
-                {activeChat?.messages.map((message, index) => {
-                    const isDeleted = message.delete.some((item) => item.id === userId);
+                {data.map((message, index) => {
+                    const isDeleted = message.deletedBy.some((item) => item.id === userId);
                     const Component = message.destroy ? ChatDestroy : MessageComponent[message.type];
                     // Kiểm tra nếu tin nhắn trước đó bị xóa hoặc có sender khác
                     const prevMessage = activeChat?.messages[index - 1];
                     const prevMessageDeleted = prevMessage?.delete?.some((item) => item.id === userId);
                     const showAvatar =
-                        index === 0 || !prevMessage || prevMessage.sender !== message.sender || prevMessageDeleted;
-                    const position = message.sender === userId ? 'right' : 'left';
+                        index === 0 ||
+                        !prevMessage ||
+                        prevMessage.sender.id !== message.sender.id ||
+                        prevMessageDeleted;
+                    const position = message.sender.id === userId ? 'right' : 'left';
                     const sumReaction = message.reactions.reduce((total, reaction) => total + reaction.sum, 0);
 
                     return (
                         <div
-                            className={`relative flex ${message.sender === userId ? 'justify-end' : 'justify-start'}`}
+                            className={`relative flex ${
+                                message.sender.id === userId ? 'justify-end' : 'justify-start'
+                            }`}
                             key={index}
                             onMouseEnter={() => {
                                 if (isPopupOpenIndex === null) setHoveredMessage(index);
@@ -290,9 +304,9 @@ function TabMessage() {
                             {!isDeleted && Component && (
                                 <div className="flex ">
                                     <div className="w-[45px] h-[45px] mr-3 flex-shrink-0">
-                                        {message.sender !== userId && showAvatar && (
+                                        {message.sender.id !== userId && showAvatar && (
                                             <img
-                                                src={message.avatar}
+                                                src={message.sender.avatar}
                                                 alt="avatar"
                                                 className="w-full h-full rounded-full border object-cover"
                                             />
@@ -302,7 +316,7 @@ function TabMessage() {
                                     <div className="flex relative ">
                                         {hoveredMessage === index &&
                                             isPopupOpenIndex === null &&
-                                            message.sender === userActive.id && (
+                                            message.sender.id === userActive.id && (
                                                 <div className="flex">
                                                     <button
                                                         className={`absolute left-[-25px] bottom-[30px] dark:bg-gray-700  p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 mr-1 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
@@ -391,7 +405,7 @@ function TabMessage() {
 
                                         {hoveredMessage === index &&
                                             isPopupOpenIndex === null &&
-                                            message.sender !== userActive.id && (
+                                            message.sender.id !== userActive.id && (
                                                 <div className="relative flex ">
                                                     <button
                                                         className={`absolute dark:bg-gray-700 right-[-25px] bottom-[30px] p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}

@@ -40,7 +40,7 @@ function TabChat() {
         };
 
         fetchChats(); // Gọi hàm async bên trong useEffect
-    }, []);
+    }, [data]);
     const dispatch = useDispatch();
     const priorityChatsList = data.filter(
         (chat) =>
@@ -166,36 +166,32 @@ function TabChat() {
                                             {chat.category?.name && (
                                                 <MdLabel className={`text-[18px] mr-1 ${chat.category?.color}`} />
                                             )}
-                                            {chat?.sender === userId ? (
-                                                <span className="mr-1">You: </span>
+                                            {chat?.messages[0]?.senderId === userId ? (
+                                                <span className="mr-1">Bạn: </span>
                                             ) : (
-                                                <span className="mr-1">
-                                                    {chat.isGroup
-                                                        ? chat.name
-                                                        : chat.participants?.find((user) => user.accountId !== userId)
-                                                              ?.account.name || 'Người dùng'}
-                                                    :
-                                                </span>
+                                                <span className="mr-1">{chat?.messages[0]?.sender.name}:</span>
                                             )}
-                                            {chat?.type === 'gif' ? (
+                                            {chat?.messages[0]?.type === 'gif' ? (
                                                 <span className="flex items-center">
                                                     <MdOutlineGifBox size={15} className="mr-[4px]" /> [GIF]
                                                 </span>
-                                            ) : chat?.type === 'sticker' ? (
+                                            ) : chat?.messages[0]?.type === 'sticker' ? (
                                                 <span className="flex items-center">
                                                     <LuSticker size={15} className="mr-[4px]" /> [Sticker]
                                                 </span>
-                                            ) : chat?.type === 'image' ? (
+                                            ) : chat?.messages[0]?.type === 'image' ? (
                                                 <span className="flex items-center">
                                                     <IoImageOutline size={15} className="mr-[4px]" />
                                                     [Hình ảnh]
                                                 </span>
-                                            ) : chat?.type === 'file' ? (
+                                            ) : chat?.messages[0]?.type === 'file' ? (
                                                 <span className="flex items-center">
                                                     <MdFilePresent size={15} className="mr-[4px]" /> {chat?.fileName}
                                                 </span>
-                                            ) : chat?.content ? (
-                                                <span className="max-w-[220px] truncate">{chat?.content}</span>
+                                            ) : chat?.messages[0]?.type == 'text' ? (
+                                                <span className="max-w-[220px] truncate">
+                                                    {chat?.messages[0].content}
+                                                </span>
                                             ) : (
                                                 <span className="max-w-[220px] truncate italic">
                                                     Hãy bắt đầu trò chuyện
