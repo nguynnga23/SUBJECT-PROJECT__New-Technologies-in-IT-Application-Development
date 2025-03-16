@@ -5,13 +5,13 @@ import { IoSettingsOutline } from 'react-icons/io5';
 import { IoMdCloudOutline } from 'react-icons/io';
 import { CiShare1 } from 'react-icons/ci';
 
-import { setChats } from '../../redux/slices/chatSlice';
+// import { setChats } from '../../redux/slices/chatSlice';
 import Messaging from '../Messaging';
 import Contacts from '../Contacts';
 import Settings from '../Settings';
 
-import { useDispatch, useSelector } from 'react-redux';
-import groups from '../../sample_data/listGroup';
+import { useSelector } from 'react-redux';
+// import groups from '../../sample_data/listGroup';
 import { useNavigate } from 'react-router-dom';
 
 import Modal from '../../components/Modal';
@@ -20,21 +20,13 @@ export default function Home() {
     const navigate = useNavigate();
     const [selectedScreen, setSelectedScreen] = useState('messaging');
     const [settingScreen, setSettingScreen] = useState(false);
-    const dispatch = useDispatch();
+    // const dispatch = useDispatch();
     const userActive = useSelector((state) => state.auth.userActive);
     useEffect(() => {
-        if (userActive && userActive.id !== null) {
-            dispatch(
-                setChats({
-                    userActive: userActive,
-                    chats: userActive?.chats,
-                    groups: groups.filter((g) => g.members?.some((m) => m?.id === userActive?.id)),
-                }),
-            );
-        } else {
+        if (!userActive) {
             navigate('/');
         }
-    }, [userActive, dispatch, navigate]);
+    }, [userActive, navigate]);
 
     // open modal
     const [isOpenModel, setIsOpenModel] = useState(false);
