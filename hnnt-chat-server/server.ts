@@ -5,7 +5,7 @@ import pool from './db';
 import friendRouter from './src/routes/friendRoutes';
 import chatRouter from './src/routes/chatRoutes';
 import messageRouter from './src/routes/messageRoutes';
-import loginRouter from './src/routes/loginRoutes';
+import authRouter from './src/routes/authRoutes';
 
 // Load environment variables
 dotenv.config();
@@ -33,10 +33,16 @@ app.use(express.urlencoded({ extended: true }));
 //     });
 
 // Routes
+app.use(
+    cors({
+        origin: 'http://localhost:3000', // Frontend chạy ở cổng 3000
+        credentials: true, // Cho phép gửi cookie/token
+    }),
+);
 app.use('/api/friends', friendRouter);
 app.use('/api/chats', chatRouter);
 app.use('/api/messages', messageRouter);
-app.use('', loginRouter);
+app.use('/api/auth', authRouter);
 
 app.listen(PORT, () => {
     console.log(`Server đang chạy trên cổng ${PORT}`);

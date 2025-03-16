@@ -1,11 +1,13 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { AuthRequest } from '../types/authRequest';
 
 const prisma = new PrismaClient();
 
-export const GetMessageOfChat = async (req: Request, res: Response): Promise<void> => {
+export const GetMessageOfChat = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { chatId, userId } = req.params;
+        const userId = req.user?.id;
+        const { chatId } = req.params;
 
         // Kiểm tra xem user có trong chat không
         const participant = await prisma.chatParticipant.findFirst({
@@ -39,10 +41,11 @@ export const GetMessageOfChat = async (req: Request, res: Response): Promise<voi
     }
 };
 
-export const SendMessage = async (req: Request, res: Response): Promise<void> => {
+export const SendMessage = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const { chatId } = req.params;
-        const { senderId, content, type = 'text' } = req.body;
+        const senderId = req.user.id;
+        const { content, type = 'text' } = req.body;
 
         // Kiểm tra xem user có trong chat không
         const participant = await prisma.chatParticipant.findFirst({

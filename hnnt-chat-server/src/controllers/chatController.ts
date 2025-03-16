@@ -1,11 +1,17 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { AuthRequest } from '../types/authRequest';
 
 const prisma = new PrismaClient();
 
-export const getChatOfUser = async (req: Request, res: Response): Promise<void> => {
+export const getChatOfUser = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { userId } = req.params;
+        const userId = req.user.id;
+
+        if (!userId) {
+            res.status(401).json({ message: 'Unauthorized - No user ID found' });
+            return;
+        }
 
         // Lấy danh sách các chat mà user tham gia
         const chats = await prisma.chat.findMany({
