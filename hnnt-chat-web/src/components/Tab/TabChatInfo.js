@@ -17,9 +17,10 @@ import {
     setShowOrOffRightBar,
     setShowOrOffRightBarSearch,
 } from '../../redux/slices/chatSlice';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Archive from '../Archive/Archive';
 import PopupAddGroup from '../Popup/PopupAddGroup';
+import { getMessage } from '../../screens/Messaging/api';
 
 function TabChatInfo({ setActiveMessageTab }) {
     const userActive = useSelector((state) => state.auth.userActive);
@@ -27,6 +28,9 @@ function TabChatInfo({ setActiveMessageTab }) {
     const activeChat = useSelector((state) => state.chat.activeChat);
     const chatId = activeChat?.id;
     const [addGroupButton, setAddGroupButton] = useState(false);
+
+    const [data, setData] = useState([]);
+    const [error, setError] = useState([]);
 
     const [memberOpen, setMemberOpen] = useState(true);
     const [fileOpen, setFileOpen] = useState(true);
@@ -48,6 +52,19 @@ function TabChatInfo({ setActiveMessageTab }) {
         dispatch(setShowOrOffRightBar(false));
         dispatch(setShowOrOffRightBarSearch(false));
     };
+
+    useEffect(() => {
+        const fetchMessages = async () => {
+            try {
+                const chats = await getMessage(chatId);
+                setData(chats);
+            } catch (err) {
+                setError(err.message);
+            }
+        };
+
+        fetchMessages();
+    }, [chatId, data]);
 
     return (
         <div className="overflow-auto dark:text-gray-300">
@@ -151,7 +168,7 @@ function TabChatInfo({ setActiveMessageTab }) {
                         title="Thành viên"
                         isOpen={memberOpen}
                         toggleOpen={() => setMemberOpen(!memberOpen)}
-                        messages={activeChat?.messages}
+                        messages={data}
                         type="member"
                         group={activeChat?.participants}
                         setActiveMessageTab={setActiveMessageTab}
@@ -161,21 +178,21 @@ function TabChatInfo({ setActiveMessageTab }) {
                     title="Ảnh"
                     isOpen={imageOpen}
                     toggleOpen={() => setImageOpen(!imageOpen)}
-                    messages={activeChat?.messages}
+                    messages={data}
                     type="image"
                 />
                 <Archive
                     title="File"
                     isOpen={fileOpen}
                     toggleOpen={() => setFileOpen(!fileOpen)}
-                    messages={activeChat?.messages}
+                    messages={data}
                     type="file"
                 />
                 <Archive
                     title="Link"
                     isOpen={linkOpen}
                     toggleOpen={() => setLinkOpen(!linkOpen)}
-                    messages={activeChat?.messages}
+                    messages={data}
                     type="link"
                 />
             </div>

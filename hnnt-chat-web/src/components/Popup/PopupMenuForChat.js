@@ -1,27 +1,24 @@
 import { useEffect, useRef } from 'react';
 import { MdContentCopy, MdPushPin, MdDelete } from 'react-icons/md';
 import { IoReload } from 'react-icons/io5';
-import { useDispatch, useSelector } from 'react-redux';
-import { updateMessageStatus } from '../../redux/slices/chatSlice';
-import { deleteMessage } from '../../screens/Messaging/api';
+import { useSelector } from 'react-redux';
+import { deleteMessage, destroyMessage } from '../../screens/Messaging/api';
 
 function PopupMenuForChat({ setIsPopupOpen, position, message }) {
     const popupRef = useRef(null);
-    const dispatch = useDispatch();
     const chat = useSelector((state) => state.chat.activeChat);
     const userActive = useSelector((state) => state.auth.userActive);
-    const userId = userActive.id;
-    const handleToggleStatus = (statusType, messageId) => {
-        if (!chat) return;
-        dispatch(updateMessageStatus({ chatId: chat.id, messageId, statusType, userId }));
-
-        setIsPopupOpen(null);
-    };
 
     const handleDeleteMessage = async (messageId) => {
         if (!chat) return;
         await deleteMessage(messageId);
 
+        setIsPopupOpen(null);
+    };
+
+    const handleDestroyMessage = async (messageId) => {
+        if (!chat) return;
+        await destroyMessage(messageId);
         setIsPopupOpen(null);
     };
 
@@ -81,7 +78,7 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
                 {position === 'right' && !message?.destroy && (
                     <li
                         className="flex items-center px-4 py-2 text-red-500 hover:bg-gray-100 cursor-pointer"
-                        onClick={() => handleToggleStatus('destroy', message?.id)}
+                        onClick={() => handleDestroyMessage(message?.id)}
                     >
                         <IoReload className="mr-3" />
                         Thu hồi
