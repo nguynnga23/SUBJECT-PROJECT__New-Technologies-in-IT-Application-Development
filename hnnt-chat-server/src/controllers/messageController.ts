@@ -112,3 +112,33 @@ export const deleteMessage = async (req: AuthRequest, res: Response): Promise<vo
         res.status(500).json({ message: 'Lỗi server.' });
     }
 };
+
+export const destroyMessage = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const { messageId } = req.params;
+        const message = await prisma.message.findFirst({
+            where: {
+                id: messageId,
+            },
+        });
+
+        if (!message) {
+            res.status(404).json({ message: 'Tin nhắn không tồn tại' });
+            return;
+        }
+
+        // Cập nhật deletedBy để thêm userId
+        await prisma.message.update({
+            where: { id: messageId },
+            data: {
+                destroy: true,
+            },
+        });
+
+        res.status(200).json({ message: 'Đã xóa tin nhắn thành công' });
+        return;
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server.' });
+    }
+};

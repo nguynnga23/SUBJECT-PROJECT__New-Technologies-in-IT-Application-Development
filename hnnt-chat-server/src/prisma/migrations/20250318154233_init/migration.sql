@@ -85,6 +85,7 @@ CREATE TABLE "Message" (
     "time" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "deletedBy" TEXT[],
     "destroy" BOOLEAN NOT NULL DEFAULT false,
+    "pin" BOOLEAN NOT NULL DEFAULT false,
     "fileName" TEXT,
     "fileSize" TEXT,
     "fileType" TEXT,

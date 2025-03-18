@@ -118,6 +118,7 @@ model Message {
   time      DateTime @default(now())
   deletedBy String[] // Danh sách UUID của các user đã xóa tin nhắn này
   destroy   Boolean  @default(false) // Tin nhắn tự hủy?
+  pin   Boolean  @default(false) // Ghim tin nhắn tự hủy?
   
   // Thông tin file đính kèm (chỉ áp dụng khi type = 'file', 'image', 'video')
   fileName   String? // Tên file
