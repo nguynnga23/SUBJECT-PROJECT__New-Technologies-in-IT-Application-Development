@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
 // import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import redis from '../config/redis';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -40,6 +41,27 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         res.status(200).json({ token, user });
     } catch (error) {
         console.error('Login Error:', error);
+        res.status(500).json({ message: 'Lỗi máy chủ' });
+    }
+};
+
+export const logout = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const token = req.header('Authorization')?.replace('Bearer ', '');
+        if (!token) {
+            res.status(400).json({ message: 'Không có token để logout' });
+            return;
+        }
+
+        // Giải mã token để lấy thời gian hết hạn
+        const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
+        const expiryTime = decoded.exp - Math.floor(Date.now() / 1000);
+
+        // Lưu token vào Redis blacklist
+        await redis.setex(`blacklist:${token}`, expiryTime, 'blacklisted');
+
+        res.status(200).json({ message: 'Đăng xuất thành công' });
+    } catch (error) {
         res.status(500).json({ message: 'Lỗi máy chủ' });
     }
 };

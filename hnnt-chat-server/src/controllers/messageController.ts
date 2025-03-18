@@ -30,6 +30,7 @@ export const GetMessageOfChat = async (req: AuthRequest, res: Response): Promise
             include: {
                 sender: { select: { id: true, name: true, avatar: true } },
                 reactions: true,
+                replyTo: { select: { sender: { select: { name: true } }, content: true } },
             },
             orderBy: { time: 'asc' },
         });
@@ -44,7 +45,7 @@ export const SendMessage = async (req: AuthRequest, res: Response): Promise<void
     try {
         const { chatId } = req.params;
         const senderId = req.user.id;
-        const { content, type = 'text' } = req.body;
+        const { content, type, replyToId, fileName, fileType, fileSize } = req.body;
 
         // Kiểm tra xem user có trong chat không
         const participant = await prisma.chatParticipant.findFirst({
@@ -62,6 +63,10 @@ export const SendMessage = async (req: AuthRequest, res: Response): Promise<void
                 senderId,
                 content,
                 type,
+                replyToId,
+                fileName,
+                fileType,
+                fileSize,
             },
             include: {
                 sender: { select: { id: true, name: true, avatar: true } },
@@ -69,6 +74,39 @@ export const SendMessage = async (req: AuthRequest, res: Response): Promise<void
         });
 
         res.status(201).json(message);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server.' });
+    }
+};
+
+export const deleteMessage = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.id;
+        const { messageId } = req.params;
+        const message = await prisma.message.findFirst({
+            where: {
+                id: messageId,
+            },
+        });
+
+        if (!message) {
+            res.status(404).json({ message: 'Tin nhắn không tồn tại' });
+            return;
+        }
+
+        // Cập nhật deletedBy để thêm userId
+        await prisma.message.update({
+            where: { id: messageId },
+            data: {
+                deletedBy: {
+                    push: userId,
+                },
+            },
+        });
+
+        res.status(200).json({ message: 'Đã xóa tin nhắn thành công' });
+        return;
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Lỗi server.' });

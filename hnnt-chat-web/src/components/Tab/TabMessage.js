@@ -87,7 +87,7 @@ function TabMessage() {
             }
         };
 
-        fetchMessages(); // Gọi hàm async bên trong useEffect
+        fetchMessages();
     }, [chatId, data]);
 
     const MessageComponent = {
@@ -126,7 +126,7 @@ function TabMessage() {
 
     const handleSendMessage = async () => {
         if (message.trim() !== '') {
-            await sendMessage(chatId, message, 'text');
+            await sendMessage(chatId, message, 'text', replyMessage?.id, null, null, null);
             setMessage('');
             setReplyMessage(null);
         }
@@ -144,25 +144,17 @@ function TabMessage() {
         dispatch(sendEmoji(null));
     }, [emojiObject, dispatch]);
 
-    const handleFileChange = (event, type) => {
+    const handleFileChange = async (event, type) => {
         const file = event.target.files[0];
         if (file) {
-            const currentTime = new Date().toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-            });
-
-            dispatch(
-                sendMessage({
-                    chatId: activeChat.id,
-                    content: URL.createObjectURL(file),
-                    fileName: file.name, // Lấy tên file
-                    fileSize: (file.size / 1024).toFixed(2) + ' KB',
-                    fileType: file.type,
-                    time: currentTime,
-                    type: type,
-                    reply: replyMessage,
-                }),
+            await sendMessage(
+                chatId,
+                URL.createObjectURL(file),
+                type,
+                null,
+                file.name,
+                file.type,
+                (file.size / 1024).toFixed(2) + ' KB',
             );
         }
         event.target.value = '';
@@ -273,14 +265,14 @@ function TabMessage() {
             </div>
             <div className="flex-1 p-5 overflow-auto bg-gray-200 dark:bg-[#16191d]" ref={chatContainerRef}>
                 {data.map((message, index) => {
-                    const isDeleted = message.deletedBy.some((item) => item.id === userId);
+                    const isDeleted = message.deletedBy.some((item) => item === userId);
                     const Component = message.destroy ? ChatDestroy : MessageComponent[message.type];
                     // Kiểm tra nếu tin nhắn trước đó bị xóa hoặc có sender khác
-                    const prevMessage = activeChat?.messages[index - 1];
-                    const prevMessageDeleted = prevMessage?.delete?.some((item) => item.id === userId);
+                    const prevMessage = data[index - 1];
+                    const prevMessageDeleted = prevMessage?.deletedBy?.some((item) => item === userId);
                     const showAvatar =
                         index === 0 ||
-                        !prevMessage ||
+                        // !prevMessage ||
                         prevMessage.sender.id !== message.sender.id ||
                         prevMessageDeleted;
                     const position = message.sender.id === userId ? 'right' : 'left';
@@ -347,7 +339,7 @@ function TabMessage() {
                                                 message={message}
                                                 reactions={message.reactions}
                                                 showName={message.sender !== userId && showAvatar && activeChat.group}
-                                                replyMessage={message?.reply}
+                                                replyMessage={message?.replyTo}
                                             />
                                             {isPopupOpenIndex === index && (
                                                 <PopupMenuForChat
@@ -488,7 +480,7 @@ function TabMessage() {
                                     <p className="text-[12px] text-gray-500 dark:text-gray-300 mr-1">Trả lời:</p>
 
                                     <p className="text-[12px] font-medium text-gray-600 dark:text-gray-300">
-                                        {replyMessage.name}
+                                        {replyMessage.sender.name}
                                     </p>
                                 </div>
                                 <div>

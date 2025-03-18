@@ -38,7 +38,7 @@ function ChatText({ index, userId, message, reactions, showName, replyMessage })
                         } dark:bg-gray-700  p-2 rounded-[3px]`}
                     >
                         <p className="text-[12px] font-medium text-gray-600 dark:text-gray-300 mb-1">
-                            {replyMessage.name}
+                            {replyMessage.sender.name}
                         </p>
                         <div>
                             <p className="text-[12px] text-gray-600 dark:text-gray-300 max-h-[50px] overflow-hidden text-ellipsis break-words whitespace-pre-wrap line-clamp-3">

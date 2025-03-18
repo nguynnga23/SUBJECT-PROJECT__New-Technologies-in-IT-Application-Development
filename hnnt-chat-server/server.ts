@@ -1,7 +1,7 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import pool from './db';
+import pool from './src/config/db';
 import friendRouter from './src/routes/friendRoutes';
 import chatRouter from './src/routes/chatRoutes';
 import messageRouter from './src/routes/messageRoutes';

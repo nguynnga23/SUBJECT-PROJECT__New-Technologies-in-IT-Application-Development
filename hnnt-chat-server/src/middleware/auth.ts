@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import dotenv from 'dotenv';
 import { AuthRequest } from '../types/authRequest';
+import redis from '../config/redis';
 
 dotenv.config();
 const prisma = new PrismaClient();
@@ -13,6 +14,13 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
 
         if (!token) {
             res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
+        // Kiểm tra token có trong blacklist không
+        const isBlacklisted = await redis.get(`blacklist:${token}`);
+        if (isBlacklisted) {
+            res.status(401).json({ message: 'Token đã bị vô hiệu hóa' });
             return;
         }
 

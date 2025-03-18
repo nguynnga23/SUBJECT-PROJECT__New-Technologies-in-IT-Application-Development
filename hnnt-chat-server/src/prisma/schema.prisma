@@ -118,8 +118,18 @@ model Message {
   time      DateTime @default(now())
   deletedBy String[] // Danh sách UUID của các user đã xóa tin nhắn này
   destroy   Boolean  @default(false) // Tin nhắn tự hủy?
+  
+  // Thông tin file đính kèm (chỉ áp dụng khi type = 'file', 'image', 'video')
+  fileName   String? // Tên file
+  fileSize   String? // Kích thước file (có thể dùng String hoặc Int nếu cần số)
+  fileType   String? // Loại file (ví dụ: 'pdf', 'excel', 'word')
 
   reactions Reaction[]
+
+  // Quan hệ tự tham chiếu (reply)
+  replyToId String?  @unique  // ID của tin nhắn gốc, phải là duy nhất
+  replyTo   Message? @relation("Reply", fields: [replyToId], references: [id], onDelete: SetNull)
+  reply     Message? @relation("Reply") 
 }
 
 model Reaction {

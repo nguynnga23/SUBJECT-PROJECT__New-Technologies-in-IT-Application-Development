@@ -3,6 +3,7 @@ import { MdContentCopy, MdPushPin, MdDelete } from 'react-icons/md';
 import { IoReload } from 'react-icons/io5';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateMessageStatus } from '../../redux/slices/chatSlice';
+import { deleteMessage } from '../../screens/Messaging/api';
 
 function PopupMenuForChat({ setIsPopupOpen, position, message }) {
     const popupRef = useRef(null);
@@ -13,6 +14,13 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
     const handleToggleStatus = (statusType, messageId) => {
         if (!chat) return;
         dispatch(updateMessageStatus({ chatId: chat.id, messageId, statusType, userId }));
+
+        setIsPopupOpen(null);
+    };
+
+    const handleDeleteMessage = async (messageId) => {
+        if (!chat) return;
+        await deleteMessage(messageId);
 
         setIsPopupOpen(null);
     };
@@ -64,7 +72,7 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
                 <li
                     className="flex items-center px-4 py-2 text-red-500 hover:bg-gray-100 cursor-pointer"
                     onClick={() => {
-                        handleToggleStatus('delete', message?.id);
+                        handleDeleteMessage(message?.id);
                     }}
                 >
                     <MdDelete className="mr-3" />

@@ -47,7 +47,7 @@ const Archive = ({ title, isOpen, toggleOpen, messages, type, group, setActiveMe
             {isOpen && (
                 <div className="flex flex-wrap p-1 gap-2">
                     {messages
-                        ?.filter((msg) => msg.type === type && !msg.delete.some((m) => m.id === userId))
+                        ?.filter((msg) => msg.type === type && !msg.deletedBy.some((m) => m.id === userId))
                         .map((msg, index) => {
                             if (type === 'image') {
                                 return (

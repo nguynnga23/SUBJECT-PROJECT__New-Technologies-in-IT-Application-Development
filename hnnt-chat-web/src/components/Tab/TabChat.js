@@ -92,6 +92,11 @@ function TabChat() {
                 {data
                     .sort((a, b) => (b.pin ? 1 : 0) - (a.pin ? 1 : 0))
                     .map((chat, index) => {
+                        const notMe = chat.participants?.find((user) => user.accountId !== userId)?.account;
+                        const me = chat.participants?.find((user) => user.accountId === userId);
+                        const deleteByMeOrDestroy =
+                            chat.messages[0]?.deletedBy.some((m) => m === userId) || chat.messages[0]?.destroy;
+
                         return (
                             <div
                                 key={chat.id}
@@ -133,28 +138,20 @@ function TabChat() {
                                             )}
                                         </div>
                                     ) : (
-                                        !chat.notify && <HiBellSlash size={13} className="m-2 text-gray-500" />
+                                        !me?.notify && <HiBellSlash size={13} className="m-2 text-gray-500" />
                                     )}
-                                    {chat.pin && <TiPin size={13} className="m-2 text-gray-500" />}
+                                    {me?.pin && <TiPin size={13} className="m-2 text-gray-500" />}
                                 </div>
 
                                 <div className="flex item-center">
                                     <img
-                                        src={
-                                            chat.isGroup
-                                                ? chat.avatar
-                                                : chat.participants?.find((user) => user.accountId !== userId)?.account
-                                                      .avatar
-                                        } // Thay bằng avatar thật
+                                        src={chat.isGroup ? chat.avatar : notMe.avatar} // Thay bằng avatar thật
                                         alt="avatar"
                                         className="w-[45px] h-[45px] rounded-full border mr-3 object-cover"
                                     />
                                     <div>
                                         <h3 className="font-medium text-xs text-lg mt-1 max-w-[270px] truncate dark:text-white">
-                                            {chat.isGroup
-                                                ? chat.name
-                                                : chat.participants?.find((user) => user.accountId !== userId)?.account
-                                                      .name || 'Người dùng'}
+                                            {chat.isGroup ? chat.name : notMe.name || 'Người dùng'}
                                         </h3>
                                         <p
                                             className={`flex items-center text-sm  text-xs mt-1  ${
@@ -171,31 +168,40 @@ function TabChat() {
                                             ) : (
                                                 <span className="mr-1">{chat?.messages[0]?.sender.name}:</span>
                                             )}
-                                            {chat?.messages[0]?.type === 'gif' ? (
-                                                <span className="flex items-center">
-                                                    <MdOutlineGifBox size={15} className="mr-[4px]" /> [GIF]
-                                                </span>
-                                            ) : chat?.messages[0]?.type === 'sticker' ? (
-                                                <span className="flex items-center">
-                                                    <LuSticker size={15} className="mr-[4px]" /> [Sticker]
-                                                </span>
-                                            ) : chat?.messages[0]?.type === 'image' ? (
-                                                <span className="flex items-center">
-                                                    <IoImageOutline size={15} className="mr-[4px]" />
-                                                    [Hình ảnh]
-                                                </span>
-                                            ) : chat?.messages[0]?.type === 'file' ? (
-                                                <span className="flex items-center">
-                                                    <MdFilePresent size={15} className="mr-[4px]" /> {chat?.fileName}
-                                                </span>
-                                            ) : chat?.messages[0]?.type == 'text' ? (
-                                                <span className="max-w-[220px] truncate">
-                                                    {chat?.messages[0].content}
+                                            {deleteByMeOrDestroy ? (
+                                                <span className="max-w-[220px] truncate italic">
+                                                    Tin nhắn đã bị xóa
                                                 </span>
                                             ) : (
-                                                <span className="max-w-[220px] truncate italic">
-                                                    Hãy bắt đầu trò chuyện
-                                                </span>
+                                                <>
+                                                    {chat?.messages[0]?.type === 'gif' ? (
+                                                        <span className="flex items-center">
+                                                            <MdOutlineGifBox size={15} className="mr-[4px]" /> [GIF]
+                                                        </span>
+                                                    ) : chat?.messages[0]?.type === 'sticker' ? (
+                                                        <span className="flex items-center">
+                                                            <LuSticker size={15} className="mr-[4px]" /> [Sticker]
+                                                        </span>
+                                                    ) : chat?.messages[0]?.type === 'image' ? (
+                                                        <span className="flex items-center">
+                                                            <IoImageOutline size={15} className="mr-[4px]" />
+                                                            [Hình ảnh]
+                                                        </span>
+                                                    ) : chat?.messages[0]?.type === 'file' ? (
+                                                        <span className="flex items-center">
+                                                            <MdFilePresent size={15} className="mr-[4px]" />{' '}
+                                                            {chat?.messages[0]?.fileName}
+                                                        </span>
+                                                    ) : chat?.messages[0]?.type === 'text' ? (
+                                                        <span className="max-w-[220px] truncate">
+                                                            {chat?.messages[0].content}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="max-w-[220px] truncate italic">
+                                                            Hãy bắt đầu trò chuyện
+                                                        </span>
+                                                    )}
+                                                </>
                                             )}
                                         </p>
                                     </div>
