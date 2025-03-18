@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import pool from './db';
 import friendRouterer from './src/routes/friendRoutes';
+import groupChatManageRouter from './src/routes/groupChatManageRoutes';
 
 // Load environment variables
 dotenv.config();
@@ -31,6 +32,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/friends', friendRouterer);
+
+app.use('/api/groups', groupChatManageRouter);
 
 app.listen(PORT, () => {
     console.log(`Server đang chạy trên cổng ${PORT}`);
