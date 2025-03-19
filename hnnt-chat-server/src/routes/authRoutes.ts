@@ -1,16 +1,10 @@
 import { Router } from 'express';
-import { register, login, logout, refreshToken, forgotPassword } from '../controllers/authController';
+import { login, logout } from '../controllers/authController';
+import { authenticate } from '../middleware/auth';
 
 const authRouter = Router();
 
-authRouter.post('/register', register);
-
 authRouter.post('/login', login);
-
-authRouter.delete('/logout', logout);
-
-authRouter.put('/refresh_token', refreshToken);
-
-authRouter.post('/forgot-password', forgotPassword);
+authRouter.post('/logout', authenticate, logout);
 
 export default authRouter;

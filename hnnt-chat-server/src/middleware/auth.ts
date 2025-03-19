@@ -1,42 +1,41 @@
-import { Request, Response, NextFunction } from 'express';
-import { JwtProvider } from '../providers/JwtProvider';
-import { JwtPayload } from 'jsonwebtoken'; // Định nghĩa kiểu cho token đã giải mã
+import { Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import { PrismaClient } from '@prisma/client';
+import dotenv from 'dotenv';
+import { AuthRequest } from '../types/authRequest';
+import redis from '../config/redis';
 
-// Mở rộng kiểu Request để thêm jwtDecoded
-interface AuthenticatedRequest extends Request {
-    jwtDecoded?: any;
-}
+dotenv.config();
+const prisma = new PrismaClient();
 
-export const isAuthorized = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+export const authenticate = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const accessTokenFromCookie: string | undefined = req.cookies?.accessToken;
+        const token = req.header('Authorization')?.replace('Bearer ', '');
 
-        if (!accessTokenFromCookie) {
-            res.status(401).json({ message: 'Unauthorized (token not found)' });
+        if (!token) {
+            res.status(401).json({ message: 'Unauthorized' });
             return;
         }
 
-        const secretKey = process.env.ACCESS_TOKEN_SECRET_SIGNATURE;
-        if (!secretKey) {
-            throw new Error('Thiếu ACCESS_TOKEN_SECRET_SIGNATURE trong biến môi trường!');
+        // Kiểm tra token có trong blacklist không
+        const isBlacklisted = await redis.get(`blacklist:${token}`);
+        if (isBlacklisted) {
+            res.status(401).json({ message: 'Token đã bị vô hiệu hóa' });
+            return;
         }
 
-        // Xác thực token
-        const accessTokenDecoded = await JwtProvider.verifyToken(accessTokenFromCookie, secretKey);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
+        const user = await prisma.account.findUnique({ where: { id: decoded.id } });
 
-        // Gán vào request để tầng sau có thể sử dụng
-        req.jwtDecoded = accessTokenDecoded;
+        if (!user) {
+            res.status(401).json({ message: 'Người dùng không tồn tại' });
+            return;
+        }
+
+        req.user = user;
 
         next();
     } catch (error) {
-        if (error instanceof Error) {
-            if (error.message.includes('jwt expired')) {
-                res.status(410).json({ message: 'Need to refresh token' });
-                return;
-            }
-            res.status(401).json({ message: 'Unauthorized! Token is invalid!' });
-        } else {
-            res.status(500).json({ message: 'Internal Server Error' });
-        }
+        next(error);
     }
 };
