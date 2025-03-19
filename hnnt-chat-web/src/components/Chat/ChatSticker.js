@@ -1,49 +1,23 @@
-import { FiMoreHorizontal } from 'react-icons/fi';
-import PopupMenuForChat from '../Popup/PopupMenuForChat';
-
-function ChatSticker({
-    index,
-    userId,
-    message,
-    setHoveredMessage,
-    hoveredMessage,
-    isPopupOpenIndex,
-    setIsPopupOpenIndex,
-    showName,
-}) {
-    const position = message.sender === userId ? 'right' : 'left';
+function ChatSticker({ userId, message, showName, replyMessage }) {
     return (
-        <div
-            className={`relative rounded-lg`}
-            onMouseEnter={() => {
-                if (isPopupOpenIndex === null) setHoveredMessage(index);
-            }}
-            onMouseLeave={() => {
-                setTimeout(() => {
-                    if (isPopupOpenIndex === null) setHoveredMessage(null);
-                }, 3000);
-            }}
-        >
+        <div className={`relative rounded-lg`}>
+            <div>
+                {replyMessage && (
+                    <div className="mb-1 bg-gray-300 dark:bg-gray-700  p-2 rounded-[5px]">
+                        <p className="text-[12px] font-medium text-gray-600 dark:text-gray-300 ">{replyMessage.name}</p>
+                        <div>
+                            <p className="text-[12px] text-gray-600 dark:text-gray-300 max-h-[50px] overflow-hidden text-ellipsis break-words whitespace-pre-wrap line-clamp-3">
+                                {replyMessage.content}
+                            </p>
+                        </div>
+                    </div>
+                )}
+            </div>
             {showName && (
                 <p className="text-[10px] text-gray-400 pb-[2px]">{message?.sender !== userId && message?.name}</p>
             )}
             <img src={message.content} alt="GIF" className="w-[150px] h-[150px] rounded-lg mb-2 " />
             <p className="absolute left-[8px] bottom-[2px] text-gray-500 text-[10px]">{message.time}</p>
-            {hoveredMessage === index && isPopupOpenIndex === null && (
-                <button
-                    className={`absolute bottom-2 ${
-                        message.sender === userId ? 'left-[-25px]' : 'right-[-25px]'
-                    } p-1 rounded-full hover:bg-gray-300`}
-                    onClick={() => {
-                        setIsPopupOpenIndex(index);
-                    }}
-                >
-                    <FiMoreHorizontal size={15} />
-                </button>
-            )}
-            {isPopupOpenIndex === index && (
-                <PopupMenuForChat setIsPopupOpen={setIsPopupOpenIndex} position={position} message={message} />
-            )}
         </div>
     );
 }

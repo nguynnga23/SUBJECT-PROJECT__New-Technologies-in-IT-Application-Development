@@ -14,19 +14,19 @@ function Settings({ setSettingScreen }) {
 
     return (
         <div className="w-full flex">
-            <div className="fixed inset-0 flex items-center justify-center bg-opacity-80 z-50 bg-gray-400 ">
-                <div className="flex relative h-[450px] w-[800px] border rounded-lg shadow-md text-[13px]  bg-gray-200">
+            <div className="fixed inset-0 flex items-center justify-center bg-opacity-80 z-50 bg-gray-400">
+                <div className="flex relative h-[450px] w-[800px] border rounded-lg shadow-md text-[13px] bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-black">
                     <CiCircleRemove
-                        className="absolute top-[-30px] right-[-30px] text-3xl text-white cursor-pointer"
+                        className="absolute top-[-30px] right-[-30px] text-3xl text-white cursor-pointer "
                         onClick={() => setSettingScreen(false)}
                     />
                     {/* Sidebar */}
-                    <div className="w-1/3 p-4 border-r bg-white rounded-l-lg">
+                    <div className="w-1/3 p-4 border-r dark:border-r-black bg-white rounded-l-lg bg-gray-200 dark:bg-gray-900 dark:text-gray-300">
                         <h2 className="text-[20px] font-semibold mb-4">Cài đặt</h2>
                         <ul className="space-y-2">
                             <li
-                                className={`flex items-center p-2 hover:bg-gray-200 rounded cursor-pointer ${
-                                    tab === 'authen' ? 'bg-gray-200' : ''
+                                className={`flex items-center p-2 rounded cursor-pointer hover:bg-gray-300 hover:dark:bg-gray-700 ${
+                                    tab === 'authen' ? 'bg-gray-200 dark:bg-gray-700' : ''
                                 }`}
                                 onClick={() => setTab('authen')}
                             >
@@ -34,8 +34,8 @@ function Settings({ setSettingScreen }) {
                                 Tài khoản và bảo mật
                             </li>
                             <li
-                                className={`flex items-center p-2 hover:bg-gray-200 rounded cursor-pointer ${
-                                    tab === 'private' ? 'bg-gray-200' : ''
+                                className={`flex items-center p-2 rounded cursor-pointer hover:bg-gray-300 hover:dark:bg-gray-700 ${
+                                    tab === 'private' ? 'bg-gray-200 dark:bg-gray-700' : ''
                                 }`}
                                 onClick={() => setTab('private')}
                             >
@@ -43,8 +43,8 @@ function Settings({ setSettingScreen }) {
                                 Quyền riêng tư
                             </li>
                             <li
-                                className={`flex items-center p-2 hover:bg-gray-200 rounded cursor-pointer ${
-                                    tab === 'notify' ? 'bg-gray-200' : ''
+                                className={`flex items-center p-2 rounded cursor-pointer hover:bg-gray-300 hover:dark:bg-gray-700 ${
+                                    tab === 'notify' ? 'bg-gray-200 dark:bg-gray-700' : ''
                                 }`}
                                 onClick={() => setTab('notify')}
                             >
@@ -52,8 +52,8 @@ function Settings({ setSettingScreen }) {
                                 Thông báo
                             </li>
                             <li
-                                className={`flex items-center p-2 hover:bg-gray-200 rounded cursor-pointer ${
-                                    tab === 'interface' ? 'bg-gray-200' : ''
+                                className={`flex items-center p-2 rounded cursor-pointer hover:bg-gray-300 hover:dark:bg-gray-700${
+                                    tab === 'interface' ? 'bg-gray-200 dark:bg-gray-700' : ''
                                 }`}
                                 onClick={() => setTab('interface')}
                             >
@@ -65,7 +65,7 @@ function Settings({ setSettingScreen }) {
 
                     {/* Content */}
 
-                    <div className="m-6 w-2/3 rounded-r-lg overflow-auto">
+                    <div className="m-6 w-2/3 rounded-r-lg overflow-auto ">
                         {tab === 'authen' && <TabSettingAuthen />}
                         {tab === 'private' && <TabSettingPrivate />}
                         {tab === 'notify' && <TabSettingNotify />}

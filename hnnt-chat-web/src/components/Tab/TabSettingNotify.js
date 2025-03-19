@@ -14,7 +14,7 @@ function TabSettingNotify() {
                     <p className="text-gray-400 text-[11px] ">Nhận được thông báo khi có tin nhắn mới</p>
                 </div>
 
-                <div className="bg-white p-4 rounded-lg shadow flex">
+                <div className="bg-white p-4 rounded-lg shadow flex dark:bg-gray-800 dark:text-gray-300">
                     <label className="flex items-center space-x-2 mr-6">
                         <IoNotificationsOutline
                             size={40}
@@ -29,7 +29,7 @@ function TabSettingNotify() {
                             onChange={() => setSelected(true)}
                             className="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500"
                         />
-                        <span className="text-gray-700">Bật</span>
+                        <span className="text-gray-700 dark:text-gray-300">Bật</span>
                     </label>
                     <label className="flex items-center space-x-2">
                         <IoNotificationsOffOutline
@@ -45,7 +45,7 @@ function TabSettingNotify() {
                             onChange={() => setSelected(false)}
                             className="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500"
                         />
-                        <span className="text-gray-700">Tắt</span>
+                        <span className="text-gray-700 dark:text-gray-300">Tắt</span>
                     </label>
                 </div>
             </div>
@@ -55,7 +55,7 @@ function TabSettingNotify() {
                     <p className="text-[14px] font-semibold mb-0.5">Âm thanh khi nhận được thông báo</p>
                 </div>
 
-                <div className="bg-white p-4 rounded-lg shadow flex justify-between">
+                <div className="bg-white p-4 rounded-lg shadow flex justify-between dark:bg-gray-800 dark:text-gray-300">
                     <p className="text-[12px]">Phát âm thanh thông báo khi có tin nhắn</p>
                     <div className="flex">
                         <label className="flex items-center space-x-2 mr-2">
@@ -67,7 +67,7 @@ function TabSettingNotify() {
                                 onChange={() => setSound(true)}
                                 className="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500"
                             />
-                            <span className="text-gray-700">Bật</span>
+                            <span className="text-gray-700 dark:text-gray-300">Bật</span>
                         </label>
                         <label className="flex items-center space-x-2">
                             <input
@@ -78,7 +78,7 @@ function TabSettingNotify() {
                                 onChange={() => setSound(false)}
                                 className="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500"
                             />
-                            <span className="text-gray-700">Tắt</span>
+                            <span className="text-gray-700 dark:text-gray-300">Tắt</span>
                         </label>
                     </div>
                 </div>

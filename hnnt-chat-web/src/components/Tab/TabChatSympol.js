@@ -36,7 +36,7 @@ function TabChatSymbol() {
     return (
         <>
             {/* Tabs */}
-            <div className="flex border-b  h-[50px] text-sm justify-between items-center">
+            <div className="flex border-b dark:border-black h-[50px] text-sm justify-between items-center  dark:text-gray-300 ">
                 {['sticker', 'emoji', 'gif'].map((tab) => (
                     <button
                         key={tab}
@@ -68,13 +68,18 @@ function TabChatSymbol() {
                     )}
 
                     {activeTab === 'emoji' && (
-                        <div className="flex h-[calc(100vh-112px)]">
-                            <Picker onEmojiClick={onEmojiClick} height={'100%'} width={'100%'} />
+                        <div className="flex h-[calc(100vh-112px)] ">
+                            <Picker
+                                onEmojiClick={onEmojiClick}
+                                height={'100%'}
+                                width={'100%'}
+                                className="dark:bg-gray-900 dark:border-black"
+                            />
                         </div>
                     )}
 
                     {activeTab === 'gif' && (
-                        <div className="flex h-[calc(100vh-112px)]">
+                        <div className="flex h-[calc(100vh-112px)] ">
                             <GifPicker
                                 tenorApiKey={process.env.REACT_APP_TENNORAPIKEY}
                                 onGifClick={onGifClick}

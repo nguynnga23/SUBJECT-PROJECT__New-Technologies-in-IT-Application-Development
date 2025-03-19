@@ -36,7 +36,7 @@ function PopupCategoryAndState() {
         }
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [isOpen]);
+    }, [isOpen, isOpenManageCategory]);
 
     const toggleCategory = (category) => {
         setSelectedCategories((prevSelected) => {
@@ -64,7 +64,7 @@ function PopupCategoryAndState() {
             <div className="h-full flex items-center">
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className={`px-2 py-1 text-xs mr-1 rounded-lg flex items-center gap-2 cursor-pointer ${
+                    className={`px-2 py-1 text-xs mr-1 rounded-lg flex items-center gap-2 cursor-pointer dark:text-gray-300 ${
                         isOpen ? 'bg-blue-400 text-white' : ''
                     }`}
                 >
@@ -75,15 +75,16 @@ function PopupCategoryAndState() {
 
             {/* Dropdown Menu */}
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white shadow-lg rounded-lg border">
-                    <p className="text-sm font-bold text-gray-700 mb-2">Theo trạng thái</p>
+                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 shadow-lg rounded-t-lg border dark:border-gray-900 dark:text-gray-300">
                     <div className="p-2 ">
+                        <p className="text-sm font-bold text-gray-700 pt-1 mb-2 dark:text-gray-300">Theo trạng thái</p>
+
                         {/* Theo trạng thái */}
                         {states.map((state) => (
                             <div
                                 key={state.id}
                                 onClick={() => toggleState(state)}
-                                className="flex items-center p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
+                                className="flex items-center p-2 dark:bg-gray-900 hover:bg-gray-300 hover:dark:bg-gray-700 rounded-lg cursor-pointer"
                             >
                                 {selectedState?.id === state.id ? (
                                     <FaCircle className={`mr-3 cursor-pointer text-blue-500`} />
@@ -96,7 +97,7 @@ function PopupCategoryAndState() {
 
                         {/* Theo thẻ phân loại */}
                         <div>
-                            <p className="text-sm font-bold text-gray-700 mt-3 mb-2 border-t pt-1">
+                            <p className="text-sm font-bold text-gray-700 mt-3 mb-2 border-t pt-1 dark:text-gray-300 ">
                                 Theo thẻ phân loại
                             </p>
                             <div className=" overflow-auto max-h-[300px]">
@@ -106,7 +107,7 @@ function PopupCategoryAndState() {
                                         onClick={() => {
                                             toggleCategory(category);
                                         }}
-                                        className="flex items-center p-2 hover:bg-gray-100 rounded-lg cursor-pointer "
+                                        className="flex items-center p-2 hover:bg-gray-300 hover:dark:bg-gray-700 rounded-lg cursor-pointer"
                                     >
                                         {selectedCategories.some((c) => c.id === category.id) ? (
                                             <FaRegSquareCheck className="mr-3 text-blue-500" />
@@ -114,14 +115,14 @@ function PopupCategoryAndState() {
                                             <FaRegSquare className="mr-3 text-gray-500" />
                                         )}
                                         <MdLabel className={`mr-3 ${category.color}`} size={18} />
-                                        <span className="flex-1 text-sm">{category.name}</span>
+                                        <span className="flex-1 text-sm max-w-[180px] truncate">{category.name}</span>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     </div>
                     <p
-                        className="flex justify-center item-center cursor-pointer py-2 text-sm font-bold hover:bg-gray-100 text-gray-700 border-t pt-1"
+                        className="flex justify-center item-center cursor-pointer py-2 text-sm font-bold dark:bg-gray-900 hover:opacity-60 text-gray-700 border-t pt-1 dark:text-gray-300"
                         onClick={() => setIsOpenManageCategory(true)}
                     >
                         Quản lý thẻ phân loại

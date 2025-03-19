@@ -6,31 +6,33 @@ import TabChatInfoGroup from './TabChatInfoGroup';
 
 function TabChatRightBar() {
     const initTab = useSelector((state) => state.chat.rightBarTab);
-    const activeChat = useSelector((state) => state.chat.data.find((chat) => chat.id === state.chat.activeChat?.id));
+    const activeChat = useSelector((state) => state.chat.activeChat);
 
     const [activeMessageTab, setActiveMessageTab] = useState(initTab);
 
     useEffect(() => {
-        if (!activeChat?.group) {
+        if (!activeChat?.isGroup) {
             setActiveMessageTab('info');
         }
-    }, [activeChat]);
+    }, [activeChat.isGroup]);
 
     return (
-        <div className="w-1/4 flex flex-col bg-white min-w-[350px] border-l">
+        <div className="w-1/4 flex flex-col bg-white dark:bg-gray-800  min-w-[350px] border-l dark:border-l-black">
             {/* Tabs */}
             <div className="flex">
                 <button
-                    className={`flex-1 p-[18.5px] text-center font-medium w-[50%] ${
-                        activeMessageTab === 'info' || activeMessageTab === 'infoGroup' ? 'bg-white' : 'bg-gray-200'
+                    className={`flex-1 p-[18.5px] text-center font-medium w-[50%] dark:text-gray-300 ${
+                        activeMessageTab === 'info' || activeMessageTab === 'infoGroup'
+                            ? 'bg-white dark:bg-gray-800'
+                            : 'bg-gray-200 dark:bg-gray-900'
                     }`}
                     onClick={() => setActiveMessageTab('info')}
                 >
                     Thông tin
                 </button>
                 <button
-                    className={`flex-1 py-2 text-center font-medium w-[50%] ${
-                        activeMessageTab === 'sympol' ? 'bg-white' : 'bg-gray-200'
+                    className={`flex-1 py-2 text-center font-medium w-[50%] dark:text-gray-300 ${
+                        activeMessageTab === 'sympol' ? 'bg-white dark:bg-gray-800' : 'bg-gray-200 dark:bg-gray-900'
                     }`}
                     onClick={() => setActiveMessageTab('sympol')}
                 >
@@ -43,7 +45,7 @@ function TabChatRightBar() {
 
             {activeMessageTab === 'sympol' && <TabChatSympol />}
 
-            {activeMessageTab === 'infoGroup' && activeChat.group && (
+            {activeMessageTab === 'infoGroup' && activeChat?.isGroup && (
                 <TabChatInfoGroup setActiveMessageTab={setActiveMessageTab} group={activeChat} />
             )}
         </div>

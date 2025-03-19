@@ -5,36 +5,33 @@ import { IoSettingsOutline } from 'react-icons/io5';
 import { IoMdCloudOutline } from 'react-icons/io';
 import { CiShare1 } from 'react-icons/ci';
 
-import { setChats } from '../../redux/slices/chatSlice';
+// import { setChats } from '../../redux/slices/chatSlice';
 import Messaging from '../Messaging';
 import Contacts from '../Contacts';
 import Settings from '../Settings';
 
 import { useDispatch, useSelector } from 'react-redux';
-import groups from '../../sample_data/listGroup';
+// import groups from '../../sample_data/listGroup';
 import { useNavigate } from 'react-router-dom';
 
 import Modal from '../../components/Modal';
 
+import { logout } from '../Authentication/api';
+import { logoutOfSlice } from '../../redux/slices/authSlice';
+import { setActiveChat } from '../../redux/slices/chatSlice';
+
 export default function Home() {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [selectedScreen, setSelectedScreen] = useState('messaging');
     const [settingScreen, setSettingScreen] = useState(false);
-    const dispatch = useDispatch();
+    // const dispatch = useDispatch();
     const userActive = useSelector((state) => state.auth.userActive);
     useEffect(() => {
-        if (userActive && userActive.id !== null) {
-            dispatch(
-                setChats({
-                    userActive: userActive,
-                    chats: userActive?.chats,
-                    groups: groups.filter((g) => g.members?.some((m) => m?.id === userActive?.id)),
-                }),
-            );
-        } else {
+        if (!userActive) {
             navigate('/');
         }
-    }, [userActive, dispatch, navigate]);
+    }, [userActive, navigate]);
 
     // open modal
     const [isOpenModel, setIsOpenModel] = useState(false);
@@ -54,10 +51,23 @@ export default function Home() {
         };
     }, []);
 
+    const handleLogout = async () => {
+        try {
+            await logout(); // Gọi API logout
+            dispatch(logoutOfSlice);
+            dispatch(setActiveChat(null));
+
+            // Cập nhật state, Redux hoặc điều hướng về trang login
+            navigate('/');
+        } catch (error) {
+            console.error('Lỗi khi đăng xuất:', error);
+        }
+    };
+
     return (
-        <div className="flex h-screen bg-gray-100">
+        <div className="flex h-screen bg-gray-100 dark:bg-[#16191d]">
             {/* Sidebar */}
-            <div className="w-16 h-screen bg-blue-600 flex flex-col items-center py-4 space-y-6">
+            <div className="w-16 h-screen bg-blue-600 dark:bg-gray-900 flex flex-col items-center py-4 space-y-6">
                 {/* Avatar */}
                 <div className="relative" ref={dropdownRef}>
                     <button
@@ -96,7 +106,7 @@ export default function Home() {
                             </li>
                             <li>
                                 <p
-                                    className="block px-4 py-2 hover:bg-gray-100 text-black cursor-pointer"
+                                    className="block px-4 py-2 hover:bg-gray-100  text-black cursor-pointer"
                                     onClick={() => setIsOpenModel(true)}
                                 >
                                     Hồ sơ của bạn
@@ -107,7 +117,12 @@ export default function Home() {
                             </li>
                         </ul>
                         <div className="">
-                            <p className="block px-4 py-2 hover:bg-gray-100 text-black cursor-pointer">Đăng xuất</p>
+                            <p
+                                className="block px-4 py-2 hover:bg-gray-100 text-black cursor-pointer"
+                                onClick={handleLogout}
+                            >
+                                Đăng xuất
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -116,7 +131,7 @@ export default function Home() {
                 <div className="flex flex-col space-y-6 text-white ">
                     {/* open Messaging */}
                     <div
-                        className={`w-10 h-10 rounded-[5px] flex items-center justify-center cursor-pointer ${
+                        className={`w-10 h-10 rounded-[5px] flex items-center justify-center cursor-pointer hover:bg-white hover:bg-opacity-20 ${
                             selectedScreen === 'messaging' ? 'bg-white bg-opacity-20' : ''
                         }`}
                     >
@@ -124,7 +139,7 @@ export default function Home() {
                     </div>
                     {/* open Contacts */}
                     <div
-                        className={`w-10 h-10 rounded-[5px] flex items-center justify-center cursor-pointer ${
+                        className={`w-10 h-10 rounded-[5px] flex items-center justify-center cursor-pointer hover:bg-white hover:bg-opacity-20 ${
                             selectedScreen === 'contacts' ? 'bg-white bg-opacity-20' : ''
                         }`}
                     >
@@ -137,13 +152,13 @@ export default function Home() {
                 <div className="w-10 border-t border-white"></div>
 
                 {/* More Icons */}
-                <div className="flex flex-col space-y-6 text-white">
-                    <div className="w-10 h-10 rounded-[5px] flex items-center justify-center">
+                <div className="flex flex-col space-y-6 text-white ">
+                    <div className="w-10 h-10 rounded-[5px] flex items-center justify-center hover:bg-white hover:bg-opacity-20">
                         <IoMdCloudOutline size={28} />
                     </div>
                     {/* open Settings */}
                     <div
-                        className={`w-10 h-10 rounded-[5px] flex items-center justify-center cursor-pointer ${
+                        className={`w-10 h-10 rounded-[5px] flex items-center justify-center cursor-pointer hover:bg-white hover:bg-opacity-20 ${
                             selectedScreen === 'settings' ? 'bg-white bg-opacity-20' : ''
                         }`}
                     >

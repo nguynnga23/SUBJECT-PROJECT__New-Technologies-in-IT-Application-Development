@@ -17,6 +17,7 @@ const chatSlice = createSlice({
         emojiObject: null,
         rightBarTab: 'info',
         rightBarTabSub: 'emoji',
+        searchResults: [],
     },
     reducers: {
         setChats: (state, action) => {
@@ -26,13 +27,15 @@ const chatSlice = createSlice({
             state.data = [...action.payload.chats, ...action.payload.groups];
         },
         sendMessage: (state, action) => {
-            const { chatId, content, time, type, fileName, fileSize, fileType } = action.payload;
+            const { chatId, content, time, type, fileName, fileSize, fileType, reply } = action.payload;
             const chat = state.data.find((c) => c.id === chatId);
 
             if (chat) {
                 const message = {
                     id: uuidv4(),
                     sender: state.userActive.id,
+                    name: state.userActive.name,
+                    avatar: state.userActive.avatar,
                     content: content,
                     time: time,
                     type: type,
@@ -53,6 +56,10 @@ const chatSlice = createSlice({
                 // Nếu có fileType thì thêm vào object
                 if (fileType) {
                     message.fileType = fileType;
+                }
+
+                if (reply) {
+                    message.reply = reply;
                 }
 
                 chat.messages.push(message);
@@ -233,6 +240,35 @@ const chatSlice = createSlice({
                 ),
             };
         },
+
+        destroyGroup: (state, action) => {
+            const { groupId } = action.payload;
+            return {
+                ...state,
+                data: state.data.filter((group) => group.id !== groupId),
+            };
+        },
+
+        searchFollowKeyWord: (state, action) => {
+            const { keyword } = action.payload;
+            if (!keyword.trim()) {
+                return { ...state, searchResults: [] };
+            }
+
+            return {
+                ...state,
+                searchResults: state.data.flatMap((group) =>
+                    group.messages.filter(
+                        (message) =>
+                            !message.destroy &&
+                            ((message.type === 'text' &&
+                                message.content.toLowerCase().includes(keyword.toLowerCase())) ||
+                                (message.type === 'file' &&
+                                    message.fileName?.toLowerCase().includes(keyword.toLowerCase()))),
+                    ),
+                ),
+            };
+        },
     },
 });
 
@@ -258,5 +294,7 @@ export const {
     createGroup,
     addMemberToGroup,
     removeMemberOfGroup,
+    destroyGroup,
+    searchFollowKeyWord,
 } = chatSlice.actions;
 export default chatSlice.reducer;
