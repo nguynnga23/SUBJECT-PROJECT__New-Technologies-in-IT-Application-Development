@@ -5,36 +5,32 @@ import { IoSettingsOutline } from 'react-icons/io5';
 import { IoMdCloudOutline } from 'react-icons/io';
 import { CiShare1 } from 'react-icons/ci';
 
-import { setChats } from '../../redux/slices/chatSlice';
+// import { setChats } from '../../redux/slices/chatSlice';
 import Messaging from '../Messaging';
 import Contacts from '../Contacts';
 import Settings from '../Settings';
 
 import { useDispatch, useSelector } from 'react-redux';
-import groups from '../../sample_data/listGroup';
+// import groups from '../../sample_data/listGroup';
 import { useNavigate } from 'react-router-dom';
 
 import Modal from '../../components/Modal';
+import { logout } from '../Authentication/api';
+import { logoutOfSlice } from '../../redux/slices/authSlice';
+import { setActiveChat } from '../../redux/slices/chatSlice';
 
 export default function Home() {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [selectedScreen, setSelectedScreen] = useState('messaging');
     const [settingScreen, setSettingScreen] = useState(false);
-    const dispatch = useDispatch();
+    // const dispatch = useDispatch();
     const userActive = useSelector((state) => state.auth.userActive);
     useEffect(() => {
-        if (userActive && userActive.id !== null) {
-            dispatch(
-                setChats({
-                    userActive: userActive,
-                    chats: userActive?.chats,
-                    groups: groups.filter((g) => g.members?.some((m) => m?.id === userActive?.id)),
-                }),
-            );
-        } else {
+        if (!userActive) {
             navigate('/');
         }
-    }, [userActive, dispatch, navigate]);
+    }, [userActive, navigate]);
 
     // open modal
     const [isOpenModel, setIsOpenModel] = useState(false);
@@ -53,6 +49,19 @@ export default function Home() {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
+
+    const handleLogout = async () => {
+        try {
+            await logout(); // Gọi API logout
+            dispatch(logoutOfSlice);
+            dispatch(setActiveChat(null));
+
+            // Cập nhật state, Redux hoặc điều hướng về trang login
+            navigate('/');
+        } catch (error) {
+            console.error('Lỗi khi đăng xuất:', error);
+        }
+    };
 
     return (
         <div className="flex h-screen bg-gray-100 dark:bg-[#16191d]">
@@ -107,7 +116,12 @@ export default function Home() {
                             </li>
                         </ul>
                         <div className="">
-                            <p className="block px-4 py-2 hover:bg-gray-100 text-black cursor-pointer">Đăng xuất</p>
+                            <p
+                                className="block px-4 py-2 hover:bg-gray-100 text-black cursor-pointer"
+                                onClick={handleLogout}
+                            >
+                                Đăng xuất
+                            </p>
                         </div>
                     </div>
                 </div>

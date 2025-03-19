@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Accounts from '../../sample_data/listAccount';
 import { IoMdPhonePortrait } from 'react-icons/io';
 import { FaBars, FaLock } from 'react-icons/fa6';
 
 import { useDispatch } from 'react-redux';
 import { setUser } from '../../redux/slices/authSlice';
+import { login } from './api';
 
 function Authentication() {
     const [number, setNumber] = useState('');
@@ -16,13 +16,24 @@ function Authentication() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const handleLogin = () => {
-        const user = Accounts.find((account) => account.number === number && account.password === password);
-        if (user) {
-            dispatch(setUser({ userActive: user, token: null }));
+    // const handleLogin = () => {
+    //     const user = Accounts.find((account) => account.number === number && account.password === password);
+    //     if (user) {
+    //         dispatch(setUser({ userActive: user, token: null }));
+    //         navigate('/home');
+    //     } else {
+    //         alert('Sai số điện thoại hoặc mật khẩu!');
+    //     }
+    // };
+
+    const handleLogin = async () => {
+        try {
+            const data = await login(number, password);
+            localStorage.setItem('token', data.token);
+            dispatch(setUser({ userActive: data.user, token: null }));
             navigate('/home');
-        } else {
-            alert('Sai số điện thoại hoặc mật khẩu!');
+        } catch (err) {
+            alert('Sai mật khẩu hoặc tên đăng nhập!');
         }
     };
 

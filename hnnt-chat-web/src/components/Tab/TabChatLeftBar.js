@@ -11,6 +11,7 @@ import TabMesssage from '../../components/Tab/TabMessage';
 
 import { searchFollowKeyWord } from '../../redux/slices/chatSlice';
 import { useDispatch } from 'react-redux';
+import TabChat from './TabChat';
 
 function TabChatLeftBar() {
     const [addFriendButton, setAddFriendButton] = useState(false);
@@ -72,7 +73,7 @@ function TabChatLeftBar() {
             </div>
             {/* Tabs */}
             {/* Tabs danh mục */}
-            {search !== '' ? <TabSearch keyword={search} /> : <TabMesssage />}
+            {search !== '' ? <TabSearch keyword={search} /> : <TabChat />}
         </div>
     );
 }

@@ -18,8 +18,8 @@ const getFileIcon = (fileType) => {
 function ChatFile({ userId, message, showName, replyMessage }) {
     return (
         <div
-            className={`relative pb-2 p-3 mb-2 border rounded-lg bg-gray-100 max-w-[500px] cursor-pointer ${
-                message.sender === userId
+            className={`relative pb-2 p-3 mb-2 border rounded-lg max-w-[500px] cursor-pointer ${
+                message.sender.id === userId
                     ? 'bg-blue-100 dark:bg-[#20344c] border-blue-200 dark:border-blue-100'
                     : 'bg-white dark:bg-[#20344c] border-gray-200 dark:border-gray-800'
             }`}
@@ -59,7 +59,9 @@ function ChatFile({ userId, message, showName, replyMessage }) {
             </div>
 
             {/* Thời gian gửi */}
-            <p className="absolute left-[8px] bottom-[10px] text-gray-500 text-[10px] mb-2">{message.time}</p>
+            <p className="absolute left-[8px] bottom-[10px] text-gray-500 text-[10px] mb-2">
+                {new Date(message.time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+            </p>
         </div>
     );
 }

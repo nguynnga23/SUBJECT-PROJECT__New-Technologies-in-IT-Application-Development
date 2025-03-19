@@ -8,7 +8,7 @@ function ChatImage({ userId, message, showName, replyMessage }) {
     return (
         <div className={`relative rounded-lg pb-2 cursor-pointer `}>
             {showName && (
-                <p className="text-[10px] text-gray-400 pb-[2px]">{message?.sender !== userId && message?.name}</p>
+                <p className="text-[10px] text-gray-400 pb-[2px]">{message?.sender.id !== userId && message?.name}</p>
             )}
             <div>
                 {replyMessage && (
@@ -28,7 +28,9 @@ function ChatImage({ userId, message, showName, replyMessage }) {
                 className="max-w-[500px] mb-4 rounded-lg"
                 onClick={() => setSelectedImage(message.content)}
             />
-            <p className="absolute left-[8px] bottom-[2px] text-gray-500 text-[10px]">{message.time}</p>
+            <p className="absolute left-[8px] bottom-[2px] text-gray-500 text-[10px]">
+                {new Date(message.time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+            </p>
 
             {selectedImage && <PopupViewImage selectedImage={selectedImage} setSelectedImage={setSelectedImage} />}
         </div>
