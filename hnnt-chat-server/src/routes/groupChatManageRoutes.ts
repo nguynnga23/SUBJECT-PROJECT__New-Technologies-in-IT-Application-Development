@@ -5,14 +5,15 @@ import {
     muteGroup,
     changeGroupRole,
     leaveGroup,
-    disbandGroup
+    disbandGroup,
+    pinMessage,
 } from '../controllers/groupChatManageController';
 
 const router = Router();
 
 router.post('/create', createGroupChat);
 router.post('/:groupId/add', addMemberToGroup);
-// router.put('/message/:messageId/pin', pinMessage);
+router.put('/message/:messageId/pin', pinMessage);
 router.put('/mute', muteGroup);
 router.put('/role', changeGroupRole);
 router.delete('/:groupId/leave', leaveGroup);

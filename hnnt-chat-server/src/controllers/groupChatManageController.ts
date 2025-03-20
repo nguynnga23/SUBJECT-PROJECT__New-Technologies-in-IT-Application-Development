@@ -1,13 +1,21 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { AuthRequest } from '../types/authRequest';
 
 const prisma = new PrismaClient();
 
 // Create group chat
 // POST /api/groups/create
 // Body: { name: string, avatar: string, chatParticipant: [{ accountId: string}] }
-export const createGroupChat = async (req: Request, res: Response): Promise<void> => {
+export const createGroupChat = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
+        // const userId = req.user.id;
+
+        // if (!userId) {
+        //     res.status(401).json({ message: 'Unauthorized - No user ID found' });
+        //     return;
+        // }
+
         const {name, avatar, chatParticipant } = req.body;
         if (!name) {
             res.status(400).json({ message: 'Tên nhóm không thể để trống!' });
@@ -62,15 +70,17 @@ export const addMemberToGroup = async (req: Request, res: Response): Promise<voi
     }
 };
 
-// export const pinMessage = async (req: Request, res: Response): Promise<void> => {
-//     try {
-//         const messageId = req.params.messageId;
-//         await prisma.message.update({ where: { id: messageId }, data: { pinned: true } });
-//         res.status(200).json({ message: 'Tin nhắn đã được ghim!' });
-//     } catch (error) {
-//         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
-//     }
-// };
+// Pin message
+// PUT /api/message/:messageId/pin
+export const pinMessage = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const messageId = req.params.messageId;
+        await prisma.message.update({ where: { id: messageId }, data: { pin: true } });
+        res.status(200).json({ message: 'Tin nhắn đã được ghim!' });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+    }
+};
 
 // Mute group
 // PUT /api/groups/mute
