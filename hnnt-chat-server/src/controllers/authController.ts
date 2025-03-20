@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
-// import bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import redis from '../config/redis';
 import dotenv from 'dotenv';
@@ -24,19 +24,22 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         }
 
         // So sánh mật khẩu
-        // const isMatch = await bcrypt.compare(password, user.password);
-        const isMatch = password === user.password;
+        const isMatch = await bcrypt.compare(password, user.password);
+        // const isMatch = password === user.password;
         if (!isMatch) {
             res.status(401).json({ message: 'Số điện thoại hoặc mật khẩu không đúng' });
             return;
         }
 
+        const secretKey = process.env.JWT_SECRET;
+        if (!secretKey) {
+            throw new Error('Thiếu ACCESS_TOKEN_SECRET_SIGNATURE trong biến môi trường!');
+        }
+
         // Tạo JWT token
-        const token = jwt.sign(
-            { id: user.id, number: user.number, name: user.name },
-            process.env.JWT_SECRET as string,
-            { expiresIn: '7d' },
-        );
+        const token = jwt.sign({ id: user.id, number: user.number, name: user.name }, secretKey as string, {
+            expiresIn: '7d',
+        });
 
         res.status(200).json({ token, user });
     } catch (error) {
@@ -65,3 +68,37 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
         res.status(500).json({ message: 'Lỗi máy chủ' });
     }
 };
+
+export const register = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { name, number, password, avatar, status, birthDate, location, gender } = req.body;
+
+        const existingUser = await prisma.account.findUnique({ where: { number } });
+        if (existingUser) {
+            res.status(400).json({ message: 'Số điện thoại này đã được sử dụng!' });
+            return;
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = await prisma.account.create({
+            data: {
+                name: name ?? 'Người dùng mới',
+                number,
+                password: hashedPassword,
+                avatar: avatar ?? 'https://m.media-amazon.com/images/I/518K-+yYl2L._AC_SL1000_.jpg',
+                status: status ?? 'active',
+                birthDate: birthDate ? new Date(birthDate) : new Date('2000-01-01'), // Chuyển đổi birthDate thành kiểu Date
+                location: location ?? '',
+                gender: gender ?? 'Nam',
+                currentAvatars: [], // Mảng trống mặc định
+            },
+        });
+
+        res.status(201).json({ message: 'Đăng ký thành công!', user: newUser });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+    }
+};
+
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {};
