@@ -5,6 +5,8 @@ import jwt from 'jsonwebtoken';
 import redis from '../config/redis';
 import dotenv from 'dotenv';
 
+import { sendSMS } from '../config/sendSMS';
+
 dotenv.config();
 
 const prisma = new PrismaClient();
@@ -78,6 +80,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
             res.status(400).json({ message: 'Số điện thoại này đã được sử dụng!' });
             return;
         }
+
+        // Gửi SMS xác nhận
+        // const otpCode = Math.floor(100000 + Math.random() * 900000).toString(); // Tạo mã OTP 6 số
+        // await sendSMS('+84935019843', `Mã OTP của bạn là: ${otpCode}`);
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
