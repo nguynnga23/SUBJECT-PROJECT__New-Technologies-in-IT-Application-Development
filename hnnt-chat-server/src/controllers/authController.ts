@@ -158,4 +158,51 @@ export const verifyOTP = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
-export const forgotPassword = async (req: Request, res: Response): Promise<void> => {};
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { number } = req.body;
+        if (!number || !/^0\d{9}$/.test(number)) {
+            res.status(400).json({ error: 'Số điện thoại không hợp lệ' });
+        }
+
+        // Kiểm tra xem số có trong DB không
+        const user = await prisma.account.findUnique({
+            where: { number },
+        });
+
+        if (!user) {
+            res.status(404).json({ error: 'Số điện thoại chưa đăng ký' });
+        }
+
+        // Tạo OTP ngẫu nhiên
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        otpStore.set(number, otpCode); // Lưu OTP
+
+        // Gửi OTP qua SMS (Thêm +84 cho số Việt Nam)
+        // await sendSMS('+84935019843', `Mã OTP đặt lại mật khẩu của bạn là: ${otpCode}`);
+
+        res.json({ message: 'OTP đã được gửi!' });
+    } catch (error) {
+        res.status(500).json({ error: 'Không thể gửi OTP' });
+    }
+};
+
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { number, newPassword } = req.body;
+        if (!number || !newPassword) {
+            res.status(400).json({ error: 'Thiếu thông tin' });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        const user = await prisma.account.update({
+            where: { number },
+            data: { password: hashedPassword },
+        });
+
+        res.json({ message: 'Đặt lại mật khẩu thành công!' });
+    } catch (error) {
+        res.status(500).json({ error: 'Lỗi đặt lại mật khẩu' });
+    }
+};
