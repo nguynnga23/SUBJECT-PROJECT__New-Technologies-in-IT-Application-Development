@@ -53,10 +53,21 @@ CREATE TABLE "Chat" (
 );
 
 -- CreateTable
+CREATE TABLE "Category" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "color" TEXT NOT NULL,
+
+    CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "ChatParticipant" (
     "id" TEXT NOT NULL,
     "chatId" TEXT NOT NULL,
     "accountId" TEXT NOT NULL,
+    "categoryId" TEXT,
+    "priority" BOOLEAN DEFAULT true,
     "pin" BOOLEAN NOT NULL DEFAULT false,
     "notify" BOOLEAN NOT NULL DEFAULT true,
     "role" "ChatRole" NOT NULL DEFAULT 'MEMBER',
@@ -74,6 +85,11 @@ CREATE TABLE "Message" (
     "time" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "deletedBy" TEXT[],
     "destroy" BOOLEAN NOT NULL DEFAULT false,
+    "pin" BOOLEAN NOT NULL DEFAULT false,
+    "fileName" TEXT,
+    "fileSize" TEXT,
+    "fileType" TEXT,
+    "replyToId" TEXT,
 
     CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
 );
@@ -101,6 +117,9 @@ CREATE UNIQUE INDEX "Friend_user1Id_user2Id_key" ON "Friend"("user1Id", "user2Id
 -- CreateIndex
 CREATE UNIQUE INDEX "ChatParticipant_chatId_accountId_key" ON "ChatParticipant"("chatId", "accountId");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "Message_replyToId_key" ON "Message"("replyToId");
+
 -- AddForeignKey
 ALTER TABLE "FriendRequest" ADD CONSTRAINT "FriendRequest_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -120,10 +139,16 @@ ALTER TABLE "ChatParticipant" ADD CONSTRAINT "ChatParticipant_chatId_fkey" FOREI
 ALTER TABLE "ChatParticipant" ADD CONSTRAINT "ChatParticipant_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "ChatParticipant" ADD CONSTRAINT "ChatParticipant_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Message" ADD CONSTRAINT "Message_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "Chat"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Message" ADD CONSTRAINT "Message_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Message" ADD CONSTRAINT "Message_replyToId_fkey" FOREIGN KEY ("replyToId") REFERENCES "Message"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Reaction" ADD CONSTRAINT "Reaction_messageId_fkey" FOREIGN KEY ("messageId") REFERENCES "Message"("id") ON DELETE CASCADE ON UPDATE CASCADE;

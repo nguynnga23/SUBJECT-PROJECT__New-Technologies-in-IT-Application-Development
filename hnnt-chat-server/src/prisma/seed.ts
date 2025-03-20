@@ -77,6 +77,7 @@ async function main() {
         data: {
             id: uuidv4(),
             isGroup: true,
+            avatar: 'https://cdn-icons-png.flaticon.com/512/6387/6387947.png',
             name: 'Dev Team',
             participants: {
                 create: [

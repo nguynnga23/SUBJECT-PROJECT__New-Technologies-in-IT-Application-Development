@@ -3,6 +3,7 @@ import TabChatRightBar from '../../components/Tab/TabChatRightBar';
 import TabChatLeftBar from '../../components/Tab/TabChatLeftBar';
 import TabChatRightBarSearch from '../../components/Tab/TabChatRightBarSearch';
 import { useSelector } from 'react-redux';
+import TabMessage from '../../components/Tab/TabMessage';
 
 function Messaging() {
     const userActive = useSelector((state) => state.auth.userActive);
@@ -20,8 +21,8 @@ function Messaging() {
                         showRightBar || showRightBarSearch ? 'w-2/4' : 'w-3/4'
                     }`}
                 >
-                    {!activeChat?.delete.includes(userId) && activeChat ? (
-                        <TabChat />
+                    {activeChat ? (
+                        <TabMessage />
                     ) : (
                         <div className="flex-1 flex items-center justify-center text-gray-500 dark:text-white">
                             Chọn một cuộc trò chuyện để bắt đầu
