@@ -6,6 +6,7 @@ import friendRouter from './src/routes/friendRoutes';
 import chatRouter from './src/routes/chatRoutes';
 import messageRouter from './src/routes/messageRoutes';
 import authRouter from './src/routes/authRoutes';
+import userRouter from './src/routes/userRoutes';
 
 // Load environment variables
 dotenv.config();
@@ -43,6 +44,7 @@ app.use('/api/friends', friendRouter);
 app.use('/api/chats', chatRouter);
 app.use('/api/messages', messageRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/user', userRouter);
 
 app.listen(PORT, () => {
     console.log(`Server đang chạy trên cổng ${PORT}`);
