@@ -11,6 +11,8 @@ dotenv.config();
 
 const prisma = new PrismaClient();
 
+const otpStore = new Map<string, string>(); // Lưu OTP tạm thời
+
 export const login = async (req: Request, res: Response): Promise<void> => {
     try {
         const { number, password } = req.body;
@@ -104,6 +106,55 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         res.status(201).json({ message: 'Đăng ký thành công!', user: newUser });
     } catch (error) {
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+    }
+};
+
+export const sendOTP = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { number } = req.body;
+        if (!number || !/^0\d{9}$/.test(number)) {
+            res.status(400).json({ error: 'Số điện thoại không hợp lệ' });
+            return;
+        }
+
+        // Tạo OTP ngẫu nhiên
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Lưu OTP vào bộ nhớ tạm
+        otpStore.set(number, otpCode);
+
+        // Gửi OTP qua SMS (Thêm +84 cho số Việt Nam)
+        // await sendSMS('+84935019843', `Mã OTP của bạn là: ${otpCode}`);
+
+        res.json({ message: 'OTP đã được gửi!' });
+    } catch (error) {
+        console.error('Lỗi gửi OTP:', error);
+        res.status(500).json({ error: 'Không thể gửi OTP' });
+    }
+};
+
+export const verifyOTP = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { number, otp } = req.body;
+
+        if (!number || !otp) {
+            res.status(400).json({ error: 'Thiếu thông tin' });
+            return;
+        }
+
+        // Kiểm tra OTP trong bộ nhớ tạm
+        const storedOTP = otpStore.get(number);
+        if (!storedOTP || storedOTP !== otp) {
+            res.status(400).json({ error: 'Mã OTP không đúng hoặc đã hết hạn' });
+            return;
+        }
+
+        // Xóa OTP khỏi bộ nhớ
+        otpStore.delete(number);
+
+        res.json({ message: 'Xác thực OTP thành công! Hãy đặt mật khẩu.' });
+    } catch (error) {
+        res.status(500).json({ error: 'Lỗi xác thực OTP' });
     }
 };
 
