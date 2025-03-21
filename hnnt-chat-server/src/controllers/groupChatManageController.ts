@@ -21,6 +21,12 @@ export const createGroupChat = async (req: AuthRequest, res: Response): Promise<
             return;
         }
 
+        if (chatParticipant.length < 2) {
+            res.status(400).json({ message: 'Nhóm phải có ít nhất 3 thành viên.' });
+            return;
+        }
+        const filteredParticipants = chatParticipant.filter((p: any) => p.accountId !== requesterId);
+
         const chat = await prisma.chat.create({
             data: {
                 isGroup: true,
@@ -41,7 +47,7 @@ export const createGroupChat = async (req: AuthRequest, res: Response): Promise<
                 role: 'LEADER',
             },
             // Thêm các thành viên còn lại (MEMBER)
-            ...chatParticipant.map((p: any) => ({
+            ...filteredParticipants.map((p: any) => ({
                 chatId: chat.id,
                 accountId: p.accountId,
                 pin: false,
