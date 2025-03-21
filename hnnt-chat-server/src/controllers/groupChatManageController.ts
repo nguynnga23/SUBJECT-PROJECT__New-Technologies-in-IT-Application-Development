@@ -9,12 +9,11 @@ const prisma = new PrismaClient();
 // Body: { name: string, avatar: string, chatParticipant: [{ accountId: string}] }
 export const createGroupChat = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        // const userId = req.user.id;
-
-        // if (!userId) {
-        //     res.status(401).json({ message: 'Unauthorized - No user ID found' });
-        //     return;
-        // }
+        const requesterId = req.user?.id;
+        if (!requesterId) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
 
         const {name, avatar, chatParticipant } = req.body;
         if (!name) {
@@ -32,13 +31,24 @@ export const createGroupChat = async (req: AuthRequest, res: Response): Promise<
             },
         });
 
-        const participants = chatParticipant.map((p: any, index: number) => ({
-            chatId: chat.id,
-            accountId: p.accountId,
-            pin: false,
-            notify: true,
-            role: index === 0 ? 'LEADER' : p.role || 'MEMBER',
-        }));
+        const participants = [
+            // Thêm người tạo nhóm (LEADER)
+            {
+                chatId: chat.id,
+                accountId: requesterId,
+                pin: false,
+                notify: true,
+                role: 'LEADER',
+            },
+            // Thêm các thành viên còn lại (MEMBER)
+            ...chatParticipant.map((p: any) => ({
+                chatId: chat.id,
+                accountId: p.accountId,
+                pin: false,
+                notify: true,
+                role: 'MEMBER',
+            })),
+        ];
 
         await prisma.chatParticipant.createMany({ data: participants });
         res.status(201).json({ chat, participants });
@@ -50,8 +60,13 @@ export const createGroupChat = async (req: AuthRequest, res: Response): Promise<
 // Add member to group
 // POST /api/groups/:groupId/add
 // Body: { accountId: string}
-export const addMemberToGroup = async (req: Request, res: Response): Promise<void> => {
+export const addMemberToGroup = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
+        const requesterId = req.user?.id;
+        if (!requesterId) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
         const chatId = req.params.groupId;
         const members = req.body;
         
@@ -72,8 +87,13 @@ export const addMemberToGroup = async (req: Request, res: Response): Promise<voi
 
 // Pin message
 // PUT /api/message/:messageId/pin
-export const pinMessage = async (req: Request, res: Response): Promise<void> => {
+export const pinMessage = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
+        const requesterId = req.user.id;
+        if (!requesterId) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
         const messageId = req.params.messageId;
         await prisma.message.update({ where: { id: messageId }, data: { pin: true } });
         res.status(200).json({ message: 'Tin nhắn đã được ghim!' });
@@ -82,17 +102,58 @@ export const pinMessage = async (req: Request, res: Response): Promise<void> => 
     }
 };
 
+// Pin message
+// PUT /api/message/:messageId/un-pin
+export const unPinMessage = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const requesterId = req.user.id;
+        if (!requesterId) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+        const messageId = req.params.messageId;
+        await prisma.message.update({ where: { id: messageId }, data: { pin: false } });
+        res.status(200).json({ message: 'Tin nhắn đã được gỡ ghim!' });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+    }
+};
+
 // Mute group
 // PUT /api/groups/mute
-// Body: { chatId: string, accountId: string, notify: boolean }
-export const muteGroup = async (req: Request, res: Response): Promise<void> => {
+// Body: { chatId: string}
+export const muteGroup = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { chatId, accountId, notify } = req.body;
+        const requesterId = req.user?.id;
+        if (!requesterId) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
+        const { chatId } = req.body;
+        const accountId = requesterId;
+        // Kiểm tra xem người dùng có trong nhóm không
+        const participant = await prisma.chatParticipant.findUnique({
+            where: { chatId_accountId: { chatId, accountId } },
+        });
+
+        if (!participant) {
+            res.status(403).json({ message: 'Bạn không phải thành viên của nhóm này' });
+            return;
+        }
+
+        // Đảo trạng thái notify
+        const newNotify = !participant.notify;
+
         await prisma.chatParticipant.update({
             where: { chatId_accountId: { chatId, accountId } },
-            data: { notify },
+            data: { notify: newNotify },
         });
-        res.status(200).json({ message: `Thông báo đã ${notify ? 'bật' : 'tắt'}!` });
+
+        res.status(200).json({
+            message: `Thông báo đã ${newNotify ? 'bật' : 'tắt'}!`,
+            notify: newNotify
+        });
     } catch (error) {
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
     }
@@ -100,18 +161,15 @@ export const muteGroup = async (req: Request, res: Response): Promise<void> => {
 
 // Change group leader
 // PUT /api/groups/role
-// Body: {requesterId: string, chatId: string, accountId: string }
-export const changeGroupRole = async (req: Request, res: Response): Promise<void> => {
+// Body: {chatId: string, accountId: string }
+export const changeGroupRole = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { chatId, accountId } = req.body;
-
-        // Lấy ID của người thực hiện request
-        // const requesterId = req.user?.accountId; // Giả sử req.user chứa thông tin người gửi request
-        const requesterId = req.body.requesterId;
-
+        const requesterId = req.user.id;
         if (!requesterId) {
-            res.status(403).json({ message: 'Không xác định được người dùng!' });
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
         }
+        const { chatId, accountId } = req.body;
 
         // Kiểm tra xem người yêu cầu có phải là LEADER không
         const requester = await prisma.chatParticipant.findUnique({
@@ -153,12 +211,16 @@ export const changeGroupRole = async (req: Request, res: Response): Promise<void
 
 // Leave group
 // DELETE /api/groups/:groupId/leave
-// Body: { accountId: string }
-export const leaveGroup = async (req: Request, res: Response): Promise<void> => {
+export const leaveGroup = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const chatId = req.params.groupId;
-        const accountId = req.body.accountId;
+        const requesterId = req.user.id;
+        if (!requesterId) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
 
+        const chatId = req.params.groupId;
+        const accountId = requesterId;
         // Kiểm tra xem người dùng có trong nhóm không
         const participant = await prisma.chatParticipant.findUnique({
             where: { chatId_accountId: { chatId, accountId } },
@@ -218,15 +280,20 @@ export const leaveGroup = async (req: Request, res: Response): Promise<void> => 
 
 // Disband group
 // DELETE /api/groups/:groupId/disband
-// Body: { requestId: string }
-export const disbandGroup = async (req: Request, res: Response): Promise<void> => {
+export const disbandGroup = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
+        const requesterId = req.user.id;
+        if (!requesterId) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
         const chatId = req.params.groupId;
-        const requesterId = req.body.requestId;
+        const accountId = requesterId;
 
         // Kiểm tra xem người yêu cầu có phải là LEADER không
         const requester = await prisma.chatParticipant.findUnique({
-            where: { chatId_accountId: { chatId, accountId: requesterId } },
+            where: { chatId_accountId: { chatId, accountId} },
             select: { role: true },
         });
 
@@ -247,4 +314,47 @@ export const disbandGroup = async (req: Request, res: Response): Promise<void> =
     }
 };
 
+//LEADER kick member
+// DELETE /api/groups/:groupId/kick
+// Body: { accountId: string }
+export const kickMember = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const requesterId = req.user.id;
+        if (!requesterId) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
+        const chatId = req.params.groupId;
+        const { accountId } = req.body;
+
+        // Kiểm tra xem người yêu cầu có phải là LEADER không
+        const requester = await prisma.chatParticipant.findUnique({
+            where: { chatId_accountId: { chatId, accountId: requesterId } },
+            select: { role: true },
+        });
+
+        if (!requester || requester.role !== 'LEADER') {
+            res.status(403).json({ message: 'Bạn không có quyền xóa thành viên khỏi nhóm!' });
+            return;
+        }
+
+        const member = await prisma.chatParticipant.findUnique({
+            where: { chatId_accountId: { chatId, accountId } },
+        });
+
+        if (!member) {
+            res.status(404).json({ message: 'Thành viên không tồn tại trong nhóm!' });
+            return;
+        }
+
+        await prisma.chatParticipant.delete({
+            where: { chatId_accountId: { chatId, accountId } },
+        });
+
+        res.status(200).json({ message: 'Xóa thành viên khỏi nhóm thành công!' });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+    }
+};
 
