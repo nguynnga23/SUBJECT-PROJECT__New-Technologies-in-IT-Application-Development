@@ -77,6 +77,18 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     try {
         const { name, number, password, avatar, status, birthDate, location, gender } = req.body;
 
+        const phoneRegex = /^(03|05|07|08|09)\d{8}$/; // Chỉ chấp nhận số hợp lệ ở VN
+
+        if (!phoneRegex.test(number) || /^(\d)\1{9}$/.test(number)) {
+            res.status(400).json({ message: 'Số điện thoại không hợp lệ!' });
+            return;
+        }
+
+        if (!password || password.trim() === '') {
+            res.status(400).json({ message: 'Mật khẩu không được để trống!' });
+            return;
+        }
+
         const existingUser = await prisma.account.findUnique({ where: { number } });
         if (existingUser) {
             res.status(400).json({ message: 'Số điện thoại này đã được sử dụng!' });
@@ -91,14 +103,17 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
         const newUser = await prisma.account.create({
             data: {
-                name: name ?? 'Người dùng mới',
+                name: name && name.trim() !== '' ? name : 'Người dùng mới',
                 number,
                 password: hashedPassword,
-                avatar: avatar ?? 'https://m.media-amazon.com/images/I/518K-+yYl2L._AC_SL1000_.jpg',
-                status: status ?? 'active',
+                avatar:
+                    avatar && avatar.trim() !== ''
+                        ? avatar
+                        : 'https://m.media-amazon.com/images/I/518K-+yYl2L._AC_SL1000_.jpg',
+                status: status && status.trim() !== '' ? status : 'active',
                 birthDate: birthDate ? new Date(birthDate) : new Date('2000-01-01'), // Chuyển đổi birthDate thành kiểu Date
                 location: location ?? '',
-                gender: gender ?? 'Nam',
+                gender: gender && gender.trim() !== '' ? gender : 'Nam',
                 currentAvatars: [], // Mảng trống mặc định
             },
         });
