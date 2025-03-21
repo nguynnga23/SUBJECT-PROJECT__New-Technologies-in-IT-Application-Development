@@ -26,6 +26,7 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
     try {
         const userId = req.user?.id;
         const { name, gender, birthDate } = req.body;
+        console.log(req.body);
 
         if (!name && !gender && !birthDate) {
             res.status(400).json({ message: 'No data provided to update' });

@@ -10,6 +10,8 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import { useSelector } from 'react-redux';
 
+import { updateUser } from '../../screens/Profile/api';
+
 function ModalEdit({ setIsType, onClose }) {
     const userActive = useSelector((state) => state.auth.userActive);
 
@@ -42,6 +44,14 @@ function ModalEdit({ setIsType, onClose }) {
             setDay(newMaxDays); // Giữ ngày trong phạm vi hợp lệ
         }
     }, [month, year]);
+
+    const handleUpdateUser = async () => {
+        await updateUser(
+            isName,
+            gender,
+            `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`,
+        );
+    };
 
     return (
         <motion.div
@@ -142,7 +152,10 @@ function ModalEdit({ setIsType, onClose }) {
                 </button>
 
                 <button
-                    onClick={onClose}
+                    onClick={() => {
+                        handleUpdateUser();
+                        setIsType('profile');
+                    }}
                     className="bg-blue-600 hover:bg-blue-800 rounded-md flex items-center justify-center gap-2 p-2 cursor-pointer mr-3"
                 >
                     <p className="font-semibold text-white">Cập nhật</p>
