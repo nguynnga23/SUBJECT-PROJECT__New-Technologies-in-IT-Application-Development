@@ -1,35 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Image, TouchableOpacity, ScrollView, Linking, StyleSheet, Modal, TextInput, Button } from "react-native";
+import { View, Text, Image, TouchableOpacity, ScrollView, Linking, StyleSheet, Modal, TextInput, Button, Alert, TouchableWithoutFeedback } from "react-native";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { handleReport, handleLeaveGroup, toggleMute, handleEditGroupName, handleChangeAvatar, handleDisbandGroup } from "../../services/GroupChat/GroupInfoService";
 
 export default function GroupInfoScreen() {
     const navigation = useNavigation();
     const route = useRoute();
     const groupName = route.params?.groupName || "null";
     const [isMuted, setIsMuted] = useState(false);
+    const [editVisible, setEditVisible] = useState(false);
+    const [newGroupName, setNewGroupName] = useState("");
     const [reportVisible, setReportVisible] = useState(false);
     const [leaveVisible, setLeaveVisible] = useState(false);
     const [reportReason, setReportReason] = useState("");
+    const [avatar, setAvatar] = useState(null);
+    const [userRole, setUserRole] = useState("Leader");
+    const [disbandVisible, setDisbandVisible] = useState(false);
+    const [pinVisible, setPinVisible] = useState(false);
 
-    const handleReport = () => {
-        if (reportReason === "") {
-            return;
-        }
-        console.log("Report reason:", reportReason);
-        setReportVisible(false);
-    };
-
-    const handleLeaveGroup = () => {
-        console.log("User confirmed leaving group");
-        setLeaveVisible(false);
-    };
-
-    const toggleMute = () => {
-        setIsMuted(!isMuted);
-    };
     return (
         <SafeAreaView style={styles.container}>
             <SafeAreaProvider>
@@ -43,13 +34,15 @@ export default function GroupInfoScreen() {
 
                 {/* Group Info */}
                 <View style={styles.groupInfo}>
-                    <Image
-                        source={require("../../../../assets/icon.png")}
+                    {avatar && <Image
+
+                        // source={require("../../../../assets/icon.png")}
+                        source={{ uri: avatar }}
                         style={styles.groupImage}
-                    />
+                    />}
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Text style={styles.groupName}>{groupName}</Text>
-                        <TouchableOpacity>
+                        <Text style={styles.groupName}>{newGroupName.trim() ? newGroupName : groupName}</Text>
+                        <TouchableOpacity onPress={() => setEditVisible(true)}>
                             <AntDesign style={{ marginTop: 7 }} name="edit" size={24} color="black" />
                         </TouchableOpacity>
                     </View>
@@ -59,14 +52,14 @@ export default function GroupInfoScreen() {
                 {/* Actions */}
                 <View style={styles.actions}>
                     <TouchableOpacity onPress={() => navigation.navigate("FindGrMessagesScreen")}>
-                        <ActionButton icon="search" label="Find messages" />
+                        <ActionButton icon="search" label="Find      message" />
                     </TouchableOpacity>
 
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={() => handleChangeAvatar(setAvatar)}>
                         <ActionButton icon="image" label="Change avatar" />
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.actionButton} onPress={toggleMute}>
+                    <TouchableOpacity style={styles.actionButton} onPress={() => toggleMute(isMuted, setIsMuted)}>
                         <Ionicons name={isMuted ? "notifications" : "notifications-off"} size={24} color="black" />
                         <Text style={styles.actionText}>{isMuted ? "Unmute" : "Mute"}</Text>
                     </TouchableOpacity>
@@ -77,21 +70,21 @@ export default function GroupInfoScreen() {
                     <OptionItem label="Image, file, link" />
                 </TouchableOpacity>
 
-                {/* <TouchableOpacity>
+                <TouchableOpacity onPress={() => setPinVisible(true)}>
                     <OptionItem label="Pinned message" />
-                </TouchableOpacity> */}
+                </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => navigation.navigate("MemberListScreen")}>
                     <OptionItem label="Member (4)" />
                 </TouchableOpacity>
 
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate("AddMemberScreen")}>
                     <OptionItem label="Add member" />
                 </TouchableOpacity>
 
                 {/* Group Links */}
                 <OptionItem
-                    label="Link to join group" s
+                    label="Link to join group"
                     textColor="black"
                     links={[
                         { text: "https://zalo.me/g/deuqlw127", url: "https://zalo.me/g/deuqlw127" },
@@ -105,6 +98,29 @@ export default function GroupInfoScreen() {
                 <TouchableOpacity onPress={() => setLeaveVisible(true)}>
                     <OptionItem label="Leave group" textColor="red" />
                 </TouchableOpacity>
+                {userRole === "Leader" && (
+                    <TouchableOpacity onPress={() => setDisbandVisible(true)}>
+                        <OptionItem label="Disband group" textColor="red" />
+                    </TouchableOpacity>
+                )}
+
+                {/* edit groupname modal */}
+                <Modal visible={editVisible} transparent animationType="slide">
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalContent}>
+                            <Text style={styles.modalTitle}>Edit Group Name</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={newGroupName}
+                                onChangeText={setNewGroupName}
+                            />
+                            <View style={styles.modalActions}>
+                                <Button title="Cancel" color="red" onPress={() => setEditVisible(false)} />
+                                <Button title="Apply" onPress={() => handleEditGroupName(setEditVisible, newGroupName, setNewGroupName)} />
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
 
                 {/* Report Modal */}
                 <Modal visible={reportVisible} transparent animationType="slide">
@@ -125,7 +141,7 @@ export default function GroupInfoScreen() {
                             />
                             <View style={styles.modalActions}>
                                 <Button title="Cancel" onPress={() => setReportVisible(false)} />
-                                <Button title="Submit" onPress={handleReport} />
+                                <Button title="Submit" onPress={() => handleReport(reportReason, setReportVisible)} />
                             </View>
                         </View>
                     </View>
@@ -139,10 +155,36 @@ export default function GroupInfoScreen() {
                             <Text>Are you sure you want to leave this group?</Text>
                             <View style={styles.modalActions}>
                                 <Button title="Cancel" onPress={() => setLeaveVisible(false)} />
-                                <Button title="Leave" color="red" onPress={handleLeaveGroup} />
+                                <Button title="Leave" color="red" onPress={() => handleLeaveGroup(setLeaveVisible, navigation)} />
                             </View>
                         </View>
                     </View>
+                </Modal>
+
+                {/* Disband Group Modal */}
+                <Modal visible={disbandVisible} transparent animationType="slide">
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalContent}>
+                            <Text style={styles.modalTitle}>Disband Group</Text>
+                            <Text>Are you sure you want to disband this group? This action cannot be undone.</Text>
+                            <View style={styles.modalActions}>
+                                <Button title="Cancel" onPress={() => setDisbandVisible(false)} />
+                                <Button title="Disband" color="red" onPress={() => handleDisbandGroup(setDisbandVisible, navigation)} />
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+                {/* Pin Modal */}
+                <Modal visible={pinVisible} transparent animationType="slide">
+                    <TouchableWithoutFeedback onPress={() => setPinVisible(false)}>
+                        <View style={styles.modalContainer}>
+                            <View style={styles.modalContent}>
+                                <Text style={styles.modalTitle}>Pin messenge</Text>
+                                <Text>...</Text>
+                            </View>
+                        </View>
+                    </TouchableWithoutFeedback>
                 </Modal>
             </SafeAreaProvider>
         </SafeAreaView>
@@ -175,7 +217,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#f2f2f2",
     },
     header: {
-        backgroundColor: "#0084ff",
+        backgroundColor: "#005ae0",
         padding: 15,
         flexDirection: "row",
         alignItems: "center",
