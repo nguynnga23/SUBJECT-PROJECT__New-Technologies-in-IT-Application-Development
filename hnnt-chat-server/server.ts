@@ -34,6 +34,7 @@ app.use(express.urlencoded({ extended: true }));
 //     });
 
 // Routes
+
 app.use(
     cors({
         origin: 'http://localhost:3000', // Frontend chạy ở cổng 3000
