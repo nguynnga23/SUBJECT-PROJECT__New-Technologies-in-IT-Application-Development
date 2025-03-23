@@ -4,6 +4,7 @@ import { TiPin } from 'react-icons/ti';
 import { MdDelete } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
 import { setOnOrOfPin, setOnOrOfNotify, deleteChatForUser } from '../../redux/slices/chatSlice';
+import { notifyChatOfUser, pinChatOfUser } from '../../screens/Messaging/api';
 
 function PopupMenuForMess({ setShowPopup, setHoveredMessage, chat }) {
     const userActive = useSelector((state) => state.auth.userActive);
@@ -24,9 +25,16 @@ function PopupMenuForMess({ setShowPopup, setHoveredMessage, chat }) {
         };
     }, [setShowPopup]);
 
+    const pinMessage = async (chatId) => {
+        await pinChatOfUser(chatId);
+    };
+    const notifyMessage = async (chatId) => {
+        await notifyChatOfUser(chatId);
+    };
+
     return (
         <div
-            className={`absolute right-[0] top-[-10px] w-40 z-[10] bg-white shadow-lg rounded-lg z-1000 dark:bg-gray-800 `}
+            className={`absolute right-[0] top-[5px] w-40 z-[10] bg-white shadow-lg rounded-lg z-1000 dark:bg-gray-800 `}
             ref={popupRef}
         >
             <div className="">
@@ -34,7 +42,7 @@ function PopupMenuForMess({ setShowPopup, setHoveredMessage, chat }) {
                     <li
                         className="flex text-[12px] items-center px-4 py-2 hover:bg-gray-100 cursor-pointer rounded-lg"
                         onClick={() => {
-                            dispatch(setOnOrOfPin(chat.id));
+                            pinMessage(chat.chatId);
                             setShowPopup(false); // Đóng popup khi click ra ngoài
                             setHoveredMessage(null);
                         }}
@@ -45,7 +53,7 @@ function PopupMenuForMess({ setShowPopup, setHoveredMessage, chat }) {
                     <li
                         className="flex text-[12px] items-center px-4 py-2 hover:bg-gray-100 cursor-pointer rounded-lg"
                         onClick={() => {
-                            dispatch(setOnOrOfNotify(chat.id));
+                            notifyChatOfUser(chat.chatId);
                             setShowPopup(false); // Đóng popup khi click ra ngoài
                             setHoveredMessage(null);
                         }}
@@ -55,7 +63,7 @@ function PopupMenuForMess({ setShowPopup, setHoveredMessage, chat }) {
                     </li>
                     <li
                         className="flex text-[12px] items-center text-red-500 px-4 py-2 hover:bg-gray-100 cursor-pointer rounded-lg"
-                        onClick={() => dispatch(deleteChatForUser({ userId: userActive.id, chatId: chat.id }))}
+                        onClick={() => dispatch(deleteChatForUser({ userId: userActive.id, chatId: chat.chatId }))}
                     >
                         <MdDelete size={13} className="mr-2 text-red-500" />
                         Xóa tin nhắn

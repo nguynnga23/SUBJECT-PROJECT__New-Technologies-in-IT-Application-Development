@@ -88,7 +88,7 @@ function TabMessage() {
         };
 
         fetchMessages();
-    }, [data]);
+    }, [data, error]);
 
     const MessageComponent = {
         text: ChatText,

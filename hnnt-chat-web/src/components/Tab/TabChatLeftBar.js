@@ -7,7 +7,6 @@ import { TiDelete } from 'react-icons/ti';
 import PopupAddFriend from '../../components/Popup/PopupAddFriend';
 import PopupAddGroup from '../../components/Popup/PopupAddGroup';
 import TabSearch from '../../components/Tab/TabSearch';
-import TabMesssage from '../../components/Tab/TabMessage';
 
 import { searchFollowKeyWord } from '../../redux/slices/chatSlice';
 import { useDispatch } from 'react-redux';

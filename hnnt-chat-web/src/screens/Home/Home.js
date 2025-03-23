@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import Modal from '../../components/Modal';
 import { logout } from '../Authentication/api';
 import { logoutOfSlice } from '../../redux/slices/authSlice';
-import { setActiveChat } from '../../redux/slices/chatSlice';
+import { setActiveChat, setShowOrOffRightBar, setShowOrOffRightBarSearch } from '../../redux/slices/chatSlice';
 
 export default function Home() {
     const navigate = useNavigate();
@@ -55,6 +55,8 @@ export default function Home() {
             await logout(); // Gọi API logout
             dispatch(logoutOfSlice);
             dispatch(setActiveChat(null));
+            dispatch(setShowOrOffRightBar(false));
+            dispatch(setShowOrOffRightBarSearch(false));
 
             // Cập nhật state, Redux hoặc điều hướng về trang login
             navigate('/');

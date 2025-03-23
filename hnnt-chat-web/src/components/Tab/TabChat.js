@@ -13,6 +13,8 @@ import { setActiveTabMessToOrther, setActiveTabMessToPriority } from '../../redu
 import { useEffect, useRef, useState } from 'react';
 import PopupMenuForMess from '../Popup/PopupMenuForMess';
 import { FiMoreHorizontal } from 'react-icons/fi';
+import { formatDistanceToNow, format } from 'date-fns';
+import { vi } from 'date-fns/locale';
 
 import { getChat } from '../../screens/Messaging/api';
 
@@ -65,6 +67,21 @@ function TabChat() {
     // };
     const timeoutRef = useRef(null);
 
+    const formatTime = (time) => {
+        const date = new Date(time);
+        const now = new Date();
+
+        const diffInDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+
+        if (diffInDays === 0) {
+            return formatDistanceToNow(date, { addSuffix: true, locale: vi }); // "2 phút trước", "1 giờ trước"
+        } else if (diffInDays === 1) {
+            return 'Hôm qua';
+        } else {
+            return format(date, 'dd/MM/yyyy', { locale: vi }); // Hiển thị ngày gửi
+        }
+    };
+
     return (
         <div className="">
             <div className="flex border-b dark:border-b-black justify-between p-4 pt-0 pb-0">
@@ -90,7 +107,11 @@ function TabChat() {
             </div>
             <div className="overflow-y-auto min-h-[500px] z-0">
                 {data
-                    .sort((a, b) => (b.pin ? 1 : 0) - (a.pin ? 1 : 0))
+                    .sort((a, b) => {
+                        const pinA = a.participants.find((p) => p.accountId === userId)?.pin || false;
+                        const pinB = b.participants.find((p) => p.accountId === userId)?.pin || false;
+                        return Number(pinB) - Number(pinA);
+                    })
                     .map((chat, index) => {
                         const notMe = chat.participants?.find((user) => user.accountId !== userId)?.account;
                         const me = chat.participants?.find((user) => user.accountId === userId);
@@ -121,26 +142,30 @@ function TabChat() {
                                     }, 500);
                                 }}
                             >
-                                <div className="absolute top-[5px] right-[0px]">
-                                    {hoveredMessage === index ? (
-                                        <div className="relative ">
-                                            <FiMoreHorizontal
-                                                size={13}
-                                                className="m-2 text-gray-500 hover:bg-blue-200 rounded-[2px]"
-                                                onClick={() => setShowPopup(true)}
-                                            />
-                                            {showPopup && hoveredMessage === index && (
-                                                <PopupMenuForMess
-                                                    setShowPopup={setShowPopup}
-                                                    setHoveredMessage={setHoveredMessage}
-                                                    chat={chat}
+                                <div>
+                                    <div className="absolute top-[5px] right-[0px] flex">
+                                        {!me?.notify && <HiBellSlash size={13} className="m-1 text-gray-500" />}
+                                        {me?.pin && <TiPin size={13} className="m-1 text-gray-500" />}
+                                        {hoveredMessage === index && (
+                                            <div className="relative ">
+                                                <FiMoreHorizontal
+                                                    size={13}
+                                                    className="m-1 mr-2 text-gray-500 hover:bg-blue-200 rounded-[2px]"
+                                                    onClick={() => setShowPopup(true)}
                                                 />
-                                            )}
-                                        </div>
-                                    ) : (
-                                        !me?.notify && <HiBellSlash size={13} className="m-2 text-gray-500" />
-                                    )}
-                                    {me?.pin && <TiPin size={13} className="m-2 text-gray-500" />}
+                                                {showPopup && hoveredMessage === index && (
+                                                    <PopupMenuForMess
+                                                        setShowPopup={setShowPopup}
+                                                        setHoveredMessage={setHoveredMessage}
+                                                        chat={me}
+                                                    />
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="absolute bottom-[15px] right-[10px] flex  text-[10px]">
+                                        {chat?.messages[0]?.time && formatTime(chat?.messages[0]?.time)}
+                                    </div>
                                 </div>
 
                                 <div className="flex item-center">
@@ -193,7 +218,7 @@ function TabChat() {
                                                             {chat?.messages[0]?.fileName}
                                                         </span>
                                                     ) : chat?.messages[0]?.type === 'text' ? (
-                                                        <span className="max-w-[220px] truncate">
+                                                        <span className="max-w-[160px] truncate">
                                                             {chat?.messages[0].content}
                                                         </span>
                                                     ) : (
