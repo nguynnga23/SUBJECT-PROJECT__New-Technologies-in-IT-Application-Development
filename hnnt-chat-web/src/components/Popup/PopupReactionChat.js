@@ -15,15 +15,19 @@ export default function PopupReactionChat({ onClose, reactions }) {
 
                 {/* Danh sách người dùng */}
                 <div className="p-4 max-h-[350px] overflow-auto">
-                    {reactions.map((user, index) => (
+                    {reactions.map((reaction, index) => (
                         <div key={index} className="flex items-center justify-between p-1">
                             <div className="flex items-center space-x-2">
-                                <img src={user.avatar} alt="Avatar" className="w-10 h-10 rounded-full object-cover" />
-                                <span className="text-[12px]">{user.name}</span>
+                                <img
+                                    src={reaction.user.avatar}
+                                    alt="Avatar"
+                                    className="w-10 h-10 rounded-full object-cover"
+                                />
+                                <span className="text-[12px]">{reaction.user.name}</span>
                             </div>
                             <div className="flex items-center space-x-1">
-                                <span>{user.reaction}</span>
-                                <span className="text-sm font-semibold">{user.sum}</span>
+                                <span>{reaction.reaction}</span>
+                                <span className="text-sm font-semibold">{reaction.sum}</span>
                             </div>
                         </div>
                     ))}

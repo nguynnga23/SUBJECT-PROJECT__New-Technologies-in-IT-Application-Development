@@ -33,7 +33,7 @@ function Authentication() {
             dispatch(setUser({ userActive: data.user, token: null }));
             navigate('/home');
         } catch (err) {
-            alert('Sai mật khẩu hoặc tên đăng nhập!');
+            alert('Lỗi server!');
         }
     };
 

@@ -29,7 +29,9 @@ export const GetMessageOfChat = async (req: AuthRequest, res: Response): Promise
             },
             include: {
                 sender: { select: { id: true, name: true, avatar: true } },
-                reactions: true,
+                reactions: {
+                    select: { user: { select: { id: true, name: true, avatar: true } }, reaction: true, sum: true },
+                },
                 replyTo: { select: { sender: { select: { name: true } }, content: true } },
             },
             orderBy: { time: 'asc' },
@@ -140,5 +142,125 @@ export const destroyMessage = async (req: AuthRequest, res: Response): Promise<v
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Lỗi server.' });
+    }
+};
+
+export const reactionMessage = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const { messageId } = req.params;
+        const { userId, reaction } = req.body;
+        const message = await prisma.message.findFirst({
+            where: {
+                id: messageId,
+            },
+        });
+        if (!message) {
+            res.status(404).json({ message: 'Tin nhắn không tồn tại' });
+            return;
+        }
+
+        const existingReaction = await prisma.reaction.findFirst({
+            where: {
+                messageId,
+                userId,
+            },
+        });
+
+        if (existingReaction) {
+            if (existingReaction.reaction === reaction) {
+                // Nếu reaction giống nhau, tăng sum lên
+                const updatedReaction = await prisma.reaction.update({
+                    where: { id: existingReaction.id },
+                    data: { sum: existingReaction.sum + 1 },
+                });
+
+                res.status(200).json({ message: 'Reaction updated', reaction: updatedReaction });
+                return;
+            } else {
+                // Nếu reaction khác, kiểm tra xem reaction đó đã tồn tại chưa
+                const newReaction = await prisma.reaction.findFirst({
+                    where: { messageId, userId, reaction },
+                });
+
+                if (newReaction) {
+                    // Nếu đã tồn tại reaction khác cùng loại, tăng sum của reaction đó
+                    const updatedNewReaction = await prisma.reaction.update({
+                        where: { id: newReaction.id },
+                        data: { sum: newReaction.sum + 1 },
+                    });
+
+                    res.status(200).json({ message: 'Reaction switched and updated', reaction: updatedNewReaction });
+                    return;
+                } else {
+                    // Nếu chưa có reaction khác, tạo mới
+                    const createdReaction = await prisma.reaction.create({
+                        data: {
+                            messageId,
+                            userId,
+                            reaction,
+                        },
+                    });
+
+                    res.status(201).json({ message: 'New reaction added', reaction: createdReaction });
+                    return;
+                }
+            }
+        }
+
+        // Nếu chưa có reaction, tạo mới
+        const newReaction = await prisma.reaction.create({
+            data: {
+                messageId,
+                userId,
+                reaction,
+            },
+        });
+
+        res.status(201).json({ message: 'Reaction added', reaction: newReaction });
+        return;
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+        return;
+    }
+};
+
+export const removeReactionOfMessage = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const { messageId } = req.params;
+        const { userId } = req.body;
+        const message = await prisma.message.findFirst({
+            where: {
+                id: messageId,
+            },
+        });
+        if (!message) {
+            res.status(404).json({ message: 'Tin nhắn không tồn tại' });
+            return;
+        }
+
+        const existingReactions = await prisma.reaction.findMany({
+            where: {
+                messageId,
+                userId,
+            },
+        });
+        if (existingReactions.length === 0) {
+            res.status(404).json({ message: 'Không có reaction nào để xóa' });
+            return;
+        }
+        // Xóa tất cả reaction của user trên message
+        await prisma.reaction.deleteMany({
+            where: {
+                messageId,
+                userId,
+            },
+        });
+
+        res.status(200).json({ message: 'Đã xóa tất cả reaction của user trên tin nhắn' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+        return;
     }
 };

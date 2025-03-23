@@ -88,7 +88,7 @@ function TabMessage() {
         };
 
         fetchMessages();
-    }, [chatId, data]);
+    }, [data]);
 
     const MessageComponent = {
         text: ChatText,
@@ -350,7 +350,7 @@ function TabMessage() {
                                             )}
                                             {sumReaction > 0 && !message.destroy && (
                                                 <div
-                                                    className="absolute flex items-center bottom-[5px] right-[15px] rounded-full p-0.5 bg-white text-[12px] cursor-pointer dark:bg-gray-700"
+                                                    className="absolute flex items-center bottom-[2px] right-[15px] rounded-full p-0.5 bg-white text-[12px] cursor-pointer dark:bg-gray-700"
                                                     onClick={() => setOpenReactionChat(true)}
                                                 >
                                                     {message.reactions.slice(0, 2).map((re, index) => {

@@ -69,7 +69,7 @@ function ChatText({ index, userId, message, reactions, showName, replyMessage })
 
             <p
                 className={`absolute left-[8px] ${
-                    reactions.length > 0 ? 'bottom-[16px]' : 'bottom-[5px]'
+                    reactions.length > 0 ? 'bottom-[15px]' : 'bottom-[5px]'
                 } text-gray-500 text-[10px]`}
             >
                 {new Date(message.time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
