@@ -8,8 +8,6 @@ import { IoIosLogOut } from 'react-icons/io';
 import { AiOutlineUsergroupDelete } from 'react-icons/ai';
 
 import {
-    setOnOrOfPin,
-    setOnOrOfNotify,
     deleteChatForUser,
     removeMemberOfGroup,
     destroyGroup,
@@ -20,7 +18,7 @@ import {
 import { useEffect, useState } from 'react';
 import Archive from '../Archive/Archive';
 import PopupAddGroup from '../Popup/PopupAddGroup';
-import { getMessage } from '../../screens/Messaging/api';
+import { getMessage, notifyChatOfUser, pinChatOfUser } from '../../screens/Messaging/api';
 
 function TabChatInfo({ setActiveMessageTab }) {
     const userActive = useSelector((state) => state.auth.userActive);
@@ -64,7 +62,14 @@ function TabChatInfo({ setActiveMessageTab }) {
         };
 
         fetchMessages();
-    }, [chatId, data]);
+    }, [chatId]);
+
+    const pinMessage = (chatId) => {
+        pinChatOfUser(chatId);
+    };
+    const notifyMessage = (chatId) => {
+        notifyChatOfUser(chatId);
+    };
 
     return (
         <div className="overflow-auto dark:text-gray-300">
@@ -89,17 +94,17 @@ function TabChatInfo({ setActiveMessageTab }) {
             <div className="flex item-center justify-center border-b-[7px] dark:border-b-gray-900 ">
                 <div className="m-4 mt-1 w-[50px] text-center">
                     <div className="flex justify-center">
-                        {activeChat?.notify ? (
+                        {activeChat.participants?.find((user) => user.accountId === userId)?.notify ? (
                             <GoBell
                                 size={35}
                                 className="p-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer"
-                                onClick={() => dispatch(setOnOrOfNotify(activeChat?.id))}
+                                onClick={() => notifyMessage(activeChat?.id)}
                             />
                         ) : (
                             <GoBellSlash
                                 size={35}
                                 className="p-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer text-blue-500"
-                                onClick={() => dispatch(setOnOrOfNotify(activeChat?.id))}
+                                onClick={() => notifyMessage(activeChat?.id)}
                             />
                         )}
                     </div>
@@ -107,17 +112,17 @@ function TabChatInfo({ setActiveMessageTab }) {
                 </div>
                 <div className="m-4 mt-1 w-[50px] text-center">
                     <div className="flex justify-center">
-                        {!activeChat?.pin ? (
+                        {!activeChat.participants?.find((user) => user.accountId === userId)?.pin ? (
                             <GrPin
                                 size={35}
                                 className="p-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer"
-                                onClick={() => dispatch(setOnOrOfPin(activeChat?.id))}
+                                onClick={() => pinMessage(chatId)}
                             />
                         ) : (
                             <GrPin
                                 size={35}
                                 className="p-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer text-blue-500"
-                                onClick={() => dispatch(setOnOrOfPin(activeChat?.id))}
+                                onClick={() => pinMessage(chatId)}
                             />
                         )}
                     </div>

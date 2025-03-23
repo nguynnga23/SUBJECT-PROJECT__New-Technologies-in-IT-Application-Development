@@ -27,6 +27,8 @@ model Account {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  categories Category[]
+
   sentFriendRequests     FriendRequest[] @relation("SentRequests")
   receivedFriendRequests FriendRequest[] @relation("ReceivedRequests")
 
@@ -84,6 +86,9 @@ model Category {
   id        String   @id @default(uuid()) // ID dạng UUID
   name      String
   color     String
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade) 
+  accountId String
+
   participants ChatParticipant[]
 }
 
@@ -91,7 +96,7 @@ model ChatParticipant {
   id        String   @id @default(uuid()) // ID dạng UUID
   chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
   account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  category  Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category  Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   chatId    String
   accountId String

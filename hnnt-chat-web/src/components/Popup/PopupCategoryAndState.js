@@ -7,8 +7,9 @@ import { MdLabel } from 'react-icons/md';
 
 import PopupReaded from './PopupReaded';
 import PopupManageCategory from './PopupManageCategory';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { setCategory, setState } from '../../redux/slices/categorySlice';
+import { getAllCategory } from '../../screens/Messaging/api';
 
 const states = [
     { id: 1, name: 'Tất cả' },
@@ -20,10 +21,24 @@ function PopupCategoryAndState() {
     const [selectedState, setSelectedState] = useState(null);
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [isOpenManageCategory, setIsOpenManageCategory] = useState(false);
-    const categories = useSelector((state) => state.category.categories);
+    const [data, setData] = useState([]);
+    const [error, setError] = useState([]);
     const popupContainerRef = useRef(null);
 
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        const fetchChats = async () => {
+            try {
+                const chats = await getAllCategory();
+                setData(chats);
+            } catch (err) {
+                setError(err.message);
+            }
+        };
+
+        fetchChats(); // Gọi hàm async bên trong useEffect
+    }, [data]);
 
     // Hàm đóng popup khi click bên ngoài
     useEffect(() => {
@@ -101,7 +116,7 @@ function PopupCategoryAndState() {
                                 Theo thẻ phân loại
                             </p>
                             <div className=" overflow-auto max-h-[300px]">
-                                {categories.map((category) => (
+                                {data?.map((category) => (
                                     <div
                                         key={category.id}
                                         onClick={() => {

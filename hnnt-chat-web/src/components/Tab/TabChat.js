@@ -25,7 +25,7 @@ function TabChat() {
     const activeChat = useSelector((state) => state.chat.activeChat);
     const [hoveredMessage, setHoveredMessage] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
-    const categories = useSelector((state) => state.category.currentCategory) || [];
+    // const categories = useSelector((state) => state.category.currentCategory) || [];
     const state = useSelector((state) => state.category.state);
     // const data = useSelector((state) => state.chat.data);
     const [data, setData] = useState([]);
@@ -44,22 +44,22 @@ function TabChat() {
         fetchChats(); // Gọi hàm async bên trong useEffect
     }, [data]);
     const dispatch = useDispatch();
-    const priorityChatsList = data.filter(
-        (chat) =>
-            chat.priority &&
-            (categories.length === 0 || categories?.some((cat) => cat.id === chat.category.id)) &&
-            (!chat.isGroup || chat.members?.some((m) => m?.id === userActive?.id)) &&
-            (state !== 'Chưa đọc' || chat.seem === false),
-    );
-    const otherChatsList = data.filter(
-        (chat) =>
-            !chat.priority &&
-            (categories.length === 0 || categories?.some((cat) => cat.id === chat.category.id)) &&
-            (!chat.isGroup || chat.members?.some((m) => m?.id === userActive?.id)) &&
-            (state !== 'Chưa đọc' || chat.seem === false),
-    );
+    // const priorityChatsList = data.filter(
+    //     (chat) =>
+    //         chat.priority &&
+    //         (categories.length === 0 || categories?.some((cat) => cat.id === chat.category.id)) &&
+    //         (!chat.isGroup || chat.members?.some((m) => m?.id === userActive?.id)) &&
+    //         (state !== 'Chưa đọc' || chat.seem === false),
+    // );
+    // const otherChatsList = data.filter(
+    //     (chat) =>
+    //         !chat.priority &&
+    //         (categories.length === 0 || categories?.some((cat) => cat.id === chat.category.id)) &&
+    //         (!chat.isGroup || chat.members?.some((m) => m?.id === userActive?.id)) &&
+    //         (state !== 'Chưa đọc' || chat.seem === false),
+    // );
 
-    const chats = activeTab === 'priority' ? priorityChatsList : otherChatsList;
+    // const chats = activeTab === 'priority' ? priorityChatsList : otherChatsList;
 
     // const getLastMessage = (messages) => {
     //     const filteredMessages = messages.filter((msg) => !msg.delete.some((m) => m.id === userId) && !msg.destroy);
@@ -150,7 +150,7 @@ function TabChat() {
                                             <div className="relative ">
                                                 <FiMoreHorizontal
                                                     size={13}
-                                                    className="m-1 mr-2 text-gray-500 hover:bg-blue-200 rounded-[2px]"
+                                                    className="m-1 mr-2 text-gray-500 hover:text-blue-500"
                                                     onClick={() => setShowPopup(true)}
                                                 />
                                                 {showPopup && hoveredMessage === index && (
@@ -163,20 +163,20 @@ function TabChat() {
                                             </div>
                                         )}
                                     </div>
-                                    <div className="absolute bottom-[15px] right-[10px] flex  text-[10px]">
+                                    <div className="absolute bottom-[8px] right-[10px] flex  text-[10px]">
                                         {chat?.messages[0]?.time && formatTime(chat?.messages[0]?.time)}
                                     </div>
                                 </div>
 
                                 <div className="flex item-center">
                                     <img
-                                        src={chat.isGroup ? chat.avatar : notMe.avatar} // Thay bằng avatar thật
+                                        src={chat.isGroup ? chat?.avatar : notMe?.avatar} // Thay bằng avatar thật
                                         alt="avatar"
                                         className="w-[45px] h-[45px] rounded-full border mr-3 object-cover"
                                     />
                                     <div>
                                         <h3 className="font-medium text-xs text-lg mt-1 max-w-[270px] truncate dark:text-white">
-                                            {chat.isGroup ? chat.name : notMe.name || 'Người dùng'}
+                                            {chat.isGroup ? chat?.name : notMe?.name || 'Người dùng'}
                                         </h3>
                                         <p
                                             className={`flex items-center text-sm  text-xs mt-1  ${
@@ -185,8 +185,8 @@ function TabChat() {
                                                     : 'font-medium text-black dark:text-white'
                                             }`}
                                         >
-                                            {chat.category?.name && (
-                                                <MdLabel className={`text-[18px] mr-1 ${chat.category?.color}`} />
+                                            {me.category?.name && (
+                                                <MdLabel className={`text-[18px] mr-1 ${me.category?.color}`} />
                                             )}
                                             {chat?.messages[0]?.senderId === userId ? (
                                                 <span className="mr-1">Bạn: </span>

@@ -192,13 +192,21 @@ function TabMessage() {
                                     <p className="text-[10px] mr-1">{activeChat?.members.length} thành viên |</p>
                                 </div>
                             )}
-                            {activeChat?.category?.name ? (
+                            {activeChat.participants?.find((user) => user.accountId === userId)?.category ? (
                                 <div className="flex items-center">
                                     <MdLabel
-                                        className={`cursor-pointer mr-1 ${activeChat?.category.color}`}
+                                        className={`cursor-pointer mr-1 ${
+                                            activeChat.participants?.find((user) => user.accountId === userId)?.category
+                                                .color
+                                        }`}
                                         onClick={() => setIsOpenCategory(!isOpenCategory)}
                                     />
-                                    <p className="text-[10px] dark:text-gray-300">{activeChat?.category?.name}</p>
+                                    <p className="text-[10px] dark:text-gray-300">
+                                        {
+                                            activeChat.participants?.find((user) => user.accountId === userId)?.category
+                                                ?.name
+                                        }
+                                    </p>
                                 </div>
                             ) : (
                                 <MdLabelOutline

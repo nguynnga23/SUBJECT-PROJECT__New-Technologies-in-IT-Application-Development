@@ -3,7 +3,7 @@ import { HiBellSlash } from 'react-icons/hi2';
 import { TiPin } from 'react-icons/ti';
 import { MdDelete } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
-import { setOnOrOfPin, setOnOrOfNotify, deleteChatForUser } from '../../redux/slices/chatSlice';
+import { deleteChatForUser } from '../../redux/slices/chatSlice';
 import { notifyChatOfUser, pinChatOfUser } from '../../screens/Messaging/api';
 
 function PopupMenuForMess({ setShowPopup, setHoveredMessage, chat }) {
@@ -53,7 +53,7 @@ function PopupMenuForMess({ setShowPopup, setHoveredMessage, chat }) {
                     <li
                         className="flex text-[12px] items-center px-4 py-2 hover:bg-gray-100 cursor-pointer rounded-lg"
                         onClick={() => {
-                            notifyChatOfUser(chat.chatId);
+                            notifyMessage(chat.chatId);
                             setShowPopup(false); // Đóng popup khi click ra ngoài
                             setHoveredMessage(null);
                         }}

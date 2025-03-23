@@ -24,6 +24,7 @@ export const GetChatOfUser = async (req: AuthRequest, res: Response): Promise<vo
                 participants: {
                     include: {
                         account: { select: { id: true, name: true, avatar: true } },
+                        category: true,
                     },
                 },
                 messages: {
@@ -116,6 +117,49 @@ export const NotifyChatOfUser = async (req: AuthRequest, res: Response): Promise
             },
             data: {
                 notify: !chat.notify,
+            },
+        });
+
+        res.status(200).json({ message: 'Đã cập nhật ghim' });
+        return;
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server.' });
+    }
+};
+
+export const addCategoryToChat = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user.id;
+        const { chatId } = req.params;
+        const { categoryId } = req.body;
+
+        if (!chatId) {
+            res.status(401).json({ message: 'Bạn không được phép truy cập đoạn chat này' });
+            return;
+        }
+        if (!categoryId) {
+            res.status(401).json({ message: 'Unauthorized - No user ID found' });
+            return;
+        }
+
+        // Lấy đoạn chat mà user tham gia
+        const chat = await prisma.chatParticipant.findFirst({
+            where: {
+                chatId: chatId,
+                accountId: userId,
+            },
+        });
+        if (!chat) {
+            res.status(403).json({ message: 'Bạn không có quyền chat này.' });
+            return;
+        }
+        await prisma.chatParticipant.update({
+            where: {
+                id: chat.id,
+            },
+            data: {
+                categoryId: categoryId,
             },
         });
 
