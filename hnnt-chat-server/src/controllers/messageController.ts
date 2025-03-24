@@ -4,7 +4,7 @@ import { AuthRequest } from '../types/authRequest';
 
 const prisma = new PrismaClient();
 
-export const GetMessageOfChat = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getMessageOfChat = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const userId = req.user?.id;
         const { chatId } = req.params;
@@ -43,7 +43,7 @@ export const GetMessageOfChat = async (req: AuthRequest, res: Response): Promise
     }
 };
 
-export const SendMessage = async (req: AuthRequest, res: Response): Promise<void> => {
+export const sendMessage = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const { chatId } = req.params;
         const senderId = req.user.id;
@@ -258,6 +258,32 @@ export const removeReactionOfMessage = async (req: AuthRequest, res: Response): 
         });
 
         res.status(200).json({ message: 'Đã xóa tất cả reaction của user trên tin nhắn' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+        return;
+    }
+};
+
+export const pinOfMessage = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const { messageId } = req.params;
+        const message = await prisma.message.findFirst({
+            where: {
+                id: messageId,
+            },
+        });
+        if (!message) {
+            res.status(404).json({ message: 'Tin nhắn không tồn tại' });
+            return;
+        }
+
+        await prisma.message.update({
+            where: { id: messageId },
+            data: {
+                pin: true,
+            },
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal server error' });

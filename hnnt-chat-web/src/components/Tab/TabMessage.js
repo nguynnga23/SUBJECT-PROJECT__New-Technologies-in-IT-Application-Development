@@ -22,6 +22,7 @@ import { VscFilePdf } from 'react-icons/vsc';
 import { FaRegFileWord } from 'react-icons/fa';
 import { FaRegFileExcel } from 'react-icons/fa';
 import { FaRegFilePowerpoint } from 'react-icons/fa';
+import { BsChatText } from 'react-icons/bs';
 
 import PopupCategory from '../Popup/PopupCategory';
 
@@ -45,6 +46,7 @@ import PopupReacttion from '../Popup/PopupReaction';
 import PopupReactionChat from '../Popup/PopupReactionChat';
 import PopupMenuForChat from '../Popup/PopupMenuForChat';
 import { getMessage, sendMessage } from '../../screens/Messaging/api';
+import PopupAllPinnedOfMessage from '../Popup/PopupAllPinnedOfMessage';
 
 function TabMessage() {
     const [message, setMessage] = useState('');
@@ -73,6 +75,7 @@ function TabMessage() {
     const [openReactionChat, setOpenReactionChat] = useState(false);
 
     const [replyMessage, setReplyMessage] = useState(null);
+    const [showAllPinned, setShowAllPinned] = useState(false);
 
     const [data, setData] = useState([]);
     const [error, setError] = useState(null);
@@ -164,6 +167,31 @@ function TabMessage() {
             }
         }, 100);
     };
+
+    const scrollToMessage = (messageId) => {
+        setTimeout(() => {
+            const messageElement = document.getElementById(`message-${messageId}`);
+            if (messageElement) {
+                messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Thêm hiệu ứng phát sáng
+                messageElement.classList.add('highlight');
+
+                // Xóa hiệu ứng sau 1.5 giây
+                messageElement.classList.add('bg-blue-200');
+                messageElement.classList.add('rounded-[5px]');
+
+                // Xóa class sau 1.5 giây
+                setTimeout(() => {
+                    messageElement.classList.remove('bg-blue-200');
+                    messageElement.classList.remove('rounded-[5px]');
+                }, 1500);
+            } else {
+                console.log('Không tìm thấy phần tử:', `message-${messageId}`);
+            }
+        }, 100); // Đợi 100ms để đảm bảo phần tử đã được render
+    };
+    const pinnedMessages = data.filter((message) => message.pin);
+    const lastPinnedMessage = pinnedMessages[pinnedMessages.length - 1];
 
     return (
         <>
@@ -280,7 +308,83 @@ function TabMessage() {
                     )}
                 </div>
             </div>
-            <div className="flex-1 p-5 overflow-auto bg-gray-200 dark:bg-[#16191d]" ref={chatContainerRef}>
+            <div className="p-1.5 bg-gray-200 dark:bg-gray-800">
+                <div className="relative">
+                    {/* Hiển thị tin nhắn ghim cuối cùng */}
+                    {lastPinnedMessage && (
+                        <div className="p-2 text-[10px] flex dark:bg-gray-700 bg-white rounded-lg shadow items-center justify-between ">
+                            <div
+                                className="flex items-center cursor-pointer"
+                                onClick={() => scrollToMessage(lastPinnedMessage.id)}
+                            >
+                                <BsChatText size={20} className="text-blue-500 m-1" />
+                                <div className="ml-1">
+                                    <p>Tin nhắn</p>
+                                    <div className="flex items-center max-w-[500px] truncate">
+                                        <p className="font-medium text-gray-600 dark:text-gray-300 mr-2">
+                                            {lastPinnedMessage.sender?.name}:
+                                        </p>
+                                        {lastPinnedMessage.type === 'file' ? (
+                                            <div className="flex items-center">
+                                                {getFileIcon(lastPinnedMessage.fileType)}
+                                                <div className="flex flex-col">
+                                                    <p className="text-[12px] font-bold">
+                                                        {lastPinnedMessage.fileName}
+                                                    </p>
+                                                    <p className="text-[12px] text-gray-500 dark:text-gray-300 pt-1">
+                                                        {lastPinnedMessage.fileSize}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ) : lastPinnedMessage.type === 'image' ? (
+                                            <img
+                                                src={lastPinnedMessage.content}
+                                                alt="content"
+                                                className="max-w-[80px] rounded-lg"
+                                            />
+                                        ) : lastPinnedMessage.type === 'gif' ? (
+                                            <img
+                                                src={lastPinnedMessage.content}
+                                                alt="GIF"
+                                                className="max-w-[80px] rounded-lg"
+                                            />
+                                        ) : lastPinnedMessage.type === 'sticker' ? (
+                                            <img
+                                                src={lastPinnedMessage.content}
+                                                alt="GIF"
+                                                className="max-w-[50px] rounded-lg"
+                                            />
+                                        ) : (
+                                            lastPinnedMessage.content
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Nút mở popup */}
+                            {pinnedMessages.length > 1 && (
+                                <button
+                                    onClick={() => setShowAllPinned(!showAllPinned)}
+                                    className="ml-2 text[10px] p-1 border border-gray-600 rounded-[3px] bg-white mr-3"
+                                >
+                                    + ({pinnedMessages.length}) ghim
+                                </button>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Popup hiển thị tất cả tin nhắn ghim */}
+                    {showAllPinned && (
+                        <PopupAllPinnedOfMessage
+                            pinnedMessages={pinnedMessages}
+                            showAllPinned={showAllPinned}
+                            setShowAllPinned={setShowAllPinned}
+                            scrollToMessage={scrollToMessage}
+                        />
+                    )}
+                </div>
+            </div>
+            <div className="flex-1 p-4 overflow-auto bg-gray-200 dark:bg-[#16191d] " ref={chatContainerRef}>
                 {data.map((message, index) => {
                     const isDeleted = message.deletedBy.some((item) => item === userId);
                     const Component = message.destroy ? ChatDestroy : MessageComponent[message.type];
@@ -297,7 +401,8 @@ function TabMessage() {
 
                     return (
                         <div
-                            className={`relative flex ${
+                            id={`message-${message.id}`}
+                            className={`relative flex items-center ${
                                 message.sender.id === userId ? 'justify-end' : 'justify-start'
                             }`}
                             key={index}
@@ -311,7 +416,7 @@ function TabMessage() {
                             }}
                         >
                             {!isDeleted && Component && (
-                                <div className="flex ">
+                                <div className="flex items-center">
                                     <div className="w-[45px] h-[45px] mr-3 flex-shrink-0">
                                         {message.sender.id !== userId && showAvatar && (
                                             <img
@@ -322,7 +427,7 @@ function TabMessage() {
                                         )}
                                     </div>
 
-                                    <div className="flex relative ">
+                                    <div className="flex relative items-center">
                                         {hoveredMessage === index &&
                                             isPopupOpenIndex === null &&
                                             message.sender.id === userActive.id && (
@@ -355,7 +460,9 @@ function TabMessage() {
                                                 activeChat={activeChat}
                                                 message={message}
                                                 reactions={message.reactions}
-                                                showName={message.sender !== userId && showAvatar && activeChat.group}
+                                                showName={
+                                                    message.sender.id !== userId && showAvatar && activeChat.group
+                                                }
                                                 replyMessage={message?.replyTo}
                                             />
                                             {isPopupOpenIndex === index && (

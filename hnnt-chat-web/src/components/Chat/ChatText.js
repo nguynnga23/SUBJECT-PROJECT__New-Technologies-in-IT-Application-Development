@@ -19,7 +19,7 @@ function ChatText({ index, userId, message, reactions, showName, replyMessage })
     return (
         <div
             key={index}
-            className={`relative text-[14px] border p-2 dark:text-gray-200 cursor-pointer ${
+            className={`relative text-[14px] border p-2 dark:text-gray-200  ${
                 reactions.length > 0 ? 'pb-8' : 'pb-6'
             } rounded-[7px] w-fit mb-2 max-w-[500px] min-w-[60px] break-all ${
                 message.sender.id === userId
@@ -33,7 +33,7 @@ function ChatText({ index, userId, message, reactions, showName, replyMessage })
             <div>
                 {replyMessage && (
                     <div
-                        className={`mb-1 border-l-[4px] border-blue-500 ${
+                        className={`mb-1 border-l-[4px] border-blue-500 cursor-pointer ${
                             message.sender.id === userId ? 'bg-blue-200' : 'bg-gray-300'
                         } dark:bg-gray-700  p-2 rounded-[3px]`}
                     >
