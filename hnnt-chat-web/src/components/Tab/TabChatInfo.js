@@ -14,6 +14,8 @@ import {
     setActiveChat,
     setShowOrOffRightBar,
     setShowOrOffRightBarSearch,
+    setOnOrOfPin,
+    setOnOrOfNotify,
 } from '../../redux/slices/chatSlice';
 import { useEffect, useState } from 'react';
 import Archive from '../Archive/Archive';
@@ -62,13 +64,27 @@ function TabChatInfo({ setActiveMessageTab }) {
         };
 
         fetchMessages();
-    }, [chatId]);
+    }, [chatId, activeChat]);
 
-    const pinMessage = (chatId) => {
+    const pinMessage = (chatId, userId, pinStatus) => {
         pinChatOfUser(chatId);
+        dispatch(
+            setOnOrOfPin({
+                chatId,
+                userId,
+                pinStatus,
+            }),
+        );
     };
-    const notifyMessage = (chatId) => {
+    const notifyMessage = (chatId, userId, notifyStatus) => {
         notifyChatOfUser(chatId);
+        dispatch(
+            setOnOrOfNotify({
+                chatId,
+                userId,
+                notifyStatus,
+            }),
+        );
     };
 
     return (
@@ -98,13 +114,13 @@ function TabChatInfo({ setActiveMessageTab }) {
                             <GoBell
                                 size={35}
                                 className="p-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer"
-                                onClick={() => notifyMessage(activeChat?.id)}
+                                onClick={() => notifyMessage(chatId, userId, false)}
                             />
                         ) : (
                             <GoBellSlash
                                 size={35}
                                 className="p-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer text-blue-500"
-                                onClick={() => notifyMessage(activeChat?.id)}
+                                onClick={() => notifyMessage(chatId, userId, true)}
                             />
                         )}
                     </div>
@@ -116,13 +132,13 @@ function TabChatInfo({ setActiveMessageTab }) {
                             <GrPin
                                 size={35}
                                 className="p-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer"
-                                onClick={() => pinMessage(chatId)}
+                                onClick={() => pinMessage(chatId, userId, true)}
                             />
                         ) : (
                             <GrPin
                                 size={35}
                                 className="p-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer text-blue-500"
-                                onClick={() => pinMessage(chatId)}
+                                onClick={() => pinMessage(chatId, userId, false)}
                             />
                         )}
                     </div>

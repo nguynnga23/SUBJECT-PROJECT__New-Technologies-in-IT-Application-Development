@@ -169,15 +169,24 @@ function TabMessage() {
         <>
             <div className="p-2 border-b dark:border-b-black flex justify-between items-center h-[62px] min-w-[600px] dark:bg-gray-800">
                 <div className="flex justify-center ">
-                    <img
-                        src={
-                            activeChat?.isGroup
-                                ? activeChat?.avatar
-                                : activeChat?.participants?.find((user) => user.accountId !== userId)?.account.avatar
-                        } // Thay bằng avatar thật
-                        alt="avatar"
-                        className="w-[45px] h-[45px] rounded-full border mr-2 object-cover"
-                    />
+                    <div className="relative w-[45px] h-[45px] mr-2">
+                        <img
+                            src={
+                                activeChat?.isGroup
+                                    ? activeChat?.avatar
+                                    : activeChat?.participants?.find((user) => user.accountId !== userId)?.account
+                                          .avatar
+                            } // Thay bằng avatar thật
+                            alt="avatar"
+                            className="w-[45px] h-[45px] rounded-full border object-cover"
+                        />
+                        {activeChat?.participants?.find((user) => user.accountId !== userId)?.account?.status ===
+                        'active' ? (
+                            <span className="absolute p-[2px] w-[10px] h-[10px] right-[3px] bottom-[0px] rounded-full bg-green-600 border-[2px]"></span>
+                        ) : (
+                            <span className="absolute p-[2px] w-[10px] h-[10px] right-[3px] bottom-[0px] rounded-full bg-gray-500 border-[2px]"></span>
+                        )}
+                    </div>
                     <div>
                         <h3 className="font-medium text-base text-lg max-h-[28px] dark:text-gray-300">
                             {activeChat?.isGroup

@@ -23,7 +23,7 @@ export const GetChatOfUser = async (req: AuthRequest, res: Response): Promise<vo
             include: {
                 participants: {
                     include: {
-                        account: { select: { id: true, name: true, avatar: true } },
+                        account: { select: { id: true, name: true, avatar: true, status: true } },
                         category: true,
                     },
                 },
@@ -154,12 +154,15 @@ export const addCategoryToChat = async (req: AuthRequest, res: Response): Promis
             res.status(403).json({ message: 'Bạn không có quyền chat này.' });
             return;
         }
+
+        const newCategoryId = chat.categoryId === categoryId ? null : categoryId;
+
         await prisma.chatParticipant.update({
             where: {
                 id: chat.id,
             },
             data: {
-                categoryId: categoryId,
+                categoryId: newCategoryId,
             },
         });
 

@@ -79,11 +79,14 @@ export default function Home() {
                         type="button"
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     >
-                        <img
-                            src={userActive?.avatar}
-                            alt="Avatar"
-                            className="w-12 h-12 rounded-full border-2 border-white object-cover"
-                        />
+                        <div className="relative">
+                            <img
+                                src={userActive?.avatar}
+                                alt="Avatar"
+                                className="w-12 h-12 rounded-full border-2 border-white object-cover"
+                            />
+                            <span className="absolute p-[2px] w-[10px] h-[10px] right-[3px] bottom-[0px] rounded-full bg-green-600 border-[2px]"></span>
+                        </div>
                     </button>
                     {/* Dropdown menu */}
                     <div

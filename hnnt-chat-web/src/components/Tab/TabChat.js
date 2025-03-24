@@ -113,7 +113,7 @@ function TabChat() {
                         return Number(pinB) - Number(pinA);
                     })
                     .map((chat, index) => {
-                        const notMe = chat.participants?.find((user) => user.accountId !== userId)?.account;
+                        const notMe = chat.participants?.find((user) => user.accountId !== userId);
                         const me = chat.participants?.find((user) => user.accountId === userId);
                         const deleteByMeOrDestroy =
                             chat.messages[0]?.deletedBy.some((m) => m === userId) || chat.messages[0]?.destroy;
@@ -169,14 +169,22 @@ function TabChat() {
                                 </div>
 
                                 <div className="flex item-center">
-                                    <img
-                                        src={chat.isGroup ? chat?.avatar : notMe?.avatar} // Thay bằng avatar thật
-                                        alt="avatar"
-                                        className="w-[45px] h-[45px] rounded-full border mr-3 object-cover"
-                                    />
+                                    <div className="relative mr-2">
+                                        <img
+                                            src={chat.isGroup ? chat?.avatar : notMe?.account.avatar} // Thay bằng avatar thật
+                                            alt="avatar"
+                                            className="w-[45px] h-[45px] rounded-full border object-cover"
+                                        />
+                                        {notMe.account.status === 'active' && !chat.isGroup ? (
+                                            <span className="absolute p-[2px] w-[10px] h-[10px] right-[3px] bottom-[0px] rounded-full bg-green-600 border-[2px]"></span>
+                                        ) : (
+                                            <span className="absolute p-[2px] w-[10px] h-[10px] right-[3px] bottom-[0px] rounded-full bg-gray-500 border-[2px]"></span>
+                                        )}
+                                    </div>
+
                                     <div>
                                         <h3 className="font-medium text-xs text-lg mt-1 max-w-[270px] truncate dark:text-white">
-                                            {chat.isGroup ? chat?.name : notMe?.name || 'Người dùng'}
+                                            {chat.isGroup ? chat?.name : notMe?.account.name || 'Người dùng'}
                                         </h3>
                                         <p
                                             className={`flex items-center text-sm  text-xs mt-1  ${

@@ -11,6 +11,7 @@ function PopupCategory({ isOpen, setIsOpen }) {
     const [error, setError] = useState([]);
     const [isOpenManageCategory, setIsOpenManageCategory] = useState(false);
     const activeChat = useSelector((state) => state.chat.activeChat);
+    const userActive = useSelector((state) => state.auth.userActive);
 
     const popupContainerRef = useRef(null);
     const dispatch = useDispatch();
@@ -46,6 +47,7 @@ function PopupCategory({ isOpen, setIsOpen }) {
     const chooseCategory = (category) => {
         const chatId = activeChat.id;
         addCategoryToChat(chatId, category.id);
+        dispatch(addOrChangeCategory({ chatId, userId: userActive.id, category }));
         setIsOpen(false);
         return;
     };

@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import redis from '../config/redis';
 import dotenv from 'dotenv';
+import { AuthRequest } from '../types/authRequest';
 
 dotenv.config();
 
@@ -22,6 +23,14 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             res.status(401).json({ message: 'Số điện thoại hoặc mật khẩu không đúng' });
             return;
         }
+        await prisma.account.update({
+            where: {
+                id: user.id,
+            },
+            data: {
+                status: 'active',
+            },
+        });
 
         // So sánh mật khẩu
         // const isMatch = await bcrypt.compare(password, user.password);
@@ -45,13 +54,21 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
-export const logout = async (req: Request, res: Response): Promise<void> => {
+export const logout = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const token = req.header('Authorization')?.replace('Bearer ', '');
         if (!token) {
             res.status(400).json({ message: 'Không có token để logout' });
             return;
         }
+        await prisma.account.update({
+            where: {
+                id: req.user.id,
+            },
+            data: {
+                status: 'no active',
+            },
+        });
 
         // Giải mã token để lấy thời gian hết hạn
         const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
