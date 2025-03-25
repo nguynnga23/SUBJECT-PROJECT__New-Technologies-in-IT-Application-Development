@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { AuthRequest } from '../types/authRequest';
 
 const prisma = new PrismaClient();
 
@@ -130,9 +131,9 @@ export const deleteFriend = async (req: Request, res: Response): Promise<void> =
 };
 
 // 📌 Get list friend
-export const getListFriend = async (req: Request, res: Response): Promise<void> => {
+export const getListFriend = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { userId } = req.params; // id của user
+        const userId = req.user.id;
 
         const friends = await prisma.friend.findMany({
             where: {

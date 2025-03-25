@@ -32,7 +32,7 @@ export const getMessageOfChat = async (req: AuthRequest, res: Response): Promise
                 reactions: {
                     select: { user: { select: { id: true, name: true, avatar: true } }, reaction: true, sum: true },
                 },
-                replyTo: { select: { sender: { select: { name: true } }, content: true } },
+                replyTo: { select: { id: true, sender: { select: { name: true } }, content: true } },
             },
             orderBy: { time: 'asc' },
         });
@@ -288,5 +288,89 @@ export const pinOfMessage = async (req: AuthRequest, res: Response): Promise<voi
         console.error(error);
         res.status(500).json({ error: 'Internal server error' });
         return;
+    }
+};
+
+export const deletePinOfMessage = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const { messageId } = req.params;
+        const message = await prisma.message.findFirst({
+            where: {
+                id: messageId,
+            },
+        });
+        if (!message) {
+            res.status(404).json({ message: 'Tin nhắn không tồn tại' });
+            return;
+        }
+
+        await prisma.message.update({
+            where: { id: messageId },
+            data: {
+                pin: false,
+            },
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+        return;
+    }
+};
+
+export const searchForKeyWord = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user.id; // Lấy userId từ token hoặc session
+        const keyword = req.query.keyword;
+
+        // Lấy danh sách tất cả các đoạn chat mà user tham gia
+        const chatIds = await prisma.chatParticipant.findMany({
+            where: { accountId: userId },
+            select: { chatId: true },
+        });
+
+        const chatIdList = chatIds.map((chat) => chat.chatId);
+
+        // Lấy tất cả tin nhắn từ các đoạn chat này
+        const messages = await prisma.message.findMany({
+            where: {
+                chatId: { in: chatIdList },
+                AND: [
+                    {
+                        OR: [
+                            { deletedBy: { equals: null } }, // Nếu deletedBy là null (không có ai xóa)
+                            { NOT: { deletedBy: { has: userId } } }, // Hoặc không chứa userId
+                        ],
+                    },
+                    {
+                        OR: [
+                            {
+                                AND: [
+                                    { type: 'text' },
+                                    { content: { contains: keyword?.toString(), mode: 'insensitive' } },
+                                ],
+                            },
+                            {
+                                AND: [
+                                    { type: 'file' },
+                                    { fileName: { contains: keyword?.toString(), mode: 'insensitive' } },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
+            include: {
+                sender: { select: { id: true, name: true, avatar: true } }, // Lấy thông tin người gửi
+                chat: { select: { id: true, name: true, isGroup: true } }, // Lấy thông tin đoạn chat
+            },
+            orderBy: {
+                time: 'desc', // Sắp xếp tin nhắn theo thời gian giảm dần
+            },
+        });
+
+        res.json({ messages });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };

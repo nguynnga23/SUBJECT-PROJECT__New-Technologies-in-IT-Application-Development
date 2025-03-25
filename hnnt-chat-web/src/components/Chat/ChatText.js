@@ -4,7 +4,7 @@ import { FaRegFileWord } from 'react-icons/fa';
 import { FaRegFileExcel } from 'react-icons/fa';
 import { FaRegFilePowerpoint } from 'react-icons/fa';
 
-function ChatText({ index, userId, message, reactions, showName, replyMessage }) {
+function ChatText({ index, userId, message, reactions, showName, replyMessage, scrollToMessage }) {
     const getFileIcon = (fileType) => {
         if (fileType.includes('pdf')) return <VscFilePdf className="text-3xl text-red-500 mr-2" />;
         if (fileType.includes('excel') || fileType.includes('spreadsheet') || fileType.includes('xls'))
@@ -36,6 +36,7 @@ function ChatText({ index, userId, message, reactions, showName, replyMessage })
                         className={`mb-1 border-l-[4px] border-blue-500 cursor-pointer ${
                             message.sender.id === userId ? 'bg-blue-200' : 'bg-gray-300'
                         } dark:bg-gray-700  p-2 rounded-[3px]`}
+                        onClick={() => scrollToMessage(replyMessage.id)}
                     >
                         <p className="text-[12px] font-medium text-gray-600 dark:text-gray-300 mb-1">
                             {replyMessage.sender.name}

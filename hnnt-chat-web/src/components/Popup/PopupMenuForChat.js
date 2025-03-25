@@ -7,7 +7,6 @@ import { deleteMessage, destroyMessage, pinOfMessage } from '../../screens/Messa
 function PopupMenuForChat({ setIsPopupOpen, position, message }) {
     const popupRef = useRef(null);
     const chat = useSelector((state) => state.chat.activeChat);
-    const userActive = useSelector((state) => state.auth.userActive);
 
     const handleDeleteMessage = async (messageId) => {
         if (!chat) return;

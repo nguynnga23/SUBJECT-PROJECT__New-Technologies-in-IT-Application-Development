@@ -5,19 +5,20 @@ import { FaRegFileExcel } from 'react-icons/fa';
 import { FaRegFilePowerpoint } from 'react-icons/fa';
 import { BsChatText } from 'react-icons/bs';
 import { useEffect, useRef } from 'react';
+import { deletePinOfMessage } from '../../screens/Messaging/api';
 
 const PopupAllPinnedOfMessage = ({ pinnedMessages, setShowAllPinned, scrollToMessage }) => {
     const popupContainerRef = useRef(null);
 
     const getFileIcon = (fileType) => {
-        if (fileType.includes('pdf')) return <VscFilePdf className="text-3xl text-red-500 mr-2" />;
+        if (fileType.includes('pdf')) return <VscFilePdf className="text-[20px] text-red-500 mr-2" />;
         if (fileType.includes('excel') || fileType.includes('spreadsheet') || fileType.includes('xls'))
-            return <FaRegFileExcel className="text-3xl text-green-600 mr-2" />;
+            return <FaRegFileExcel className="text-[20px] text-green-600 mr-2" />;
         if (fileType.includes('powerpoint') || fileType.includes('presentation') || fileType.includes('ppt'))
-            return <FaRegFilePowerpoint className="text-3xl text-orange-500 mr-2" />;
+            return <FaRegFilePowerpoint className="text-[20px] text-orange-500 mr-2" />;
         if (fileType.includes('word') || fileType.includes('msword') || fileType.includes('document'))
-            return <FaRegFileWord className="text-3xl text-blue-600 mr-2" />;
-        return <MdFilePresent className="text-3xl text-gray-500 mr-2" />; // Mặc định
+            return <FaRegFileWord className="text-[20px] text-blue-600 mr-2" />;
+        return <MdFilePresent className="text-[20px] text-gray-500 mr-2" />; // Mặc định
     };
 
     useEffect(() => {
@@ -38,7 +39,13 @@ const PopupAllPinnedOfMessage = ({ pinnedMessages, setShowAllPinned, scrollToMes
             <div className="space-y-1">
                 {pinnedMessages.map((message, index) => (
                     <div className="relative">
-                        <p className="absolute text-red-500 text-[7px] right-[5px] top-[5px] p-1 cursor-pointer hover:bg-red-500 hover:text-white border rounded-lg">
+                        <p
+                            className="absolute text-red-500 text-[7px] right-[5px] top-[5px] p-1 cursor-pointer hover:bg-red-500 hover:text-white border rounded-lg"
+                            onClick={() => {
+                                deletePinOfMessage(message.id);
+                                setShowAllPinned(false);
+                            }}
+                        >
                             Bỏ ghim
                         </p>
 
@@ -61,10 +68,7 @@ const PopupAllPinnedOfMessage = ({ pinnedMessages, setShowAllPinned, scrollToMes
                                         <div className="flex items-center">
                                             {getFileIcon(message.fileType)}
                                             <div className="flex flex-col">
-                                                <p className="text-[12px] font-bold">{message.fileName}</p>
-                                                <p className="text-[12px] text-gray-500 dark:text-gray-300 pt-1">
-                                                    {message.fileSize}
-                                                </p>
+                                                <p className="text-[10px] font-bold">{message.fileName}</p>
                                             </div>
                                         </div>
                                     ) : message.type === 'image' ? (

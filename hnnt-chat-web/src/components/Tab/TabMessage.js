@@ -326,13 +326,10 @@ function TabMessage() {
                                         </p>
                                         {lastPinnedMessage.type === 'file' ? (
                                             <div className="flex items-center">
-                                                {getFileIcon(lastPinnedMessage.fileType)}
+                                                <MdFilePresent className="text-[10px] text-gray-500 mr-1" />
                                                 <div className="flex flex-col">
-                                                    <p className="text-[12px] font-bold">
+                                                    <p className="text-[10px] font-bold">
                                                         {lastPinnedMessage.fileName}
-                                                    </p>
-                                                    <p className="text-[12px] text-gray-500 dark:text-gray-300 pt-1">
-                                                        {lastPinnedMessage.fileSize}
                                                     </p>
                                                 </div>
                                             </div>
@@ -464,6 +461,7 @@ function TabMessage() {
                                                     message.sender.id !== userId && showAvatar && activeChat.group
                                                 }
                                                 replyMessage={message?.replyTo}
+                                                scrollToMessage={scrollToMessage}
                                             />
                                             {isPopupOpenIndex === index && (
                                                 <PopupMenuForChat
@@ -677,18 +675,7 @@ function TabMessage() {
                                 <AiFillLike
                                     className="text-2xl cursor-pointer ml-3 text-yellow-500 mr-3"
                                     onClick={() => {
-                                        const currentTime = new Date().toLocaleTimeString([], {
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                        });
-                                        return dispatch(
-                                            sendMessage({
-                                                chatId: activeChat.id,
-                                                content: '👍',
-                                                time: currentTime,
-                                                type: 'text',
-                                            }),
-                                        );
+                                        sendMessage(chatId, '👍', 'text', null, null, null, null);
                                     }}
                                 />
                             )}

@@ -8,26 +8,37 @@ import PopupAddFriend from '../../components/Popup/PopupAddFriend';
 import PopupAddGroup from '../../components/Popup/PopupAddGroup';
 import TabSearch from '../../components/Tab/TabSearch';
 
-import { searchFollowKeyWord } from '../../redux/slices/chatSlice';
 import { useDispatch } from 'react-redux';
 import TabChat from './TabChat';
+import { searchFollowKeyWord } from '../../screens/Messaging/api';
+import { getListFriend } from '../../screens/Contacts/api';
 
 function TabChatLeftBar() {
     const [addFriendButton, setAddFriendButton] = useState(false);
     const [addGroupButton, setAddGroupButton] = useState(false);
 
     const [search, setSearch] = useState('');
-    const distpatch = useDispatch();
+    const [data, setData] = useState([]);
+    const [dataContact, setDataContact] = useState([]);
 
     useEffect(() => {
-        const delayDebounce = setTimeout(() => {
+        const delayDebounce = setTimeout(async () => {
             if (search.trim()) {
-                distpatch(searchFollowKeyWord({ keyword: search }));
+                try {
+                    const response1 = await searchFollowKeyWord(search);
+                    const response2 = await getListFriend();
+                    setData(response1.messages);
+                    setDataContact(response2);
+                } catch (error) {
+                    console.error('Lỗi khi tìm kiếm:', error);
+                }
+            } else {
+                setData([]);
             }
         }, 1000);
 
         return () => clearTimeout(delayDebounce);
-    }, [search, distpatch]);
+    }, [search]);
 
     return (
         <div className="w-1/4 min-w-[340px] bg-white dark:bg-gray-800 border-r dark:border-r-black ">
@@ -72,7 +83,7 @@ function TabChatLeftBar() {
             </div>
             {/* Tabs */}
             {/* Tabs danh mục */}
-            {search !== '' ? <TabSearch keyword={search} /> : <TabChat />}
+            {search !== '' ? <TabSearch keyword={search} data={data} dataContact={dataContact} /> : <TabChat />}
         </div>
     );
 }
