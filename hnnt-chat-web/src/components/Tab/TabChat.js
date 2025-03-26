@@ -1,6 +1,6 @@
 import PopupCategoryAndState from '../Popup/PopupCategoryAndState';
 import { useSelector, useDispatch } from 'react-redux';
-import { setActiveChat, setSeemChat, setShowOrOffRightBarSearch } from '../../redux/slices/chatSlice';
+import { setActiveChat, setShowOrOffRightBarSearch } from '../../redux/slices/chatSlice';
 import { MdOutlineGifBox } from 'react-icons/md';
 import { LuSticker } from 'react-icons/lu';
 import { IoImageOutline } from 'react-icons/io5';
@@ -15,15 +15,18 @@ import { FiMoreHorizontal } from 'react-icons/fi';
 import { formatDistanceToNow, format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
-import { getChat } from '../../screens/Messaging/api';
+import { getChat, readedChatOfUser } from '../../screens/Messaging/api';
+import { socket } from '../../configs/socket';
 
 function TabChat() {
     const userActive = useSelector((state) => state.auth.userActive);
     const userId = userActive?.id;
-    const [activeTab, setActiveTab] = useState('priority');
+    const [activeTab, setActiveTab] = useState(true);
     const activeChat = useSelector((state) => state.chat.activeChat);
     const [hoveredMessage, setHoveredMessage] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
+    const categories = useSelector((state) => state.category.currentCategory);
+
     const [data, setData] = useState([]);
     const [error, setError] = useState(null);
 
@@ -64,17 +67,17 @@ function TabChat() {
                 <div>
                     <button
                         className={`flex-1 py-2 mr-3 pt-4 text-xs text-center font-medium ${
-                            activeTab === 'priority' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
+                            activeTab ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
                         }`}
-                        onClick={() => setActiveTab('priority')}
+                        onClick={() => setActiveTab(true)}
                     >
                         Ưu tiên
                     </button>
                     <button
                         className={`flex-1 py-2 pt-4 text-xs text-center font-medium ${
-                            activeTab === 'other' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
+                            !activeTab ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
                         }`}
-                        onClick={() => setActiveTab('other')}
+                        onClick={() => setActiveTab(false)}
                     >
                         Khác
                     </button>
@@ -83,6 +86,18 @@ function TabChat() {
             </div>
             <div className="overflow-y-auto min-h-[500px] z-0">
                 {data
+                    .filter((chat) => {
+                        const me = chat.participants.find((user) => user.accountId === userId);
+                        // Nếu categories rỗng, bỏ qua lọc theo category
+                        const categoryIds = categories.map((c) => c.id);
+                        const categoryMatch =
+                            categories.length === 0 || (me?.category && categoryIds.includes(me.category.id));
+
+                        // Lọc theo priority (activeTab)
+                        const priorityMatch = me?.priority === activeTab;
+
+                        return categoryMatch && priorityMatch;
+                    })
                     .sort((a, b) => {
                         const pinA = a.participants.find((p) => p.accountId === userId)?.pin || false;
                         const pinB = b.participants.find((p) => p.accountId === userId)?.pin || false;
@@ -100,11 +115,6 @@ function TabChat() {
                                 className={`relative p-3 cursor-pointer hover:bg-gray-300 hover:dark:bg-gray-700 dark:text-gray-300 ${
                                     activeChat?.id === chat.id ? 'bg-blue-100 dark:bg-[#20344c]' : ''
                                 }`}
-                                onClick={() => {
-                                    dispatch(setActiveChat(chat));
-                                    dispatch(setSeemChat({ chatId: chat.id, seem: true }));
-                                    dispatch(setShowOrOffRightBarSearch(false));
-                                }}
                                 onMouseEnter={() => {
                                     if (timeoutRef.current) {
                                         // Hủy bỏ timeout nếu chuột quay lại
@@ -140,12 +150,20 @@ function TabChat() {
                                             </div>
                                         )}
                                     </div>
-                                    <div className="absolute bottom-[8px] right-[10px] flex  text-[10px]">
+                                    <div className="absolute bottom-[5px] right-[10px] flex  text-[10px]">
                                         {chat?.messages[0]?.time && formatTime(chat?.messages[0]?.time)}
                                     </div>
                                 </div>
 
-                                <div className="flex item-center">
+                                <div
+                                    className="flex item-center"
+                                    onClick={() => {
+                                        dispatch(setActiveChat(chat));
+                                        readedChatOfUser(chat.id);
+                                        dispatch(setShowOrOffRightBarSearch(false));
+                                        // socket.emit('read_message', { chatId: chat.id });
+                                    }}
+                                >
                                     <div className="relative mr-2">
                                         <img
                                             src={chat.isGroup ? chat?.avatar : notMe?.account.avatar} // Thay bằng avatar thật
@@ -165,7 +183,7 @@ function TabChat() {
                                         </h3>
                                         <p
                                             className={`flex items-center text-sm  text-xs mt-1  ${
-                                                chat.seem
+                                                me.readed
                                                     ? 'text-gray-600 dark:text-gray-400'
                                                     : 'font-medium text-black dark:text-white'
                                             }`}

@@ -3,7 +3,7 @@ import Picker from 'emoji-picker-react';
 import GifPicker from 'gif-picker-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { sendEmoji } from '../../redux/slices/chatSlice';
-import { sendMessage } from '../../screens/Messaging/api';
+import { readedChatOfUser, sendMessage } from '../../screens/Messaging/api';
 
 import listSticker from '../../sample_data/listSticker';
 
@@ -20,11 +20,13 @@ function TabChatSymbol() {
         dispatch(sendEmoji(emojiData));
     };
 
-    const onGifClick = async (gifObject) => {
-        await sendMessage(activeChat.id, gifObject.url, 'gif', null, null, null, null);
+    const onGifClick = (gifObject) => {
+        sendMessage(activeChat.id, gifObject.url, 'gif', null, null, null, null);
+        readedChatOfUser(activeChat.id);
     };
-    const onStickerClick = async (sticker) => {
-        await sendMessage(activeChat.id, sticker, 'sticker', null, null, null, null);
+    const onStickerClick = (sticker) => {
+        sendMessage(activeChat.id, sticker, 'sticker', null, null, null, null);
+        readedChatOfUser(activeChat.id);
     };
 
     return (

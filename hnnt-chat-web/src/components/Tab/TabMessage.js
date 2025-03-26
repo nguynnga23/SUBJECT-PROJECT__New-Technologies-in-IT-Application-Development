@@ -45,7 +45,7 @@ import { FiMoreHorizontal } from 'react-icons/fi';
 import PopupReacttion from '../Popup/PopupReaction';
 import PopupReactionChat from '../Popup/PopupReactionChat';
 import PopupMenuForChat from '../Popup/PopupMenuForChat';
-import { getMessage, sendMessage } from '../../screens/Messaging/api';
+import { getMessage, readedChatOfUser, sendMessage } from '../../screens/Messaging/api';
 import PopupAllPinnedOfMessage from '../Popup/PopupAllPinnedOfMessage';
 
 function TabMessage() {
@@ -91,7 +91,7 @@ function TabMessage() {
         };
 
         fetchMessages();
-    }, [data, error]);
+    }, [data, error, chatId]);
 
     const MessageComponent = {
         text: ChatText,
@@ -130,6 +130,7 @@ function TabMessage() {
     const handleSendMessage = async () => {
         if (message.trim() !== '') {
             await sendMessage(chatId, message, 'text', replyMessage?.id, null, null, null);
+            await readedChatOfUser(chatId);
             setMessage('');
             setReplyMessage(null);
         }
@@ -396,6 +397,9 @@ function TabMessage() {
                     const position = message.sender.id === userId ? 'right' : 'left';
                     const sumReaction = message.reactions.reduce((total, reaction) => total + reaction.sum, 0);
 
+                    // Xác định tin nhắn cuối cùng của userId
+                    const lastMessage = data[data.length - 1];
+
                     return (
                         <div
                             id={`message-${message.id}`}
@@ -463,6 +467,19 @@ function TabMessage() {
                                                 replyMessage={message?.replyTo}
                                                 scrollToMessage={scrollToMessage}
                                             />
+                                            {message.id === lastMessage.id && message.sender.id === userId && (
+                                                <span className="flex justify-end">
+                                                    <p className="text-[10px] p-1 bg-gray-300 rounded-lg text-gray-500 mt-1 ">
+                                                        {!activeChat.isGroup
+                                                            ? activeChat.participants?.find(
+                                                                  (user) => user.accountId !== userId,
+                                                              ).readed
+                                                                ? 'Đã xem'
+                                                                : 'Đã gửi'
+                                                            : 'Đã nhận'}
+                                                    </p>
+                                                </span>
+                                            )}
                                             {isPopupOpenIndex === index && (
                                                 <PopupMenuForChat
                                                     setIsPopupOpen={setIsPopupOpenIndex}
@@ -676,6 +693,7 @@ function TabMessage() {
                                     className="text-2xl cursor-pointer ml-3 text-yellow-500 mr-3"
                                     onClick={() => {
                                         sendMessage(chatId, '👍', 'text', null, null, null, null);
+                                        readedChatOfUser(chatId);
                                     }}
                                 />
                             )}
