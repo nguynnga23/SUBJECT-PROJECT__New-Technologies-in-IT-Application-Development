@@ -16,7 +16,7 @@ import { formatDistanceToNow, format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
 import { getChat, readedChatOfUser } from '../../screens/Messaging/api';
-import { socket } from '../../configs/socket';
+// import { socket } from '../../configs/socket';
 
 function TabChat() {
     const userActive = useSelector((state) => state.auth.userActive);
@@ -26,6 +26,7 @@ function TabChat() {
     const [hoveredMessage, setHoveredMessage] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
     const categories = useSelector((state) => state.category.currentCategory);
+    const stateOfChat = useSelector((state) => state.category.stateOfChat);
 
     const [data, setData] = useState([]);
     const [error, setError] = useState(null);
@@ -95,8 +96,11 @@ function TabChat() {
 
                         // Lọc theo priority (activeTab)
                         const priorityMatch = me?.priority === activeTab;
+                        // Lọc theo trạng thái đọc
 
-                        return categoryMatch && priorityMatch;
+                        const readedMatch =
+                            stateOfChat === 'Tất cả' || (stateOfChat === 'Chưa đọc' && me?.readed === false);
+                        return categoryMatch && priorityMatch && readedMatch;
                     })
                     .sort((a, b) => {
                         const pinA = a.participants.find((p) => p.accountId === userId)?.pin || false;

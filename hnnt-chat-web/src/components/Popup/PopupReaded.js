@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { MdOutlineMoreHoriz } from 'react-icons/md';
 import { useDispatch } from 'react-redux';
 import { setSeemAllChat } from '../../redux/slices/chatSlice';
+import { readedAllChatOfUser } from '../../screens/Messaging/api';
 
 function PopupReaded() {
     const [isOpen, setIsOpen] = useState(false);
@@ -37,10 +38,10 @@ function PopupReaded() {
                 <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 dark:text-gray-300 dark:border-black shadow-lg rounded-lg border">
                     <div
                         onClick={() => {
-                            dispatch(setSeemAllChat());
+                            readedAllChatOfUser();
                             setIsOpen(false);
                         }}
-                        className="flex items-center my-1 dark:bg-gray-800 hover:opacity-60 rounded-lg cursor-pointer"
+                        className="flex items-center my-1 hover:bg-gray-300 hover:dark:bg-gray-700 rounded-lg cursor-pointer"
                     >
                         <span className="flex-1 my-1 text-sm text-center ">Đánh dấu đã đọc</span>
                     </div>

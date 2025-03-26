@@ -1,8 +1,7 @@
 import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthRequest } from '../types/authRequest';
-import { io } from '../utils/socket';
-import { log } from 'console';
+// import { io } from '../utils/socket';
 
 const prisma = new PrismaClient();
 
@@ -220,6 +219,48 @@ export const NotifyChatOfUser = async (req: AuthRequest, res: Response): Promise
     }
 };
 
+export const PriorityChatOfUser = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user.id;
+        const { chatId } = req.params;
+
+        if (!userId) {
+            res.status(401).json({ message: 'Unauthorized - No user ID found' });
+            return;
+        }
+        if (!chatId) {
+            res.status(401).json({ message: 'Bạn không được phép truy cập đoạn chat này' });
+            return;
+        }
+
+        // Lấy đoạn chat mà user tham gia
+        const chat = await prisma.chatParticipant.findFirst({
+            where: {
+                chatId,
+                accountId: userId,
+            },
+        });
+        if (!chat) {
+            res.status(403).json({ message: 'Bạn không có quyền chat này.' });
+            return;
+        }
+        await prisma.chatParticipant.update({
+            where: {
+                id: chat.id,
+            },
+            data: {
+                priority: !chat.priority,
+            },
+        });
+
+        res.status(200).json({ message: 'Đã cập nhật ghim' });
+        return;
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server.' });
+    }
+};
+
 export const AddCategoryToChat = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const userId = req.user.id;
@@ -304,6 +345,34 @@ export const ReadedChatOfUser = async (req: AuthRequest, res: Response): Promise
         // io.to(chatId).emit('read_message', { chatId, userId });
 
         res.status(200).json({ message: 'Đã cập nhật trạng thái readed' });
+        return;
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server.' });
+    }
+};
+
+export const ReadedAllChatOfUser = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user.id;
+
+        if (!userId) {
+            res.status(401).json({ message: 'Unauthorized - No user ID found' });
+            return;
+        }
+
+        await prisma.chatParticipant.updateMany({
+            where: {
+                accountId: userId,
+            },
+            data: {
+                readed: true,
+            },
+        });
+
+        // io.to(chatId).emit('read_message', { chatId, userId });
+
+        res.status(200).json({ message: 'Đã cập nhật trạng thái all readed' });
         return;
     } catch (error) {
         console.error(error);

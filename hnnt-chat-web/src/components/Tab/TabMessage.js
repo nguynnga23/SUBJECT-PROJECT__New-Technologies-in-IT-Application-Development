@@ -23,6 +23,7 @@ import { FaRegFileWord } from 'react-icons/fa';
 import { FaRegFileExcel } from 'react-icons/fa';
 import { FaRegFilePowerpoint } from 'react-icons/fa';
 import { BsChatText } from 'react-icons/bs';
+import { RiKey2Line } from 'react-icons/ri';
 
 import PopupCategory from '../Popup/PopupCategory';
 
@@ -79,6 +80,7 @@ function TabMessage() {
 
     const [data, setData] = useState([]);
     const [error, setError] = useState(null);
+    const leader = activeChat?.participants?.find((user) => user.role === 'LEADER')?.account;
 
     useEffect(() => {
         const fetchMessages = async () => {
@@ -418,13 +420,22 @@ function TabMessage() {
                         >
                             {!isDeleted && Component && (
                                 <div className="flex items-center">
-                                    <div className="w-[45px] h-[45px] mr-3 flex-shrink-0">
+                                    <div className=" mr-3 ">
                                         {message.sender.id !== userId && showAvatar && (
-                                            <img
-                                                src={message.sender.avatar}
-                                                alt="avatar"
-                                                className="w-full h-full rounded-full border object-cover"
-                                            />
+                                            <div className="relative w-[45px] h-[45px] flex-shrink-0">
+                                                <img
+                                                    src={message.sender.avatar}
+                                                    alt="avatar"
+                                                    className="w-full h-full rounded-full border object-cover"
+                                                />
+                                                {leader && (
+                                                    <RiKey2Line
+                                                        size={15}
+                                                        color="yellow"
+                                                        className="absolute bottom-[0px] right-[0px] bg-gray-500  bg-opacity-50 rounded-full p-[2px]"
+                                                    />
+                                                )}
+                                            </div>
                                         )}
                                     </div>
 
@@ -434,7 +445,7 @@ function TabMessage() {
                                             message.sender.id === userActive.id && (
                                                 <div className="flex">
                                                     <button
-                                                        className={`absolute left-[-25px] bottom-[30px] dark:bg-gray-700  p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 mr-1 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
+                                                        className={`absolute left-[-25px] bottom-[10px] dark:bg-gray-700  p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 mr-1 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
                                                         onClick={() => {
                                                             setIsPopupOpenIndex(index);
                                                         }}
@@ -443,7 +454,7 @@ function TabMessage() {
                                                     </button>
                                                     {!message.destroy && (
                                                         <button
-                                                            className={`absolute left-[-50px] bottom-[30px] dark:bg-gray-700  p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
+                                                            className={`absolute left-[-50px] bottom-[10px] dark:bg-gray-700  p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
                                                             onClick={() => {
                                                                 setReplyMessage(message);
                                                             }}
@@ -468,7 +479,7 @@ function TabMessage() {
                                                 scrollToMessage={scrollToMessage}
                                             />
                                             {message.id === lastMessage.id && message.sender.id === userId && (
-                                                <span className="flex justify-end">
+                                                <span className="absolute bottom-[-27px] right-[0]">
                                                     <p className="text-[10px] p-1 bg-gray-300 rounded-lg text-gray-500 mt-1 ">
                                                         {!activeChat.isGroup
                                                             ? activeChat.participants?.find(
@@ -489,7 +500,7 @@ function TabMessage() {
                                             )}
                                             {sumReaction > 0 && !message.destroy && (
                                                 <div
-                                                    className="absolute flex items-center bottom-[2px] right-[15px] rounded-full p-0.5 bg-white text-[12px] cursor-pointer dark:bg-gray-700"
+                                                    className="absolute flex items-center bottom-[-5px] right-[10px] rounded-full p-0.5 bg-white text-[12px] cursor-pointer dark:bg-gray-700"
                                                     onClick={() => setOpenReactionChat(true)}
                                                 >
                                                     {message.reactions.slice(0, 2).map((re, index) => {
@@ -504,7 +515,7 @@ function TabMessage() {
                                                 isPopupOpenIndex === null &&
                                                 !message.destroy && (
                                                     <button
-                                                        className="absolute bottom-[8px] right-[-8px] rounded-full p-0.5 text-[12px] bg-white dark:bg-gray-700"
+                                                        className="absolute bottom-[-5px] right-[-10px] rounded-full p-0.5 text-[12px] bg-white dark:bg-gray-700"
                                                         onMouseEnter={() => setShowPopupReaction(true)}
                                                         onMouseLeave={() =>
                                                             !showPopupReaction && setShowPopupReaction(false)
@@ -539,7 +550,7 @@ function TabMessage() {
                                             message.sender.id !== userActive.id && (
                                                 <div className="relative flex ">
                                                     <button
-                                                        className={`absolute dark:bg-gray-700 right-[-25px] bottom-[30px] p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
+                                                        className={`absolute dark:bg-gray-700 right-[-25px] bottom-[-10px] p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
                                                         onClick={() => {
                                                             setIsPopupOpenIndex(index);
                                                         }}
@@ -547,7 +558,7 @@ function TabMessage() {
                                                         <FiMoreHorizontal size={15} />
                                                     </button>
                                                     <button
-                                                        className={`absolute dark:bg-gray-700 right-[-50px] bottom-[30px] p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
+                                                        className={`absolute dark:bg-gray-700 right-[-50px] bottom-[-10px] p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
                                                         onClick={() => {
                                                             setReplyMessage(message);
                                                         }}

@@ -72,25 +72,34 @@ function TabSearchAll({ data, dataContact, keyword, scrollToMessage }) {
 
     return (
         <div className="mt-1 overflow-auto dark:bg-gray-800 dark:text-gray-300">
-            {dataContact && <p className="font-medium text-[13px]">Liên lạc</p>}
-            {dataContact?.map((r, index) => (
-                <div
-                    className="relative flex items-center p-2 hover:bg-gray-200 hover:dark:bg-gray-500 cursor-pointer "
-                    key={index}
-                    onClick={async () => {
-                        const activeChat = await getChatByUser(r.id);
-                        dispatch(setActiveChat(activeChat));
-                    }}
-                >
-                    <img src={r.avatar} alt="avatar" className="w-[35px] h-[35px] object-cover rounded-full mr-2" />
-                    <div>
-                        <p
-                            className="font-medium text-[12px] mb-[2px]"
-                            dangerouslySetInnerHTML={{ __html: highlightKeyword(r.name, keyword) }}
-                        ></p>
-                    </div>
+            {dataContact.length > 0 ? (
+                <div>
+                    {<p className="font-medium text-[13px]">Liên lạc</p>}
+                    {dataContact?.map((r, index) => (
+                        <div
+                            className="relative flex items-center p-2 hover:bg-gray-200 hover:dark:bg-gray-500 cursor-pointer "
+                            key={index}
+                            onClick={async () => {
+                                const activeChat = await getChatByUser(r.id);
+                                dispatch(setActiveChat(activeChat));
+                            }}
+                        >
+                            <img
+                                src={r.avatar}
+                                alt="avatar"
+                                className="w-[35px] h-[35px] object-cover rounded-full mr-2"
+                            />
+                            <div>
+                                <p
+                                    className="font-medium text-[12px] mb-[2px]"
+                                    dangerouslySetInnerHTML={{ __html: highlightKeyword(r.name, keyword) }}
+                                ></p>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-            ))}
+            ) : null}
+
             {renderResults('text', 'Tin nhắn')}
             {renderResults('file', 'File')}
         </div>

@@ -2,9 +2,11 @@ import { useEffect, useRef } from 'react';
 import { HiBellSlash } from 'react-icons/hi2';
 import { TiPin } from 'react-icons/ti';
 import { MdDelete } from 'react-icons/md';
+import { LiaExchangeAltSolid } from 'react-icons/lia';
+
 import { useDispatch, useSelector } from 'react-redux';
 import { deleteChatForUser } from '../../redux/slices/chatSlice';
-import { notifyChatOfUser, pinChatOfUser } from '../../screens/Messaging/api';
+import { notifyChatOfUser, pinChatOfUser, priorityChatOfUser } from '../../screens/Messaging/api';
 
 function PopupMenuForMess({ setShowPopup, setHoveredMessage, chat }) {
     const userActive = useSelector((state) => state.auth.userActive);
@@ -39,6 +41,17 @@ function PopupMenuForMess({ setShowPopup, setHoveredMessage, chat }) {
         >
             <div className="">
                 <ul>
+                    <li
+                        className="flex text-[12px] items-center px-4 py-2 hover:bg-gray-100 cursor-pointer rounded-lg"
+                        onClick={() => {
+                            priorityChatOfUser(chat.chatId);
+                            setShowPopup(false); // Đóng popup khi click ra ngoài
+                            setHoveredMessage(null);
+                        }}
+                    >
+                        <LiaExchangeAltSolid size={13} className={`mr-2 `} />{' '}
+                        {!chat.priority ? 'Chuyển qua ưu tiên' : 'Chuyển qua khác'}
+                    </li>
                     <li
                         className="flex text-[12px] items-center px-4 py-2 hover:bg-gray-100 cursor-pointer rounded-lg"
                         onClick={() => {

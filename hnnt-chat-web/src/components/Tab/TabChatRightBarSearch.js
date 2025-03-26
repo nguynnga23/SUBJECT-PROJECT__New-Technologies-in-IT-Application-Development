@@ -59,7 +59,7 @@ function TabChatRightBarSearch() {
 
             {/* Search Input */}
             <div className="relative p-4">
-                <IoSearchOutline className="absolute top-7 left-5 text-gray-400 " size={18} />
+                <IoSearchOutline className="absolute top-7 left-6 text-gray-400 " size={18} />
                 <input
                     type="text"
                     className="w-full pl-8 pr-8 py-2 border rounded-md focus:border-blue-500 focus:outline-none dark:bg-gray-700 dark:border-black"
