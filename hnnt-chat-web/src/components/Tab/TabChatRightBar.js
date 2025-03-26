@@ -6,15 +6,15 @@ import TabChatInfoGroup from './TabChatInfoGroup';
 
 function TabChatRightBar() {
     const initTab = useSelector((state) => state.chat.rightBarTab);
-    const activeChat = useSelector((state) => state.chat.data.find((chat) => chat.id === state.chat.activeChat?.id));
+    const activeChat = useSelector((state) => state.chat.activeChat);
 
     const [activeMessageTab, setActiveMessageTab] = useState(initTab);
 
     useEffect(() => {
-        if (!activeChat?.group) {
+        if (!activeChat?.isGroup) {
             setActiveMessageTab('info');
         }
-    }, [activeChat.group]);
+    }, [activeChat.isGroup]);
 
     return (
         <div className="w-1/4 flex flex-col bg-white dark:bg-gray-800  min-w-[350px] border-l dark:border-l-black">
@@ -45,7 +45,7 @@ function TabChatRightBar() {
 
             {activeMessageTab === 'sympol' && <TabChatSympol />}
 
-            {activeMessageTab === 'infoGroup' && activeChat.group && (
+            {activeMessageTab === 'infoGroup' && activeChat?.isGroup && (
                 <TabChatInfoGroup setActiveMessageTab={setActiveMessageTab} group={activeChat} />
             )}
         </div>

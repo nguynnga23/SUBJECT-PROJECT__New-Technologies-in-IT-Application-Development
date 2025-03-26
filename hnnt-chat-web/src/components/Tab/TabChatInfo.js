@@ -17,16 +17,20 @@ import {
     setShowOrOffRightBar,
     setShowOrOffRightBarSearch,
 } from '../../redux/slices/chatSlice';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Archive from '../Archive/Archive';
 import PopupAddGroup from '../Popup/PopupAddGroup';
+import { getMessage } from '../../screens/Messaging/api';
 
 function TabChatInfo({ setActiveMessageTab }) {
     const userActive = useSelector((state) => state.auth.userActive);
     const userId = userActive?.id;
-    const activeChat = useSelector((state) => state.chat.data.find((chat) => chat.id === state.chat.activeChat?.id));
+    const activeChat = useSelector((state) => state.chat.activeChat);
     const chatId = activeChat?.id;
     const [addGroupButton, setAddGroupButton] = useState(false);
+
+    const [data, setData] = useState([]);
+    const [error, setError] = useState([]);
 
     const [memberOpen, setMemberOpen] = useState(true);
     const [fileOpen, setFileOpen] = useState(true);
@@ -49,16 +53,38 @@ function TabChatInfo({ setActiveMessageTab }) {
         dispatch(setShowOrOffRightBarSearch(false));
     };
 
+    useEffect(() => {
+        const fetchMessages = async () => {
+            try {
+                const chats = await getMessage(chatId);
+                setData(chats);
+            } catch (err) {
+                setError(err.message);
+            }
+        };
+
+        fetchMessages();
+    }, [chatId, data]);
+
     return (
         <div className="overflow-auto dark:text-gray-300">
             {/* Avatar + Tên nhóm */}
             <div className="flex flex-col items-center p-3">
                 <img
-                    src={activeChat?.avatar}
+                    src={
+                        activeChat?.isGroup
+                            ? activeChat?.avatar
+                            : activeChat?.participants?.find((user) => user.accountId !== userId)?.account.avatar
+                    }
                     alt="avatar"
                     className="w-[55px] h-[55px] rounded-full border object-cover"
                 />
-                <h3 className="font-bold text-lg mt-2 font-medium">{activeChat?.name}</h3>
+                <h3 className="font-bold text-lg mt-2 font-medium">
+                    {activeChat?.isGroup
+                        ? activeChat?.name
+                        : activeChat?.participants?.find((user) => user.accountId !== userId)?.account?.name ||
+                          'Người dùng'}
+                </h3>
             </div>
             <div className="flex item-center justify-center border-b-[7px] dark:border-b-gray-900 ">
                 <div className="m-4 mt-1 w-[50px] text-center">
@@ -98,7 +124,7 @@ function TabChatInfo({ setActiveMessageTab }) {
                     <p className="text-[10px]"> {!activeChat?.pin ? 'Ghim hội thoại' : 'Bỏ ghim hội thoại'}</p>
                 </div>
                 <div className="m-4 mt-1 w-[50px] text-center">
-                    {activeChat?.group ? (
+                    {activeChat?.isGroup ? (
                         <div>
                             <div className="flex justify-center">
                                 <AiOutlineUsergroupAdd
@@ -137,14 +163,14 @@ function TabChatInfo({ setActiveMessageTab }) {
 
             {/* Danh mục */}
             <div className="space-y-2 ">
-                {activeChat?.group && (
+                {activeChat?.isGroup && (
                     <Archive
                         title="Thành viên"
                         isOpen={memberOpen}
                         toggleOpen={() => setMemberOpen(!memberOpen)}
-                        messages={activeChat?.messages}
+                        messages={data}
                         type="member"
-                        group={activeChat?.members}
+                        group={activeChat?.participants}
                         setActiveMessageTab={setActiveMessageTab}
                     />
                 )}
@@ -152,21 +178,21 @@ function TabChatInfo({ setActiveMessageTab }) {
                     title="Ảnh"
                     isOpen={imageOpen}
                     toggleOpen={() => setImageOpen(!imageOpen)}
-                    messages={activeChat?.messages}
+                    messages={data}
                     type="image"
                 />
                 <Archive
                     title="File"
                     isOpen={fileOpen}
                     toggleOpen={() => setFileOpen(!fileOpen)}
-                    messages={activeChat?.messages}
+                    messages={data}
                     type="file"
                 />
                 <Archive
                     title="Link"
                     isOpen={linkOpen}
                     toggleOpen={() => setLinkOpen(!linkOpen)}
-                    messages={activeChat?.messages}
+                    messages={data}
                     type="link"
                 />
             </div>
@@ -178,7 +204,7 @@ function TabChatInfo({ setActiveMessageTab }) {
                     Xóa lịch sử trò chuyện
                 </span>
             </div>
-            {activeChat?.group && (
+            {activeChat?.isGroup && (
                 <div className="text-red-500 flex items-center space-x-2 py-3 font-medium cursor-pointer text-base pl-2 hover:bg-gray-100 hover:dark:bg-gray-700">
                     <IoIosLogOut />
                     <span className="text-[12px]" onClick={handleRemoveMember}>
@@ -186,14 +212,15 @@ function TabChatInfo({ setActiveMessageTab }) {
                     </span>
                 </div>
             )}
-            {userActive.id === activeChat.leader && (
-                <div className="text-red-500 flex items-center space-x-2 py-3 font-medium cursor-pointer text-base pl-2 hover:bg-gray-100 hover:dark:bg-gray-700">
-                    <AiOutlineUsergroupDelete />
-                    <span className="text-[12px]" onClick={handleDeleteGroup}>
-                        Giải tán nhóm
-                    </span>
-                </div>
-            )}
+            {activeChat?.isGroup &&
+                activeChat.participants?.find((user) => user.accountId === userId)?.role === 'LEADER' && (
+                    <div className="text-red-500 flex items-center space-x-2 py-3 font-medium cursor-pointer text-base pl-2 hover:bg-gray-100 hover:dark:bg-gray-700">
+                        <AiOutlineUsergroupDelete />
+                        <span className="text-[12px]" onClick={handleDeleteGroup}>
+                            Giải tán nhóm
+                        </span>
+                    </div>
+                )}
         </div>
     );
 }
