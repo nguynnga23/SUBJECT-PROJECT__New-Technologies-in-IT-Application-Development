@@ -1,6 +1,6 @@
 import PopupCategoryAndState from '../Popup/PopupCategoryAndState';
 import { useSelector, useDispatch } from 'react-redux';
-import { setActiveChat, setSeemChat } from '../../redux/slices/chatSlice';
+import { setActiveChat, setSeemChat, setShowOrOffRightBarSearch } from '../../redux/slices/chatSlice';
 import { MdOutlineGifBox } from 'react-icons/md';
 import { LuSticker } from 'react-icons/lu';
 import { IoImageOutline } from 'react-icons/io5';
@@ -9,7 +9,6 @@ import { MdLabel } from 'react-icons/md';
 import { HiBellSlash } from 'react-icons/hi2';
 import { TiPin } from 'react-icons/ti';
 
-import { setActiveTabMessToOrther, setActiveTabMessToPriority } from '../../redux/slices/chatSlice';
 import { useEffect, useRef, useState } from 'react';
 import PopupMenuForMess from '../Popup/PopupMenuForMess';
 import { FiMoreHorizontal } from 'react-icons/fi';
@@ -21,13 +20,10 @@ import { getChat } from '../../screens/Messaging/api';
 function TabChat() {
     const userActive = useSelector((state) => state.auth.userActive);
     const userId = userActive?.id;
-    const activeTab = useSelector((state) => state.chat.activeTabMess);
+    const [activeTab, setActiveTab] = useState('priority');
     const activeChat = useSelector((state) => state.chat.activeChat);
     const [hoveredMessage, setHoveredMessage] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
-    // const categories = useSelector((state) => state.category.currentCategory) || [];
-    const state = useSelector((state) => state.category.state);
-    // const data = useSelector((state) => state.chat.data);
     const [data, setData] = useState([]);
     const [error, setError] = useState(null);
 
@@ -44,27 +40,7 @@ function TabChat() {
         fetchChats(); // Gọi hàm async bên trong useEffect
     }, [data]);
     const dispatch = useDispatch();
-    // const priorityChatsList = data.filter(
-    //     (chat) =>
-    //         chat.priority &&
-    //         (categories.length === 0 || categories?.some((cat) => cat.id === chat.category.id)) &&
-    //         (!chat.isGroup || chat.members?.some((m) => m?.id === userActive?.id)) &&
-    //         (state !== 'Chưa đọc' || chat.seem === false),
-    // );
-    // const otherChatsList = data.filter(
-    //     (chat) =>
-    //         !chat.priority &&
-    //         (categories.length === 0 || categories?.some((cat) => cat.id === chat.category.id)) &&
-    //         (!chat.isGroup || chat.members?.some((m) => m?.id === userActive?.id)) &&
-    //         (state !== 'Chưa đọc' || chat.seem === false),
-    // );
 
-    // const chats = activeTab === 'priority' ? priorityChatsList : otherChatsList;
-
-    // const getLastMessage = (messages) => {
-    //     const filteredMessages = messages.filter((msg) => !msg.delete.some((m) => m.id === userId) && !msg.destroy);
-    //     return filteredMessages.length > 0 ? filteredMessages.at(-1) : null;
-    // };
     const timeoutRef = useRef(null);
 
     const formatTime = (time) => {
@@ -90,7 +66,7 @@ function TabChat() {
                         className={`flex-1 py-2 mr-3 pt-4 text-xs text-center font-medium ${
                             activeTab === 'priority' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
                         }`}
-                        onClick={() => dispatch(setActiveTabMessToPriority())}
+                        onClick={() => setActiveTab('priority')}
                     >
                         Ưu tiên
                     </button>
@@ -98,7 +74,7 @@ function TabChat() {
                         className={`flex-1 py-2 pt-4 text-xs text-center font-medium ${
                             activeTab === 'other' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
                         }`}
-                        onClick={() => dispatch(setActiveTabMessToOrther())}
+                        onClick={() => setActiveTab('other')}
                     >
                         Khác
                     </button>
@@ -127,6 +103,7 @@ function TabChat() {
                                 onClick={() => {
                                     dispatch(setActiveChat(chat));
                                     dispatch(setSeemChat({ chatId: chat.id, seem: true }));
+                                    dispatch(setShowOrOffRightBarSearch(false));
                                 }}
                                 onMouseEnter={() => {
                                     if (timeoutRef.current) {

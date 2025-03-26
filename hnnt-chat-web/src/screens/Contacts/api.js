@@ -1,9 +1,9 @@
-export const getListFriend = async (number, password) => {
+export const getListFriendByKeyword = async (keyword) => {
     try {
         const token = localStorage.getItem('token');
         if (!token) throw new Error('Token is required');
 
-        const response = await fetch(`http://localhost:4000/api/friends/list`, {
+        const response = await fetch(`http://localhost:4000/api/friends/list/search/?keyword=${keyword}`, {
             method: 'GET',
             headers: {
                 Authorization: `Bearer ${token}`,

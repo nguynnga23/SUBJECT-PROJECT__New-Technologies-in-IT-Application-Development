@@ -34,44 +34,46 @@ function TabSearchAll({ data, dataContact, keyword, scrollToMessage }) {
 
         return (
             <>
-                <p className="font-medium text-[13px]">{label}</p>
-                {filteredResults.map((r, index) => (
-                    <div
-                        key={index}
-                        className="relative flex items-center p-2 hover:bg-gray-200 dark:hover:bg-gray-500 cursor-pointer"
-                        onClick={async () => {
-                            const activeChat = await getChatById(r.chatId);
-                            dispatch(setActiveChat(activeChat));
-                            scrollToMessage(r.id);
-                        }}
-                    >
-                        <img
-                            src={r.sender.avatar}
-                            alt="avatar"
-                            className="w-[35px] h-[35px] object-cover rounded-full mr-2"
-                        />
-                        <div>
-                            <p className="font-medium text-[12px] mb-[2px]">{r.sender.name}</p>
-                            <p
-                                className="text-[12px] max-w-[200px] truncate"
-                                dangerouslySetInnerHTML={{
-                                    __html: highlightKeyword(type === 'text' ? r.content : r.fileName, keyword),
-                                }}
-                            ></p>
-                            <p className="absolute right-[10px] top-[5px] text-[12px] mb-[2px]">
-                                {r.time && formatTime(r.time)}
-                            </p>
+                <div>
+                    <p className="font-medium text-[13px]">{label}</p>
+                    {filteredResults.map((r, index) => (
+                        <div
+                            key={index}
+                            className="relative flex items-center p-2 hover:bg-gray-200 dark:hover:bg-gray-500 cursor-pointer"
+                            onClick={async () => {
+                                const activeChat = await getChatById(r.chatId);
+                                dispatch(setActiveChat(activeChat));
+                                scrollToMessage(r.id);
+                            }}
+                        >
+                            <img
+                                src={r.sender.avatar}
+                                alt="avatar"
+                                className="w-[35px] h-[35px] object-cover rounded-full mr-2"
+                            />
+                            <div>
+                                <p className="font-medium text-[12px] mb-[2px]">{r.sender.name}</p>
+                                <p
+                                    className="text-[12px] max-w-[200px] truncate"
+                                    dangerouslySetInnerHTML={{
+                                        __html: highlightKeyword(type === 'text' ? r.content : r.fileName, keyword),
+                                    }}
+                                ></p>
+                                <p className="absolute right-[10px] top-[5px] text-[12px] mb-[2px]">
+                                    {r.time && formatTime(r.time)}
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </>
         );
     };
 
     return (
         <div className="mt-1 overflow-auto dark:bg-gray-800 dark:text-gray-300">
-            <p className="font-medium text-[13px]">Liên lạc</p>
-            {dataContact.map((r, index) => (
+            {dataContact && <p className="font-medium text-[13px]">Liên lạc</p>}
+            {dataContact?.map((r, index) => (
                 <div
                     className="relative flex items-center p-2 hover:bg-gray-200 hover:dark:bg-gray-500 cursor-pointer "
                     key={index}

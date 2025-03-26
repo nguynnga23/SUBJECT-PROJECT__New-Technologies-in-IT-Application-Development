@@ -9,11 +9,13 @@ import {
     pinOfMessage,
     deletePinOfMessage,
     searchForKeyWord,
+    searchForKeyWordByChat,
 } from '../controllers/messageController';
 import { authenticate } from '../middleware/auth';
 
 const messageRouter = Router();
 messageRouter.get('/search/', authenticate, searchForKeyWord);
+messageRouter.get('/search/:chatId/', authenticate, searchForKeyWordByChat);
 messageRouter.get('/:chatId', authenticate, getMessageOfChat);
 messageRouter.post('/:chatId', authenticate, sendMessage);
 messageRouter.put('/:messageId', authenticate, deleteMessage);

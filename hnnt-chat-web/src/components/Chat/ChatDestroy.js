@@ -2,7 +2,7 @@ function ChatDestroy({ index, userId, message, showName }) {
     return (
         <div
             key={index}
-            className={`relative text-[12px] border border-gray-400 p-3 pb-5 rounded-lg w-fit mb-2 max-w-[500px] min-w-[40px] break-all bg-gray-200 dark:bg-gray-600`}
+            className={`relative text-[12px] border border-gray-400 p-3 pb-5 rounded-lg w-fit max-w-[500px] min-w-[40px] break-all bg-gray-200 dark:bg-gray-600`}
         >
             {showName && (
                 <p className="text-[12px] text-gray-400 pb-[2px]">{message?.sender.id !== userId && message?.name}</p>

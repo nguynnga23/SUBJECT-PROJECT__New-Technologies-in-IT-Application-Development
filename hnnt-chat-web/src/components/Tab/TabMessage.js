@@ -399,7 +399,7 @@ function TabMessage() {
                     return (
                         <div
                             id={`message-${message.id}`}
-                            className={`relative flex items-center ${
+                            className={`relative flex items-center mb-2 ${
                                 message.sender.id === userId ? 'justify-end' : 'justify-start'
                             }`}
                             key={index}

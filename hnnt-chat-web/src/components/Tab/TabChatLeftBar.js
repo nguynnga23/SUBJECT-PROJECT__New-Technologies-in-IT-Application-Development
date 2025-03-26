@@ -11,7 +11,7 @@ import TabSearch from '../../components/Tab/TabSearch';
 import { useDispatch } from 'react-redux';
 import TabChat from './TabChat';
 import { searchFollowKeyWord } from '../../screens/Messaging/api';
-import { getListFriend } from '../../screens/Contacts/api';
+import { getListFriend, getListFriendByKeyword } from '../../screens/Contacts/api';
 
 function TabChatLeftBar() {
     const [addFriendButton, setAddFriendButton] = useState(false);
@@ -26,7 +26,7 @@ function TabChatLeftBar() {
             if (search.trim()) {
                 try {
                     const response1 = await searchFollowKeyWord(search);
-                    const response2 = await getListFriend();
+                    const response2 = await getListFriendByKeyword(search);
                     setData(response1.messages);
                     setDataContact(response2);
                 } catch (error) {
@@ -34,6 +34,7 @@ function TabChatLeftBar() {
                 }
             } else {
                 setData([]);
+                setDataContact([]);
             }
         }, 1000);
 
