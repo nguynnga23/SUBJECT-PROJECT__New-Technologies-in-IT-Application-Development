@@ -3,6 +3,23 @@ import * as ImagePicker from "expo-image-picker";
 import { Audio } from "expo-av";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system";
+import axios from 'axios';
+
+const API_URL = 'http://192.168.101.11:5000/api/messages';
+
+export const fetchMessages = async (chatId, token) => {
+    try {
+        const response = await axios.get(`${API_URL}/${chatId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Gửi token trong header
+            },
+        });
+        return response.data; // Trả về danh sách tin nhắn
+    } catch (error) {
+        console.error('Error fetching messages:', error.response?.data || error.message);
+        throw error;
+    }
+};
 
 let recording = null;
 let chatData = {

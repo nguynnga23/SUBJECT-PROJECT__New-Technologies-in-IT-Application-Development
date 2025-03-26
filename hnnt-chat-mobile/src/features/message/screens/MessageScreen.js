@@ -1,47 +1,85 @@
-import React from "react";
-import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
+import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, Alert, RefreshControl } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-
-const messages = [
-  { id: 1, name: "Media Box", message: "Báo Mới: Phá đường dây cá độ bóng đá...", time: "11 giờ", unread: true, typeChat: "private" },
-  { id: 2, name: "Thời Tiết", message: "Chào ngày mới, thời tiết Thành phố Hồ Chí...", time: "11 giờ", unread: false, typeChat: "private" },
-  { id: 3, name: "Nhóm CNMOI-HK2-24-25", message: "Nguyễn Nga: ChatGPT làm 😂", time: "18 giờ", unread: false, typeChat: "group" },
-  { id: 4, name: "CNMOI-Hk2-24-25-KTPM17C-sangT6", message: "Nguyễn Minh Đức: Thưa thầy, nhóm 12 xin bổ...", time: "CN", unread: false, typeChat: "group" },
-  { id: 5, name: "Nhóm 5_QLDA", message: "Trần Anh Bảo khóa bình chọn: Chương 3", time: "CN", unread: false, typeChat: "group" },
-  { id: 6, name: "Nhóm 6- Tư Tưởng Hồ Chí Minh", message: "Nguyễn Tuấn An: [Hình ảnh]", time: "CN", unread: false, typeChat: "group" },
-  { id: 7, name: "Nguyễn Thế Lực", message: "Không biết có nghe thấy không", time: "T7", unread: false, typeChat: "private" },
-  { id: 8, name: "Fiza", message: "🎁 VIB Financial Free: Sắm Tết thành thơi...", time: "T7", unread: true, typeChat: "private" },
-  { id: 9, name: "DHKTPM17B", message: "Hoang Khanh: [File] Kế hoạch ngày hội việc làm...", time: "T6", unread: false, typeChat: "private" },
-];
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fetchChats } from "../services/MessageChanelService"; // Import hàm fetchChats
 
 const ChatListScreen = () => {
   const navigation = useNavigation();
+  const [chats, setChats] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false); // State cho tính năng làm mới
+
+  const loadChats = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token'); // Lấy token từ AsyncStorage
+      if (!token) {
+        Alert.alert('Error', 'You are not logged in!');
+        return;
+      }
+      const data = await fetchChats(token); // Gọi API để lấy danh sách chat
+      setChats(data);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to fetch chats.');
+    } finally {
+      setLoading(false);
+      setRefreshing(false); // Dừng trạng thái làm mới
+    }
+  };
+
+  useEffect(() => {
+    loadChats();
+  }, []);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true); // Bắt đầu trạng thái làm mới
+    loadChats(); // Gọi lại API để làm mới dữ liệu
+  }, []);
 
   const handlePress = (item) => {
-    if (item.typeChat === "private") {
-      navigation.navigate("PrivateChatScreen", { chatId: item.id, chatName: item.name });
-    } else {
+    if (item.isGroup) {
       navigation.navigate("GroupChatScreen", { chatId: item.id, chatName: item.name });
+    } else {
+      navigation.navigate("PrivateChatScreen", { chatId: item.id, chatName: item.name });
     }
   };
 
   const renderItem = ({ item }) => (
-
     <TouchableOpacity style={styles.item} onPress={() => handlePress(item)}>
-      <Image source={require("../../../assets/icon.png")} style={styles.avatar} />
+      <Image
+        source={{ uri: item.avatar || "https://via.placeholder.com/50" }}
+        style={styles.avatar}
+      />
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.time}>{item.time}</Text>
+          <Text style={styles.time}>{new Date(item.updatedAt).toLocaleString()}</Text>
         </View>
-        <Text style={[styles.message, item.unread && styles.unread]}>{item.message}</Text>
+        <Text style={styles.message}>
+          {item.messages.length > 0 ? item.messages[0].content : "No messages yet"}
+        </Text>
       </View>
     </TouchableOpacity>
   );
 
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading chats...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <FlatList data={messages} keyExtractor={(item) => item.id.toString()} renderItem={renderItem} />
+      <FlatList
+        data={chats}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderItem}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        } // Thêm RefreshControl để hỗ trợ kéo để làm mới
+      />
     </View>
   );
 };
@@ -85,10 +123,6 @@ const styles = StyleSheet.create({
   message: {
     fontSize: 14,
     color: "#666",
-  },
-  unread: {
-    fontWeight: "bold",
-    color: "#000",
   },
 });
 

@@ -22,13 +22,22 @@ import chatData, {
   handleDeleteMessage,
   handleSendMessage, sendImage, sendFile, downloadFile,
   startRecording, stopRecording, sendVoiceMessage, playAudio,
-  handleReaction
+  handleReaction, fetchMessages
 } from "../../services/GroupChat/GroupChatService";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRoute } from "@react-navigation/native";
+import { getUserIdFromToken } from "../../../../utils/auth";
+import { formatDateTime } from "../../../../utils/formatDateTime";
 
 export default function GroupChatScreen() {
   const navigation = useNavigation();
+  const route = useRoute();
+  const { chatId, chatName } = route.params; // Lấy chatId và chatName từ route params
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState(chatData.messages);
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState(null); // Lưu userId của người dùng hiện tại
+
   const [replyingMessage, setReplyingMessage] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalRecordVisible, setModalRecordVisible] = useState(false);
@@ -52,6 +61,39 @@ export default function GroupChatScreen() {
       });
     };
   }, [navigation]);
+
+  useEffect(() => {
+    const loadMessages = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token'); // Lấy token từ AsyncStorage
+
+        if (!token) {
+          Alert.alert('Error', 'You are not logged in!');
+          return;
+        }
+
+        const userId = getUserIdFromToken(token);
+        setCurrentUserId(userId);
+
+        const data = await fetchMessages(chatId, token); // Gọi API để lấy danh sách tin nhắn
+        setMessages(data);
+      } catch (error) {
+        Alert.alert('Error', 'Failed to fetch messages.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMessages();
+  }, [chatId]);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Loading messages...</Text>
+      </View>
+    );
+  }
 
   const getReactionsForMessage = (messageId) => {
     return chatData.reaction
@@ -95,7 +137,7 @@ export default function GroupChatScreen() {
             <Ionicons name="arrow-back" size={30} color="white" />
           </TouchableOpacity>
 
-          <Text style={styles.groupName}>{chatData.group_name}</Text>
+          <Text style={styles.groupName}>{chatName}</Text>
 
           <TouchableOpacity style={{ position: "absolute", right: 70 }} onPress={() => navigation.navigate("GroupCallScreen")}>
             <Icon name="video-outline" size={35} color="white" />
@@ -112,7 +154,7 @@ export default function GroupChatScreen() {
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <TouchableOpacity onLongPress={() => handleLongPressMessage(item.id, messages, setMessages, setReplyingMessage, setModalVisible)}>
-              <View style={[styles.messageContainer, item.isMe ? styles.myMessage : styles.otherMessage]}>
+              <View style={[styles.messageContainer, item.senderId === currentUserId ? styles.myMessage : styles.otherMessage]}>
 
                 {item.replyTo && (
                   <View style={styles.replyBox}>
@@ -121,7 +163,7 @@ export default function GroupChatScreen() {
                   </View>
                 )}
 
-                <Text style={styles.sender}>{item.name}</Text>
+                <Text style={styles.sender}>{item.sender.name}</Text>
 
                 {item.audioUri && (
                   <TouchableOpacity onPress={() => playAudio(item.audioUri)} style={styles.playButton}>
@@ -144,11 +186,11 @@ export default function GroupChatScreen() {
 
 
                 {/* Nội dung tin nhắn */}
-                <Text style={styles.message}>{item.message}</Text>
+                <Text style={styles.message}>{item.content}</Text>
 
                 {/* Hiển thị reaction và thời gian */}
                 <View style={styles.timeReactionContainer}>
-                  <Text style={styles.time}>{item.time}</Text>
+                  <Text style={styles.time}>{formatDateTime(item.time)}</Text>
 
                   {Object.keys(getReactionsForMessage(item.id)).length > 0 && (
                     <View style={styles.reactionContainer}>
@@ -312,6 +354,12 @@ export default function GroupChatScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f4f4f4" },
+
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
   header: {
     flexDirection: "row",
