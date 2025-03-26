@@ -1,6 +1,8 @@
 import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthRequest } from '../types/authRequest';
+import { io } from '../utils/socket';
+import { log } from 'console';
 
 const prisma = new PrismaClient();
 
@@ -218,7 +220,7 @@ export const NotifyChatOfUser = async (req: AuthRequest, res: Response): Promise
     }
 };
 
-export const addCategoryToChat = async (req: AuthRequest, res: Response): Promise<void> => {
+export const AddCategoryToChat = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const userId = req.user.id;
         const { chatId } = req.params;
@@ -257,6 +259,51 @@ export const addCategoryToChat = async (req: AuthRequest, res: Response): Promis
         });
 
         res.status(200).json({ message: 'Đã cập nhật ghim' });
+        return;
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server.' });
+    }
+};
+
+export const ReadedChatOfUser = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user.id;
+        const { chatId } = req.params;
+
+        if (!userId) {
+            res.status(401).json({ message: 'Unauthorized - No user ID found' });
+            return;
+        }
+        if (!chatId) {
+            res.status(401).json({ message: 'Bạn không được phép truy cập đoạn chat này' });
+            return;
+        }
+
+        // Lấy đoạn chat mà user tham gia
+        const chat = await prisma.chatParticipant.findFirst({
+            where: {
+                chatId,
+                accountId: userId,
+            },
+        });
+
+        if (!chat) {
+            res.status(403).json({ message: 'Bạn không có quyền chat này.' });
+            return;
+        }
+        await prisma.chatParticipant.update({
+            where: {
+                id: chat.id,
+            },
+            data: {
+                readed: true,
+            },
+        });
+
+        // io.to(chatId).emit('read_message', { chatId, userId });
+
+        res.status(200).json({ message: 'Đã cập nhật trạng thái readed' });
         return;
     } catch (error) {
         console.error(error);

@@ -102,6 +102,7 @@ model ChatParticipant {
   accountId String
   categoryId String?
   priority Boolean? @default(true)
+  readed Boolean? @default(false)
 
 
   pin       Boolean  @default(false) // User có ghim chat này không?

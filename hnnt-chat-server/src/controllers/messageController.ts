@@ -75,6 +75,16 @@ export const sendMessage = async (req: AuthRequest, res: Response): Promise<void
             },
         });
 
+        await prisma.chatParticipant.updateMany({
+            where: {
+                chatId,
+                accountId: { not: senderId }, // Lọc những user khác userId hiện tại
+            },
+            data: {
+                readed: false,
+            },
+        });
+
         res.status(201).json(message);
     } catch (error) {
         console.error(error);
@@ -379,7 +389,7 @@ export const searchForKeyWordByChat = async (req: AuthRequest, res: Response): P
     try {
         const userId = req.user.id; // Lấy userId từ token hoặc session
         const keyword = req.query.keyword;
-        const {chatId} = req.params;
+        const { chatId } = req.params;
 
         // Lấy tất cả tin nhắn từ các đoạn chat này
         const messages = await prisma.message.findMany({
@@ -424,4 +434,4 @@ export const searchForKeyWordByChat = async (req: AuthRequest, res: Response): P
         console.error(error);
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
-}
+};

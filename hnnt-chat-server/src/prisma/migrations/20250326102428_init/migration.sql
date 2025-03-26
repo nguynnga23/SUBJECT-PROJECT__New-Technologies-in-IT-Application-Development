@@ -69,6 +69,7 @@ CREATE TABLE "ChatParticipant" (
     "accountId" TEXT NOT NULL,
     "categoryId" TEXT,
     "priority" BOOLEAN DEFAULT true,
+    "readed" BOOLEAN DEFAULT false,
     "pin" BOOLEAN NOT NULL DEFAULT false,
     "notify" BOOLEAN NOT NULL DEFAULT true,
     "role" "ChatRole" NOT NULL DEFAULT 'MEMBER',

@@ -1,12 +1,13 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import pool from './src/config/db';
+import { createServer } from 'http';
 import friendRouter from './src/routes/friendRoutes';
 import chatRouter from './src/routes/chatRoutes';
 import messageRouter from './src/routes/messageRoutes';
 import authRouter from './src/routes/authRoutes';
 import categoryRouter from './src/routes/categoryRoutes';
+import { initSocket } from './src/utils/socket';
 
 // Load environment variables
 dotenv.config();
@@ -19,19 +20,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// // Connect PostgreSQL
-// pool.connect()
-//     .then(() => {
-//         console.log('✅ Connected to PostgreSQL');
-
-//         app.listen(PORT, () => {
-//             console.log(`🚀 Server is running on http://localhost:${PORT}`);
-//         });
-//     })
-//     .catch((err) => {
-//         console.error('❌ Database connection error:', err);
-//         process.exit(1);
-//     });
+// Tạo HTTP server từ Express
+const server = createServer(app);
+// initSocket(server);
 
 // Routes
 app.use(
@@ -46,6 +37,6 @@ app.use('/api/categories', categoryRouter);
 app.use('/api/messages', messageRouter);
 app.use('/api/auth', authRouter);
 
-app.listen(PORT, () => {
-    console.log(`Server đang chạy trên cổng ${PORT}`);
+server.listen(PORT, () => {
+    console.log(`✅ Server đang chạy trên cổng ${PORT}`);
 });
