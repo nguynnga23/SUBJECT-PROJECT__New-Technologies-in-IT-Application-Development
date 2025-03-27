@@ -18,10 +18,48 @@ export const fetchChat = async (chatId, token) => {
     }
 };
 
-export const handleEditGroupName = (setEditVisible, newGroupName, setGroupName) => {
-    console.log("Updating group name:", newGroupName);
-    setGroupName(newGroupName);
-    setEditVisible(false);
+export const getPinMess = async (chatId, token) => {
+    try {
+        const response = await axios.get(`${API_URL}/groups/message/${chatId}/show-pin`, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Gửi token trong header
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.warn('Error fetching:', error.response?.data || error.message);
+        throw error;
+    }
+};
+
+export const unPinMess = async (messageId, token) => {
+    try {
+        const response = await axios.put(`${API_URL}/groups/message/${messageId}/un-pin`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Gửi token trong header
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.warn('Error fetching:', error.response?.data || error.message);
+        throw error;
+    }
+};
+
+export const editGroupName = async (e_name, chatId, token) => {
+    try {
+        const response = await axios.put(`${API_URL}/groups/${chatId}/edit-name`,
+            { "name": e_name },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Gửi token trong header
+                },
+            });
+        return response.data;
+    } catch (error) {
+        console.warn('Error fetching:', error.response?.data || error.message);
+        throw error;
+    }
 };
 
 export const handleReport = (reportReason, setReportVisible) => {
@@ -30,13 +68,22 @@ export const handleReport = (reportReason, setReportVisible) => {
     setReportVisible(false);
 };
 
-export const handleLeaveGroup = (setLeaveVisible, navigation) => {
-    console.log("User confirmed leaving group");
-    setLeaveVisible(false);
-    navigation.reset({
-        index: 0,
-        routes: [{ name: "MessageScreen" }],
-    });
+export const leaveGroup = async (chatId, token) => {
+    try {
+        const groupId = chatId;
+        const response = await axios.delete(
+            `${API_URL}/groups/${groupId}/leave`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Gửi token trong header
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.warn('Error fetching:', error.response?.data || error.message);
+        throw error;
+    }
 };
 
 export const toggleMute = async (chatId, token) => {
@@ -85,11 +132,20 @@ export const handleChangeAvatar = async (setAvatar) => {
     }
 };
 
-export const handleDisbandGroup = (setDisbandVisible, navigation) => {
-    console.log("Group has been disbanded.");
-    setDisbandVisible(false);
-    navigation.reset({
-        index: 0,
-        routes: [{ name: "MessageScreen" }],
-    });
+export const disbandGroup = async (chatId, token) => {
+    try {
+        const groupId = chatId;
+        const response = await axios.delete(
+            `${API_URL}/groups/${groupId}/disband`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Gửi token trong header
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.warn('Error fetching:', error.response?.data || error.message);
+        throw error;
+    }
 };

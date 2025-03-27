@@ -153,7 +153,7 @@ export const unPinMessage = async (req: AuthRequest, res: Response): Promise<voi
 };
 
 // get pinned message
-// GET /api/message/:messageId/show-pin
+// GET /api/message/:chatId/show-pin
 export const getPinnedMessage = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const requesterId = req.user.id;
@@ -162,11 +162,11 @@ export const getPinnedMessage = async (req: AuthRequest, res: Response): Promise
             return;
         }
 
-        const chatId = req.params.chatId; // Đảm bảo sử dụng đúng tham số chatId từ URL
+        const chatId = req.params.chatId; // Lấy chatId từ URL
 
-        // Truy vấn các tin nhắn được ghim trong nhóm chat
+        // Truy vấn tin nhắn được ghim trong nhóm chat
         const pinnedMessages = await prisma.message.findMany({
-            where: { chatId, pin: true }, // Đảm bảo điều kiện đúng
+            where: { chatId, pin: true }, // Điều kiện: chatId và pin = true
             include: {
                 sender: { select: { id: true, name: true, avatar: true } }, // Bao gồm thông tin người gửi
             },

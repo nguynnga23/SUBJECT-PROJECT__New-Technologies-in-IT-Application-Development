@@ -7,8 +7,8 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUserIdFromToken } from "../../../../utils/auth";
 import {
-    handleReport, handleLeaveGroup, toggleMute, handleEditGroupName, handleChangeAvatar, handleDisbandGroup,
-    fetchChat
+    handleReport, leaveGroup, toggleMute, editGroupName, handleChangeAvatar, disbandGroup,
+    fetchChat, getPinMess, unPinMess
 } from "../../services/GroupChat/GroupInfoService";
 
 export default function GroupInfoScreen() {
@@ -25,35 +25,112 @@ export default function GroupInfoScreen() {
     const [userRole, setUserRole] = useState("");
     const [disbandVisible, setDisbandVisible] = useState(false);
     const [pinVisible, setPinVisible] = useState(false);
+    const [pinMess, setPinMess] = useState([]);
+    const [messageId, setMessageId] = useState("");
+    const [numberOfMembers, setNumberOfMembers] = useState("");
+
+    const fetchChatInfo = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const chatInfo = await fetchChat(chatId, token); // Replace with actual token
+            setNewGroupName(chatInfo.name);
+            setAvatar(chatInfo.avatar);
+            const userId = getUserIdFromToken(token);
+            const participant = chatInfo.participants.find(p => p.accountId === userId);
+            if (participant) {
+                setUserRole(participant.role); // Lưu vai trò vào state
+                setIsMuted(participant.notify);
+            }
+            setNumberOfMembers("Member (" + chatInfo.participants.length + ")");
+
+            try {
+                const pin_Mess = await getPinMess(chatId, token);
+                setPinMess(pin_Mess[0].content); // Lấy nội dung tin nhắn đầu tiên
+                setMessageId(pin_Mess[0].id); // Lấy ID tin nhắn đầu tiên
+            } catch (error) {
+                if (error.response?.status === 404) {
+                    // Xử lý lỗi 404 một cách yên lặng
+                    console.warn("No pinned message found."); // Log cảnh báo nếu cần
+                    setPinMess("No pinned message"); // Đặt giá trị mặc định
+                    setMessageId(null); // Đặt giá trị mặc định
+                } else {
+                    // Xử lý các lỗi khác
+                    console.warn("Error fetching pinned message:", error); // Log lỗi nếu cần
+                    setPinMess(null); // Đặt giá trị mặc định nếu xảy ra lỗi khác
+                    setMessageId(null); // Đặt giá trị mặc định nếu xảy ra lỗi khác
+                }
+            }
+
+        } catch (error) {
+            console.error("Error fetching chat info:", error);
+        }
+    };
+
+    const handleEditGroupName = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await editGroupName(newGroupName, chatId, token);
+            setNewGroupName(response.name);
+            setEditVisible(false);
+            fetchChatInfo();
+            Alert.alert("Success", response.message);
+        } catch (error) {
+            console.warn("Error editing group name:", error);
+        }
+    }
 
     useEffect(() => {
-        const fetchChatInfo = async () => {
-            try {
-                const token = await AsyncStorage.getItem('token');
-                const chatInfo = await fetchChat(chatId, token); // Replace with actual token
-                setNewGroupName(chatInfo.name);
-                setAvatar(chatInfo.avatar);
-                const userId = getUserIdFromToken(token);
-                const participant = chatInfo.participants.find(p => p.accountId === userId);
-                if (participant) {
-                    setUserRole(participant.role); // Lưu vai trò vào state
-                    setIsMuted(participant.notify);
-                }
-            } catch (error) {
-                console.error("Error fetching chat info:", error);
-            }
-        };
         fetchChatInfo();
     }, [chatId]);
 
     const handleToggleMute = async () => {
         try {
+            console.log("Toggling mute for chatId:", chatId);
             const token = await AsyncStorage.getItem('token');
             const response = await toggleMute(chatId, token);
             setIsMuted(response.notify);
             Alert.alert("Success", response.message);
         } catch (error) {
             console.error("Error toggling mute:", error);
+        }
+    };
+
+    const handleUnPinMess = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await unPinMess(messageId, token);
+            fetchChatInfo(); // Refresh chat info after unpinning
+            Alert.alert("Success", response.message);
+        } catch (error) {
+            console.warn("Error unpinning message:", error);
+        }
+    };
+
+    const handleDisbandGroup = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await disbandGroup(chatId, token);
+            Alert.alert("Success", response.message);
+            navigation.reset({
+                index: 0,
+                routes: [{ name: "MessageScreen" }],
+            });
+        } catch (error) {
+            console.warn("Error disbanding group:", error);
+        }
+    }
+
+    const handleLeaveGroup = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await leaveGroup(chatId, token);
+            Alert.alert("Success", response.message);
+            navigation.reset({
+                index: 0,
+                routes: [{ name: "MessageScreen" }],
+            });
+        } catch (error) {
+            console.warn("Error leaving group:", error);
         }
     }
 
@@ -76,9 +153,9 @@ export default function GroupInfoScreen() {
                     />}
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <Text style={styles.groupName}>{newGroupName}</Text>
-                        <TouchableOpacity onPress={() => setEditVisible(true)}>
+                        {userRole === "LEADER" && (<TouchableOpacity onPress={() => setEditVisible(true)}>
                             <AntDesign style={{ marginTop: 7 }} name="edit" size={24} color="black" />
-                        </TouchableOpacity>
+                        </TouchableOpacity>)}
                     </View>
 
                 </View>
@@ -89,9 +166,11 @@ export default function GroupInfoScreen() {
                         <ActionButton icon="search" label="Find      message" />
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={() => handleChangeAvatar(setAvatar)}>
-                        <ActionButton icon="image" label="Change avatar" />
-                    </TouchableOpacity>
+                    {userRole === "LEADER" && (
+                        <TouchableOpacity onPress={() => handleChangeAvatar(setAvatar)}>
+                            <ActionButton icon="image" label="Change avatar" />
+                        </TouchableOpacity>
+                    )}
 
                     <TouchableOpacity style={styles.actionButton} onPress={() => handleToggleMute()}>
                         <Ionicons name={isMuted ? "notifications" : "notifications-off"} size={24} color="black" />
@@ -109,7 +188,7 @@ export default function GroupInfoScreen() {
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => navigation.navigate("MemberListScreen")}>
-                    <OptionItem label="Member (4)" />
+                    <OptionItem label={numberOfMembers} />
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => navigation.navigate("AddMemberScreen")}>
@@ -132,7 +211,7 @@ export default function GroupInfoScreen() {
                 <TouchableOpacity onPress={() => setLeaveVisible(true)}>
                     <OptionItem label="Leave group" textColor="red" />
                 </TouchableOpacity>
-                {userRole === "Leader" && (
+                {userRole === "LEADER" && (
                     <TouchableOpacity onPress={() => setDisbandVisible(true)}>
                         <OptionItem label="Disband group" textColor="red" />
                     </TouchableOpacity>
@@ -150,7 +229,7 @@ export default function GroupInfoScreen() {
                             />
                             <View style={styles.modalActions}>
                                 <Button title="Cancel" color="red" onPress={() => setEditVisible(false)} />
-                                <Button title="Apply" onPress={() => handleEditGroupName(setEditVisible, newGroupName, setNewGroupName)} />
+                                <Button title="Apply" onPress={() => handleEditGroupName()} />
                             </View>
                         </View>
                     </View>
@@ -189,7 +268,7 @@ export default function GroupInfoScreen() {
                             <Text>Are you sure you want to leave this group?</Text>
                             <View style={styles.modalActions}>
                                 <Button title="Cancel" onPress={() => setLeaveVisible(false)} />
-                                <Button title="Leave" color="red" onPress={() => handleLeaveGroup(setLeaveVisible, navigation)} />
+                                <Button title="Leave" color="red" onPress={() => handleLeaveGroup()} />
                             </View>
                         </View>
                     </View>
@@ -203,7 +282,7 @@ export default function GroupInfoScreen() {
                             <Text>Are you sure you want to disband this group? This action cannot be undone.</Text>
                             <View style={styles.modalActions}>
                                 <Button title="Cancel" onPress={() => setDisbandVisible(false)} />
-                                <Button title="Disband" color="red" onPress={() => handleDisbandGroup(setDisbandVisible, navigation)} />
+                                <Button title="Disband" color="red" onPress={() => handleDisbandGroup()} />
                             </View>
                         </View>
                     </View>
@@ -214,8 +293,11 @@ export default function GroupInfoScreen() {
                     <TouchableWithoutFeedback onPress={() => setPinVisible(false)}>
                         <View style={styles.modalContainer}>
                             <View style={styles.modalContent}>
-                                <Text style={styles.modalTitle}>Pin messenge</Text>
-                                <Text>...</Text>
+                                <Text style={styles.modalTitle}>{pinMess}</Text>
+
+                                <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 10, width: "100%" }}>
+                                    <Button title="Un-pin" color="red" onPress={() => handleUnPinMess()} />
+                                </View>
                             </View>
                         </View>
                     </TouchableWithoutFeedback>
