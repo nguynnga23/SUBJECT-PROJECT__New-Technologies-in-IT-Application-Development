@@ -43,3 +43,49 @@ export const GetChatOfUser = async (req: AuthRequest, res: Response): Promise<vo
         res.status(500).json({ message: 'Lỗi server.' });
     }
 };
+
+//get chat by id, only participants can get chat
+export const GetChatById = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user.id;
+        const chatId = req.params.id;
+
+        if (!userId) {
+            res.status(401).json({ message: 'Unauthorized - No user ID found' });
+            return;
+        }
+
+        const chat = await prisma.chat.findFirst({
+            where: {
+                id: chatId,
+                participants: {
+                    some: { accountId: userId },
+                },
+            },
+            include: {
+                participants: {
+                    include: {
+                        account: { select: { id: true, name: true, avatar: true } },
+                    },
+                },
+                messages: {
+                    include: {
+                        sender: { select: { id: true, name: true, avatar: true } },
+                    },
+                },
+            },
+        });
+
+        if (!chat) {
+            res.status(404).json({ message: 'Không tìm thấy chat.' });
+            return;
+        }
+
+        res.json(chat);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server.' });
+    }
+}
+
+

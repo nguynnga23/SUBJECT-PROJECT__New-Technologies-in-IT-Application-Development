@@ -47,7 +47,7 @@ const ChatListScreen = () => {
   const renderItem = ({ item }) => (
     <TouchableOpacity style={styles.item} onPress={() => handlePress(item)}>
       <Image
-        source={{ uri: item.avatar || "https://via.placeholder.com/50" }}
+        source={{ uri: item.avatar || "https://img.freepik.com/premium-vector/chat-vector-icon_676179-133.jpg" }}
         style={styles.avatar}
       />
       <View style={styles.content}>
