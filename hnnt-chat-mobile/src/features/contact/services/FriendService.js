@@ -1,25 +1,60 @@
-// src/services/friendService.js
-const BASE_URL = 'http://api.example.com';
+import axios from 'axios';
 
-const handleResponse = async (response) => {
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch friends');
-    }
-    return response.json();
+const BASE_URL = 'http://192.168.1.100:3000'; // Thay bằng IP của server
+
+const friendService = {
+    // Lấy danh sách bạn bè của người đăng nhập
+    getFriends: async (token) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/friends`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    // Block một người bạn
+    blockFriend: async (receiverId, token) => {
+        try {
+            const response = await axios.post(
+                `${BASE_URL}/block`,
+                { receiverId },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                },
+            );
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    // Có thể thêm các hàm khác như gửi lời mời, chấp nhận lời mời, v.v.
+    sendFriendRequest: async (receiverId, token) => {
+        try {
+            const response = await axios.post(
+                `${BASE_URL}/friend-request`,
+                { receiverId },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                },
+            );
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
 };
 
-export const getFriendList = async (userId) => {
-    try {
-        const response = await fetch(`${BASE_URL}/users/${userId}/friends`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        return await handleResponse(response);
-    } catch (error) {
-        console.error('Error fetching friend list:', error);
-        throw error;
-    }
-};
+export default friendService;

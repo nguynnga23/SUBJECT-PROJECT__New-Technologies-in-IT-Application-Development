@@ -1,8 +1,10 @@
-// src/redux/store.js
-import { createStore, applyMiddleware } from 'redux';
-import thunk from 'redux-thunk';
-import friendReducer from './reducers/friendReducer';
+import { configureStore } from '@reduxjs/toolkit';
+import friendReducer from './slices/friendSlice';
+import authReducer from './slices/authSlice';
 
-const store = createStore(friendReducer, applyMiddleware(thunk));
-
-export default store;
+export const store = configureStore({
+    reducer: {
+        friends: friendReducer,
+        auth: authReducer,
+    },
+});
