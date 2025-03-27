@@ -31,7 +31,7 @@ export const createGroupChat = async (req: AuthRequest, res: Response): Promise<
             data: {
                 isGroup: true,
                 name,
-                avatar: avatar || 'default-avatar.png',
+                avatar: avatar || 'https://img.freepik.com/premium-vector/chat-vector-icon_676179-133.jpg',
                 createdAt: new Date(),
                 updatedAt: new Date(),
             },
