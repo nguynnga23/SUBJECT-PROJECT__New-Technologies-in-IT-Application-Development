@@ -37,6 +37,7 @@ export default function GroupChatScreen() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState(null); // Lưu userId của người dùng hiện tại
+  const [token, setToken] = useState(null); // Lưu token từ AsyncStorage
 
   const [replyingMessage, setReplyingMessage] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -66,6 +67,7 @@ export default function GroupChatScreen() {
     const loadMessages = async () => {
       try {
         const token = await AsyncStorage.getItem('token'); // Lấy token từ AsyncStorage
+        setToken(token); // Lưu token vào state
 
         if (!token) {
           Alert.alert('Error', 'You are not logged in!');
@@ -153,7 +155,7 @@ export default function GroupChatScreen() {
           data={messages}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <TouchableOpacity onLongPress={() => handleLongPressMessage(item.id, messages, setMessages, setReplyingMessage, setModalVisible)}>
+            <TouchableOpacity onLongPress={() => handleLongPressMessage(item.id, messages, setMessages, setReplyingMessage, setModalVisible, token)}>
               <View style={[styles.messageContainer, item.senderId === currentUserId ? styles.myMessage : styles.otherMessage]}>
 
                 {item.replyTo && (

@@ -100,10 +100,37 @@ export const pinMessage = async (req: AuthRequest, res: Response): Promise<void>
             res.status(401).json({ message: 'Unauthorized' });
             return;
         }
+
         const messageId = req.params.messageId;
-        await prisma.message.update({ where: { id: messageId }, data: { pin: true } });
+
+        // Lấy thông tin tin nhắn để xác định chatId
+        const message = await prisma.message.findUnique({
+            where: { id: messageId },
+            select: { chatId: true },
+        });
+
+        if (!message) {
+            res.status(404).json({ message: 'Tin nhắn không tồn tại!' });
+            return;
+        }
+
+        const chatId = message.chatId;
+
+        // Gỡ ghim tất cả các tin nhắn khác trong cùng nhóm chat
+        await prisma.message.updateMany({
+            where: { chatId, pin: true },
+            data: { pin: false },
+        });
+
+        // Ghim tin nhắn mới
+        await prisma.message.update({
+            where: { id: messageId },
+            data: { pin: true },
+        });
+
         res.status(200).json({ message: 'Tin nhắn đã được ghim!' });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
     }
 };
@@ -121,6 +148,38 @@ export const unPinMessage = async (req: AuthRequest, res: Response): Promise<voi
         await prisma.message.update({ where: { id: messageId }, data: { pin: false } });
         res.status(200).json({ message: 'Tin nhắn đã được gỡ ghim!' });
     } catch (error) {
+        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+    }
+};
+
+// get pinned message
+// GET /api/message/:messageId/show-pin
+export const getPinnedMessage = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const requesterId = req.user.id;
+        if (!requesterId) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
+        const chatId = req.params.chatId; // Đảm bảo sử dụng đúng tham số chatId từ URL
+
+        // Truy vấn các tin nhắn được ghim trong nhóm chat
+        const pinnedMessages = await prisma.message.findMany({
+            where: { chatId, pin: true }, // Đảm bảo điều kiện đúng
+            include: {
+                sender: { select: { id: true, name: true, avatar: true } }, // Bao gồm thông tin người gửi
+            },
+        });
+
+        if (pinnedMessages.length === 0) {
+            res.status(404).json({ message: 'Không có tin nhắn nào được ghim.' });
+            return;
+        }
+
+        res.status(200).json(pinnedMessages);
+    } catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
     }
 };
@@ -359,6 +418,42 @@ export const kickMember = async (req: AuthRequest, res: Response): Promise<void>
         });
 
         res.status(200).json({ message: 'Xóa thành viên khỏi nhóm thành công!' });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+    }
+};
+
+// Update group name
+// PUT /api/groups/:groupId/edit-name
+// Body: { name: string }
+export const updateGroupName = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const requesterId = req.user.id;
+        if (!requesterId) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
+        const chatId = req.params.groupId;
+        const { name } = req.body;
+
+        // Kiểm tra xem người yêu cầu có phải là LEADER không
+        const requester = await prisma.chatParticipant.findUnique({
+            where: { chatId_accountId: { chatId, accountId: requesterId } },
+            select: { role: true },
+        });
+
+        if (!requester || requester.role !== 'LEADER') {
+            res.status(403).json({ message: 'Bạn không có quyền đổi tên nhóm!' });
+            return;
+        }
+
+        await prisma.chat.update({
+            where: { id: chatId },
+            data: { name },
+        });
+
+        res.status(200).json({ message: 'Đổi tên nhóm thành công!' });
     } catch (error) {
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
     }
