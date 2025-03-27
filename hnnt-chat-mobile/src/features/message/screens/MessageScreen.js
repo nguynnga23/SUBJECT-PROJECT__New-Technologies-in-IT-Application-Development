@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, Alert, RefreshControl } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { formatDateTime } from "../../../utils/formatDateTime";
 import { fetchChats } from "../services/MessageChanelService"; // Import hàm fetchChats
 
 const ChatListScreen = () => {
@@ -53,7 +54,7 @@ const ChatListScreen = () => {
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.time}>{new Date(item.updatedAt).toLocaleString()}</Text>
+          <Text style={styles.time}>{formatDateTime(item.updatedAt)}</Text>
         </View>
         <Text style={styles.message}>
           {item.messages.length > 0 ? item.messages[0].content : "No messages yet"}
