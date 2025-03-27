@@ -1,5 +1,22 @@
 import * as ImagePicker from 'expo-image-picker';
 import { Alert } from 'react-native';
+import axios from 'axios';
+
+const API_URL = 'http://192.168.101.11:5000/api';
+
+export const fetchChat = async (chatId, token) => {
+    try {
+        const response = await axios.get(`${API_URL}/chats/${chatId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Gửi token trong header
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching chat info:', error.response?.data || error.message);
+        throw error;
+    }
+};
 
 export const handleEditGroupName = (setEditVisible, newGroupName, setGroupName) => {
     console.log("Updating group name:", newGroupName);
@@ -22,8 +39,23 @@ export const handleLeaveGroup = (setLeaveVisible, navigation) => {
     });
 };
 
-export const toggleMute = (isMuted, setIsMuted) => {
-    setIsMuted(!isMuted);
+export const toggleMute = async (chatId, token) => {
+    try {
+        const response = await axios.put(
+            `${API_URL}/groups/mute`,
+            { chatId }, // Body request
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Gửi token trong header
+                },
+            }
+        );
+        console.log('Response from toggleMute:', response.data); // Log thông tin từ response
+        return response.data;
+    } catch (error) {
+        console.error('Error toggling mute:', error.response?.data || error.message);
+        throw error;
+    }
 };
 
 export const handleChangeAvatar = async (setAvatar) => {

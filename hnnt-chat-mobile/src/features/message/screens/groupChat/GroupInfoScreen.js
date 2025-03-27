@@ -4,22 +4,58 @@ import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { handleReport, handleLeaveGroup, toggleMute, handleEditGroupName, handleChangeAvatar, handleDisbandGroup } from "../../services/GroupChat/GroupInfoService";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getUserIdFromToken } from "../../../../utils/auth";
+import {
+    handleReport, handleLeaveGroup, toggleMute, handleEditGroupName, handleChangeAvatar, handleDisbandGroup,
+    fetchChat
+} from "../../services/GroupChat/GroupInfoService";
 
 export default function GroupInfoScreen() {
     const navigation = useNavigation();
     const route = useRoute();
-    const groupName = route.params?.groupName || "null";
-    const [isMuted, setIsMuted] = useState(false);
+    const chatId = route.params?.chatId || "null";
+    const [isMuted, setIsMuted] = useState();
     const [editVisible, setEditVisible] = useState(false);
     const [newGroupName, setNewGroupName] = useState("");
     const [reportVisible, setReportVisible] = useState(false);
     const [leaveVisible, setLeaveVisible] = useState(false);
     const [reportReason, setReportReason] = useState("");
     const [avatar, setAvatar] = useState(null);
-    const [userRole, setUserRole] = useState("Leader");
+    const [userRole, setUserRole] = useState("");
     const [disbandVisible, setDisbandVisible] = useState(false);
     const [pinVisible, setPinVisible] = useState(false);
+
+    useEffect(() => {
+        const fetchChatInfo = async () => {
+            try {
+                const token = await AsyncStorage.getItem('token');
+                const chatInfo = await fetchChat(chatId, token); // Replace with actual token
+                setNewGroupName(chatInfo.name);
+                setAvatar(chatInfo.avatar);
+                const userId = getUserIdFromToken(token);
+                const participant = chatInfo.participants.find(p => p.accountId === userId);
+                if (participant) {
+                    setUserRole(participant.role); // Lưu vai trò vào state
+                    setIsMuted(participant.notify);
+                }
+            } catch (error) {
+                console.error("Error fetching chat info:", error);
+            }
+        };
+        fetchChatInfo();
+    }, [chatId]);
+
+    const handleToggleMute = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await toggleMute(chatId, token);
+            setIsMuted(response.notify);
+            Alert.alert("Success", response.message);
+        } catch (error) {
+            console.error("Error toggling mute:", error);
+        }
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -35,13 +71,11 @@ export default function GroupInfoScreen() {
                 {/* Group Info */}
                 <View style={styles.groupInfo}>
                     {avatar && <Image
-
-                        // source={require("../../../../assets/icon.png")}
-                        source={{ uri: avatar }}
+                        source={{ uri: avatar || "https://img.freepik.com/premium-vector/chat-vector-icon_676179-133.jpg" }}
                         style={styles.groupImage}
                     />}
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Text style={styles.groupName}>{newGroupName.trim() ? newGroupName : groupName}</Text>
+                        <Text style={styles.groupName}>{newGroupName}</Text>
                         <TouchableOpacity onPress={() => setEditVisible(true)}>
                             <AntDesign style={{ marginTop: 7 }} name="edit" size={24} color="black" />
                         </TouchableOpacity>
@@ -59,7 +93,7 @@ export default function GroupInfoScreen() {
                         <ActionButton icon="image" label="Change avatar" />
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.actionButton} onPress={() => toggleMute(isMuted, setIsMuted)}>
+                    <TouchableOpacity style={styles.actionButton} onPress={() => handleToggleMute()}>
                         <Ionicons name={isMuted ? "notifications" : "notifications-off"} size={24} color="black" />
                         <Text style={styles.actionText}>{isMuted ? "Unmute" : "Mute"}</Text>
                     </TouchableOpacity>
@@ -83,13 +117,13 @@ export default function GroupInfoScreen() {
                 </TouchableOpacity>
 
                 {/* Group Links */}
-                <OptionItem
+                {/* <OptionItem
                     label="Link to join group"
                     textColor="black"
                     links={[
                         { text: "https://zalo.me/g/deuqlw127", url: "https://zalo.me/g/deuqlw127" },
                     ]}
-                />
+                /> */}
 
                 {/* Danger Zone */}
                 <TouchableOpacity onPress={() => setReportVisible(true)}>
