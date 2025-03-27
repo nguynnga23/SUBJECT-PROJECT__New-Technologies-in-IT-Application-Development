@@ -30,7 +30,7 @@ function TabSearchAll({ data, dataContact, keyword, scrollToMessage }) {
 
     const renderResults = (type, label) => {
         const filteredResults = data.filter((r) => r?.type === type);
-        if (filteredResults.length === 0) return null; // Nếu không có kết quả thì không render
+        if (filteredResults?.length === 0) return null; // Nếu không có kết quả thì không render
 
         return (
             <>
@@ -72,7 +72,7 @@ function TabSearchAll({ data, dataContact, keyword, scrollToMessage }) {
 
     return (
         <div className="mt-1 overflow-auto dark:bg-gray-800 dark:text-gray-300">
-            {dataContact.length > 0 ? (
+            {dataContact?.length > 0 ? (
                 <div>
                     {<p className="font-medium text-[13px]">Liên lạc</p>}
                     {dataContact?.map((r, index) => (

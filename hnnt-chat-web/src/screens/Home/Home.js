@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import Modal from '../../components/Modal';
 import { logout } from '../Authentication/api';
 import { logoutOfSlice } from '../../redux/slices/authSlice';
-import { setActiveChat, setShowOrOffRightBar, setShowOrOffRightBarSearch } from '../../redux/slices/chatSlice';
+import { setShowOrOffRightBar, setShowOrOffRightBarSearch } from '../../redux/slices/chatSlice';
 
 export default function Home() {
     const navigate = useNavigate();
@@ -26,11 +26,12 @@ export default function Home() {
     const [settingScreen, setSettingScreen] = useState(false);
     // const dispatch = useDispatch();
     const userActive = useSelector((state) => state.auth.userActive);
+    const isRehydrated = useSelector((state) => state._persist?.rehydrated);
     useEffect(() => {
-        if (!userActive) {
+        if (isRehydrated && !userActive) {
             navigate('/');
         }
-    }, [userActive, navigate]);
+    }, [userActive, navigate, isRehydrated]);
 
     // open modal
     const [isOpenModel, setIsOpenModel] = useState(false);
@@ -52,14 +53,11 @@ export default function Home() {
 
     const handleLogout = async () => {
         try {
-            await logout(); // Gọi API logout
-            dispatch(logoutOfSlice);
-            dispatch(setActiveChat(null));
+            navigate('/'); // Điều hướng sau khi Redux cập nhật
+            dispatch(logoutOfSlice());
             dispatch(setShowOrOffRightBar(false));
             dispatch(setShowOrOffRightBarSearch(false));
-
-            // Cập nhật state, Redux hoặc điều hướng về trang login
-            navigate('/');
+            await logout(); // Gọi API logout
         } catch (error) {
             console.error('Lỗi khi đăng xuất:', error);
         }

@@ -30,7 +30,7 @@ function Authentication() {
         try {
             const data = await login(number, password);
             localStorage.setItem('token', data.token);
-            dispatch(setUser({ userActive: data.user, token: null }));
+            dispatch(setUser({ userActive: data.user, token: data.token }));
             navigate('/home');
         } catch (err) {
             alert('Lỗi server!');

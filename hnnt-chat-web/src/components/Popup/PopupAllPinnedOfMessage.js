@@ -33,7 +33,7 @@ const PopupAllPinnedOfMessage = ({ pinnedMessages, setShowAllPinned, scrollToMes
 
     return (
         <div
-            className="absolute right-[10px] bg-gray-200 dark:bg-gray-800 p-1 rounded-lg w-96 max-h-[80vh] overflow-auto z-[1000]"
+            className="absolute right-[10px] bg-gray-200 dark:bg-gray-800 p-1 rounded-lg w-96 max-h-[80vh] overflow-auto z-[1000] dark:text-gray-300"
             ref={popupContainerRef}
         >
             <div className="space-y-1">

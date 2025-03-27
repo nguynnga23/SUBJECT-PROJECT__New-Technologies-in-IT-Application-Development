@@ -46,17 +46,17 @@ import { FiMoreHorizontal } from 'react-icons/fi';
 import PopupReacttion from '../Popup/PopupReaction';
 import PopupReactionChat from '../Popup/PopupReactionChat';
 import PopupMenuForChat from '../Popup/PopupMenuForChat';
-import { getMessage, readedChatOfUser, sendMessage } from '../../screens/Messaging/api';
+import { deletePinOfMessage, getMessage, readedChatOfUser, sendMessage } from '../../screens/Messaging/api';
 import PopupAllPinnedOfMessage from '../Popup/PopupAllPinnedOfMessage';
 
 function TabMessage() {
     const [message, setMessage] = useState('');
     const [isOpenCategory, setIsOpenCategory] = useState(false);
     const userActive = useSelector((state) => state.auth.userActive);
-    const userId = userActive.id;
+    const userId = userActive?.id;
 
     const activeChat = useSelector((state) => state.chat.activeChat);
-    const chatId = activeChat.id;
+    const chatId = activeChat?.id;
 
     const dispatch = useDispatch();
     const showRightBar = useSelector((state) => state.chat.showRightBar);
@@ -113,12 +113,6 @@ function TabMessage() {
             return <FaRegFileWord className="text-3xl text-blue-600 mr-2" />;
         return <MdFilePresent className="text-3xl text-gray-500 mr-2" />; // Mặc định
     };
-
-    useEffect(() => {
-        if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-        }
-    }, [activeChat?.id]);
 
     // Hàm tự động điều chỉnh chiều cao
     useEffect(() => {
@@ -315,7 +309,7 @@ function TabMessage() {
                 <div className="relative">
                     {/* Hiển thị tin nhắn ghim cuối cùng */}
                     {lastPinnedMessage && (
-                        <div className="p-2 text-[10px] flex dark:bg-gray-700 bg-white rounded-lg shadow items-center justify-between ">
+                        <div className="p-2 text-[10px] flex dark:bg-gray-700 bg-white rounded-lg shadow items-center justify-between dark:text-gray-300">
                             <div
                                 className="flex items-center cursor-pointer"
                                 onClick={() => scrollToMessage(lastPinnedMessage.id)}
@@ -365,10 +359,20 @@ function TabMessage() {
                             {pinnedMessages.length > 1 && (
                                 <button
                                     onClick={() => setShowAllPinned(!showAllPinned)}
-                                    className="ml-2 text[10px] p-1 border border-gray-600 rounded-[3px] bg-white mr-3"
+                                    className="ml-2 text[10px] p-1 border border-gray-600 rounded-[3px] bg-white mr-3 dark:bg-gray-600"
                                 >
                                     + ({pinnedMessages.length}) ghim
                                 </button>
+                            )}
+                            {pinnedMessages.length === 1 && (
+                                <p
+                                    className="absolute text-red-500 text-[7px] right-[5px] top-[10px] p-1 cursor-pointer hover:bg-red-500 hover:text-white border rounded-lg"
+                                    onClick={() => {
+                                        deletePinOfMessage(pinnedMessages[0].id);
+                                    }}
+                                >
+                                    Bỏ ghim
+                                </p>
                             )}
                         </div>
                     )}
@@ -420,7 +424,7 @@ function TabMessage() {
                         >
                             {!isDeleted && Component && (
                                 <div className="flex items-center">
-                                    <div className=" mr-3 ">
+                                    <div className=" mr-3 w-[45px] h-[45px] ">
                                         {message.sender.id !== userId && showAvatar && (
                                             <div className="relative w-[45px] h-[45px] flex-shrink-0">
                                                 <img
