@@ -108,14 +108,16 @@ export const deleteMessage = async (req: AuthRequest, res: Response): Promise<vo
         }
 
         // Cập nhật deletedBy để thêm userId
-        await prisma.message.update({
-            where: { id: messageId },
-            data: {
-                deletedBy: {
-                    push: userId,
+        if (!message.deletedBy.includes(userId)) {
+            await prisma.message.update({
+                where: { id: messageId },
+                data: {
+                    deletedBy: {
+                        push: userId,
+                    },
                 },
-            },
-        });
+            });
+        }
 
         res.status(200).json({ message: 'Đã xóa tin nhắn thành công' });
         return;

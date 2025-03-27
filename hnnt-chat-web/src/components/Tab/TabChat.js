@@ -29,7 +29,6 @@ function TabChat() {
     const stateOfChat = useSelector((state) => state.category.stateOfChat);
 
     const [data, setData] = useState([]);
-    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchChats = async () => {
@@ -37,7 +36,7 @@ function TabChat() {
                 const chats = await getChat();
                 setData(chats);
             } catch (err) {
-                setError(err.message);
+                console.log(err.message);
             }
         };
 
@@ -198,7 +197,7 @@ function TabChat() {
                                             {chat?.messages[0]?.senderId === userId ? (
                                                 <span className="mr-1">Bạn: </span>
                                             ) : (
-                                                <span className="mr-1">{chat?.messages[0]?.sender.name}:</span>
+                                                <span className="mr-1">{`${chat?.messages[0]?.sender.name}:`}</span>
                                             )}
                                             {deleteByMeOrDestroy ? (
                                                 <span className="max-w-[220px] truncate italic">

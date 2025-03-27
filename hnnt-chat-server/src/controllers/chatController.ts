@@ -379,3 +379,60 @@ export const ReadedAllChatOfUser = async (req: AuthRequest, res: Response): Prom
         res.status(500).json({ message: 'Lỗi server.' });
     }
 };
+
+export const DeleteAllMessageOfChat = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user.id;
+        const { chatId } = req.params;
+
+        if (!userId) {
+            res.status(401).json({ message: 'Unauthorized - No user ID found' });
+            return;
+        }
+        if (!chatId) {
+            res.status(400).json({ message: 'Chat ID is required' });
+            return;
+        }
+
+        // Kiểm tra xem user có tham gia đoạn chat này không
+        const chatParticipant = await prisma.chatParticipant.findFirst({
+            where: {
+                chatId,
+                accountId: userId,
+            },
+        });
+
+        if (!chatParticipant) {
+            res.status(403).json({ message: 'Bạn không có quyền xóa tin nhắn trong đoạn chat này.' });
+            return;
+        }
+
+        // Lấy tất cả tin nhắn của chat
+        const messages = await prisma.message.findMany({
+            where: { chatId },
+            select: { id: true, deletedBy: true },
+        });
+
+        // Cập nhật chỉ những tin nhắn chưa có userId trong deletedBy
+        const updatePromises = messages.map((message) => {
+            if (!message.deletedBy.includes(userId)) {
+                return prisma.message.update({
+                    where: { id: message.id },
+                    data: { deletedBy: [...message.deletedBy, userId] },
+                });
+            }
+            return null;
+        });
+
+        // Chạy các update đồng thời
+        await Promise.all(updatePromises.filter(Boolean));
+
+        // io.to(chatId).emit('read_message', { chatId, userId });
+
+        res.status(200).json({ message: 'Đã xóa tất cả tin nhắn trong chat này' });
+        return;
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server.' });
+    }
+};

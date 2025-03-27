@@ -17,7 +17,6 @@ function PopupCategoryAndState() {
     const [isOpenManageCategory, setIsOpenManageCategory] = useState(false);
     const [stateOfChat, setStateOfChat] = useState('Tất cả');
     const [data, setData] = useState([]);
-    const [error, setError] = useState([]);
     const popupContainerRef = useRef(null);
 
     const dispatch = useDispatch();
@@ -28,7 +27,7 @@ function PopupCategoryAndState() {
                 const chats = await getAllCategory();
                 setData(chats);
             } catch (err) {
-                setError(err.message);
+                console.log(err.message);
             }
         };
 
@@ -78,7 +77,7 @@ function PopupCategoryAndState() {
                         isOpen ? 'bg-blue-400 text-white' : ''
                     }`}
                 >
-                    Phân loại <FaChevronDown />
+                    {stateOfChat} <FaChevronDown />
                 </button>
                 <PopupReaded />
             </div>

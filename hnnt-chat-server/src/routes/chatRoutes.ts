@@ -9,6 +9,7 @@ import {
     ReadedChatOfUser,
     ReadedAllChatOfUser,
     PriorityChatOfUser,
+    DeleteAllMessageOfChat,
 } from '../controllers/chatController';
 import { authenticate } from '../middleware/auth';
 
@@ -24,5 +25,6 @@ chatRouter.put('/:chatId/priority', authenticate, PriorityChatOfUser);
 chatRouter.put('/:chatId/category', authenticate, AddCategoryToChat);
 chatRouter.put('/:chatId/readed', authenticate, ReadedChatOfUser);
 chatRouter.put('/all-readed', authenticate, ReadedAllChatOfUser);
+chatRouter.put('/:chatId/all-delete', authenticate, DeleteAllMessageOfChat);
 
 export default chatRouter;

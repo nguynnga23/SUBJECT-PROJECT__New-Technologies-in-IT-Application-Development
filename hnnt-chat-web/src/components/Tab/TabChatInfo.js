@@ -8,7 +8,6 @@ import { IoIosLogOut } from 'react-icons/io';
 import { AiOutlineUsergroupDelete } from 'react-icons/ai';
 
 import {
-    deleteChatForUser,
     removeMemberOfGroup,
     destroyGroup,
     setActiveChat,
@@ -20,7 +19,7 @@ import {
 import { useEffect, useState } from 'react';
 import Archive from '../Archive/Archive';
 import PopupAddGroup from '../Popup/PopupAddGroup';
-import { getMessage, notifyChatOfUser, pinChatOfUser } from '../../screens/Messaging/api';
+import { deleteAllChatOfChat, getMessage, notifyChatOfUser, pinChatOfUser } from '../../screens/Messaging/api';
 
 function TabChatInfo({ setActiveMessageTab }) {
     const userActive = useSelector((state) => state.auth.userActive);
@@ -30,7 +29,6 @@ function TabChatInfo({ setActiveMessageTab }) {
     const [addGroupButton, setAddGroupButton] = useState(false);
 
     const [data, setData] = useState([]);
-    const [error, setError] = useState([]);
 
     const [memberOpen, setMemberOpen] = useState(true);
     const [fileOpen, setFileOpen] = useState(true);
@@ -59,7 +57,7 @@ function TabChatInfo({ setActiveMessageTab }) {
                 const chats = await getMessage(chatId);
                 setData(chats);
             } catch (err) {
-                setError(err.message);
+                console.log(err.message);
             }
         };
 
@@ -221,7 +219,7 @@ function TabChatInfo({ setActiveMessageTab }) {
             {/* Xóa lịch sử trò chuyện */}
             <div className="text-red-500 flex items-center space-x-2 py-3 font-medium cursor-pointer text-base pl-2 hover:bg-gray-100 hover:dark:bg-gray-700">
                 <FaTrashAlt />
-                <span className="text-[12px]" onClick={() => dispatch(deleteChatForUser({ userId, chatId }))}>
+                <span className="text-[12px]" onClick={() => deleteAllChatOfChat(chatId)}>
                     Xóa lịch sử trò chuyện
                 </span>
             </div>

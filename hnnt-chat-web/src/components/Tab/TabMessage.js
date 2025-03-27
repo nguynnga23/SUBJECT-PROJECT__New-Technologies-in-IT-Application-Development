@@ -79,7 +79,6 @@ function TabMessage() {
     const [showAllPinned, setShowAllPinned] = useState(false);
 
     const [data, setData] = useState([]);
-    const [error, setError] = useState(null);
     const leader = activeChat?.participants?.find((user) => user.role === 'LEADER')?.account;
 
     useEffect(() => {
@@ -88,12 +87,12 @@ function TabMessage() {
                 const chats = await getMessage(chatId);
                 setData(chats);
             } catch (err) {
-                setError(err.message);
+                console.log(err.message);
             }
         };
 
         fetchMessages();
-    }, [data, error, chatId]);
+    }, [setData, chatId]);
 
     const MessageComponent = {
         text: ChatText,
