@@ -139,7 +139,7 @@ export const sendOTP = async (req: Request, res: Response): Promise<void> => {
         otpStore.set(number, otpCode);
 
         // Gửi OTP qua SMS (Thêm +84 cho số Việt Nam)
-        // await sendSMS('+84935019843', `Mã OTP của bạn là: ${otpCode}`);
+        await sendSMS('+84935019843', `Mã OTP của bạn là: ${otpCode}`);
 
         res.json({ message: 'OTP đã được gửi!' });
     } catch (error) {
