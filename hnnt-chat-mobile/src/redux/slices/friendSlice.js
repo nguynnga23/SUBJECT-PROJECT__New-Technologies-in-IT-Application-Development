@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import friendService from '../../services/friendService';
+import friendService from '../../features/contact/services/FriendService';
 
 // Thunk để lấy danh sách bạn bè
 export const fetchFriends = createAsyncThunk('friends/fetchFriends', async (_, { getState }) => {

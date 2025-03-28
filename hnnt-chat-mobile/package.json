@@ -16,6 +16,8 @@
     "@react-navigation/material-top-tabs": "^7.1.0",
     "@react-navigation/native": "^7.0.14",
     "@react-navigation/native-stack": "^7.2.0",
+    "@reduxjs/toolkit": "^2.6.1",
+    "axios": "^1.8.4",
     "expo": "~52.0.30",
     "expo-av": "~15.0.2",
     "expo-document-picker": "~13.0.3",

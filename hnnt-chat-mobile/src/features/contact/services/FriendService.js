@@ -1,12 +1,12 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://192.168.1.100:3000'; // Thay bằng IP của server
+const BASE_URL = 'http://localhost:4000'; // Thay bằng IP của server
 
 const friendService = {
     // Lấy danh sách bạn bè của người đăng nhập
     getFriends: async (token) => {
         try {
-            const response = await axios.get(`${BASE_URL}/friends`, {
+            const response = await axios.get(`${BASE_URL}/friends/list`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
