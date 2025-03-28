@@ -80,11 +80,12 @@ const chatSlice = createSlice({
         setActiveChat: (state, action) => {
             state.activeChat = action.payload;
         },
-        setSeemChat: (state, action) => {
-            const { chatId, seem } = action.payload;
-            const chat = state.data.find((c) => c.id === chatId);
-            if (chat) {
-                chat.seem = seem;
+        setReadedChatWhenSendNewMessage: (state, action) => {
+            const { chatId, userId } = action.payload;
+            if (state.activeChat && state.activeChat.id === chatId) {
+                state.activeChat.participants = state.activeChat.participants.map((user) =>
+                    user.accountId !== userId ? { ...user, readed: false } : user,
+                );
             }
         },
         setSeemAllChat: (state) => {
@@ -275,7 +276,7 @@ const chatSlice = createSlice({
 
 export const {
     setChats,
-    setSeemChat,
+    setReadedChatWhenSendNewMessage,
     setSeemAllChat,
     sendMessage,
     setActiveChat,

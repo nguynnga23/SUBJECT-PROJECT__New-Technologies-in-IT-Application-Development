@@ -33,6 +33,7 @@ import {
     setShowOrOffRightBarSearch,
     openEmojiTab,
     sendEmoji,
+    setReadedChatWhenSendNewMessage,
 } from '../../redux/slices/chatSlice';
 import ChatText from '../Chat/ChatText';
 import ChatGif from '../Chat/ChatGif';
@@ -92,7 +93,7 @@ function TabMessage() {
         };
 
         fetchMessages();
-    }, [setData, chatId]);
+    }, [setData, chatId, data]);
 
     const MessageComponent = {
         text: ChatText,
@@ -126,6 +127,7 @@ function TabMessage() {
         if (message.trim() !== '') {
             await sendMessage(chatId, message, 'text', replyMessage?.id, null, null, null);
             await readedChatOfUser(chatId);
+            dispatch(setReadedChatWhenSendNewMessage({ chatId: chatId, userId: userId }));
             setMessage('');
             setReplyMessage(null);
         }
