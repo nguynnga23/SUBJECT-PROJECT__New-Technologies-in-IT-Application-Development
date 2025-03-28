@@ -7,6 +7,7 @@ CREATE TABLE "Account" (
     "name" VARCHAR(255) NOT NULL,
     "number" VARCHAR(20) NOT NULL,
     "password" TEXT NOT NULL,
+    "email" VARCHAR(20) NOT NULL,
     "avatar" TEXT,
     "status" TEXT,
     "birthDate" TIMESTAMP(3),
@@ -109,6 +110,9 @@ CREATE TABLE "Reaction" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Account_number_key" ON "Account"("number");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Account_email_key" ON "Account"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "FriendRequest_senderId_receiverId_key" ON "FriendRequest"("senderId", "receiverId");
