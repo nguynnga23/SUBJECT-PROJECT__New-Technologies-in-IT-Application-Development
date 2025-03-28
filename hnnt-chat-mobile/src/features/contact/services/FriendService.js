@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:4000'; // Thay bằng IP của server
+const BASE_URL = 'http://172.20.61.183:4000/api'; // Thay bằng IP của server
 
 const friendService = {
     // Lấy danh sách bạn bè của người đăng nhập

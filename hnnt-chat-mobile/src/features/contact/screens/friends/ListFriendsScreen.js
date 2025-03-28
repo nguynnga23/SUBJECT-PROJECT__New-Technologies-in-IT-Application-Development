@@ -1,17 +1,19 @@
 import { View, Text, StyleSheet, TouchableOpacity, SectionList, Image } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Feather from '@expo/vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
+import FriendService from '../../services/FriendService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Sample data for the friends list
-const allFriends = [
-    { id: '1', name: 'Nguyễn Lê Nhật Huy', avatar: 'https://i.pravatar.cc/150?img=20' },
-    { id: '2', name: 'Nguyễn Thị Nga', avatar: 'https://i.pravatar.cc/150?img=10' },
-    { id: '3', name: 'Nguyễn Thiên Tứ', avatar: 'https://i.pravatar.cc/150?img=14' },
-    { id: '4', name: 'Thanh Nhiệt', avatar: 'https://i.pravatar.cc/150?img=12' },
-    { id: '5', name: 'Anh Long', avatar: 'https://i.pravatar.cc/150?img=17' },
-];
+// const allFriends = [
+//     { id: '1', name: 'Nguyễn Lê Nhật Huy', avatar: 'https://i.pravatar.cc/150?img=20' },
+//     { id: '2', name: 'Nguyễn Thị Nga', avatar: 'https://i.pravatar.cc/150?img=10' },
+//     { id: '3', name: 'Nguyễn Thiên Tứ', avatar: 'https://i.pravatar.cc/150?img=14' },
+//     { id: '4', name: 'Thanh Nhiệt', avatar: 'https://i.pravatar.cc/150?img=12' },
+//     { id: '5', name: 'Anh Long', avatar: 'https://i.pravatar.cc/150?img=17' },
+// ];
 
 const recentlyOnlineFriends = [
     { id: '1', name: 'Nguyễn Lê Nhật Huy', group: 'Close Friends', avatar: 'https://i.pravatar.cc/150?img=13' },
@@ -102,8 +104,22 @@ export default function ListFriendsScreen() {
     const navigation = useNavigation();
 
     // Determine which list to show based on the selected tab
+    const [allFriends, setAllFriends] = useState([]);
     const friendsToShow = selectedTab === 'all' ? allFriends : recentlyOnlineFriends;
 
+    useEffect(() => {
+        const fetchFriends = async () => {
+            try {
+                const token = await AsyncStorage.getItem('token');
+                const data = await FriendService.getFriends(token);
+                setAllFriends(data);
+            } catch (error) {
+                console.error('Failed to fetch friends:', error);
+            }
+        };
+
+        fetchFriends();
+    }, []);
     return (
         <View style={styles.container}>
             {/* Action Section */}
