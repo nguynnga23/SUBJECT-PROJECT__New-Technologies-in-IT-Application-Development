@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SectionList, Image } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
-
+import friendService from '../../../services/FriendService';
 // Sample data for friend requests
 const receivedRequests = [
     {
@@ -104,9 +104,13 @@ const PeopleYouMayKnowItem = ({ item }) => (
 export default function FriendRequestScreen() {
     const [selectedTab, setSelectedTab] = useState('received');
     const navigation = useNavigation();
-
+    const [sentRequests, setSentRequests] = useState([]);
     // Determine which list to show based on the selected tab
+
     const requestsToShow = selectedTab === 'received' ? receivedRequests : sentRequests;
+    useEffect(() => {
+        friendService.getFriendRequests();
+    }, []);
 
     return (
         <View style={styles.container}>

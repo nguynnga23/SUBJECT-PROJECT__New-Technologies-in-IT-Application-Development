@@ -29,6 +29,7 @@ export default function LoginScreen() {
 
             // Lưu token vào AsyncStorage
             await AsyncStorage.setItem('token', token);
+            await AsyncStorage.setItem('user', JSON.stringify(user)); // Chuyển user thành chuỗi JSON
 
             console.log('Login successful:', user);
             Alert.alert('Login Successful', `Welcome, ${user.name}!`);
