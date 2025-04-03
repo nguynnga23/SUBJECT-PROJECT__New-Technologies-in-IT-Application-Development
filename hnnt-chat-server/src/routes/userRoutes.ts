@@ -5,6 +5,6 @@ import { authenticate } from '../middleware/auth';
 const authRouter = Router();
 
 authRouter.put('/update-user', authenticate, updateUser);
-authRouter.put('/update-avatar', authenticate, updateAvatar);
+authRouter.post('/update-avatar', authenticate, updateAvatar);
 
 export default authRouter;

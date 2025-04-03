@@ -45,16 +45,16 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
 export const updateAvatar = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const userId = req.user?.id;
-        const { avatar } = req.body;
+        const { image } = req.body;
 
-        if (!avatar) {
+        if (!image) {
             res.status(400).json({ message: 'No avatar provided' });
             return;
         }
 
         const updatedUser = await prisma.account.update({
             where: { id: userId },
-            data: { avatar },
+            data: { avatar: image },
         });
 
         res.json(updatedUser);
