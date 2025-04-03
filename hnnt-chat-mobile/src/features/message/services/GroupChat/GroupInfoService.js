@@ -2,7 +2,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { Alert } from 'react-native';
 import axios from 'axios';
 
-const API_URL = 'http://192.168.101.11:5000/api';
+const API_URL = 'http:/192.168.170.60:5000/api';
+// const API_URL = 'http://192.168.101.11:5000/api';
 
 export const fetchChat = async (chatId, token) => {
     try {

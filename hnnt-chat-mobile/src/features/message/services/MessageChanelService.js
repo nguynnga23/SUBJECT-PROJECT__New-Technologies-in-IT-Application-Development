@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'http://192.168.101.11:5000/api/chats';
+const API_URL = 'http://192.168.170.60:5000/api/chats';
+// const API_URL = 'http://192.168.101.11:5000/api/chats';
 
 export const fetchChats = async (token) => {
     try {

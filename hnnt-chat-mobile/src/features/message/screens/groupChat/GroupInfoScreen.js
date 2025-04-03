@@ -187,7 +187,7 @@ export default function GroupInfoScreen() {
                     <OptionItem label="Pinned message" />
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => navigation.navigate("MemberListScreen")}>
+                <TouchableOpacity onPress={() => navigation.navigate("MemberListScreen", { chatId })}>
                     <OptionItem label={numberOfMembers} />
                 </TouchableOpacity>
 
