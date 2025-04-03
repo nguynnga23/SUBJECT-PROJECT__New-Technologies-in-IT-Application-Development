@@ -26,7 +26,6 @@ export default function GroupInfoScreen() {
     const [disbandVisible, setDisbandVisible] = useState(false);
     const [pinVisible, setPinVisible] = useState(false);
     const [pinMess, setPinMess] = useState([]);
-    const [messageId, setMessageId] = useState("");
     const [numberOfMembers, setNumberOfMembers] = useState("");
 
     const fetchChatInfo = async () => {
@@ -45,19 +44,16 @@ export default function GroupInfoScreen() {
 
             try {
                 const pin_Mess = await getPinMess(chatId, token);
-                setPinMess(pin_Mess[0].content); // Lấy nội dung tin nhắn đầu tiên
-                setMessageId(pin_Mess[0].id); // Lấy ID tin nhắn đầu tiên
+                setPinMess(pin_Mess);
             } catch (error) {
                 if (error.response?.status === 404) {
                     // Xử lý lỗi 404 một cách yên lặng
                     console.warn("No pinned message found."); // Log cảnh báo nếu cần
                     setPinMess("No pinned message"); // Đặt giá trị mặc định
-                    setMessageId(null); // Đặt giá trị mặc định
                 } else {
                     // Xử lý các lỗi khác
                     console.warn("Error fetching pinned message:", error); // Log lỗi nếu cần
                     setPinMess(null); // Đặt giá trị mặc định nếu xảy ra lỗi khác
-                    setMessageId(null); // Đặt giá trị mặc định nếu xảy ra lỗi khác
                 }
             }
 
@@ -101,12 +97,15 @@ export default function GroupInfoScreen() {
         }
     };
 
-    const handleUnPinMess = async () => {
+    const handleUnPinMessage = async (messageId) => {
         try {
             const token = await AsyncStorage.getItem('token');
             const response = await unPinMess(messageId, token);
-            fetchChatInfo(); // Refresh chat info after unpinning
             Alert.alert("Success", response.message);
+
+            // Cập nhật danh sách tin nhắn được ghim
+            const updatedPinMess = pinMess.filter((message) => message.id !== messageId);
+            setPinMess(updatedPinMess);
         } catch (error) {
             console.warn("Error unpinning message:", error);
         }
@@ -313,7 +312,7 @@ export default function GroupInfoScreen() {
                         <View style={styles.modalContainer}>
                             <View style={styles.modalContent}>
                                 <Text style={styles.modalTitle}>Pinned Messages</Text>
-                                {pinMess.length > 0 ? (
+                                {Array.isArray(pinMess) && pinMess.length > 0 ? (
                                     <ScrollView style={{ width: "100%" }}>
                                         {pinMess.map((message, index) => (
                                             <View key={index} style={styles.pinnedMessageContainer}>

@@ -114,15 +114,7 @@ export const pinMessage = async (req: AuthRequest, res: Response): Promise<void>
             return;
         }
 
-        const chatId = message.chatId;
-
-        // Gỡ ghim tất cả các tin nhắn khác trong cùng nhóm chat
-        await prisma.message.updateMany({
-            where: { chatId, pin: true },
-            data: { pin: false },
-        });
-
-        // Ghim tin nhắn mới
+        // Ghim tin nhắn mới mà không gỡ ghim các tin nhắn khác
         await prisma.message.update({
             where: { id: messageId },
             data: { pin: true },

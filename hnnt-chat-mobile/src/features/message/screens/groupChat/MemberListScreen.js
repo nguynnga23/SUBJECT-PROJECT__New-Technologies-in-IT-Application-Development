@@ -1,4 +1,4 @@
-import React, { useState, useEffec, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, Modal, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
