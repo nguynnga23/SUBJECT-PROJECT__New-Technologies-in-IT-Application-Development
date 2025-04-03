@@ -4,7 +4,7 @@ import { FaRegFileWord } from 'react-icons/fa';
 import { FaRegFileExcel } from 'react-icons/fa';
 import { FaRegFilePowerpoint } from 'react-icons/fa';
 
-function ChatText({ index, userId, message, reactions, showName, replyMessage }) {
+function ChatText({ index, userId, message, reactions, showName, replyMessage, scrollToMessage }) {
     const getFileIcon = (fileType) => {
         if (fileType.includes('pdf')) return <VscFilePdf className="text-3xl text-red-500 mr-2" />;
         if (fileType.includes('excel') || fileType.includes('spreadsheet') || fileType.includes('xls'))
@@ -19,9 +19,9 @@ function ChatText({ index, userId, message, reactions, showName, replyMessage })
     return (
         <div
             key={index}
-            className={`relative text-[14px] border p-2 dark:text-gray-200 cursor-pointer ${
+            className={`relative text-[14px] border p-2 dark:text-gray-200  ${
                 reactions.length > 0 ? 'pb-8' : 'pb-6'
-            } rounded-[7px] w-fit mb-2 max-w-[500px] min-w-[60px] break-all ${
+            } rounded-[7px] w-fit max-w-[500px] min-w-[60px] break-all ${
                 message.sender.id === userId
                     ? 'bg-blue-100 dark:bg-[#20344c] border-blue-200 dark:border-blue-500'
                     : 'bg-white dark:bg-[#20344c] border-gray-200 dark:border-gray-800'
@@ -33,9 +33,10 @@ function ChatText({ index, userId, message, reactions, showName, replyMessage })
             <div>
                 {replyMessage && (
                     <div
-                        className={`mb-1 border-l-[4px] border-blue-500 ${
+                        className={`mb-1 border-l-[4px] border-blue-500 cursor-pointer ${
                             message.sender.id === userId ? 'bg-blue-200' : 'bg-gray-300'
                         } dark:bg-gray-700  p-2 rounded-[3px]`}
+                        onClick={() => scrollToMessage(replyMessage.id)}
                     >
                         <p className="text-[12px] font-medium text-gray-600 dark:text-gray-300 mb-1">
                             {replyMessage.sender.name}
@@ -69,7 +70,7 @@ function ChatText({ index, userId, message, reactions, showName, replyMessage })
 
             <p
                 className={`absolute left-[8px] ${
-                    reactions.length > 0 ? 'bottom-[16px]' : 'bottom-[5px]'
+                    reactions.length > 0 ? 'bottom-[15px]' : 'bottom-[5px]'
                 } text-gray-500 text-[10px]`}
             >
                 {new Date(message.time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}

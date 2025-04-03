@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { AuthRequest } from '../types/authRequest';
 
 const prisma = new PrismaClient();
 
@@ -130,9 +131,9 @@ export const deleteFriend = async (req: Request, res: Response): Promise<void> =
 };
 
 // 📌 Get list friend
-export const getListFriend = async (req: Request, res: Response): Promise<void> => {
+export const getListFriend = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { userId } = req.params; // id của user
+        const userId = req.user.id;
 
         const friends = await prisma.friend.findMany({
             where: {
@@ -158,6 +159,44 @@ export const getListFriend = async (req: Request, res: Response): Promise<void> 
                 createdAt: friendData.createdAt,
             };
         });
+        res.json(friendList);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+    }
+};
+
+export const getListFriendByKeyword = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user.id;
+        const keyword = req.query.keyword;
+
+        const friends = await prisma.friend.findMany({
+            where: {
+                OR: [{ user1Id: userId }, { user2Id: userId }],
+            },
+            include: {
+                user1: true,
+                user2: true,
+            },
+        });
+
+        const friendList = friends
+            .map((friend) => {
+                const friendData = friend.user1Id === userId ? friend.user2 : friend.user1;
+                return {
+                    id: friendData.id,
+                    name: friendData.name,
+                    number: friendData.number,
+                    avatar: friendData.avatar,
+                    status: friendData.status,
+                    birthDate: friendData.birthDate,
+                    location: friendData.location,
+                    gender: friendData.gender,
+                    createdAt: friendData.createdAt,
+                };
+            })
+            .filter((friend) => !keyword || friend.name.toLowerCase().includes(keyword.toString().toLowerCase()));
         res.json(friendList);
     } catch (error) {
         console.error(error);

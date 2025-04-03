@@ -2,7 +2,9 @@ import { useState } from 'react';
 import Picker from 'emoji-picker-react';
 import GifPicker from 'gif-picker-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { sendEmoji, sendMessage } from '../../redux/slices/chatSlice';
+import { sendEmoji } from '../../redux/slices/chatSlice';
+import { readedChatOfUser, sendMessage } from '../../screens/Messaging/api';
+
 import listSticker from '../../sample_data/listSticker';
 
 function TabChatSymbol() {
@@ -17,20 +19,14 @@ function TabChatSymbol() {
     const onEmojiClick = (emojiData) => {
         dispatch(sendEmoji(emojiData));
     };
-    const onGifClick = (gifObject) => {
-        const currentTime = new Date().toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-        });
 
-        dispatch(sendMessage({ chatId: activeChat.id, content: gifObject.url, time: currentTime, type: 'gif' }));
+    const onGifClick = (gifObject) => {
+        sendMessage(activeChat.id, gifObject.url, 'gif', null, null, null, null);
+        readedChatOfUser(activeChat.id);
     };
     const onStickerClick = (sticker) => {
-        const currentTime = new Date().toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-        dispatch(sendMessage({ chatId: activeChat.id, content: sticker, time: currentTime, type: 'sticker' }));
+        sendMessage(activeChat.id, sticker, 'sticker', null, null, null, null);
+        readedChatOfUser(activeChat.id);
     };
 
     return (

@@ -1,18 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MdLabel, MdDelete, MdLabelOutline } from 'react-icons/md';
 import { IoMdClose } from 'react-icons/io';
 import { BsGripVertical } from 'react-icons/bs';
 import PopupCategoryColor from './PopupCategoryColor';
-import { useDispatch, useSelector } from 'react-redux';
-import { addCategory, deleteCategory } from '../../redux/slices/categorySlice';
+import { useDispatch } from 'react-redux';
+import { getAllCategory, addCategory, deleteCategory } from '../../screens/Messaging/api';
 
 const PopupManageCategory = ({ setIsOpenManageCategory }) => {
-    const categories = useSelector((state) => state.category.categories);
+    const [data, setData] = useState([]);
+    const [error, setError] = useState([]);
     const [newCategory, setNewCategory] = useState('');
     const [hoveredId, setHoveredId] = useState(null);
     const [showPopupColor, setShowPopupColor] = useState(false);
     const [color, setColor] = useState('');
-    const dispatch = useDispatch();
+
+    useEffect(() => {
+        const fetchChats = async () => {
+            try {
+                const chats = await getAllCategory();
+                setData(chats);
+            } catch (err) {
+                setError(err.message);
+            }
+        };
+
+        fetchChats(); // Gọi hàm async bên trong useEffect
+    }, [data]);
 
     const handleClose = () => {
         setIsOpenManageCategory(false);
@@ -22,18 +35,14 @@ const PopupManageCategory = ({ setIsOpenManageCategory }) => {
     const handleAddCategory = () => {
         if (newCategory.trim() === '') return;
 
-        const newEntry = {
-            name: newCategory,
-            color: color,
-        };
-        dispatch(addCategory(newEntry));
+        addCategory(newCategory, color);
 
         setNewCategory('');
     };
 
     // Xóa phân loại
     const handleDeleteCategory = (id) => {
-        dispatch(deleteCategory({ id }));
+        deleteCategory(id);
     };
 
     return (
@@ -51,7 +60,7 @@ const PopupManageCategory = ({ setIsOpenManageCategory }) => {
                 <div className="p-4  max-h-[350px] overflow-y-auto ">
                     <h3 className="text-sm mb-2">Danh sách thẻ phân loại</h3>
                     <div className="space-y-2">
-                        {categories.map((category) => (
+                        {data.map((category) => (
                             <div
                                 key={category.id}
                                 className="flex items-center bg-gray-100 dark:bg-gray-800 p-2 rounded-lg relative"
