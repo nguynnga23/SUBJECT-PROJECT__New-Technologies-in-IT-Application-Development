@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffec, useCallback } from "react";
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, Modal, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { addFriend, handleCancelAddFriend, deleteMember, fetchChat, changeRole, getListFriendRequest } from "../../services/GroupChat/MemberListService";
 import { useRoute } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -63,6 +63,12 @@ export default function MemberListScreen() {
     useEffect(() => {
         fetchChatInfo();
     }, [chatId]);
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchChatInfo();
+        }, [])
+    );
 
     const handleChangeRole = async (accId) => {
         try {

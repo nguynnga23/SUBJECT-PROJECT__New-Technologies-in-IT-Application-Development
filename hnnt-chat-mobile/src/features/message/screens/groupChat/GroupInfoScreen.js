@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { View, Text, Image, TouchableOpacity, ScrollView, Linking, StyleSheet, Modal, TextInput, Button, Alert, TouchableWithoutFeedback } from "react-native";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUserIdFromToken } from "../../../../utils/auth";
@@ -82,6 +82,12 @@ export default function GroupInfoScreen() {
     useEffect(() => {
         fetchChatInfo();
     }, [chatId]);
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchChatInfo();
+        }, [])
+    );
 
     const handleToggleMute = async () => {
         try {
@@ -289,7 +295,7 @@ export default function GroupInfoScreen() {
                 </Modal>
 
                 {/* Pin Modal */}
-                <Modal visible={pinVisible} transparent animationType="slide">
+                {/* <Modal visible={pinVisible} transparent animationType="slide">
                     <TouchableWithoutFeedback onPress={() => setPinVisible(false)}>
                         <View style={styles.modalContainer}>
                             <View style={styles.modalContent}>
@@ -298,6 +304,32 @@ export default function GroupInfoScreen() {
                                 <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 10, width: "100%" }}>
                                     <Button title="Un-pin" color="red" onPress={() => handleUnPinMess()} />
                                 </View>
+                            </View>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </Modal> */}
+                <Modal visible={pinVisible} transparent animationType="slide">
+                    <TouchableWithoutFeedback onPress={() => setPinVisible(false)}>
+                        <View style={styles.modalContainer}>
+                            <View style={styles.modalContent}>
+                                <Text style={styles.modalTitle}>Pinned Messages</Text>
+                                {pinMess.length > 0 ? (
+                                    <ScrollView style={{ width: "100%" }}>
+                                        {pinMess.map((message, index) => (
+                                            <View key={index} style={styles.pinnedMessageContainer}>
+                                                <Text style={styles.pinnedMessageText}>{message.content}</Text>
+                                                <Button
+                                                    title="Un-pin"
+                                                    color="red"
+                                                    onPress={() => handleUnPinMessage(message.id)}
+                                                />
+                                            </View>
+                                        ))}
+                                    </ScrollView>
+                                ) : (
+                                    <Text style={styles.noPinnedMessageText}>No pinned messages</Text>
+                                )}
+                                <Button title="Close" onPress={() => setPinVisible(false)} />
                             </View>
                         </View>
                     </TouchableWithoutFeedback>
@@ -420,6 +452,25 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         marginTop: 20,
         width: "100%",
+    },
+
+    pinnedMessageContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: "#ccc",
+    },
+    pinnedMessageText: {
+        flex: 1,
+        fontSize: 16,
+    },
+    noPinnedMessageText: {
+        textAlign: "center",
+        fontSize: 16,
+        color: "#888",
+        marginVertical: 10,
     },
 });
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, Alert, RefreshControl } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { formatDateTime } from "../../../utils/formatDateTime";
 import { fetchChats } from "../services/MessageChanelService"; // Import hàm fetchChats
@@ -31,6 +31,12 @@ const ChatListScreen = () => {
   useEffect(() => {
     loadChats();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadChats();
+    }, [])
+  );
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true); // Bắt đầu trạng thái làm mới

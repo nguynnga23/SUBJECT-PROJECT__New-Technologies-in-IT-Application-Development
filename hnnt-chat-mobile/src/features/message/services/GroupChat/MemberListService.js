@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { IP_4G, IP_WIFI } from '../../../../utils/localhosts'
 
-const API_URL = 'http:/192.168.170.60:5000/api';
+const API_URL = `http://${IP_WIFI}:5000/api`;
 
 export const fetchChat = async (chatId, token) => {
     try {

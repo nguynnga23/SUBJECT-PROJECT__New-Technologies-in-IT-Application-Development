@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
   Keyboard,
   Alert
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Header from "../../../../common/components/Header";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -63,31 +63,37 @@ export default function GroupChatScreen() {
     };
   }, [navigation]);
 
-  useEffect(() => {
-    const loadMessages = async () => {
-      try {
-        const token = await AsyncStorage.getItem('token'); // Lấy token từ AsyncStorage
-        setToken(token); // Lưu token vào state
+  const loadMessages = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token'); // Lấy token từ AsyncStorage
+      setToken(token); // Lưu token vào state
 
-        if (!token) {
-          Alert.alert('Error', 'You are not logged in!');
-          return;
-        }
-
-        const userId = getUserIdFromToken(token);
-        setCurrentUserId(userId);
-
-        const data = await fetchMessages(chatId, token); // Gọi API để lấy danh sách tin nhắn
-        setMessages(data);
-      } catch (error) {
-        Alert.alert('Error', 'Failed to fetch messages.');
-      } finally {
-        setLoading(false);
+      if (!token) {
+        Alert.alert('Error', 'You are not logged in!');
+        return;
       }
-    };
 
+      const userId = getUserIdFromToken(token);
+      setCurrentUserId(userId);
+
+      const data = await fetchMessages(chatId, token); // Gọi API để lấy danh sách tin nhắn
+      setMessages(data);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to fetch messages.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadMessages();
   }, [chatId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadMessages();
+    }, [])
+  );
 
   if (loading) {
     return (

@@ -4,9 +4,9 @@ import { Audio } from "expo-av";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system";
 import axios from 'axios';
+import { IP_4G, IP_WIFI } from '../../../../utils/localhosts'
 
-const API_URL = 'http:/192.168.170.60:5000/api';
-// const API_URL = 'http://192.168.101.11:5000/api';
+const API_URL = `http://${IP_WIFI}:5000/api`;
 
 export const fetchMessages = async (chatId, token) => {
     try {
