@@ -1,46 +1,88 @@
-import React, { useState } from "react";
-import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet, Alert } from "react-native";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-
-// Dữ liệu JSON giả
-const dummyFriends = [
-    { id: "1", name: "John Doe", avatar: "https://randomuser.me/api/portraits/men/1.jpg" },
-    { id: "2", name: "Jane Smith", avatar: "https://randomuser.me/api/portraits/women/2.jpg" },
-    { id: "3", name: "Michael Johnson", avatar: "https://randomuser.me/api/portraits/men/3.jpg" },
-    { id: "4", name: "Emily Davis", avatar: "https://randomuser.me/api/portraits/women/4.jpg" },
-];
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { useRoute } from "@react-navigation/native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { addMember2Group, getListFriend, fetchChat } from "../../services/GroupChat/AddFriendActionService";
 
 export default function AddMemberScreen() {
     const navigation = useNavigation();
-    const [addedMembers, setAddedMembers] = useState([]);
+    const route = useRoute();
+    const [friends, setFriends] = useState([]);
+    const [groupMembers, setGroupMembers] = useState([]);
+    const chatId = route.params?.chatId || "null";
 
-    // Xử lý khi thêm hoặc hủy thêm bạn bè
-    const handleToggleMember = (friend) => {
-        if (addedMembers.some((m) => m.id === friend.id)) {
-            // Nếu đã thêm, xóa khỏi danh sách
-            setAddedMembers(addedMembers.filter((m) => m.id !== friend.id));
-        } else {
-            // Nếu chưa thêm, thêm vào danh sách
-            setAddedMembers([...addedMembers, friend]);
+    // Lấy danh sách bạn bè và thành viên nhóm
+    useEffect(() => {
+        const fetchFriendsAndMembers = async () => {
+            try {
+                const token = await AsyncStorage.getItem("token");
+
+                // Lấy danh sách bạn bè
+                const friendsData = await getListFriend(token);
+
+                // Lấy danh sách thành viên nhóm
+                const chatInfo = await fetchChat(chatId, token);
+                const members = chatInfo.participants.map((member) => member.accountId);
+
+                setGroupMembers(members);
+
+                // Đánh dấu trạng thái `isAdded` cho từng bạn bè
+                const updatedFriends = friendsData.map((friend) => ({
+                    ...friend,
+                    isAdded: members.includes(friend.id), // Kiểm tra nếu bạn bè đã có trong nhóm
+                }));
+
+                setFriends(updatedFriends);
+            } catch (error) {
+                console.error("Error fetching friends or group members:", error);
+            }
+        };
+
+        fetchFriendsAndMembers();
+    }, [chatId]);
+
+    // Xử lý thêm thành viên vào nhóm
+    const handleAddMember = async (friend) => {
+        try {
+            const token = await AsyncStorage.getItem("token");
+            await addMember2Group(chatId, friend.id, token);
+
+            Alert.alert("Success", `${friend.name} has been added to the group.`);
+
+            // Cập nhật trạng thái `isAdded` cho bạn bè
+            setFriends((prevFriends) =>
+                prevFriends.map((f) =>
+                    f.id === friend.id ? { ...f, isAdded: true } : f
+                )
+            );
+        } catch (error) {
+            console.error("Error adding member to group:", error);
+            Alert.alert("Error", "Failed to add member to the group.");
         }
     };
 
     // Render từng bạn bè
     const renderFriendItem = ({ item }) => {
-        const isAdded = addedMembers.some((m) => m.id === item.id);
-
         return (
             <View style={styles.friendItem}>
                 <Image source={{ uri: item.avatar }} style={styles.avatar} />
                 <Text style={styles.friendName}>{item.name}</Text>
                 <TouchableOpacity
-                    style={[styles.button, isAdded ? styles.addedButton : styles.addButton]}
-                    onPress={() => handleToggleMember(item)}
+                    style={[styles.button, item.isAdded ? styles.addedButton : styles.addButton]}
+                    onPress={() => !item.isAdded && handleAddMember(item)} // Chỉ thêm nếu chưa có trong nhóm
+                    disabled={item.isAdded} // Vô hiệu hóa nút nếu đã có trong nhóm
                 >
-                    <AntDesign name={isAdded ? "checkcircle" : "pluscircleo"} size={20} color="white" />
-                    <Text style={styles.buttonText}>{isAdded ? "Added" : "Add"}</Text>
+                    <AntDesign
+                        name={item.isAdded ? "checkcircle" : "pluscircleo"}
+                        size={20}
+                        color="white"
+                    />
+                    <Text style={styles.buttonText}>
+                        {item.isAdded ? "Added" : "Add"}
+                    </Text>
                 </TouchableOpacity>
             </View>
         );
@@ -59,7 +101,7 @@ export default function AddMemberScreen() {
 
                 {/* Danh sách bạn bè */}
                 <FlatList
-                    data={dummyFriends}
+                    data={friends}
                     keyExtractor={(item) => item.id}
                     renderItem={renderFriendItem}
                     contentContainerStyle={styles.listContainer}
