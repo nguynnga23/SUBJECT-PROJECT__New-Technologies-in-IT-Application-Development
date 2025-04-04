@@ -7,13 +7,6 @@ import { addFriend, cancelAddFriend, deleteMember, fetchChat, changeRole, getLis
 import { useRoute } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUserIdFromToken } from "../../../../utils/auth";
-// import { useSelector } from "react-redux";
-// const membersData = [
-//     { id: "1", name: "Huy Nguyen", role: "Leader", avatar: "https://example.com/avatar1.png", isUser: true },
-//     { id: "2", name: "Nguyen Nga", role: "member", avatar: "https://example.com/avatar2.png", isUser: false },
-//     { id: "3", name: "Nhiet Pham", role: "member", avatar: "https://example.com/avatar3.png", isUser: false },
-//     { id: "4", name: "Nguyen Thien Tu", role: "member", avatar: "https://example.com/avatar4.png", isUser: false },
-// ];
 
 export default function MemberListScreen() {
     const navigation = useNavigation();
