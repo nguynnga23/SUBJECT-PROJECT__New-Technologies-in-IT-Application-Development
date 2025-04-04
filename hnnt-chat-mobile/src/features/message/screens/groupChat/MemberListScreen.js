@@ -3,7 +3,7 @@ import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, Modal, Alert
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { addFriend, handleCancelAddFriend, deleteMember, fetchChat, changeRole, getListFriendRequest } from "../../services/GroupChat/MemberListService";
+import { addFriend, cancelAddFriend, deleteMember, fetchChat, changeRole, getListFriendRequest, checkFriend } from "../../services/GroupChat/MemberListService";
 import { useRoute } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUserIdFromToken } from "../../../../utils/auth";
@@ -27,6 +27,7 @@ export default function MemberListScreen() {
 
     const [members, setMembers] = useState([]);
     const [userRole, setUserRole] = useState("");
+    const [myId, setMyId] = useState("");
 
     const openModal = (member, action) => {
         setSelectedMember(member);
@@ -34,41 +35,78 @@ export default function MemberListScreen() {
         setModalVisible(true);
     };
 
+    const getMemberAction = (member, friendRequests) => {
+        if (member.accountId === myId) {
+            return; // Không có hành động nào cho chính mình
+        }
+        // Kiểm tra nếu member có trong danh sách friendRequests
+        const hasFriendRequest = friendRequests.some((request) => request.id === member.accountId);
+
+        if (hasFriendRequest) {
+            return "remove"; // Có yêu cầu kết bạn
+        }
+
+        return "add"; // Không có yêu cầu kết bạn
+    };
+
+    const handleCheckFriend = async (member, token) => {
+        try {
+            console.log("Checking friend status for member:", member.accountId, "My ID:", myId);
+            if (member.accountId === myId) {
+                console.log("This is the current user. Skipping check.");
+                return; // Không kiểm tra trạng thái bạn bè cho chính mình
+            }
+            const response = await checkFriend(member.accountId, token);
+            console.log("Friend check response:", response);
+            return response.result; // Trả về true hoặc false tùy thuộc vào trạng thái bạn bè
+        } catch (error) {
+            console.warn("Error checking friend status:", error);
+            return false; // Mặc định là không phải bạn bè nếu có lỗi
+        }
+    };
+
     const fetchChatInfo = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
             const chatInfo = await fetchChat(chatId, token); // Replace with actual token
             const userId = getUserIdFromToken(token);
+            setMyId(userId); // Lưu userId vào state
             const participant = chatInfo.participants.find(p => p.accountId === userId);
             if (participant) {
                 setUserRole(participant.role); // Lưu vai trò vào state
             }
 
             const friendRequestsData = await getListFriendRequest(userId, token);
-            console.log("Friend requests data:", friendRequestsData);
 
-            const membersData = chatInfo.participants.map((member) => ({
-                accId: member.accountId,
-                name: member.account.name,
-                role: member.role,
-                avatar: member.account.avatar,
-                isUser: member.accountId === userId,
-            }));
+
+            const membersData = await Promise.all(
+                chatInfo.participants.map(async (member) => {
+                    const isUser = member.accountId === userId;
+                    const isFriend = await handleCheckFriend(member, token); // Kiểm tra trạng thái bạn bè
+                    return {
+                        accId: member.accountId,
+                        name: member.account.name,
+                        role: member.role,
+                        avatar: member.account.avatar,
+                        isUser,
+                        isFriend: isFriend,
+                        action: isUser || isFriend ? "none" : getMemberAction(member, friendRequestsData),
+                    };
+                })
+            );
+            //console log for each membersdata
+            membersData.forEach((member) => {
+                console.log("Member data:", member.name, member.isFriend, member.action);
+            });
             setMembers(membersData);
         } catch (error) {
-            console.error("Error fetching chat info:", error);
+            console.warn("Error fetching chat info:", error);
         }
     };
 
     useEffect(() => {
         fetchChatInfo();
     }, [chatId]);
-
-    useFocusEffect(
-        useCallback(() => {
-            fetchChatInfo();
-        }, [])
-    );
 
     const handleChangeRole = async (accId) => {
         try {
@@ -95,13 +133,22 @@ export default function MemberListScreen() {
     const handleAddFriend = async (accId) => {
         try {
             const token = await AsyncStorage.getItem('token');
-            const userId = getUserIdFromToken(token);
-            const response = await addFriend(userId, accId, token);
-            console.log("Add friend response:", response);
-            Alert.alert("Success", response.message);
+            await addFriend(accId, token);
+            Alert.alert("Success", "success");
             fetchChatInfo();
         } catch (error) {
             console.warn("Error adding friend:", error);
+        }
+    };
+
+    const handleCancelAddFriend = async (accId) => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const respone = await cancelAddFriend(accId, token);
+            Alert.alert("Success", respone.message);
+            fetchChatInfo(); // Refresh the member list after canceling friend request
+        } catch (error) {
+            console.warn("Error canceling friend request:", error);
         }
     };
 
@@ -109,17 +156,34 @@ export default function MemberListScreen() {
         if (!selectedMember) return;
 
         if (modalAction === "add") {
-            if (friendRequests[selectedMember.accId]) {
-                handleCancelAddFriend(selectedMember.accId, setFriendRequests);
-            } else {
-                handleAddFriend(selectedMember.accId);
-            }
+            handleAddFriend(selectedMember.accId);
+        } else if (modalAction === "remove") {
+            handleCancelAddFriend(selectedMember.accId);
         } else if (modalAction === "delete") {
             handleDeleteMember(selectedMember.accId);
         } else if (modalAction === "changeRole") {
             handleChangeRole(selectedMember.accId);
         }
         setModalVisible(false);
+    };
+
+    const getModalText = () => {
+        if (!selectedMember) return "";
+
+        switch (modalAction) {
+            case "add":
+                return friendRequests[selectedMember?.accId]
+                    ? "Do you want to cancel the friend request?"
+                    : "Do you want to send a friend request?";
+            case "remove":
+                return "Do you want to remove the friend request?";
+            case "delete":
+                return "Are you sure you want to remove this member?";
+            case "changeRole":
+                return "Do you want to grant role LEADER to this member?";
+            default:
+                return "Are you sure you want to perform this action?";
+        }
     };
 
     return (
@@ -143,13 +207,14 @@ export default function MemberListScreen() {
                                 <Text style={styles.role}>{item.role}</Text>
                             </View>
                             <View style={styles.actions}>
-                                {!item.isUser && (
+                                {!item.isUser && item.action === "add" && (
                                     <TouchableOpacity onPress={() => openModal(item, "add")}>
-                                        <Ionicons
-                                            name={friendRequests[item.id] ? "person-remove-outline" : "person-add-outline"}
-                                            size={24}
-                                            color={friendRequests[item.id] ? "red" : "blue"}
-                                        />
+                                        <Ionicons name="person-add-outline" size={24} color="blue" />
+                                    </TouchableOpacity>
+                                )}
+                                {!item.isUser && item.action === "remove" && (
+                                    <TouchableOpacity onPress={() => openModal(item, "remove")}>
+                                        <Ionicons name="person-remove-outline" size={24} color="red" />
                                     </TouchableOpacity>
                                 )}
 
@@ -174,13 +239,7 @@ export default function MemberListScreen() {
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
                             <Text style={styles.modalText}>
-                                {modalAction === "add"
-                                    ? friendRequests[selectedMember?.accId]
-                                        ? "Do you want to cancel the friend request?"
-                                        : "Do you want to send a friend request?"
-                                    : modalAction === "delete"
-                                        ? "Are you sure you want to remove this member?"
-                                        : "Do you want to grant role LEADER to this member?"}
+                                {getModalText()}
                             </Text>
                             <View style={styles.modalButtons}>
                                 <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.cancelButton}>

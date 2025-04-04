@@ -19,7 +19,7 @@ export const fetchChat = async (chatId, token) => {
 
 export const getListFriendRequest = async (userId, token) => {
     try {
-        const response = await axios.get(`${API_URL}/friends/request/${userId}`, {
+        const response = await axios.get(`${API_URL}/friends/request/sender/${userId}`, {
             headers: {
                 Authorization: `Bearer ${token}`, // Gửi token trong header
             },
@@ -48,11 +48,10 @@ export const deleteMember = async (chatId, accId, token) => {
     }
 };
 
-export const addFriend = async (senderId, receiverId, token) => {
+export const addFriend = async (receiverId, token) => {
     try {
         const response = await axios.post(`${API_URL}/friends/request`,
             {
-                senderId: senderId,
                 receiverId: receiverId
             },
             {
@@ -67,12 +66,19 @@ export const addFriend = async (senderId, receiverId, token) => {
     }
 };
 
-export const handleCancelAddFriend = (id, setFriendRequests) => {
-    setFriendRequests((prevRequests) => {
-        const updatedRequests = { ...prevRequests };
-        delete updatedRequests[id]; // Xóa lời mời kết bạn
-        return updatedRequests;
-    });
+export const cancelAddFriend = async (receiverId, token) => {
+    try {
+        const response = await axios.delete(`${API_URL}/friends/request/cancel-by-sender/${receiverId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Gửi token trong header
+                }
+            });
+        return response.data;
+    } catch (error) {
+        console.error('Error cancel add friend:', error.response?.data || error.message);
+        throw error;
+    }
 };
 
 export const changeRole = async (chatId, accId, token) => {
@@ -93,5 +99,19 @@ export const changeRole = async (chatId, accId, token) => {
     } catch (error) {
         console.error('Error change role:', error.response?.data || error.message);
         throw error;
+    }
+};
+
+//Kiem tra nguoi dung va member da la ban be hay chua
+export const checkFriend = async (friendId, token) => {
+    try {
+        const response = await axios.get(`${API_URL}/friends/check-friend/${friendId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Gửi token trong header
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.warn('Error checking friend:', error.response?.data || error.message);
     }
 };
