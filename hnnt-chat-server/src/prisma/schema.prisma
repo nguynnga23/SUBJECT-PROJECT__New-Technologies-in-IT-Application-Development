@@ -17,8 +17,8 @@ model Account {
   id        String   @id @default(uuid()) // ID dạng UUID
   name      String   @db.VarChar(255)
   number    String   @unique @db.VarChar(20)
+  email  String @unique @db.VarChar(255)
   password  String
-  email  String @unique @db.VarChar(20)
   avatar    String?
   status    String?
   birthDate DateTime?

@@ -1,10 +1,15 @@
 import { useState, useEffect } from 'react';
+import { updateAvatar } from '../../screens/Profile/api';
+import { setUser } from '../../redux/slices/authSlice';
+import { useDispatch } from 'react-redux';
 
 function ModalEditAvatar({ image, setIsType, onClose }) {
     const [zoom, setZoom] = useState(1);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [dragging, setDragging] = useState(false);
     const [start, setStart] = useState({ x: 0, y: 0 });
+
+    const dispatch = useDispatch();
 
     // Khi nhấn giữ chuột để kéo ảnh
     const handleMouseDown = (e) => {
@@ -35,6 +40,17 @@ function ModalEditAvatar({ image, setIsType, onClose }) {
             window.removeEventListener('mouseup', handleMouseUp);
         };
     }, [dragging]);
+
+    const handleUpload = async () => {
+        try {
+            const data = await updateAvatar(image);
+            dispatch(setUser({ userActive: data, token: null }));
+            setIsType('profile');
+        } catch (error) {
+            console.error(error);
+            alert('Lỗi khi upload ảnh!');
+        }
+    };
 
     return (
         <>
@@ -91,7 +107,7 @@ function ModalEditAvatar({ image, setIsType, onClose }) {
                 </button>
 
                 <button
-                    onClick={onClose}
+                    onClick={() => handleUpload()}
                     className="bg-blue-600 hover:bg-blue-800 rounded-md flex items-center justify-center gap-2 p-2 cursor-pointer mr-3"
                 >
                     <p className="font-semibold text-white">Cập nhật</p>

@@ -18,7 +18,7 @@ export default function Header({ iconName1, iconName2, onPress1, onPress2, showM
 
             {showMenu ? (
                 <>
-                    <TouchableOpacity style={{ width: '10%', marginLeft: 30 }} onPress={onPress2}>
+                    <TouchableOpacity style={{ width: '10%', marginLeft: 30 }} onPress={() => navigation.navigate("CameraScreen")}>
                         <MaterialCommunityIcons name={iconName1} size={20} color="white" />
                     </TouchableOpacity>
                     <Menu>

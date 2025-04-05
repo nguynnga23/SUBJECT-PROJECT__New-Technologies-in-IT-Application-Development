@@ -13,6 +13,11 @@ function ModalAccount({ setIsType }) {
     const userActive = useSelector((state) => state.auth.userActive);
     const Avatar = userActive?.avatar;
 
+    const date = new Date(userActive?.birthDate);
+    const formattedDate = date
+        .toLocaleDateString('vi-VN', { day: '2-digit', month: 'long', year: 'numeric' })
+        .replace('tháng', 'tháng ');
+
     const [selectedImage, setSelectedImage] = useState(null);
     return (
         <>
@@ -58,10 +63,10 @@ function ModalAccount({ setIsType }) {
                         <p>{userActive?.gender}</p>
 
                         <p className="text-gray-500">Ngày sinh</p>
-                        <p>{userActive?.birthDate}</p>
+                        <p>{formattedDate}</p>
 
                         <p className="text-gray-500">Điện thoại</p>
-                        <p>(+84 ){userActive?.number}</p>
+                        <p>+84 {userActive?.number}</p>
                     </div>
 
                     <p className="text-gray-500 mt-3 text-xs">
