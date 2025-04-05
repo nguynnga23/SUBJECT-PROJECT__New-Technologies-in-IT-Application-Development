@@ -11,7 +11,7 @@ export default function LoginScreen() {
 
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const isFormFilled = phone.length > 0 && password.length > 0;
+  const isFormFilled = phone.length == 10 && password.length >= 3;
 
   const handleLogin = async () => {
     try {
@@ -72,7 +72,9 @@ export default function LoginScreen() {
 
           <View style={{ paddingHorizontal: 20 }}>
             <TouchableOpacity>
-              <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+              <Text style={styles.forgotPasswordText} onPress={() => navigation.navigate('ForgotPassword')}>
+                Forgot password?
+              </Text>
             </TouchableOpacity>
           </View>
 

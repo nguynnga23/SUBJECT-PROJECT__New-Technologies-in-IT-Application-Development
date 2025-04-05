@@ -6,17 +6,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from "@react-navigation/native";
 // import CheckBox from '@react-native-community/checkbox';
 
-export default function PhoneNumSignUpScreen() {
+export default function SignUpScreen() {
     const navigation = useNavigation();
 
     const [phone, setPhone] = useState('');
-    // const [agree, setAgree] = useState(false);
-    const [showTerms, setShowTerms] = useState(false);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
 
-    const isButtonEnabled = phone.length == 10;
-
-    // Kiểm tra nếu đã nhập số điện thoại và chọn cả 2 checkbox
-    // const isButtonEnabled = phone.length == 10 && agree;
+    const isButtonEnabled =
+        phone.length == 10
+        && email.length > 0
+        && password.length >= 8
+        && confirmPassword.length >= 8
+        && confirmPassword === password;
 
     return (
         <SafeAreaView style={styles.container}>
@@ -38,24 +41,32 @@ export default function PhoneNumSignUpScreen() {
                     onChangeText={setPhone}
                 />
 
-                {/* Các checkbox */}
-                {/* <View style={styles.checkboxContainer}>
-                <CheckBox value={agree} onValueChange={setAgree} />
-                <Text style={styles.text}>
-                    I agree to the{' '}
-                    <Text style={styles.link} onPress={() => setShowTerms(true)}>
-                        terms of use
-                    </Text>
-                </Text>
+                {/* Ô nhập email */}
+                <TextInput
+                    style={styles.input}
+                    placeholder="Email"
+                    keyboardType="email-address"
+                    value={email}
+                    onChangeText={setEmail}
+                />
 
-                {showTerms && (
-                    <WebView
-                        originWhitelist={['*']}
-                        source={require('../../../assets/terms-of-use.html')}
-                        style={styles.webview}
-                    />
-                )}
-            </View> */}
+                {/* Ô nhâp mật khẩu */}
+                <TextInput
+                    style={styles.input}
+                    placeholder="Password"
+                    secureTextEntry={true}
+                    value={password}
+                    onChangeText={setPassword}
+                />
+
+                {/* Ô nhâp mật khẩu */}
+                <TextInput
+                    style={styles.input}
+                    placeholder="Confirm Password"
+                    secureTextEntry={true}
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                />
 
                 {/* Nút Tiếp tục */}
                 <TouchableOpacity
