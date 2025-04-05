@@ -1,6 +1,6 @@
 ## Necessary technologies
 
--   Node, npm, PostgreSQL, pgAdmin
+-   Node, npm, PostgreSQL, pgAdmin, redis
 
 ## Run script sql
 

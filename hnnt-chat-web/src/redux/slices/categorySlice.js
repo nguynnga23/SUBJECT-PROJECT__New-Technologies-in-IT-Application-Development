@@ -7,7 +7,7 @@ const categorySlice = createSlice({
     initialState: {
         categories: categories,
         currentCategory: [],
-        state: 'Tất cả',
+        stateOfChat: 'Tất cả',
     },
     reducers: {
         addCategory: (state, action) => {
@@ -35,7 +35,7 @@ const categorySlice = createSlice({
             state.currentCategory = action.payload;
         },
         setState: (state, action) => {
-            state.state = action.payload;
+            state.stateOfChat = action.payload; // ✅ Chỉ gán trực tiếp payload
         },
     },
 });

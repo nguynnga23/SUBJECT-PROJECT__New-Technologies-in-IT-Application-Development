@@ -1,6 +1,6 @@
 function ChatGif({ userId, message, showName, replyMessage }) {
     return (
-        <div className={`relative pb-2 mb-2 ${message.sender === userId ? 'bg-blue-100' : 'bg-white'}`}>
+        <div className={`relative pb-2 ${message.sender === userId ? 'bg-blue-100' : 'bg-white'}`}>
             {showName && (
                 <p className="text-[10px] text-gray-400 pb-[2px]">{message?.sender !== userId && message?.name}</p>
             )}

@@ -23,17 +23,19 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
             res.status(401).json({ message: 'Token đã bị vô hiệu hóa' });
             return;
         }
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
+            const user = await prisma.account.findUnique({ where: { id: decoded.id } });
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
-        const user = await prisma.account.findUnique({ where: { id: decoded.id } });
-
-        if (!user) {
-            res.status(401).json({ message: 'Người dùng không tồn tại' });
+            if (!user) {
+                res.status(401).json({ message: 'Người dùng không tồn tại' });
+                return;
+            }
+            req.user = user;
+        } catch (error) {
+            res.status(403).json({ message: 'Invalid token' });
             return;
         }
-
-        req.user = user;
-
         next();
     } catch (error) {
         next(error);
