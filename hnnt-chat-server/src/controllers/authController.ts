@@ -162,19 +162,6 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
 // send OTP to email
 let otpStore: { [key: string]: { otp: string; expiry: number } } = {};
-// Tạo transporter để gửi email qua Nodemailer
-// const transporter = nodemailer.createTransport(
-//     {
-//     host: 'bulk.smtp.mailtrap.io',
-//     port: 587,
-//     secure: false, // true for 465, false for other ports
-//     // service: 'gmail', // Có thể thay đổi nếu bạn sử dụng dịch vụ email khác
-//     auth: {
-//         user: 'smtp@mailtrap.io', // Địa chỉ email của bạn
-//         pass: 'e68d3cebc02c2d3e51243b6acb82e579', // Mật khẩu email của bạn
-//     },
-// }
-// );
 
 // Gửi OTP qua email
 const sendOTP = async (email: string, otp: string): Promise<void> => {
@@ -309,8 +296,8 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
             data: { password: hashedPassword },
         });
 
-        res.json({ message: 'Đặt lại mật khẩu thành công!' });
+        res.status(200).json({ message: 'Đặt lại mật khẩu thành công!', success: true });
     } catch (error) {
-        res.status(500).json({ error: 'Lỗi đặt lại mật khẩu' });
+        res.status(500).json({ error: 'Lỗi đặt lại mật khẩu', success: false });
     }
 };
