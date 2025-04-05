@@ -5,6 +5,8 @@ import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import { useWindowDimensions } from 'react-native';
 import { RadioButton } from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createGroup, getListFriends } from '../components/services/AddGroupService'
 
 export default function AddGroupScreen() {
     const [selectedImage, setSelectedImage] = useState(null);
@@ -14,6 +16,8 @@ export default function AddGroupScreen() {
     const [hasGalleryPermission, setHasGalleryPermission] = useState(null);
     const layout = useWindowDimensions();
     const [selectedUsers, setSelectedUsers] = useState([]);
+
+    const [friends, setFriends] = useState([]);
 
     const toggleSelection = (id) => {
         setSelectedUsers((prevSelected) =>
@@ -29,8 +33,54 @@ export default function AddGroupScreen() {
             time: 'Yesterday',
             avatar: 'https://i.pravatar.cc/301',
         },
+        {
+            id: 3,
+            name: 'Thanh Hậu',
+            lastMessage: 'How are you?',
+            time: 'Yesterday',
+            avatar: 'https://i.pravatar.cc/301',
+        },
     ];
+
+    const handleGetListFriends = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await getListFriends(token);
+            setFriends(response); // Cập nhật danh sách bạn bè
+        } catch (error) {
+            console.warn('Error fetching friends:', error);
+        }
+    };
+
+    const handleCreateGroup = async () => {
+        if (!groupName.trim()) {
+            Alert.alert('Error', 'Tên nhóm không được để trống!');
+            return;
+        }
+
+        if (selectedUsers.length <= 1) {
+            Alert.alert('Error', 'Vui lòng chọn ít nhất 2 thành viên!');
+            return;
+        }
+
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const participants = selectedUsers.map((id) => ({ accountId: id }));
+            const response = await createGroup(groupName, selectedImage || '', participants, token);
+            if (response.status !== 200) {
+                Alert.alert('Error', 'Không thể tạo nhóm. Vui lòng thử lại.');
+                return;
+            }
+            Alert.alert('Success', 'Nhóm đã được tạo thành công!');
+        } catch (error) {
+            console.error('Error creating group:', error);
+            Alert.alert('Error', 'Không thể tạo nhóm. Vui lòng thử lại.');
+        }
+    };
+
+
     useEffect(() => {
+        handleGetListFriends();
         (async () => {
             const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
             setHasGalleryPermission(status === 'granted');
@@ -67,6 +117,7 @@ export default function AddGroupScreen() {
     ]);
 
     const UserItem = ({ user }) => (
+        console.log(user),
         <TouchableOpacity style={styles.userItem} onPress={() => toggleSelection(user.id)}>
             <RadioButton
                 value={user.id}
@@ -93,7 +144,8 @@ export default function AddGroupScreen() {
 
     const ContactsRoute = () => (
         <View style={styles.tabContent}>
-            {users.map((user) => (
+            {friends.map((user) => (
+                console.log(user),
                 <UserItem key={user.id} user={user} />
             ))}
         </View>
