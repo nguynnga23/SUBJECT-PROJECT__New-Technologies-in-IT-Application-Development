@@ -7,23 +7,32 @@ import { MdLabel } from 'react-icons/md';
 
 import PopupReaded from './PopupReaded';
 import PopupManageCategory from './PopupManageCategory';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { setCategory, setState } from '../../redux/slices/categorySlice';
-
-const states = [
-    { id: 1, name: 'Tất cả' },
-    { id: 2, name: 'Chưa đọc' },
-];
+import { getAllCategory } from '../../screens/Messaging/api';
 
 function PopupCategoryAndState() {
     const [isOpen, setIsOpen] = useState(false);
-    const [selectedState, setSelectedState] = useState(null);
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [isOpenManageCategory, setIsOpenManageCategory] = useState(false);
-    const categories = useSelector((state) => state.category.categories);
+    const [stateOfChat, setStateOfChat] = useState('Tất cả');
+    const [data, setData] = useState([]);
     const popupContainerRef = useRef(null);
 
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        const fetchChats = async () => {
+            try {
+                const chats = await getAllCategory();
+                setData(chats);
+            } catch (err) {
+                console.log(err.message);
+            }
+        };
+
+        fetchChats(); // Gọi hàm async bên trong useEffect
+    }, [data]);
 
     // Hàm đóng popup khi click bên ngoài
     useEffect(() => {
@@ -54,8 +63,8 @@ function PopupCategoryAndState() {
     };
 
     const toggleState = (state) => {
-        setSelectedState(state);
-        dispatch(setState(state.name));
+        setStateOfChat(state);
+        dispatch(setState(state));
     };
 
     return (
@@ -68,7 +77,7 @@ function PopupCategoryAndState() {
                         isOpen ? 'bg-blue-400 text-white' : ''
                     }`}
                 >
-                    Phân loại <FaChevronDown />
+                    {stateOfChat} <FaChevronDown />
                 </button>
                 <PopupReaded />
             </div>
@@ -80,20 +89,28 @@ function PopupCategoryAndState() {
                         <p className="text-sm font-bold text-gray-700 pt-1 mb-2 dark:text-gray-300">Theo trạng thái</p>
 
                         {/* Theo trạng thái */}
-                        {states.map((state) => (
-                            <div
-                                key={state.id}
-                                onClick={() => toggleState(state)}
-                                className="flex items-center p-2 dark:bg-gray-900 hover:bg-gray-300 hover:dark:bg-gray-700 rounded-lg cursor-pointer"
-                            >
-                                {selectedState?.id === state.id ? (
-                                    <FaCircle className={`mr-3 cursor-pointer text-blue-500`} />
-                                ) : (
-                                    <FaCircle className={`mr-3 cursor-pointer text-gray-500`} />
-                                )}
-                                <span className="flex-1 text-sm">{state.name}</span>
-                            </div>
-                        ))}
+                        <div
+                            onClick={() => toggleState('Tất cả')}
+                            className="flex items-center p-2 dark:bg-gray-900 hover:bg-gray-300 hover:dark:bg-gray-700 rounded-lg cursor-pointer"
+                        >
+                            {stateOfChat === 'Tất cả' ? (
+                                <FaCircle className={`mr-3 cursor-pointer text-blue-500`} />
+                            ) : (
+                                <FaCircle className={`mr-3 cursor-pointer text-gray-500`} />
+                            )}
+                            <span className="flex-1 text-sm">Tất cả</span>
+                        </div>
+                        <div
+                            onClick={() => toggleState('Chưa đọc')}
+                            className="flex items-center p-2 dark:bg-gray-900 hover:bg-gray-300 hover:dark:bg-gray-700 rounded-lg cursor-pointer"
+                        >
+                            {stateOfChat === 'Chưa đọc' ? (
+                                <FaCircle className={`mr-3 cursor-pointer text-blue-500`} />
+                            ) : (
+                                <FaCircle className={`mr-3 cursor-pointer text-gray-500`} />
+                            )}
+                            <span className="flex-1 text-sm">Chưa đọc</span>
+                        </div>
 
                         {/* Theo thẻ phân loại */}
                         <div>
@@ -101,7 +118,7 @@ function PopupCategoryAndState() {
                                 Theo thẻ phân loại
                             </p>
                             <div className=" overflow-auto max-h-[300px]">
-                                {categories.map((category) => (
+                                {data?.map((category) => (
                                     <div
                                         key={category.id}
                                         onClick={() => {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import dark from '../../public/dark.png';
 import light from '../../public/light.png';
 import useDarkMode from '../../hook/useDarkMode';

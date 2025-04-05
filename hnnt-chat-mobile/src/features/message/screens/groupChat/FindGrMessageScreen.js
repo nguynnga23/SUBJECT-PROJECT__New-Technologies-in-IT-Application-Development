@@ -5,11 +5,11 @@ import { useNavigation } from "@react-navigation/native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 const mockServerMessages = [
-    { id: 101, sender: "@nganguyen92", name: "Nga Nguyễn", message: "Link figma, mindmap, excel,.. và theo dõi Task đều có trong Trello nhé mn", time: "18:55", reactions: { "❤️": 1 } },
-    { id: 102, sender: "@nganguyen92", name: "Nga Nguyễn", message: "Mn làm Task nào thì kéo sang Doing, làm xong thì kéo sang Review rồi comment để mn trong team biết nhé", time: "18:56" },
-    { id: 103, sender: "@huynh503", name: "Huy Nguyễn", message: "ok", time: "18:57" },
-    { id: 104, sender: "@nhietpham", name: "Nhiệt Phạm", message: "yup", time: "19:00", reactions: { "😂": 1 }, isMe: true },
-    { id: 105, sender: "@nguyenthientu413", name: "Tứ Nguyễn", message: "got it", time: "19:05" },
+    { id: "101", sender: "@nganguyen92", name: "Nga Nguyễn", message: "Trello có đủ tài liệu nha!", time: "18:55" },
+    { id: "102", sender: "@nganguyen92", name: "Nga Nguyễn", message: "Mn nhớ update task trên Trello nhé!", time: "18:56" },
+    { id: "103", sender: "@huynh503", name: "Huy Nguyễn", message: "ok", time: "18:57" },
+    { id: "104", sender: "@nhietpham", name: "Nhiệt Phạm", message: "yup", time: "19:00", isMe: true },
+    { id: "105", sender: "@nguyenthientu413", name: "Tứ Nguyễn", message: "got it", time: "19:05" },
 ];
 
 // Giả lập server trả về kết quả dựa trên từ khóa tìm kiếm

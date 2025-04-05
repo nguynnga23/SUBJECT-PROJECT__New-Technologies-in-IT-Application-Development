@@ -18,7 +18,7 @@ const getFileIcon = (fileType) => {
 function ChatFile({ userId, message, showName, replyMessage }) {
     return (
         <div
-            className={`relative pb-2 p-3 mb-2 border rounded-lg max-w-[500px] cursor-pointer ${
+            className={`relative pb-2 p-3 border rounded-lg max-w-[500px] cursor-pointer ${
                 message.sender.id === userId
                     ? 'bg-blue-100 dark:bg-[#20344c] border-blue-200 dark:border-blue-100'
                     : 'bg-white dark:bg-[#20344c] border-gray-200 dark:border-gray-800'

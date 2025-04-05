@@ -8,19 +8,18 @@ import { IoIosLogOut } from 'react-icons/io';
 import { AiOutlineUsergroupDelete } from 'react-icons/ai';
 
 import {
-    setOnOrOfPin,
-    setOnOrOfNotify,
-    deleteChatForUser,
     removeMemberOfGroup,
     destroyGroup,
     setActiveChat,
     setShowOrOffRightBar,
     setShowOrOffRightBarSearch,
+    setOnOrOfPin,
+    setOnOrOfNotify,
 } from '../../redux/slices/chatSlice';
 import { useEffect, useState } from 'react';
 import Archive from '../Archive/Archive';
 import PopupAddGroup from '../Popup/PopupAddGroup';
-import { getMessage } from '../../screens/Messaging/api';
+import { deleteAllChatOfChat, getMessage, notifyChatOfUser, pinChatOfUser } from '../../screens/Messaging/api';
 
 function TabChatInfo({ setActiveMessageTab }) {
     const userActive = useSelector((state) => state.auth.userActive);
@@ -30,7 +29,6 @@ function TabChatInfo({ setActiveMessageTab }) {
     const [addGroupButton, setAddGroupButton] = useState(false);
 
     const [data, setData] = useState([]);
-    const [error, setError] = useState([]);
 
     const [memberOpen, setMemberOpen] = useState(true);
     const [fileOpen, setFileOpen] = useState(true);
@@ -59,12 +57,33 @@ function TabChatInfo({ setActiveMessageTab }) {
                 const chats = await getMessage(chatId);
                 setData(chats);
             } catch (err) {
-                setError(err.message);
+                console.log(err.message);
             }
         };
 
         fetchMessages();
-    }, [chatId, data]);
+    }, [chatId, activeChat]);
+
+    const pinMessage = (chatId, userId, pinStatus) => {
+        pinChatOfUser(chatId);
+        dispatch(
+            setOnOrOfPin({
+                chatId,
+                userId,
+                pinStatus,
+            }),
+        );
+    };
+    const notifyMessage = (chatId, userId, notifyStatus) => {
+        notifyChatOfUser(chatId);
+        dispatch(
+            setOnOrOfNotify({
+                chatId,
+                userId,
+                notifyStatus,
+            }),
+        );
+    };
 
     return (
         <div className="overflow-auto dark:text-gray-300">
@@ -89,17 +108,17 @@ function TabChatInfo({ setActiveMessageTab }) {
             <div className="flex item-center justify-center border-b-[7px] dark:border-b-gray-900 ">
                 <div className="m-4 mt-1 w-[50px] text-center">
                     <div className="flex justify-center">
-                        {activeChat?.notify ? (
+                        {activeChat.participants?.find((user) => user.accountId === userId)?.notify ? (
                             <GoBell
                                 size={35}
                                 className="p-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer"
-                                onClick={() => dispatch(setOnOrOfNotify(activeChat?.id))}
+                                onClick={() => notifyMessage(chatId, userId, false)}
                             />
                         ) : (
                             <GoBellSlash
                                 size={35}
                                 className="p-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer text-blue-500"
-                                onClick={() => dispatch(setOnOrOfNotify(activeChat?.id))}
+                                onClick={() => notifyMessage(chatId, userId, true)}
                             />
                         )}
                     </div>
@@ -107,17 +126,17 @@ function TabChatInfo({ setActiveMessageTab }) {
                 </div>
                 <div className="m-4 mt-1 w-[50px] text-center">
                     <div className="flex justify-center">
-                        {!activeChat?.pin ? (
+                        {!activeChat.participants?.find((user) => user.accountId === userId)?.pin ? (
                             <GrPin
                                 size={35}
                                 className="p-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer"
-                                onClick={() => dispatch(setOnOrOfPin(activeChat?.id))}
+                                onClick={() => pinMessage(chatId, userId, true)}
                             />
                         ) : (
                             <GrPin
                                 size={35}
                                 className="p-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer text-blue-500"
-                                onClick={() => dispatch(setOnOrOfPin(activeChat?.id))}
+                                onClick={() => pinMessage(chatId, userId, false)}
                             />
                         )}
                     </div>
@@ -200,7 +219,7 @@ function TabChatInfo({ setActiveMessageTab }) {
             {/* Xóa lịch sử trò chuyện */}
             <div className="text-red-500 flex items-center space-x-2 py-3 font-medium cursor-pointer text-base pl-2 hover:bg-gray-100 hover:dark:bg-gray-700">
                 <FaTrashAlt />
-                <span className="text-[12px]" onClick={() => dispatch(deleteChatForUser({ userId, chatId }))}>
+                <span className="text-[12px]" onClick={() => deleteAllChatOfChat(chatId)}>
                     Xóa lịch sử trò chuyện
                 </span>
             </div>
