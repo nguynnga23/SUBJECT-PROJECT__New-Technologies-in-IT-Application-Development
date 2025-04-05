@@ -1,9 +1,9 @@
 import * as ImagePicker from 'expo-image-picker';
 import { Alert } from 'react-native';
 import axios from 'axios';
-import { IP_4G, IP_WIFI } from '../../../../utils/localhosts'
+import { localhost } from '../../../../utils/localhosts'
 
-const API_URL = `http://${IP_WIFI}:5000/api`;
+const API_URL = `http://${localhost}/api`;
 
 export const fetchChat = async (chatId, token) => {
     try {

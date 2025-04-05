@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { IP_4G, IP_WIFI } from '../../../utils/localhosts'
+import { localhost } from '../../../utils/localhosts'
 
-const API_URL = `http://${IP_WIFI}:5000/api/chats`;
+const API_URL = `http://${localhost}/api/chats`;
 
 export const fetchChats = async (token) => {
     try {

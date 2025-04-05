@@ -18,9 +18,9 @@ export default function GroupInfoScreen() {
     const [isMuted, setIsMuted] = useState();
     const [editVisible, setEditVisible] = useState(false);
     const [newGroupName, setNewGroupName] = useState("");
-    const [reportVisible, setReportVisible] = useState(false);
+    // const [reportVisible, setReportVisible] = useState(false);
     const [leaveVisible, setLeaveVisible] = useState(false);
-    const [reportReason, setReportReason] = useState("");
+    // const [reportReason, setReportReason] = useState("");
     const [avatar, setAvatar] = useState(null);
     const [userRole, setUserRole] = useState("");
     const [disbandVisible, setDisbandVisible] = useState(false);
@@ -210,9 +210,9 @@ export default function GroupInfoScreen() {
                 /> */}
 
                 {/* Danger Zone */}
-                <TouchableOpacity onPress={() => setReportVisible(true)}>
+                {/* <TouchableOpacity onPress={() => setReportVisible(true)}>
                     <OptionItem label="Report" textColor="red" />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
                 <TouchableOpacity onPress={() => setLeaveVisible(true)}>
                     <OptionItem label="Leave group" textColor="red" />
                 </TouchableOpacity>
@@ -241,7 +241,7 @@ export default function GroupInfoScreen() {
                 </Modal>
 
                 {/* Report Modal */}
-                <Modal visible={reportVisible} transparent animationType="slide">
+                {/* <Modal visible={reportVisible} transparent animationType="slide">
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
                             <Text style={styles.modalTitle}>Report</Text>
@@ -263,7 +263,7 @@ export default function GroupInfoScreen() {
                             </View>
                         </View>
                     </View>
-                </Modal>
+                </Modal> */}
 
                 {/* Leave Group Modal */}
                 <Modal visible={leaveVisible} transparent animationType="slide">
