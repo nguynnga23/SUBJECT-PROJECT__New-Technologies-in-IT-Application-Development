@@ -3,21 +3,21 @@ import {
     login,
     logout,
     register,
-    sendOTP,
+    sendOTPEmail,
     verifyOTP,
     forgotPassword,
-    resetPassword,
+    changePassword,
 } from '../controllers/authController';
 import { authenticate } from '../middleware/auth';
 
 const authRouter = Router();
 
 authRouter.post('/login', login);
-authRouter.post('/send-otp', sendOTP);
+authRouter.post('/send-otp', sendOTPEmail);
 authRouter.post('/verify-otp', verifyOTP);
 authRouter.post('/register', register);
 authRouter.post('/forgot-password', forgotPassword);
-authRouter.post('/reset-password', resetPassword);
+authRouter.post('/change-password', changePassword);
 authRouter.post('/logout', authenticate, logout);
 
 export default authRouter;

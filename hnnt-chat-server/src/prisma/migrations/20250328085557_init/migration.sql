@@ -7,6 +7,7 @@ CREATE TABLE "Account" (
     "name" VARCHAR(255) NOT NULL,
     "number" VARCHAR(20) NOT NULL,
     "password" TEXT NOT NULL,
+    "email" VARCHAR(20) NOT NULL,
     "avatar" TEXT,
     "status" TEXT,
     "birthDate" TIMESTAMP(3),
@@ -57,6 +58,7 @@ CREATE TABLE "Category" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "color" TEXT NOT NULL,
+    "accountId" TEXT NOT NULL,
 
     CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
 );
@@ -68,6 +70,7 @@ CREATE TABLE "ChatParticipant" (
     "accountId" TEXT NOT NULL,
     "categoryId" TEXT,
     "priority" BOOLEAN DEFAULT true,
+    "readed" BOOLEAN DEFAULT false,
     "pin" BOOLEAN NOT NULL DEFAULT false,
     "notify" BOOLEAN NOT NULL DEFAULT true,
     "role" "ChatRole" NOT NULL DEFAULT 'MEMBER',
@@ -109,6 +112,9 @@ CREATE TABLE "Reaction" (
 CREATE UNIQUE INDEX "Account_number_key" ON "Account"("number");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Account_email_key" ON "Account"("email");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "FriendRequest_senderId_receiverId_key" ON "FriendRequest"("senderId", "receiverId");
 
 -- CreateIndex
@@ -133,13 +139,16 @@ ALTER TABLE "Friend" ADD CONSTRAINT "Friend_user1Id_fkey" FOREIGN KEY ("user1Id"
 ALTER TABLE "Friend" ADD CONSTRAINT "Friend_user2Id_fkey" FOREIGN KEY ("user2Id") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Category" ADD CONSTRAINT "Category_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "ChatParticipant" ADD CONSTRAINT "ChatParticipant_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "Chat"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ChatParticipant" ADD CONSTRAINT "ChatParticipant_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ChatParticipant" ADD CONSTRAINT "ChatParticipant_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ChatParticipant" ADD CONSTRAINT "ChatParticipant_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Message" ADD CONSTRAINT "Message_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "Chat"("id") ON DELETE CASCADE ON UPDATE CASCADE;

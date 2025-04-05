@@ -4,14 +4,30 @@ import { addOrChangeCategory } from '../../redux/slices/chatSlice';
 
 import PopupManageCategory from './PopupManageCategory';
 import { useDispatch, useSelector } from 'react-redux';
+import { addCategoryToChat, getAllCategory } from '../../screens/Messaging/api';
 
 function PopupCategory({ isOpen, setIsOpen }) {
-    const categories = useSelector((state) => state.category.categories);
+    const [data, setData] = useState([]);
+    const [error, setError] = useState([]);
     const [isOpenManageCategory, setIsOpenManageCategory] = useState(false);
     const activeChat = useSelector((state) => state.chat.activeChat);
+    const userActive = useSelector((state) => state.auth.userActive);
 
     const popupContainerRef = useRef(null);
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        const fetchChats = async () => {
+            try {
+                const chats = await getAllCategory();
+                setData(chats);
+            } catch (err) {
+                setError(err.message);
+            }
+        };
+
+        fetchChats(); // Gọi hàm async bên trong useEffect
+    }, [data]);
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -30,7 +46,8 @@ function PopupCategory({ isOpen, setIsOpen }) {
 
     const chooseCategory = (category) => {
         const chatId = activeChat.id;
-        dispatch(addOrChangeCategory({ chatId, category }));
+        addCategoryToChat(chatId, category.id);
+        dispatch(addOrChangeCategory({ chatId, userId: userActive.id, category }));
         setIsOpen(false);
         return;
     };
@@ -38,9 +55,9 @@ function PopupCategory({ isOpen, setIsOpen }) {
     return (
         <div className="relative inline-block text-left" ref={popupContainerRef}>
             {isOpen && (
-                <div className="absolute mt-11 left-[-105px] w-56 bg-white shadow-lg rounded-lg z-[10]">
+                <div className="absolute mt-11 left-[-105px] top-[10px] w-56 bg-white shadow-lg rounded-lg z-[10]">
                     <div className="overflow-auto max-h-[300px] dark:bg-gray-900 dark:text-gray-300 rounded-t-lg">
-                        {categories.map((category) => (
+                        {data.map((category) => (
                             <div
                                 key={category.id}
                                 onClick={() => chooseCategory(category)}

@@ -2,13 +2,34 @@ import { useState } from 'react';
 import TabSearchAll from './TabSearchAll';
 import TabSearchMessage from './TabSearchMessage';
 import TabSearchFile from './TabSearchFile';
-import { useSelector } from 'react-redux';
+import TabSearchFriend from './TabSearchFriend';
 
-const tabs = ['Tất cả', 'Tin nhắn', 'File'];
+const tabs = ['Tất cả', 'Liên lạc', 'Tin nhắn', 'File'];
 
-function TabSearch({ keyword }) {
+function TabSearch({ keyword, data, dataContact }) {
     const [activeSearchTab, setActiveSearchTab] = useState('Tất cả');
-    const searchResults = useSelector((state) => state.chat.searchResults);
+    const scrollToMessage = (messageId) => {
+        setTimeout(() => {
+            const messageElement = document.getElementById(`message-${messageId}`);
+            if (messageElement) {
+                messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Thêm hiệu ứng phát sáng
+                messageElement.classList.add('highlight');
+
+                // Xóa hiệu ứng sau 1.5 giây
+                messageElement.classList.add('bg-blue-200');
+                messageElement.classList.add('rounded-[5px]');
+
+                // Xóa class sau 1.5 giây
+                setTimeout(() => {
+                    messageElement.classList.remove('bg-blue-200');
+                    messageElement.classList.remove('rounded-[5px]');
+                }, 1500);
+            } else {
+                console.log('Không tìm thấy phần tử:', `message-${messageId}`);
+            }
+        }, 100); // Đợi 100ms để đảm bảo phần tử đã được render
+    };
     return (
         <div className="p-4 pt-1 dark:bg-gray-800 ">
             <div className="flex border-b dark:border-b-black ">
@@ -27,9 +48,23 @@ function TabSearch({ keyword }) {
                 ))}
             </div>
             <div className="overflow-auto max-h-[calc(100vh_-_110px)]">
-                {activeSearchTab === 'Tất cả' && <TabSearchAll results={searchResults} keyword={keyword} />}
-                {activeSearchTab === 'Tin nhắn' && <TabSearchMessage results={searchResults} keyword={keyword} />}
-                {activeSearchTab === 'File' && <TabSearchFile results={searchResults} keyword={keyword} />}
+                {activeSearchTab === 'Tất cả' && (
+                    <TabSearchAll
+                        data={data}
+                        dataContact={dataContact}
+                        keyword={keyword}
+                        scrollToMessage={scrollToMessage}
+                    />
+                )}
+                {activeSearchTab === 'Tin nhắn' && (
+                    <TabSearchMessage data={data} keyword={keyword} scrollToMessage={scrollToMessage} />
+                )}
+                {activeSearchTab === 'File' && (
+                    <TabSearchFile data={data} keyword={keyword} scrollToMessage={scrollToMessage} />
+                )}
+                {activeSearchTab === 'Liên lạc' && (
+                    <TabSearchFriend data={dataContact} keyword={keyword} scrollToMessage={scrollToMessage} />
+                )}
             </div>
         </div>
     );
