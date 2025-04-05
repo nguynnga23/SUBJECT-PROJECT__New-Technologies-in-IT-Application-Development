@@ -7,8 +7,6 @@ import redis from '../config/redis';
 import dotenv from 'dotenv';
 import { AuthRequest } from '../types/authRequest';
 
-import { sendSMS } from '../config/sendSMS';
-
 dotenv.config();
 
 const prisma = new PrismaClient();
