@@ -94,7 +94,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     try {
         const { name, number, password, avatar, status, birthDate, location, gender, email } = req.body;
 
-        const phoneRegex = /^(03|05|07|08|09|01)\d{8}$/; // Chỉ chấp nhận số hợp lệ ở VN
+        const phoneRegex = /^(03|05|07|08|09|01|02)\d{8}$/; // Chỉ chấp nhận số hợp lệ ở VN
 
         if (!phoneRegex.test(number) || /^(\d)\1{9}$/.test(number)) {
             res.status(400).json({ message: 'Số điện thoại không hợp lệ!' });
@@ -116,6 +116,12 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         const existingUser = await prisma.account.findUnique({ where: { number } });
         if (existingUser) {
             res.status(400).json({ message: 'Số điện thoại này đã được sử dụng!' });
+            return;
+        }
+
+        const existingEmail = await prisma.account.findUnique({ where: { email } });
+        if (existingEmail) {
+            res.status(400).json({ message: 'Email này đã được sử dụng!' });
             return;
         }
 
@@ -151,32 +157,27 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
 // send OTP to email
 let otpStore: { [key: string]: { otp: string; expiry: number } } = {};
-// Tạo transporter để gửi email qua Nodemailer
-const transporter = nodemailer.createTransport({
-    host: 'bulk.smtp.mailtrap.io',
-    port: 587,
-    secure: false, // true for 465, false for other ports
-    // service: 'gmail', // Có thể thay đổi nếu bạn sử dụng dịch vụ email khác
-    auth: {
-        user: 'smtp@mailtrap.io', // Địa chỉ email của bạn
-        pass: 'e68d3cebc02c2d3e51243b6acb82e579', // Mật khẩu email của bạn
-    },
-});
 
 // Gửi OTP qua email
 const sendOTP = async (email: string, otp: string): Promise<void> => {
-    const mailOptions = {
-        from: 'info@demomailtrap.co',
+    const transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        service: 'Gmail',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+
+    const message = {
+        from: process.env.EMAIL_USER,
         to: email,
-        subject: 'Mã OTP xác thực',
-        text: `Mã OTP của bạn là: ${otp}`,
+        subject: 'Mã OTP xác thực tài khoản',
+        text: `Mã OTP của bạn là: ${otp}. Vui lòng không chia sẻ mã này với bất kỳ ai khác.`,
+        html: `<p>Mã OTP của bạn là: <strong>${otp}</strong></p><p>Vui lòng không chia sẻ mã này với bất kỳ ai khác.</p>`,
     };
 
-    try {
-        await transporter.sendMail(mailOptions);
-    } catch (error) {
-        throw new Error('Không thể gửi email');
-    }
+    await transporter.sendMail(message);
 };
 
 // API gửi OTP qua email
@@ -290,8 +291,8 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
             data: { password: hashedPassword },
         });
 
-        res.json({ message: 'Đặt lại mật khẩu thành công!' });
+        res.status(200).json({ message: 'Đặt lại mật khẩu thành công!', success: true });
     } catch (error) {
-        res.status(500).json({ error: 'Lỗi đặt lại mật khẩu' });
+        res.status(500).json({ error: 'Lỗi đặt lại mật khẩu', success: false });
     }
 };
