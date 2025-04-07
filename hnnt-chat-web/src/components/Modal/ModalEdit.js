@@ -8,10 +8,14 @@ import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { setUser } from '../../redux/slices/authSlice';
+
+import { updateUser } from '../../screens/Profile/api';
 
 function ModalEdit({ setIsType, onClose }) {
     const userActive = useSelector((state) => state.auth.userActive);
+    const dispatch = useDispatch();
 
     const [isName, setIsName] = useState(userActive?.name);
     const [gender, setGender] = useState(userActive?.gender);
@@ -19,11 +23,13 @@ function ModalEdit({ setIsType, onClose }) {
     // -----------------------------------------------------
     const currentYear = new Date().getFullYear();
 
-    const [birthDay, birthMonth, birthYear] = userActive?.birthDate.split('/').map((num) => parseInt(num, 10));
+    // const [birthDay, birthMonth, birthYear] = userActive?.birthDate.split('/').map((num) => parseInt(num, 10));
 
-    const [day, setDay] = useState(birthDay);
-    const [month, setMonth] = useState(birthMonth);
-    const [year, setYear] = useState(birthYear);
+    const date = new Date(userActive?.birthDate);
+
+    const [day, setDay] = useState(date.getUTCDate());
+    const [month, setMonth] = useState(date.getUTCMonth() + 1);
+    const [year, setYear] = useState(date.getUTCFullYear());
     const [maxDays, setMaxDays] = useState(31);
 
     // Hàm kiểm tra số ngày hợp lệ trong tháng
@@ -42,6 +48,18 @@ function ModalEdit({ setIsType, onClose }) {
             setDay(newMaxDays); // Giữ ngày trong phạm vi hợp lệ
         }
     }, [month, year]);
+
+    const handleUpdateUser = async () => {
+        const data = await updateUser(
+            isName,
+            gender,
+            `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`,
+        );
+
+        dispatch(setUser({ userActive: data, token: null }));
+
+        setIsType('profile');
+    };
 
     return (
         <motion.div
@@ -142,7 +160,9 @@ function ModalEdit({ setIsType, onClose }) {
                 </button>
 
                 <button
-                    onClick={onClose}
+                    onClick={() => {
+                        handleUpdateUser();
+                    }}
                     className="bg-blue-600 hover:bg-blue-800 rounded-md flex items-center justify-center gap-2 p-2 cursor-pointer mr-3"
                 >
                     <p className="font-semibold text-white">Cập nhật</p>
