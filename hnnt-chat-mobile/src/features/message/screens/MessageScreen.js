@@ -60,7 +60,7 @@ const ChatListScreen = () => {
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.time}>{formatDateTime(item.updatedAt)}</Text>
+          <Text style={styles.time}>{item.messages.length > 0 ? formatDateTime(item.messages[0].time) : ""}</Text>
         </View>
         <Text style={styles.message}>
           {item.messages.length > 0 ? item.messages[0].content : "No messages yet"}

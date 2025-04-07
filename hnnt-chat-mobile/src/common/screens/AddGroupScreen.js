@@ -1,92 +1,44 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, Keyboard } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
-import { useWindowDimensions } from 'react-native';
-import { RadioButton } from 'react-native-paper';
+import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, FlatList, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createGroup, getListFriends } from '../components/services/AddGroupService'
+import * as ImagePicker from 'expo-image-picker';
+import { MaterialIcons } from '@expo/vector-icons';
+import { RadioButton } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+import { createGroup, getListFriends } from '../components/services/AddGroupService';
 
 export default function AddGroupScreen() {
+    const navigation = useNavigation();
     const [selectedImage, setSelectedImage] = useState(null);
-    const [isInputFocused, setIsInputFocused] = useState(false);
-    const [isEmojiPickerVisible, setIsEmojiPickerVisible] = useState(false);
     const [groupName, setGroupName] = useState('');
-    const [hasGalleryPermission, setHasGalleryPermission] = useState(null);
-    const layout = useWindowDimensions();
-    const [selectedUsers, setSelectedUsers] = useState([]);
-
     const [friends, setFriends] = useState([]);
+    const [filteredFriends, setFilteredFriends] = useState([]);
+    const [selectedUsers, setSelectedUsers] = useState([]);
+    const [searchText, setSearchText] = useState('');
+    const [hasGalleryPermission, setHasGalleryPermission] = useState(null);
 
-    const toggleSelection = (id) => {
-        setSelectedUsers((prevSelected) =>
-            prevSelected.includes(id) ? prevSelected.filter((userId) => userId !== id) : [...prevSelected, id],
-        );
-    };
-    const users = [
-        { id: 1, name: 'Nguyễn Nga', lastMessage: 'Hello!', time: '10:30 AM', avatar: 'https://i.pravatar.cc/300' },
-        {
-            id: 2,
-            name: 'Thanh Hậu',
-            lastMessage: 'How are you?',
-            time: 'Yesterday',
-            avatar: 'https://i.pravatar.cc/301',
-        },
-        {
-            id: 3,
-            name: 'Thanh Hậu',
-            lastMessage: 'How are you?',
-            time: 'Yesterday',
-            avatar: 'https://i.pravatar.cc/301',
-        },
-    ];
-
-    const handleGetListFriends = async () => {
+    // Lấy danh sách bạn bè từ API
+    const fetchFriends = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
             const response = await getListFriends(token);
             setFriends(response); // Cập nhật danh sách bạn bè
+            setFilteredFriends(response); // Khởi tạo danh sách bạn bè được filter
         } catch (error) {
             console.warn('Error fetching friends:', error);
         }
     };
 
-    const handleCreateGroup = async () => {
-        if (!groupName.trim()) {
-            Alert.alert('Error', 'Tên nhóm không được để trống!');
-            return;
-        }
-
-        if (selectedUsers.length <= 1) {
-            Alert.alert('Error', 'Vui lòng chọn ít nhất 2 thành viên!');
-            return;
-        }
-
-        try {
-            const token = await AsyncStorage.getItem('token');
-            const participants = selectedUsers.map((id) => ({ accountId: id }));
-            const response = await createGroup(groupName, selectedImage || '', participants, token);
-            if (response.status !== 200) {
-                Alert.alert('Error', 'Không thể tạo nhóm. Vui lòng thử lại.');
-                return;
-            }
-            Alert.alert('Success', 'Nhóm đã được tạo thành công!');
-        } catch (error) {
-            console.error('Error creating group:', error);
-            Alert.alert('Error', 'Không thể tạo nhóm. Vui lòng thử lại.');
-        }
-    };
-
-
     useEffect(() => {
-        handleGetListFriends();
+        fetchFriends();
+
         (async () => {
             const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
             setHasGalleryPermission(status === 'granted');
         })();
     }, []);
 
+    // Chọn ảnh đại diện cho nhóm
     const pickImage = async () => {
         if (!hasGalleryPermission) {
             alert('Bạn cần cấp quyền truy cập thư viện ảnh!');
@@ -105,57 +57,63 @@ export default function AddGroupScreen() {
         }
     };
 
-    const dismissKeyboard = () => {
-        Keyboard.dismiss();
-        setIsInputFocused(false);
+    // Xử lý tìm kiếm
+    const handleSearch = (text) => {
+        setSearchText(text);
+        const filtered = friends.filter((friend) =>
+            friend.name.toLowerCase().includes(text.toLowerCase())
+        );
+        setFilteredFriends(filtered);
     };
 
-    const [index, setIndex] = useState(0);
-    const [routes] = useState([
-        { key: 'recent', title: 'RECENT' },
-        { key: 'contacts', title: 'CONTACTS' },
-    ]);
+    // Xử lý chọn/bỏ chọn bạn bè
+    const toggleSelection = (id) => {
+        setSelectedUsers((prevSelected) =>
+            prevSelected.includes(id) ? prevSelected.filter((userId) => userId !== id) : [...prevSelected, id]
+        );
+    };
 
-    const UserItem = ({ user }) => (
-        console.log(user),
-        <TouchableOpacity style={styles.userItem} onPress={() => toggleSelection(user.id)}>
+    // Tạo nhóm mới
+    const handleCreateGroup = async () => {
+        if (!groupName.trim()) {
+            Alert.alert('Error', 'Tên nhóm không được để trống!');
+            return;
+        }
+
+        if (selectedUsers.length < 2) {
+            Alert.alert('Error', 'Vui lòng chọn ít nhất 2 thành viên!');
+            return;
+        }
+
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const participants = selectedUsers.map((id) => ({ accountId: id }));
+            const response = await createGroup(groupName, selectedImage || '', participants, token);
+
+            Alert.alert('Success', 'Nhóm đã được tạo thành công!');
+            navigation.navigate('HomeTab')
+        } catch (error) {
+            console.error('Error creating group:', error);
+            Alert.alert('Error', 'Không thể tạo nhóm. Vui lòng thử lại.');
+        }
+    };
+
+    // Render từng bạn bè
+    const renderFriendItem = ({ item }) => (
+        <TouchableOpacity style={styles.friendItem} onPress={() => toggleSelection(item.id)}>
             <RadioButton
-                value={user.id}
-                status={selectedUsers.includes(user.id) ? 'checked' : 'unchecked'}
-                onPress={() => toggleSelection(user.id)}
+                value={item.id}
+                status={selectedUsers.includes(item.id) ? 'checked' : 'unchecked'}
+                onPress={() => toggleSelection(item.id)}
             />
-            <Image source={{ uri: user.avatar }} style={styles.userAvatar} />
-            <View style={styles.userInfo}>
-                <Text style={styles.userName}>{user.name}</Text>
-                <Text style={styles.lastMessage}>
-                    {user.lastMessage} · {user.time}
-                </Text>
-            </View>
+            <Image source={{ uri: item.avatar }} style={styles.avatar} />
+            <Text style={styles.friendName}>{item.name}</Text>
         </TouchableOpacity>
     );
 
-    const RecentRoute = () => (
-        <View style={styles.tabContent}>
-            {users.map((user) => (
-                <UserItem key={user.id} user={user} />
-            ))}
-        </View>
-    );
-
-    const ContactsRoute = () => (
-        <View style={styles.tabContent}>
-            {friends.map((user) => (
-                console.log(user),
-                <UserItem key={user.id} user={user} />
-            ))}
-        </View>
-    );
-    const renderScene = SceneMap({
-        recent: RecentRoute,
-        contacts: ContactsRoute,
-    });
     return (
         <View style={styles.container}>
+            {/* Tên nhóm và ảnh đại diện */}
             <View style={styles.setNameWrapper}>
                 <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
                     {selectedImage ? (
@@ -165,69 +123,41 @@ export default function AddGroupScreen() {
                     )}
                 </TouchableOpacity>
 
-                <View
-                    style={[
-                        styles.inputContainer,
-                        isInputFocused && { borderBottomWidth: 1, borderBottomColor: '#00A8F5' },
-                    ]}
-                >
-                    <TextInput
-                        style={styles.textInput}
-                        placeholder="Nhập tên nhóm"
-                        value={groupName}
-                        onChangeText={setGroupName}
-                        onFocus={() => setIsInputFocused(true)}
-                        onBlur={() => setIsInputFocused(false)}
-                    />
-
-                    {isInputFocused && (
-                        <View style={styles.buttonContainer}>
-                            <TouchableOpacity
-                                style={styles.iconButton}
-                                onPress={() => setIsEmojiPickerVisible(!isEmojiPickerVisible)}
-                            >
-                                <MaterialCommunityIcons name="sticker-emoji" size={25} color="grey" />
-                            </TouchableOpacity>
-
-                            {/* Nút dấu tích để ẩn bàn phím */}
-                            <TouchableOpacity style={styles.iconButton} onPress={dismissKeyboard}>
-                                <MaterialIcons name="check" size={30} color="#00A8F5" />
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                </View>
-            </View>
-
-            <View style={styles.searchWrapper}>
-                <View
-                    style={[
-                        styles.inputContainer,
-                        { backgroundColor: '#F2F2F2', width: '100%', height: 40, borderRadius: 10 },
-                    ]}
-                >
-                    <MaterialIcons name="search" size={26} color="gray" />
-                    <TextInput placeholder="Search name or phone number" />
-                </View>
-            </View>
-
-            <View style={styles.listUsersWrapper}>
-                <TabView
-                    navigationState={{ index, routes }}
-                    renderScene={renderScene}
-                    onIndexChange={setIndex}
-                    initialLayout={{ width: layout.width }}
-                    renderTabBar={(props) => (
-                        <TabBar
-                            {...props}
-                            indicatorStyle={{ backgroundColor: '#00A8F5' }}
-                            style={{ backgroundColor: 'white' }}
-                            activeColor="black"
-                            inactiveColor="gray"
-                            labelStyle={{ fontSize: 16, fontWeight: 'bold' }}
-                        />
-                    )}
+                <TextInput
+                    style={styles.textInput}
+                    placeholder="Nhập tên nhóm"
+                    value={groupName}
+                    onChangeText={setGroupName}
                 />
             </View>
+
+            {/* Tìm kiếm */}
+            <View style={styles.searchWrapper}>
+                <View style={styles.searchContainer}>
+                    <MaterialIcons name="search" size={26} color="gray" />
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder="Tìm kiếm bạn bè"
+                        value={searchText}
+                        onChangeText={handleSearch}
+                    />
+                </View>
+            </View>
+
+            {/* Danh sách bạn bè */}
+            <FlatList
+                data={filteredFriends}
+                keyExtractor={(item) => item.id}
+                renderItem={renderFriendItem}
+                contentContainerStyle={styles.listContainer}
+            />
+
+            {/* Nút tạo nhóm */}
+            {selectedUsers.length >= 2 && (
+                <TouchableOpacity style={styles.createButton} onPress={handleCreateGroup}>
+                    <Text style={styles.createButtonText}>Create</Text>
+                </TouchableOpacity>
+            )}
         </View>
     );
 }
@@ -239,83 +169,81 @@ const styles = StyleSheet.create({
         padding: 15,
     },
     setNameWrapper: {
-        flex: 1,
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
     },
     avatarContainer: {
         width: 50,
         height: 50,
-        borderRadius: 60,
-        backgroundColor: '#F2F2F2',
+        borderRadius: 25,
+        backgroundColor: '#f2f2f2',
         alignItems: 'center',
         justifyContent: 'center',
-        overflow: 'hidden',
-        borderColor: '#aaa',
-    },
-    iconContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: 50,
-        height: 50,
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 10,
-        width: '80%',
-        height: 50,
-    },
-    textInput: {
-        flex: 1,
-        height: 40,
-    },
-    buttonContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    iconButton: {
-        padding: 10,
+        marginRight: 15,
     },
     avatar: {
         width: '100%',
         height: '100%',
+        borderRadius: 25,
     },
-    closeEmojiButton: {
-        alignItems: 'flex-end',
-        padding: 10,
+    textInput: {
+        flex: 1,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
+        fontSize: 16,
+        paddingVertical: 5,
     },
     searchWrapper: {
+        marginBottom: 20,
+    },
+    searchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F2F2F2',
+        borderRadius: 10,
+        paddingHorizontal: 10,
+        height: 40,
+    },
+    searchInput: {
         flex: 1,
-        justifyContent: 'center',
+        marginLeft: 10,
+        fontSize: 16,
     },
-    listUsersWrapper: {
-        flex: 9,
+    listContainer: {
+        paddingBottom: 20,
     },
-    tabContent: {
-        flex: 1,
-    },
-    userItem: {
+    friendItem: {
         flexDirection: 'row',
         alignItems: 'center',
         padding: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
     },
-    userAvatar: {
+    avatar: {
         width: 40,
         height: 40,
-        borderRadius: 20,
+        borderRadius: 30,
         marginHorizontal: 10,
     },
-    userInfo: {
+    friendName: {
+        fontSize: 16,
         flex: 1,
     },
-    userName: {
-        fontSize: 16,
+    createButton: {
+        position: 'absolute',
+        bottom: 20,
+        right: 20,
+        backgroundColor: '#4CAF50',
+        padding: 15,
+        borderRadius: 50,
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 5,
     },
-    lastMessage: {
-        fontSize: 14,
-        color: 'gray',
+    createButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
