@@ -7,12 +7,6 @@ import redis from '../config/redis';
 import dotenv from 'dotenv';
 import { AuthRequest } from '../types/authRequest';
 
-import { MailtrapTransport, MailtrapClient } from 'mailtrap';
-
-import { sendSMS } from '../config/sendSMS';
-import { homedir } from 'os';
-
-
 dotenv.config();
 
 const prisma = new PrismaClient();
