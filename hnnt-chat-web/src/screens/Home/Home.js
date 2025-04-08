@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import Modal from '../../components/Modal';
+
 import { logout } from '../Authentication/api';
 import { logoutOfSlice } from '../../redux/slices/authSlice';
 import { setShowOrOffRightBar, setShowOrOffRightBarSearch } from '../../redux/slices/chatSlice';

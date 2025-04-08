@@ -18,6 +18,8 @@ npm install
 npm run seed
 ```
 
+3
+
 ## (If any) Map directly down to PostgreSQL
 
 -   step 1: Config database in file .env follow .env.sample
