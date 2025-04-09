@@ -29,3 +29,17 @@ export const logout = async () => {
 
     return response.json();
 };
+
+export const changePasswordWithToken = async (currentPassWord, newPassword) => {
+    const token = localStorage.getItem('token');
+    const response = await fetch('http://localhost:4000/api/auth/change-password-with-token', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassWord, newPassword }),
+    });
+    if (!response.ok) {
+        throw new Error('Change password failed');
+    }
+
+    return response.json();
+};

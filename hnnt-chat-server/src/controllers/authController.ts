@@ -113,6 +113,14 @@ export const register = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\S]{6,}$/;
+        if (!passwordRegex.test(password)) {
+            res.status(400).json({
+                message: 'Mật khẩu mới phải có ít nhất 6 ký tự, gồm chữ, số và ký tự đặc biệt.',
+            });
+            return;
+        }
+
         const existingUser = await prisma.account.findUnique({ where: { number } });
         if (existingUser) {
             res.status(400).json({ message: 'Số điện thoại này đã được sử dụng!' });
@@ -284,8 +292,15 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
             res.status(400).json({ error: 'Thiếu thông tin' });
         }
 
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\S]{6,}$/;
+        if (!passwordRegex.test(newPassword)) {
+            res.status(400).json({
+                message: 'Mật khẩu mới phải có ít nhất 6 ký tự, gồm chữ, số và ký tự đặc biệt.',
+            });
+            return;
+        }
 
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
         const user = await prisma.account.update({
             where: { number },
             data: { password: hashedPassword },
@@ -318,6 +333,15 @@ export const changePasswordByToken = async (req: AuthRequest, res: Response): Pr
         const isPasswordMatch = await bcrypt.compare(currentPassWord, userCurrent.password);
         if (!isPasswordMatch) {
             res.status(400).json({ message: 'Mật khẩu hiện tại không đúng!' });
+            return;
+        }
+
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\S]{6,}$/;
+
+        if (!passwordRegex.test(newPassword)) {
+            res.status(400).json({
+                message: 'Mật khẩu mới phải có ít nhất 6 ký tự, gồm chữ, số và ký tự đặc biệt.',
+            });
             return;
         }
 
