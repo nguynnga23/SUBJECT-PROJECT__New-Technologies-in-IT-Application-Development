@@ -95,7 +95,7 @@ function TabMessage() {
         };
 
         fetchMessages();
-    }, [chatId]);
+    }, [chatId, data]);
 
     useEffect(() => {
         // Lắng nghe tin nhắn đến từ server
