@@ -30,11 +30,24 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
 
         if (!name && !gender && !birthDate) {
             res.status(400).json({ message: 'No data provided to update' });
+            return;
+        }
+
+        const updateData: any = {};
+        if (name) updateData.name = name;
+        if (gender) updateData.gender = gender;
+        if (birthDate) {
+            const parsedDate = new Date(birthDate);
+            if (isNaN(parsedDate.getTime())) {
+                res.status(400).json({ message: 'Invalid birthDate format' });
+                return;
+            }
+            updateData.birthDate = parsedDate;
         }
 
         const updatedUser = await prisma.account.update({
             where: { id: userId },
-            data: { name, gender, birthDate: new Date(birthDate) },
+            data: updateData,
         });
 
         res.json(updatedUser);

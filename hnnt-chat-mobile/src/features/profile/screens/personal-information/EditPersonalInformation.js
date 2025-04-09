@@ -5,6 +5,7 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image } from 'reac
 import * as ImagePicker from 'expo-image-picker';
 import { RadioButton } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ProfileService from '../../services/ProfileService';
 
 export default function EditPersonalInformation({ navigation }) {
     const [user, setUser] = useState(null);
@@ -39,7 +40,7 @@ export default function EditPersonalInformation({ navigation }) {
         () => ({
             avatar: user?.avatar || 'https://i.pravatar.cc/150?img=20',
             name: user?.name || '',
-            birthday: user?.birthday || '',
+            birthday: user?.birthDate || '',
             gender: user?.gender || 'Female',
         }),
         [user],
@@ -87,9 +88,31 @@ export default function EditPersonalInformation({ navigation }) {
         setFormData({ ...formData, [field]: value });
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!isChanged) return;
-        navigation.goBack();
+
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) throw new Error('Token not found');
+
+            if (selectedImage) {
+                await ProfileService.updateAvatar(token, selectedImage);
+            }
+
+            const updatedUser = {
+                ...formData,
+                avatar: selectedImage || formData.avatar,
+                birthDate: formData.birthday ? new Date(formData.birthday).toISOString() : null,
+            };
+
+            const response = await ProfileService.updateProfile(token, updatedUser);
+            await AsyncStorage.setItem('user', JSON.stringify(response));
+            setUser(response);
+            navigation.goBack();
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            alert('Failed to update profile. Please try again.');
+        }
     };
 
     return (

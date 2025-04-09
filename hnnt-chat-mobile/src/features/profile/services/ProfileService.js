@@ -21,6 +21,23 @@ const ProfileService = {
             throw error.response?.data || error.message;
         }
     },
+    updateAvatar: async (token, avatar) => {
+        try {
+            const response = await axios.put(
+                `${BASE_URL}/update-avatar`,
+                { image: avatar },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                },
+            );
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
 };
 
 export default ProfileService;
