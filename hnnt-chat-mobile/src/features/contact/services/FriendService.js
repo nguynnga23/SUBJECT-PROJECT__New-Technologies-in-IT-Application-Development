@@ -1,6 +1,7 @@
 import axios from 'axios';
-
-const BASE_URL = 'http://172.20.61.183:4000/api'; // Thay bằng IP của server
+import { localhost } from '../../../utils/localhosts';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+const BASE_URL = `http://${localhost}/api/auth`;
 
 const friendService = {
     // Lấy danh sách bạn bè của người đăng nhập
@@ -28,7 +29,7 @@ const friendService = {
             const userId = user.id; // Hoặc user._id tùy theo backend
 
             // Gọi API với userId
-            const response = await axios.get(`${API_URL}/request/${userId}`, {
+            const response = await axios.get(`${BASE_URL}/request/${userId}`, {
                 headers: getAuthHeader(),
             });
 
