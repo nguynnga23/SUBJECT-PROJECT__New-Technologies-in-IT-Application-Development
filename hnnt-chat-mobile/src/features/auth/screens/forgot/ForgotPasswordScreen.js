@@ -6,17 +6,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from "@react-navigation/native";
 // import CheckBox from '@react-native-community/checkbox';
 
-export default function PhoneNumSignUpScreen() {
+export default function ForgotPasswordScreen() {
     const navigation = useNavigation();
 
-    const [phone, setPhone] = useState('');
-    // const [agree, setAgree] = useState(false);
-    const [showTerms, setShowTerms] = useState(false);
+    const [info, setInfo] = useState('');
 
-    const isButtonEnabled = phone.length == 10;
-
-    // Kiểm tra nếu đã nhập số điện thoại và chọn cả 2 checkbox
-    // const isButtonEnabled = phone.length == 10 && agree;
+    const isButtonEnabled = info.length >= 10;
 
     return (
         <SafeAreaView style={styles.container}>
@@ -27,35 +22,15 @@ export default function PhoneNumSignUpScreen() {
                     </TouchableOpacity>
                 </View>
 
-                <Text style={styles.title}>Enter phone number</Text>
+                <Text style={styles.title}>Enter phone number or Email</Text>
 
-                {/* Ô nhập số điện thoại */}
+                {/* Ô nhập số điện thoại hoặc email */}
                 <TextInput
                     style={styles.input}
-                    placeholder="Phone number"
-                    keyboardType="phone-pad"
-                    value={phone}
-                    onChangeText={setPhone}
+                    placeholder="Your phone number or email"
+                    value={info}
+                    onChangeText={setInfo}
                 />
-
-                {/* Các checkbox */}
-                {/* <View style={styles.checkboxContainer}>
-                <CheckBox value={agree} onValueChange={setAgree} />
-                <Text style={styles.text}>
-                    I agree to the{' '}
-                    <Text style={styles.link} onPress={() => setShowTerms(true)}>
-                        terms of use
-                    </Text>
-                </Text>
-
-                {showTerms && (
-                    <WebView
-                        originWhitelist={['*']}
-                        source={require('../../../assets/terms-of-use.html')}
-                        style={styles.webview}
-                    />
-                )}
-            </View> */}
 
                 {/* Nút Tiếp tục */}
                 <TouchableOpacity
@@ -63,7 +38,7 @@ export default function PhoneNumSignUpScreen() {
                     disabled={!isButtonEnabled} // Chặn bấm nếu không đủ điều kiện
                     onPress={() => {
                         if (isButtonEnabled) {
-                            navigation.navigate('OTPConfirm');
+                            navigation.navigate('Forgot_OTPConfirm');
                         }
                     }}
                 >
