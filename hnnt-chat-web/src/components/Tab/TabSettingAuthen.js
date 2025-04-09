@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { changePasswordWithToken } from '../../screens/Authentication/api';
-import { useDispatch } from 'react-redux';
-import { setUser } from '../../redux/slices/authSlice';
 
 function TabSettingAuthen() {
     const [currentPassWord, setCurrentPassWord] = useState('');
@@ -10,8 +8,6 @@ function TabSettingAuthen() {
     const [showCurrent, setShowCurrent] = useState(false);
     const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
-
-    const dispatch = useDispatch();
 
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\S]{6,}$/; // Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ cái, số và ký tự đặc biệt
     const handleUpdatePassword = async () => {
@@ -33,10 +29,13 @@ function TabSettingAuthen() {
         try {
             const data = await changePasswordWithToken(currentPassWord, newPassword);
 
-            // const token = localStorage.getItem('token');
+            // LƯU LẠI MẬT KHẨU MỚI VÀ TOKEN MỚI VÀO LOCAL STORAGE
             // dispatch(setUser({ userActive: data.user, token: data.token }));
 
-            alert('Đổi mật khẩu thành công!');
+            if (data?.success) {
+                alert('Đổi mật khẩu thành công!');
+            }
+
             setCurrentPassWord('');
             setNewPassword('');
             setConfirmPassword('');
