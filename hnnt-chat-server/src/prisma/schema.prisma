@@ -17,6 +17,7 @@ model Account {
   id        String   @id @default(uuid()) // ID dạng UUID
   name      String   @db.VarChar(255)
   number    String   @unique @db.VarChar(20)
+  email  String @unique @db.VarChar(255)
   password  String
   avatar    String?
   status    String?
@@ -26,6 +27,8 @@ model Account {
   currentAvatars String[] @default([])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  categories Category[]
 
   sentFriendRequests     FriendRequest[] @relation("SentRequests")
   receivedFriendRequests FriendRequest[] @relation("ReceivedRequests")
@@ -84,6 +87,9 @@ model Category {
   id        String   @id @default(uuid()) // ID dạng UUID
   name      String
   color     String
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade) 
+  accountId String
+
   participants ChatParticipant[]
 }
 
@@ -91,12 +97,13 @@ model ChatParticipant {
   id        String   @id @default(uuid()) // ID dạng UUID
   chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
   account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  category  Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category  Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   chatId    String
   accountId String
   categoryId String?
   priority Boolean? @default(true)
+  readed Boolean? @default(false)
 
 
   pin       Boolean  @default(false) // User có ghim chat này không?

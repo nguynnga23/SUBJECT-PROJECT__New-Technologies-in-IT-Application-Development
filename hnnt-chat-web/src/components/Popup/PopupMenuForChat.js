@@ -2,12 +2,11 @@ import { useEffect, useRef } from 'react';
 import { MdContentCopy, MdPushPin, MdDelete } from 'react-icons/md';
 import { IoReload } from 'react-icons/io5';
 import { useSelector } from 'react-redux';
-import { deleteMessage, destroyMessage } from '../../screens/Messaging/api';
+import { deleteMessage, destroyMessage, pinOfMessage } from '../../screens/Messaging/api';
 
 function PopupMenuForChat({ setIsPopupOpen, position, message }) {
     const popupRef = useRef(null);
     const chat = useSelector((state) => state.chat.activeChat);
-    const userActive = useSelector((state) => state.auth.userActive);
 
     const handleDeleteMessage = async (messageId) => {
         if (!chat) return;
@@ -26,6 +25,10 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
         const textToCopy = message.content;
         navigator.clipboard.writeText(textToCopy).catch((err) => console.error('Lỗi sao chép: ', err));
         setIsPopupOpen(null);
+    };
+
+    const handlePinMessages = (messageId) => {
+        pinOfMessage(messageId);
     };
 
     useEffect(() => {
@@ -60,7 +63,10 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
                                 Copy tin nhắn
                             </li>
                         )}
-                        <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                        <li
+                            className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => handlePinMessages(message?.id)}
+                        >
                             <MdPushPin className="mr-3" />
                             Ghim tin nhắn
                         </li>

@@ -14,6 +14,8 @@ import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { login } from '../services/AuthService'; // Import hàm login từ AuthService
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { login } from '../services/AuthService'; // Import hàm login từ AuthService
 
 export default function LoginScreen() {
     const navigation = useNavigation();

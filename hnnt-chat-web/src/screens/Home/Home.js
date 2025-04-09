@@ -15,9 +15,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import Modal from '../../components/Modal';
+
 import { logout } from '../Authentication/api';
 import { logoutOfSlice } from '../../redux/slices/authSlice';
-import { setActiveChat } from '../../redux/slices/chatSlice';
+import { setShowOrOffRightBar, setShowOrOffRightBarSearch } from '../../redux/slices/chatSlice';
 
 export default function Home() {
     const navigate = useNavigate();
@@ -26,11 +27,12 @@ export default function Home() {
     const [settingScreen, setSettingScreen] = useState(false);
     // const dispatch = useDispatch();
     const userActive = useSelector((state) => state.auth.userActive);
+    const isRehydrated = useSelector((state) => state._persist?.rehydrated);
     useEffect(() => {
-        if (!userActive) {
+        if (isRehydrated && !userActive) {
             navigate('/');
         }
-    }, [userActive, navigate]);
+    }, [userActive, navigate, isRehydrated]);
 
     // open modal
     const [isOpenModel, setIsOpenModel] = useState(false);
@@ -52,12 +54,11 @@ export default function Home() {
 
     const handleLogout = async () => {
         try {
+            navigate('/'); // Điều hướng sau khi Redux cập nhật
+            dispatch(logoutOfSlice());
+            dispatch(setShowOrOffRightBar(false));
+            dispatch(setShowOrOffRightBarSearch(false));
             await logout(); // Gọi API logout
-            dispatch(logoutOfSlice);
-            dispatch(setActiveChat(null));
-
-            // Cập nhật state, Redux hoặc điều hướng về trang login
-            navigate('/');
         } catch (error) {
             console.error('Lỗi khi đăng xuất:', error);
         }
@@ -77,11 +78,14 @@ export default function Home() {
                         type="button"
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     >
-                        <img
-                            src={userActive?.avatar}
-                            alt="Avatar"
-                            className="w-12 h-12 rounded-full border-2 border-white object-cover"
-                        />
+                        <div className="relative">
+                            <img
+                                src={userActive?.avatar}
+                                alt="Avatar"
+                                className="w-12 h-12 rounded-full border-2 border-white object-cover"
+                            />
+                            <span className="absolute p-[2px] w-[10px] h-[10px] right-[3px] bottom-[0px] rounded-full bg-green-600 border-[2px]"></span>
+                        </div>
                     </button>
                     {/* Dropdown menu */}
                     <div

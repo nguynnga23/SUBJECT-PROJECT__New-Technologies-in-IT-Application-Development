@@ -11,6 +11,9 @@ import {
     blockRequest,
     ListBlockRequest,
     CancelBlockRequest,
+    getListFriendRequestBySender,
+    cancelFriendRequestBySender,
+    checkFriend
 } from '../controllers/friendController';
 
 const friendRouter = Router();
@@ -24,5 +27,9 @@ friendRouter.get('/request/:userId', authenticate, getListFriendRequest); // Get
 friendRouter.post('/user/block', authenticate, blockRequest); // Block user
 friendRouter.get('/user/block/list/:userId', authenticate, ListBlockRequest); // Get list block requests
 friendRouter.delete('/user/block/:id', authenticate, CancelBlockRequest); // Cancel block request
+
+friendRouter.get('/request/sender/:userId', authenticate, getListFriendRequestBySender); // Get list friend request by senderId
+friendRouter.delete('/request/cancel-by-sender/:receiverId', authenticate, cancelFriendRequestBySender); // User1/User2 cancel request
+friendRouter.get('/check-friend/:friendId', authenticate, checkFriend); // Check friendship relationship between userId and friendId
 
 export default friendRouter;

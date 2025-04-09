@@ -22,6 +22,8 @@ import { VscFilePdf } from 'react-icons/vsc';
 import { FaRegFileWord } from 'react-icons/fa';
 import { FaRegFileExcel } from 'react-icons/fa';
 import { FaRegFilePowerpoint } from 'react-icons/fa';
+import { BsChatText } from 'react-icons/bs';
+import { RiKey2Line } from 'react-icons/ri';
 
 import PopupCategory from '../Popup/PopupCategory';
 
@@ -31,6 +33,7 @@ import {
     setShowOrOffRightBarSearch,
     openEmojiTab,
     sendEmoji,
+    setReadedChatWhenSendNewMessage,
 } from '../../redux/slices/chatSlice';
 import ChatText from '../Chat/ChatText';
 import ChatGif from '../Chat/ChatGif';
@@ -44,16 +47,17 @@ import { FiMoreHorizontal } from 'react-icons/fi';
 import PopupReacttion from '../Popup/PopupReaction';
 import PopupReactionChat from '../Popup/PopupReactionChat';
 import PopupMenuForChat from '../Popup/PopupMenuForChat';
-import { getMessage, sendMessage } from '../../screens/Messaging/api';
+import { deletePinOfMessage, getMessage, readedChatOfUser, sendMessage } from '../../screens/Messaging/api';
+import PopupAllPinnedOfMessage from '../Popup/PopupAllPinnedOfMessage';
 
 function TabMessage() {
     const [message, setMessage] = useState('');
     const [isOpenCategory, setIsOpenCategory] = useState(false);
     const userActive = useSelector((state) => state.auth.userActive);
-    const userId = userActive.id;
+    const userId = userActive?.id;
 
     const activeChat = useSelector((state) => state.chat.activeChat);
-    const chatId = activeChat.id;
+    const chatId = activeChat?.id;
 
     const dispatch = useDispatch();
     const showRightBar = useSelector((state) => state.chat.showRightBar);
@@ -73,9 +77,10 @@ function TabMessage() {
     const [openReactionChat, setOpenReactionChat] = useState(false);
 
     const [replyMessage, setReplyMessage] = useState(null);
+    const [showAllPinned, setShowAllPinned] = useState(false);
 
     const [data, setData] = useState([]);
-    const [error, setError] = useState(null);
+    const leader = activeChat?.participants?.find((user) => user.role === 'LEADER')?.account;
 
     useEffect(() => {
         const fetchMessages = async () => {
@@ -83,12 +88,12 @@ function TabMessage() {
                 const chats = await getMessage(chatId);
                 setData(chats);
             } catch (err) {
-                setError(err.message);
+                console.log(err.message);
             }
         };
 
         fetchMessages();
-    }, [chatId, data]);
+    }, [setData, chatId, data]);
 
     const MessageComponent = {
         text: ChatText,
@@ -109,12 +114,6 @@ function TabMessage() {
         return <MdFilePresent className="text-3xl text-gray-500 mr-2" />; // Mặc định
     };
 
-    useEffect(() => {
-        if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-        }
-    }, [activeChat?.id]);
-
     // Hàm tự động điều chỉnh chiều cao
     useEffect(() => {
         if (textareaRef.current) {
@@ -127,6 +126,8 @@ function TabMessage() {
     const handleSendMessage = async () => {
         if (message.trim() !== '') {
             await sendMessage(chatId, message, 'text', replyMessage?.id, null, null, null);
+            await readedChatOfUser(chatId);
+            dispatch(setReadedChatWhenSendNewMessage({ chatId: chatId, userId: userId }));
             setMessage('');
             setReplyMessage(null);
         }
@@ -165,19 +166,53 @@ function TabMessage() {
         }, 100);
     };
 
+    const scrollToMessage = (messageId) => {
+        setTimeout(() => {
+            const messageElement = document.getElementById(`message-${messageId}`);
+            if (messageElement) {
+                messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Thêm hiệu ứng phát sáng
+                messageElement.classList.add('highlight');
+
+                // Xóa hiệu ứng sau 1.5 giây
+                messageElement.classList.add('bg-blue-200');
+                messageElement.classList.add('rounded-[5px]');
+
+                // Xóa class sau 1.5 giây
+                setTimeout(() => {
+                    messageElement.classList.remove('bg-blue-200');
+                    messageElement.classList.remove('rounded-[5px]');
+                }, 1500);
+            } else {
+                console.log('Không tìm thấy phần tử:', `message-${messageId}`);
+            }
+        }, 100); // Đợi 100ms để đảm bảo phần tử đã được render
+    };
+    const pinnedMessages = data.filter((message) => message.pin);
+    const lastPinnedMessage = pinnedMessages[pinnedMessages.length - 1];
+
     return (
         <>
             <div className="p-2 border-b dark:border-b-black flex justify-between items-center h-[62px] min-w-[600px] dark:bg-gray-800">
                 <div className="flex justify-center ">
-                    <img
-                        src={
-                            activeChat?.isGroup
-                                ? activeChat?.avatar
-                                : activeChat?.participants?.find((user) => user.accountId !== userId)?.account.avatar
-                        } // Thay bằng avatar thật
-                        alt="avatar"
-                        className="w-[45px] h-[45px] rounded-full border mr-2 object-cover"
-                    />
+                    <div className="relative w-[45px] h-[45px] mr-2">
+                        <img
+                            src={
+                                activeChat?.isGroup
+                                    ? activeChat?.avatar
+                                    : activeChat?.participants?.find((user) => user.accountId !== userId)?.account
+                                          .avatar
+                            } // Thay bằng avatar thật
+                            alt="avatar"
+                            className="w-[45px] h-[45px] rounded-full border object-cover"
+                        />
+                        {activeChat?.participants?.find((user) => user.accountId !== userId)?.account?.status ===
+                        'active' ? (
+                            <span className="absolute p-[2px] w-[10px] h-[10px] right-[3px] bottom-[0px] rounded-full bg-green-600 border-[2px]"></span>
+                        ) : (
+                            <span className="absolute p-[2px] w-[10px] h-[10px] right-[3px] bottom-[0px] rounded-full bg-gray-500 border-[2px]"></span>
+                        )}
+                    </div>
                     <div>
                         <h3 className="font-medium text-base text-lg max-h-[28px] dark:text-gray-300">
                             {activeChat?.isGroup
@@ -192,13 +227,21 @@ function TabMessage() {
                                     <p className="text-[10px] mr-1">{activeChat?.members.length} thành viên |</p>
                                 </div>
                             )}
-                            {activeChat?.category?.name ? (
+                            {activeChat.participants?.find((user) => user.accountId === userId)?.category ? (
                                 <div className="flex items-center">
                                     <MdLabel
-                                        className={`cursor-pointer mr-1 ${activeChat?.category.color}`}
+                                        className={`cursor-pointer mr-1 ${
+                                            activeChat.participants?.find((user) => user.accountId === userId)?.category
+                                                .color
+                                        }`}
                                         onClick={() => setIsOpenCategory(!isOpenCategory)}
                                     />
-                                    <p className="text-[10px] dark:text-gray-300">{activeChat?.category?.name}</p>
+                                    <p className="text-[10px] dark:text-gray-300">
+                                        {
+                                            activeChat.participants?.find((user) => user.accountId === userId)?.category
+                                                ?.name
+                                        }
+                                    </p>
                                 </div>
                             ) : (
                                 <MdLabelOutline
@@ -263,7 +306,90 @@ function TabMessage() {
                     )}
                 </div>
             </div>
-            <div className="flex-1 p-5 overflow-auto bg-gray-200 dark:bg-[#16191d]" ref={chatContainerRef}>
+            <div className="p-1.5 bg-gray-200 dark:bg-gray-800">
+                <div className="relative">
+                    {/* Hiển thị tin nhắn ghim cuối cùng */}
+                    {lastPinnedMessage && (
+                        <div className="p-2 text-[10px] flex dark:bg-gray-700 bg-white rounded-lg shadow items-center justify-between dark:text-gray-300">
+                            <div
+                                className="flex items-center cursor-pointer"
+                                onClick={() => scrollToMessage(lastPinnedMessage.id)}
+                            >
+                                <BsChatText size={20} className="text-blue-500 m-1" />
+                                <div className="ml-1">
+                                    <p>Tin nhắn</p>
+                                    <div className="flex items-center max-w-[500px] truncate">
+                                        <p className="font-medium text-gray-600 dark:text-gray-300 mr-2">
+                                            {lastPinnedMessage.sender?.name}:
+                                        </p>
+                                        {lastPinnedMessage.type === 'file' ? (
+                                            <div className="flex items-center">
+                                                <MdFilePresent className="text-[10px] text-gray-500 mr-1" />
+                                                <div className="flex flex-col">
+                                                    <p className="text-[10px] font-bold">
+                                                        {lastPinnedMessage.fileName}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ) : lastPinnedMessage.type === 'image' ? (
+                                            <img
+                                                src={lastPinnedMessage.content}
+                                                alt="content"
+                                                className="max-w-[80px] rounded-lg"
+                                            />
+                                        ) : lastPinnedMessage.type === 'gif' ? (
+                                            <img
+                                                src={lastPinnedMessage.content}
+                                                alt="GIF"
+                                                className="max-w-[80px] rounded-lg"
+                                            />
+                                        ) : lastPinnedMessage.type === 'sticker' ? (
+                                            <img
+                                                src={lastPinnedMessage.content}
+                                                alt="GIF"
+                                                className="max-w-[50px] rounded-lg"
+                                            />
+                                        ) : (
+                                            lastPinnedMessage.content
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Nút mở popup */}
+                            {pinnedMessages.length > 1 && (
+                                <button
+                                    onClick={() => setShowAllPinned(!showAllPinned)}
+                                    className="ml-2 text[10px] p-1 border border-gray-600 rounded-[3px] bg-white mr-3 dark:bg-gray-600"
+                                >
+                                    + ({pinnedMessages.length}) ghim
+                                </button>
+                            )}
+                            {pinnedMessages.length === 1 && (
+                                <p
+                                    className="absolute text-red-500 text-[7px] right-[5px] top-[10px] p-1 cursor-pointer hover:bg-red-500 hover:text-white border rounded-lg"
+                                    onClick={() => {
+                                        deletePinOfMessage(pinnedMessages[0].id);
+                                    }}
+                                >
+                                    Bỏ ghim
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Popup hiển thị tất cả tin nhắn ghim */}
+                    {showAllPinned && (
+                        <PopupAllPinnedOfMessage
+                            pinnedMessages={pinnedMessages}
+                            showAllPinned={showAllPinned}
+                            setShowAllPinned={setShowAllPinned}
+                            scrollToMessage={scrollToMessage}
+                        />
+                    )}
+                </div>
+            </div>
+            <div className="flex-1 p-4 overflow-auto bg-gray-200 dark:bg-[#16191d] " ref={chatContainerRef}>
                 {data.map((message, index) => {
                     const isDeleted = message.deletedBy.some((item) => item === userId);
                     const Component = message.destroy ? ChatDestroy : MessageComponent[message.type];
@@ -278,9 +404,13 @@ function TabMessage() {
                     const position = message.sender.id === userId ? 'right' : 'left';
                     const sumReaction = message.reactions.reduce((total, reaction) => total + reaction.sum, 0);
 
+                    // Xác định tin nhắn cuối cùng của userId
+                    const lastMessage = data[data.length - 1];
+
                     return (
                         <div
-                            className={`relative flex ${
+                            id={`message-${message.id}`}
+                            className={`relative flex items-center mb-2 ${
                                 message.sender.id === userId ? 'justify-end' : 'justify-start'
                             }`}
                             key={index}
@@ -294,24 +424,33 @@ function TabMessage() {
                             }}
                         >
                             {!isDeleted && Component && (
-                                <div className="flex ">
-                                    <div className="w-[45px] h-[45px] mr-3 flex-shrink-0">
+                                <div className="flex items-center">
+                                    <div className=" mr-3 w-[45px] h-[45px] ">
                                         {message.sender.id !== userId && showAvatar && (
-                                            <img
-                                                src={message.sender.avatar}
-                                                alt="avatar"
-                                                className="w-full h-full rounded-full border object-cover"
-                                            />
+                                            <div className="relative w-[45px] h-[45px] flex-shrink-0">
+                                                <img
+                                                    src={message.sender.avatar}
+                                                    alt="avatar"
+                                                    className="w-full h-full rounded-full border object-cover"
+                                                />
+                                                {leader && (
+                                                    <RiKey2Line
+                                                        size={15}
+                                                        color="yellow"
+                                                        className="absolute bottom-[0px] right-[0px] bg-gray-500  bg-opacity-50 rounded-full p-[2px]"
+                                                    />
+                                                )}
+                                            </div>
                                         )}
                                     </div>
 
-                                    <div className="flex relative ">
+                                    <div className="flex relative items-center">
                                         {hoveredMessage === index &&
                                             isPopupOpenIndex === null &&
                                             message.sender.id === userActive.id && (
                                                 <div className="flex">
                                                     <button
-                                                        className={`absolute left-[-25px] bottom-[30px] dark:bg-gray-700  p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 mr-1 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
+                                                        className={`absolute left-[-25px] bottom-[10px] dark:bg-gray-700  p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 mr-1 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
                                                         onClick={() => {
                                                             setIsPopupOpenIndex(index);
                                                         }}
@@ -320,7 +459,7 @@ function TabMessage() {
                                                     </button>
                                                     {!message.destroy && (
                                                         <button
-                                                            className={`absolute left-[-50px] bottom-[30px] dark:bg-gray-700  p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
+                                                            className={`absolute left-[-50px] bottom-[10px] dark:bg-gray-700  p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
                                                             onClick={() => {
                                                                 setReplyMessage(message);
                                                             }}
@@ -338,9 +477,25 @@ function TabMessage() {
                                                 activeChat={activeChat}
                                                 message={message}
                                                 reactions={message.reactions}
-                                                showName={message.sender !== userId && showAvatar && activeChat.group}
+                                                showName={
+                                                    message.sender.id !== userId && showAvatar && activeChat.group
+                                                }
                                                 replyMessage={message?.replyTo}
+                                                scrollToMessage={scrollToMessage}
                                             />
+                                            {message.id === lastMessage.id && message.sender.id === userId && (
+                                                <span className="absolute bottom-[-27px] right-[0]">
+                                                    <p className="text-[10px] p-1 bg-gray-300 rounded-lg text-gray-500 mt-1 ">
+                                                        {!activeChat.isGroup
+                                                            ? activeChat.participants?.find(
+                                                                  (user) => user.accountId !== userId,
+                                                              ).readed
+                                                                ? 'Đã xem'
+                                                                : 'Đã gửi'
+                                                            : 'Đã nhận'}
+                                                    </p>
+                                                </span>
+                                            )}
                                             {isPopupOpenIndex === index && (
                                                 <PopupMenuForChat
                                                     setIsPopupOpen={setIsPopupOpenIndex}
@@ -350,7 +505,7 @@ function TabMessage() {
                                             )}
                                             {sumReaction > 0 && !message.destroy && (
                                                 <div
-                                                    className="absolute flex items-center bottom-[5px] right-[15px] rounded-full p-0.5 bg-white text-[12px] cursor-pointer dark:bg-gray-700"
+                                                    className="absolute flex items-center bottom-[-5px] right-[10px] rounded-full p-0.5 bg-white text-[12px] cursor-pointer dark:bg-gray-700"
                                                     onClick={() => setOpenReactionChat(true)}
                                                 >
                                                     {message.reactions.slice(0, 2).map((re, index) => {
@@ -365,7 +520,7 @@ function TabMessage() {
                                                 isPopupOpenIndex === null &&
                                                 !message.destroy && (
                                                     <button
-                                                        className="absolute bottom-[8px] right-[-8px] rounded-full p-0.5 text-[12px] bg-white dark:bg-gray-700"
+                                                        className="absolute bottom-[-5px] right-[-10px] rounded-full p-0.5 text-[12px] bg-white dark:bg-gray-700"
                                                         onMouseEnter={() => setShowPopupReaction(true)}
                                                         onMouseLeave={() =>
                                                             !showPopupReaction && setShowPopupReaction(false)
@@ -400,7 +555,7 @@ function TabMessage() {
                                             message.sender.id !== userActive.id && (
                                                 <div className="relative flex ">
                                                     <button
-                                                        className={`absolute dark:bg-gray-700 right-[-25px] bottom-[30px] p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
+                                                        className={`absolute dark:bg-gray-700 right-[-25px] bottom-[-10px] p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
                                                         onClick={() => {
                                                             setIsPopupOpenIndex(index);
                                                         }}
@@ -408,7 +563,7 @@ function TabMessage() {
                                                         <FiMoreHorizontal size={15} />
                                                     </button>
                                                     <button
-                                                        className={`absolute dark:bg-gray-700 right-[-50px] bottom-[30px] p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
+                                                        className={`absolute dark:bg-gray-700 right-[-50px] bottom-[-10px] p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
                                                         onClick={() => {
                                                             setReplyMessage(message);
                                                         }}
@@ -553,18 +708,8 @@ function TabMessage() {
                                 <AiFillLike
                                     className="text-2xl cursor-pointer ml-3 text-yellow-500 mr-3"
                                     onClick={() => {
-                                        const currentTime = new Date().toLocaleTimeString([], {
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                        });
-                                        return dispatch(
-                                            sendMessage({
-                                                chatId: activeChat.id,
-                                                content: '👍',
-                                                time: currentTime,
-                                                type: 'text',
-                                            }),
-                                        );
+                                        sendMessage(chatId, '👍', 'text', null, null, null, null);
+                                        readedChatOfUser(chatId);
                                     }}
                                 />
                             )}

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function PasswordSignUpScreen() {
+export default function ResetPasswordScreen() {
     const navigation = useNavigation();
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -72,7 +72,8 @@ export default function PasswordSignUpScreen() {
                         disabled={!isButtonEnabled}
                         onPress={() => {
                             if (isButtonEnabled) {
-                                navigation.navigate('HomeScreen');
+                                Alert.alert("Password Reset", "Password reset successful!");
+                                navigation.navigate('Login');
                             }
                         }}
                     >

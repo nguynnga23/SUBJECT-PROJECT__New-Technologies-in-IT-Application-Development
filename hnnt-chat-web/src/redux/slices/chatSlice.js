@@ -80,11 +80,12 @@ const chatSlice = createSlice({
         setActiveChat: (state, action) => {
             state.activeChat = action.payload;
         },
-        setSeemChat: (state, action) => {
-            const { chatId, seem } = action.payload;
-            const chat = state.data.find((c) => c.id === chatId);
-            if (chat) {
-                chat.seem = seem;
+        setReadedChatWhenSendNewMessage: (state, action) => {
+            const { chatId, userId } = action.payload;
+            if (state.activeChat && state.activeChat.id === chatId) {
+                state.activeChat.participants = state.activeChat.participants.map((user) =>
+                    user.accountId !== userId ? { ...user, readed: false } : user,
+                );
             }
         },
         setSeemAllChat: (state) => {
@@ -105,19 +106,17 @@ const chatSlice = createSlice({
             state.activeTabMess = 'other';
         },
         setOnOrOfPin: (state, action) => {
-            const chatId = action.payload;
-
-            const chat = state.data.find((c) => c.id === chatId);
-            if (chat) {
-                chat.pin = !chat.pin;
+            if (state.activeChat && state.activeChat.id === action.payload.chatId) {
+                state.activeChat.participants = state.activeChat.participants.map((user) =>
+                    user.accountId === action.payload.userId ? { ...user, pin: action.payload.pinStatus } : user,
+                );
             }
         },
         setOnOrOfNotify: (state, action) => {
-            const chatId = action.payload;
-
-            const chat = state.data.find((c) => c.id === chatId);
-            if (chat) {
-                chat.notify = !chat.notify;
+            if (state.activeChat && state.activeChat.id === action.payload.chatId) {
+                state.activeChat.participants = state.activeChat.participants.map((user) =>
+                    user.accountId === action.payload.userId ? { ...user, notify: action.payload.notifyStatus } : user,
+                );
             }
         },
         sendEmoji: (state, action) => {
@@ -194,10 +193,13 @@ const chatSlice = createSlice({
             }
         },
         addOrChangeCategory: (state, action) => {
-            const { chatId, category } = action.payload;
-            const chat = state.data.find((msg) => msg.id === chatId);
-            if (chat) {
-                chat.category = category;
+            const { chatId, userId, category } = action.payload;
+            if (state.activeChat && state.activeChat.id === chatId) {
+                state.activeChat.participants = state.activeChat.participants.map((user) =>
+                    user.accountId === userId
+                        ? { ...user, category: user.category === category ? null : category }
+                        : user,
+                );
             }
         },
         createGroup: (state, action) => {
@@ -274,7 +276,7 @@ const chatSlice = createSlice({
 
 export const {
     setChats,
-    setSeemChat,
+    setReadedChatWhenSendNewMessage,
     setSeemAllChat,
     sendMessage,
     setActiveChat,

@@ -408,3 +408,116 @@ export const CancelBlockRequest = async (req: Request, res: Response): Promise<v
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
     }
 };
+
+//📌 Get list friend request by sender
+export const getListFriendRequestBySender = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.id; // Lấy ID của user từ token, không cần từ params
+
+        // Kiểm tra userId từ token
+        if (!userId) {
+            res.status(401).json({ message: 'Không thể xác thực người dùng!' });
+            return;
+        }
+
+        const friendRequests = await prisma.friendRequest.findMany({
+            where: {
+                senderId: userId,
+            },
+            include: { receiver: true },
+        });
+
+        const sentList = friendRequests.map((request) => {
+            return {
+                id: request.receiver.id,
+                name: request.receiver.name,
+                number: request.receiver.number,
+                avatar: request.receiver.avatar,
+                status: request.receiver.status,
+                birthDate: request.receiver.birthDate,
+                location: request.receiver.location,
+                gender: request.receiver.gender,
+                createdAt: request.receiver.createdAt,
+            };
+        });
+
+        res.json(sentList);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+    }
+};
+
+// Cancel friend request by senderId and receiverId
+export const cancelFriendRequestBySender = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const senderId = req.user?.id; // Lấy senderId từ token
+        if (!senderId) {
+            res.status(401).json({ message: 'Không thể xác thực người dùng!' });
+            return;
+        }
+
+        // Lấy receiverId từ params
+        const receiverId = req.params.receiverId; // Lấy receiverId từ params
+
+        // Kiểm tra senderId và receiverId có tồn tại không
+        if (!senderId || !receiverId) {
+            res.status(400).json({ message: 'Thiếu thông tin senderId hoặc receiverId!' });
+            return;
+        }
+
+        // Kiểm tra xem có tồn tại yêu cầu kết bạn giữa sender và receiver không
+        const existingRequest = await prisma.friendRequest.findFirst({
+            where: {
+                OR: [
+                    { senderId, receiverId },
+                    { senderId: receiverId, receiverId: senderId },
+                ],
+            },
+        });
+
+        if (!existingRequest) {
+            res.status(404).json({ message: 'Không tìm thấy yêu cầu kết bạn!' });
+            return;
+        }
+
+        // Xóa yêu cầu kết bạn
+        await prisma.friendRequest.delete({ where: { id: existingRequest.id } });
+
+        res.status(200).json({ message: 'Đã hủy yêu cầu kết bạn!' });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+    }
+};
+
+// /friends/check-friend/:friendId
+export const checkFriend = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.id; // Lấy ID của user từ token
+        const friendId = req.params.friendId; // Lấy ID của bạn bè từ params
+
+        // Kiểm tra userId từ token
+        if (!userId) {
+            res.status(401).json({ message: 'Không thể xác thực người dùng!' });
+            return;
+        }
+
+        // Kiểm tra xem có tồn tại mối quan hệ bạn bè giữa user và friend không
+        const friendship = await prisma.friend.findFirst({
+            where: {
+                OR: [
+                    { user1Id: userId, user2Id: friendId },
+                    { user1Id: friendId, user2Id: userId },
+                ],
+            },
+        });
+
+        if (friendship) {
+            res.status(200).json({result: true, message: 'Các bạn đã là bạn của nhau!' });
+        } else {
+            res.status(404).json({result: false, message: 'Không tìm thấy mối quan hệ bạn bè!' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+    }
+};

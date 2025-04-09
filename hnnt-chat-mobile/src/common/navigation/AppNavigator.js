@@ -7,9 +7,9 @@ import PhoneBookScreen from '../../features/contact/screens/friends/phonebook/Ph
 import AddFriendScreen from '../screens/AddFriendScreen';
 import AddGroupScreen from '../screens/AddGroupScreen';
 import SearchScreen from '../screens/SearchScreen';
-import PhoneNumSignUpScreen from '../../features/auth/screens/PhoneNumSignUpScreen';
-import OTPConfirmScreen from '../../features/auth/screens/OTPConfirmScreen';
-import PasswordSignUpScreen from '../../features/auth/screens/PasswordSignUpScreen';
+import SignUpScreen from '../../features/auth/screens/register/SignUpScreen';
+import OTPConfirmScreen from '../../features/auth/screens/register/OTPConfirmScreen';
+import ResetPasswordScreen from '../../features/auth/screens/forgot/ResetPasswordScreen';
 import HomeScreen from '../../features/auth/screens/HomeScreen';
 import AccountAndSecurity from '../../features/profile/screens/account-and-security/AccountAndSecurity';
 import Privacy from '../../features/profile/screens/privacy/Privacy';
@@ -19,6 +19,9 @@ import PhoneNumber from '../../features/profile/screens/account-and-security/pho
 import AddEmail from '../../features/profile/screens/account-and-security/email/AddEmail';
 import ChangePassword from '../../features/profile/screens/account-and-security/password/ChangePassword';
 import BlockMessage from '../../features/profile/screens/privacy/block-message/BlockMessage';
+import ForgotPasswordScreen from '../../features/auth/screens/forgot/ForgotPasswordScreen';
+import Forgot_OTPConfirmScreen from '../../features/auth/screens/forgot/Forgot_OTPConfirmScreen';
+
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -27,11 +30,19 @@ export default function AppNavigator() {
             <Stack.Navigator initialRouteName="HomeScreen">
                 <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false }} />
                 <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+                <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
                 <Stack.Screen name="HomeTab" component={BottomTabNavigator} options={{ headerShown: false }} />
 
-                <Stack.Screen name="PhoneNumSignUp" component={PhoneNumSignUpScreen} options={{ headerShown: false }} />
+                <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} />
                 <Stack.Screen name="OTPConfirm" component={OTPConfirmScreen} options={{ headerShown: false }} />
-                <Stack.Screen name="PasswordSignUp" component={PasswordSignUpScreen} options={{ headerShown: false }} />
+
+                <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ headerShown: false }} />
+                <Stack.Screen
+                    name="Forgot_OTPConfirm"
+                    component={Forgot_OTPConfirmScreen}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ headerShown: false }} />
 
                 <Stack.Screen name="FriendRequest" component={FriendRequestScreen} />
                 <Stack.Screen name="PhoneBook" component={PhoneBookScreen} />

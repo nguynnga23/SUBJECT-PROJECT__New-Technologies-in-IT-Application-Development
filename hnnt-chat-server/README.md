@@ -1,6 +1,6 @@
 ## Necessary technologies
 
--   Node, npm, PostgreSQL, pgAdmin
+-   Node, npm, PostgreSQL, pgAdmin, redis
 
 ## Run script sql
 
@@ -17,6 +17,8 @@ npm install
 ```bash
 npm run seed
 ```
+
+3
 
 ## (If any) Map directly down to PostgreSQL
 
