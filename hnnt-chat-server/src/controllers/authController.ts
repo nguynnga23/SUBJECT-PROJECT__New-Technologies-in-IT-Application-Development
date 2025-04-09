@@ -296,3 +296,39 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
         res.status(500).json({ error: 'Lỗi đặt lại mật khẩu', success: false });
     }
 };
+
+export const changePasswordByToken = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.id;
+        const { currentPassWord, newPassword } = req.body;
+
+        if (!currentPassWord || !newPassword) {
+            res.status(400).json({ error: 'Thiếu thông tin' });
+        }
+
+        const userCurrent = await prisma.account.findUnique({
+            where: { id: userId },
+        });
+
+        if (!userCurrent) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        const isPasswordMatch = await bcrypt.compare(currentPassWord, userCurrent.password);
+        if (!isPasswordMatch) {
+            res.status(400).json({ message: 'Mật khẩu hiện tại không đúng!' });
+            return;
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const user = await prisma.account.update({
+            where: { id: userId },
+            data: { password: hashedPassword },
+        });
+
+        res.status(200).json({ message: 'Đặt lại mật khẩu thành công!', success: true });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
