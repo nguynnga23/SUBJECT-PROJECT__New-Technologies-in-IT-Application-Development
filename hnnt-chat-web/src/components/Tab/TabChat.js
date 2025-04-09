@@ -16,7 +16,7 @@ import { formatDistanceToNow, format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
 import { getChat, readedChatOfUser } from '../../screens/Messaging/api';
-// import { socket } from '../../configs/socket';
+import { socket } from '../../configs/socket';
 
 function TabChat() {
     const userActive = useSelector((state) => state.auth.userActive);
@@ -42,6 +42,7 @@ function TabChat() {
 
         fetchChats(); // Gọi hàm async bên trong useEffect
     }, [data]);
+
     const dispatch = useDispatch();
 
     const timeoutRef = useRef(null);
@@ -164,7 +165,7 @@ function TabChat() {
                                         dispatch(setActiveChat(chat));
                                         readedChatOfUser(chat.id);
                                         dispatch(setShowOrOffRightBarSearch(false));
-                                        // socket.emit('read_message', { chatId: chat.id });
+                                        // socket.emit('read_chat', { chatId: chat.id, userId });
                                     }}
                                 >
                                     <div className="relative mr-2">

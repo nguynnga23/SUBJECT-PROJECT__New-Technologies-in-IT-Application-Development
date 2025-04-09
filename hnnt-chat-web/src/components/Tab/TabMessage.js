@@ -24,6 +24,7 @@ import { FaRegFileExcel } from 'react-icons/fa';
 import { FaRegFilePowerpoint } from 'react-icons/fa';
 import { BsChatText } from 'react-icons/bs';
 import { RiKey2Line } from 'react-icons/ri';
+import { socket } from '../../configs/socket';
 
 import PopupCategory from '../Popup/PopupCategory';
 
@@ -57,6 +58,7 @@ function TabMessage() {
     const userId = userActive?.id;
 
     const activeChat = useSelector((state) => state.chat.activeChat);
+
     const chatId = activeChat?.id;
 
     const dispatch = useDispatch();
@@ -93,7 +95,29 @@ function TabMessage() {
         };
 
         fetchMessages();
-    }, [setData, chatId, data]);
+    }, [chatId]);
+
+    useEffect(() => {
+        // Lắng nghe tin nhắn đến từ server
+        socket.on('receive_message', (message) => {
+            setData((prev) => [...prev, message.message]);
+            setTimeout(() => {
+                if (chatContainerRef.current) {
+                    chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+                }
+            }, 100);
+        });
+
+        // Clean up khi component unmount
+        return () => {
+            socket.off('receive_message');
+        };
+    }, []);
+    useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    }, [data]);
 
     const MessageComponent = {
         text: ChatText,
@@ -125,11 +149,15 @@ function TabMessage() {
 
     const handleSendMessage = async () => {
         if (message.trim() !== '') {
-            await sendMessage(chatId, message, 'text', replyMessage?.id, null, null, null);
+            const sendMess = await sendMessage(chatId, message, 'text', replyMessage?.id, null, null, null);
+
             await readedChatOfUser(chatId);
             dispatch(setReadedChatWhenSendNewMessage({ chatId: chatId, userId: userId }));
             setMessage('');
             setReplyMessage(null);
+            socket.emit('send_message', {
+                message: sendMess,
+            });
         }
         setTimeout(() => {
             if (chatContainerRef.current) {

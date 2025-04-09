@@ -72,6 +72,10 @@ export const sendMessage = async (req: AuthRequest, res: Response): Promise<void
             },
             include: {
                 sender: { select: { id: true, name: true, avatar: true } },
+                reactions: {
+                    select: { user: { select: { id: true, name: true, avatar: true } }, reaction: true, sum: true },
+                },
+                replyTo: { select: { id: true, sender: { select: { name: true } }, content: true } },
             },
         });
 
