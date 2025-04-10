@@ -1,13 +1,13 @@
 import axios from 'axios';
 import { localhost } from '../../../utils/localhosts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-const BASE_URL = `http://${localhost}/api/auth`;
+const BASE_URL = `http://${localhost}/api/friends`;
 
 const friendService = {
-    // Lấy danh sách bạn bè của người đăng nhập
+    // Lấy danh sách bạn bè
     getFriends: async (token) => {
         try {
-            const response = await axios.get(`${BASE_URL}/friends/list`, {
+            const response = await axios.get(`${BASE_URL}/list`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
@@ -19,51 +19,26 @@ const friendService = {
         }
     },
 
-    getFriendRequests: async () => {
+    // Lấy danh sách lời mời kết bạn
+    getFriendRequests: async (token) => {
         try {
-            // Lấy user từ AsyncStorage
-            const userJson = await AsyncStorage.getItem('user');
-            if (!userJson) throw new Error('User not found in storage');
-
-            const user = JSON.parse(userJson);
-            const userId = user.id; // Hoặc user._id tùy theo backend
-
-            // Gọi API với userId
-            const response = await axios.get(`${BASE_URL}/request/${userId}`, {
-                headers: getAuthHeader(),
-            });
-
-            return response.data;
-        } catch (error) {
-            console.error('Lỗi lấy danh sách lời mời kết bạn:', error);
-            throw error.response?.data || error.message;
-        }
-    },
-
-    // Block một người bạn
-    blockFriend: async (receiverId, token) => {
-        try {
-            const response = await axios.post(
-                `${BASE_URL}/block`,
-                { receiverId },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
+            const response = await axios.get(`${BASE_URL}/request`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
                 },
-            );
+            });
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
         }
     },
 
-    // Có thể thêm các hàm khác như gửi lời mời, chấp nhận lời mời, v.v.
+    // Gửi lời mời kết bạn
     sendFriendRequest: async (receiverId, token) => {
         try {
             const response = await axios.post(
-                `${BASE_URL}/friend-request`,
+                `${BASE_URL}/request`,
                 { receiverId },
                 {
                     headers: {
@@ -72,6 +47,149 @@ const friendService = {
                     },
                 },
             );
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    // Hủy lời mời kết bạn
+    cancelFriendRequest: async (requestId, token) => {
+        try {
+            const response = await axios.delete(`${BASE_URL}/request/cancel/${requestId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    // Chấp nhận lời mời kết bạn
+    acceptFriendRequest: async (requestId, token) => {
+        try {
+            const response = await axios.post(
+                `${BASE_URL}/request/accept/${requestId}`,
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                },
+            );
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    // Xóa bạn bè
+    deleteFriend: async (friendId, token) => {
+        try {
+            const response = await axios.delete(`${BASE_URL}/delete/${friendId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    // Kiểm tra quan hệ bạn bè
+    checkFriend: async (friendId, token) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/check-friend/${friendId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    // Lấy danh sách lời mời kết bạn đã gửi
+    getSentFriendRequests: async (token) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/request/sender`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    // Hủy lời mời kết bạn đã gửi
+    cancelSentFriendRequest: async (receiverId, token) => {
+        try {
+            const response = await axios.delete(`${BASE_URL}/request/cancel-by-sender/${receiverId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    // Block người dùng
+    blockUser: async (receiverId, token) => {
+        try {
+            const response = await axios.post(
+                `${BASE_URL}/user/block`,
+                { receiverId },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                },
+            );
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    // Lấy danh sách block
+    getBlockedUsers: async (token) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/user/block/list`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    // Hủy block người dùng
+    cancelBlock: async (blockId, token) => {
+        try {
+            const response = await axios.delete(`${BASE_URL}/user/block/${blockId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
