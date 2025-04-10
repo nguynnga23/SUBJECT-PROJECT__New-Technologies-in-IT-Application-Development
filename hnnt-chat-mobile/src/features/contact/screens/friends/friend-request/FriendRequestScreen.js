@@ -27,10 +27,15 @@ const FriendRequestItem = ({ item }) => {
     const handleDecline = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
+            if (!item.requestId) {
+                alert('Invalid request ID!');
+                return;
+            }
             await friendService.cancelFriendRequest(item.requestId, token); // Call cancel API
             alert('Friend request declined!');
         } catch (error) {
             console.error('Error declining friend request:', error);
+            alert(error.response?.data?.message || 'Failed to decline friend request.');
         }
     };
 

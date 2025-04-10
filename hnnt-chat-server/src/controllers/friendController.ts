@@ -72,31 +72,28 @@ export const sendFriendRequest = async (req: AuthRequest, res: Response): Promis
 
 export const cancelFriendRequest = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { id } = req.params; // ID của friendRequest
-        const userId = req.user?.id; // ID của người đang đăng nhập (lấy từ token)
+        const { id } = req.params; // ID of the friendRequest
+        const userId = req.user?.id; // ID of the logged-in user (from token)
 
-        // Kiểm tra userId từ token
+        // Check if userId exists
         if (!userId) {
             res.status(401).json({ message: 'Không thể xác thực người dùng!' });
             return;
         }
 
-        // Tìm friendRequest và kiểm tra xem người đăng nhập có phải là sender không
+        // Find the friendRequest and check if the user is either the sender or receiver
         const request = await prisma.friendRequest.findUnique({
-            where: {
-                id,
-                senderId: userId, // Đảm bảo chỉ sender mới có thể hủy
-            },
+            where: { id },
         });
 
-        if (!request) {
+        if (!request || (request.senderId !== userId && request.receiverId !== userId)) {
             res.status(400).json({
                 message: 'Lời mời kết bạn không tồn tại hoặc bạn không có quyền hủy!',
             });
             return;
         }
 
-        // Xóa friendRequest
+        // Delete the friendRequest
         await prisma.friendRequest.delete({ where: { id } });
 
         res.status(200).json({ message: 'Đã hủy lời mời kết bạn!' });
