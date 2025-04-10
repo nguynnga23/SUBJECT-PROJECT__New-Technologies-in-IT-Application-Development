@@ -7,3 +7,6 @@ const PORT = '4000';
 
 const localhost = `${IP_WIFI}:${PORT}`;
 module.exports = { localhost };
+
+const localhost = `${IP_WIFI}:${PORT}`;
+module.exports = { localhost };

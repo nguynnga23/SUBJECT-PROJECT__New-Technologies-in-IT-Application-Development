@@ -1,9 +1,46 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, SectionList, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { useState } from 'react';
-import { ScrollView } from 'react-native-gesture-handler';
+import Feather from '@expo/vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
+import FriendService from '../../services/FriendService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Sample data for the friends list
+// const allFriends = [
+//     { id: '1', name: 'Nguyễn Lê Nhật Huy', avatar: 'https://i.pravatar.cc/150?img=20' },
+//     { id: '2', name: 'Nguyễn Thị Nga', avatar: 'https://i.pravatar.cc/150?img=10' },
+//     { id: '3', name: 'Nguyễn Thiên Tứ', avatar: 'https://i.pravatar.cc/150?img=14' },
+//     { id: '4', name: 'Thanh Nhiệt', avatar: 'https://i.pravatar.cc/150?img=12' },
+//     { id: '5', name: 'Anh Long', avatar: 'https://i.pravatar.cc/150?img=17' },
+// ];
+
+const recentlyOnlineFriends = [
+    { id: '1', name: 'Nguyễn Lê Nhật Huy', group: 'Close Friends', avatar: 'https://i.pravatar.cc/150?img=13' },
+    { id: '2', name: 'Nguyễn Thị Nga', avatar: 'https://i.pravatar.cc/150?img=10' },
+];
+
+// Function to group friends by the first letter of their name
+const groupFriendsByLetter = (friends) => {
+    // Sort friends alphabetically by name
+    const sortedFriends = [...friends].sort((a, b) => a.name.localeCompare(b.name));
+
+    // Group by first letter
+    const grouped = sortedFriends.reduce((acc, friend) => {
+        const firstLetter = friend.name.charAt(0).toUpperCase();
+        if (!acc[firstLetter]) {
+            acc[firstLetter] = [];
+        }
+        acc[firstLetter].push(friend);
+        return acc;
+    }, {});
+
+    // Convert to SectionList format
+    return Object.keys(grouped).map((letter) => ({
+        title: letter,
+        data: grouped[letter],
+    }));
+};
 
 const ActionItem = ({ title, onPress, iconName }) => (
     <TouchableOpacity style={styles.actionItem} onPress={onPress} activeOpacity={0.7}>
@@ -20,16 +57,69 @@ const TabButton = ({ title, isActive, onPress }) => (
     </TouchableOpacity>
 );
 
-const ListContent = ({ text }) => (
-    <ScrollView style={styles.listContainer}>
-        <Text style={styles.textContent}>{text}</Text>
-    </ScrollView>
-);
+const ListContent = ({ friends }) => {
+    // Group friends by first letter
+    const sections = groupFriendsByLetter(friends);
+
+    // Render each friend item
+    const renderFriend = ({ item }) => (
+        <TouchableOpacity style={styles.friendItem}>
+            <Image source={{ uri: item.avatar }} style={styles.avatar} />
+            <View style={styles.friendInfo}>
+                <Text style={styles.friendName}>{item.name}</Text>
+                {item.group && <Text style={styles.groupLabel}>{item.group}</Text>}
+            </View>
+            <View style={styles.actionIcons}>
+                <TouchableOpacity>
+                    <Feather name="phone" size={20} color="gray" style={styles.icon} />
+                </TouchableOpacity>
+                <TouchableOpacity>
+                    <Feather name="video" size={20} color="gray" style={styles.icon} />
+                </TouchableOpacity>
+            </View>
+        </TouchableOpacity>
+    );
+
+    // Render section header
+    const renderSectionHeader = ({ section: { title } }) => (
+        <View style={styles.sectionHeader}>
+            <Text style={styles.sectionHeaderText}>{title}</Text>
+        </View>
+    );
+
+    return (
+        <SectionList
+            sections={sections}
+            renderItem={renderFriend}
+            renderSectionHeader={renderSectionHeader}
+            keyExtractor={(item) => item.id}
+            style={styles.listContainer}
+            stickySectionHeadersEnabled={true} // Make section headers sticky
+        />
+    );
+};
 
 export default function ListFriendsScreen() {
     const [selectedTab, setSelectedTab] = useState('all');
     const navigation = useNavigation();
 
+    // Determine which list to show based on the selected tab
+    const [allFriends, setAllFriends] = useState([]);
+    const friendsToShow = selectedTab === 'all' ? allFriends : recentlyOnlineFriends;
+
+    useEffect(() => {
+        const fetchFriends = async () => {
+            try {
+                const token = await AsyncStorage.getItem('token');
+                const data = await FriendService.getFriends(token);
+                setAllFriends(data);
+            } catch (error) {
+                console.error('Failed to fetch friends:', error);
+            }
+        };
+
+        fetchFriends();
+    }, []);
     return (
         <View style={styles.container}>
             {/* Action Section */}
@@ -56,11 +146,9 @@ export default function ListFriendsScreen() {
                 />
             </View>
 
-            {/* Nội dung tab */}
+            {/* Tab Content */}
             <View style={styles.content}>
-                <ListContent
-                    text={selectedTab === 'all' ? 'Danh sách tất cả bạn bè' : 'Danh sách tất cả bạn bè online'}
-                />
+                <ListContent friends={friendsToShow} />
             </View>
         </View>
     );
@@ -69,6 +157,7 @@ export default function ListFriendsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: '#f5f5f5',
     },
 
     // Action Section
@@ -82,6 +171,7 @@ const styles = StyleSheet.create({
     actionItem: {
         flexDirection: 'row',
         alignItems: 'center',
+        paddingVertical: 10,
     },
     customIcon: {
         backgroundColor: '#007AFF',
@@ -91,6 +181,10 @@ const styles = StyleSheet.create({
         marginRight: 10,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    actionText: {
+        fontSize: 16,
+        color: '#000',
     },
 
     // Tab Navigation
@@ -102,9 +196,8 @@ const styles = StyleSheet.create({
     },
     tab: {
         paddingVertical: 5,
-        paddingHorizontal: 20,
+        paddingHorizontal: 15,
         borderRadius: 20,
-        borderWidth: 1,
         borderColor: '#DEE3E7',
         marginRight: 15,
     },
@@ -118,12 +211,51 @@ const styles = StyleSheet.create({
         color: 'black',
     },
 
-    // Nội dung tab
+    // Tab Content
     content: {
         flex: 3,
         backgroundColor: '#fff',
-        alignItems: 'center',
         marginTop: 2,
         paddingHorizontal: 15,
+    },
+    listContainer: {
+        flex: 1,
+    },
+    sectionHeader: {
+        backgroundColor: '#fff',
+        paddingVertical: 10,
+    },
+    sectionHeaderText: {
+        fontSize: 15,
+        fontWeight: 'bold',
+        color: '#000',
+    },
+    friendItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 15,
+    },
+    avatar: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        marginRight: 15,
+    },
+    friendInfo: {
+        flex: 1,
+    },
+    friendName: {
+        fontSize: 16,
+        color: '#000',
+    },
+    groupLabel: {
+        fontSize: 14,
+        color: '#6D6D6D',
+    },
+    actionIcons: {
+        flexDirection: 'row',
+    },
+    icon: {
+        marginLeft: 15,
     },
 });
