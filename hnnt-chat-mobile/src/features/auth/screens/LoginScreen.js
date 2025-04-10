@@ -20,7 +20,7 @@ export default function LoginScreen() {
 
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
-    const isFormFilled = phone.length == 10 && password.length >= 3;
+    const isFormFilled = phone.length == 10 && password.length >= 8;
 
     const handleLogin = async () => {
         try {
@@ -31,14 +31,12 @@ export default function LoginScreen() {
             await AsyncStorage.setItem('token', token);
             await AsyncStorage.setItem('user', JSON.stringify(user)); // Chuyển user thành chuỗi JSON
 
-            console.log('Login successful:', user);
             Alert.alert('Login Successful', `Welcome, ${user.name}!`);
-
             // Điều hướng đến màn hình chính
             navigation.navigate('HomeTab');
         } catch (error) {
-            console.error('Login failed:', error);
-            Alert.alert('Login Failed', error || 'Invalid phone number or password.');
+            console.warn('Login failed:', error);
+            Alert.alert('Login Failed', 'Số điện thoại hoặc mật khẩu không đúng');
         }
     };
 
