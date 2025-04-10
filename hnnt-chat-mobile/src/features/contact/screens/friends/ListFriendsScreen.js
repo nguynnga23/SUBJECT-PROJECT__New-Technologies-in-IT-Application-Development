@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, SectionList, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SectionList, Image, Modal } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Feather from '@expo/vector-icons/Feather';
@@ -57,13 +57,16 @@ const TabButton = ({ title, isActive, onPress }) => (
     </TouchableOpacity>
 );
 
-const ListContent = ({ friends }) => {
+const ListContent = ({ friends, onLongPress }) => {
     // Group friends by first letter
     const sections = groupFriendsByLetter(friends);
 
     // Render each friend item
     const renderFriend = ({ item }) => (
-        <TouchableOpacity style={styles.friendItem}>
+        <TouchableOpacity
+            style={styles.friendItem}
+            onLongPress={() => onLongPress(item)} // Add long press handler
+        >
             <Image source={{ uri: item.avatar }} style={styles.avatar} />
             <View style={styles.friendInfo}>
                 <Text style={styles.friendName}>{item.name}</Text>
@@ -101,10 +104,11 @@ const ListContent = ({ friends }) => {
 
 export default function ListFriendsScreen() {
     const [selectedTab, setSelectedTab] = useState('all');
+    const [allFriends, setAllFriends] = useState([]);
+    const [modalVisible, setModalVisible] = useState(false); // State for modal visibility
+    const [selectedFriend, setSelectedFriend] = useState(null); // State for selected friend
     const navigation = useNavigation();
 
-    // Determine which list to show based on the selected tab
-    const [allFriends, setAllFriends] = useState([]);
     const friendsToShow = selectedTab === 'all' ? allFriends : recentlyOnlineFriends;
 
     useEffect(() => {
@@ -120,6 +124,31 @@ export default function ListFriendsScreen() {
 
         fetchFriends();
     }, []);
+
+    const handleLongPress = (friend) => {
+        setSelectedFriend(friend);
+        setModalVisible(true);
+    };
+
+    const handleUnfriend = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            await FriendService.deleteFriend(selectedFriend.id, token); // Pass correct friendId
+            alert(`Unfriended ${selectedFriend.name}`);
+            setModalVisible(false);
+            setAllFriends((prevFriends) => prevFriends.filter((friend) => friend.id !== selectedFriend.id));
+        } catch (error) {
+            console.error('Error unfriending:', error);
+            alert(error.message || 'Failed to unfriend.');
+        }
+    };
+
+    const handleMessage = () => {
+        // Logic for messaging the selected friend
+        alert(`Messaging ${selectedFriend.name}`);
+        setModalVisible(false);
+    };
+
     return (
         <View style={styles.container}>
             {/* Action Section */}
@@ -148,8 +177,37 @@ export default function ListFriendsScreen() {
 
             {/* Tab Content */}
             <View style={styles.content}>
-                <ListContent friends={friendsToShow} />
+                <ListContent friends={friendsToShow} onLongPress={handleLongPress} />
             </View>
+
+            {/* Friend Details Modal */}
+            {selectedFriend && (
+                <Modal
+                    visible={modalVisible}
+                    transparent={true}
+                    animationType="fade" // Change animation type to "fade"
+                    onRequestClose={() => setModalVisible(false)}
+                >
+                    <TouchableOpacity
+                        style={styles.modalOverlay}
+                        activeOpacity={1}
+                        onPress={() => setModalVisible(false)} // Close modal on overlay press
+                    >
+                        <View style={styles.modalContent}>
+                            <Image source={{ uri: selectedFriend.avatar }} style={styles.modalAvatar} />
+                            <Text style={styles.modalName}>{selectedFriend.name}</Text>
+                            <View style={styles.modalButtons}>
+                                <TouchableOpacity style={styles.unfriendButton} onPress={handleUnfriend}>
+                                    <Text style={styles.unfriendText}>Unfriend</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.messageButton} onPress={handleMessage}>
+                                    <Text style={styles.messageText}>Message</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+                </Modal>
+            )}
         </View>
     );
 }
@@ -257,5 +315,55 @@ const styles = StyleSheet.create({
     },
     icon: {
         marginLeft: 15,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Increase opacity for a stronger shadow effect
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        width: '80%',
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 20,
+        alignItems: 'center',
+    },
+    modalAvatar: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        marginBottom: 15,
+    },
+    modalName: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 20,
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+    },
+    unfriendButton: {
+        backgroundColor: '#E5E5EA',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 20,
+        marginRight: 10,
+    },
+    unfriendText: {
+        fontSize: 14,
+        color: '#000',
+    },
+    messageButton: {
+        backgroundColor: '#E5F0FF',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 20,
+    },
+    messageText: {
+        fontSize: 14,
+        color: '#007AFF',
     },
 });

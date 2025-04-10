@@ -87,6 +87,22 @@ const PeopleYouMayKnowItem = ({ item }) => (
     </View>
 );
 
+const handleUnfriend = async (friendId) => {
+    try {
+        const token = await AsyncStorage.getItem('token'); // Retrieve token
+        if (!friendId) {
+            alert('Invalid friend ID!');
+            return;
+        }
+        await friendService.deleteFriend(friendId, token); // Call delete friend API
+        alert('Friend removed successfully!');
+        // Optionally, refresh the friend list or update the UI
+    } catch (error) {
+        console.error('Error unfriending:', error);
+        alert(error.response?.data?.message || 'Failed to unfriend.');
+    }
+};
+
 export default function FriendRequestScreen() {
     const [selectedTab, setSelectedTab] = useState('received');
     const [receivedRequests, setReceivedRequests] = useState([]);

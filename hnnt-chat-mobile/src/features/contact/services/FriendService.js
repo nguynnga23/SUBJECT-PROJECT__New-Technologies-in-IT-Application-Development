@@ -100,6 +100,7 @@ const friendService = {
             });
             return response.data;
         } catch (error) {
+            console.error('Error unfriending:', error.response || error.message); // Log full error
             throw error.response?.data || error.message;
         }
     },
