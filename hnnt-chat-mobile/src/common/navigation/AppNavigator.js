@@ -22,6 +22,7 @@ import BlockMessage from '../../features/profile/screens/privacy/block-message/B
 import ForgotPasswordScreen from '../../features/auth/screens/forgot/ForgotPasswordScreen';
 import Forgot_OTPConfirmScreen from '../../features/auth/screens/forgot/Forgot_OTPConfirmScreen';
 
+import CameraScreen from '../components/CameraScreen';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -58,6 +59,8 @@ export default function AppNavigator() {
                 <Stack.Screen name="Add your email" component={AddEmail} />
                 <Stack.Screen name="Change password" component={ChangePassword} />
                 <Stack.Screen name="BLock messages" component={BlockMessage} />
+
+                <Stack.Screen name="CameraScreen" component={CameraScreen} options={{ headerShown: false }} />
             </Stack.Navigator>
         </NavigationContainer>
     );
