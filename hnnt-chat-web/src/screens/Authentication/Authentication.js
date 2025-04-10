@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IoMdPhonePortrait } from 'react-icons/io';
-import { FaBars, FaLock } from 'react-icons/fa6';
+import { FaBars, FaLock, FaS } from 'react-icons/fa6';
 import { TbReload } from 'react-icons/tb';
 import { IoMail } from 'react-icons/io5';
 import { MdOutlineDriveFileRenameOutline } from 'react-icons/md';
+
+import '../../index.css';
 
 import { useDispatch } from 'react-redux';
 import { setUser } from '../../redux/slices/authSlice';
@@ -19,6 +21,8 @@ function Authentication() {
     const [loginBy, setLoginBy] = useState('password'); // password, QR, register, sendOTP, sendRegisterInfo
     const [menuOpen, setMenuOpen] = useState(false);
     const [resUser, setResUser] = useState(null);
+
+    const [isLoading, setIsLoading] = useState(false);
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -87,20 +91,22 @@ function Authentication() {
     const handleSendOTP = async () => {
         if (!emailRegister) {
             alert('Vui lòng nhập email');
-            return;
+            return false;
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegister || !emailRegex.test(emailRegister)) {
             alert('Email không hợp lệ!');
-            return;
+            return false;
         }
 
         try {
             await sendOTPEmail(emailRegister);
-            setLoginBy('sendOTP');
+            return true;
+            // setLoginBy('sendOTP');
         } catch (error) {
             alert('Lỗi khi gửi mã OTP!');
+            return false;
         }
     };
 
@@ -144,10 +150,17 @@ function Authentication() {
         const data = await getUserByNumberAndEmail(numberRegister, emailRegister);
 
         if (data?.exists) {
-            setLoginBy('sendOTP');
-            await handleSendOTP();
+            setIsLoading(true);
+            const sendsuccess = await handleSendOTP();
+            if (sendsuccess) {
+                setIsLoading(false);
+                setLoginBy('sendOTP');
+            } else {
+                setIsLoading(false);
+                alert('Email của bạn không đúng!');
+            }
         } else {
-            setLoginBy('register');
+            // setLoginBy('register');
         }
     };
 
@@ -378,7 +391,7 @@ function Authentication() {
                             </div>
 
                             <button
-                                className={`w-full text-white py-2 rounded-lg mt-4 ${
+                                className={`w-full flex items-center justify-center text-white py-2 rounded-lg mt-4 ${
                                     numberRegister && emailRegister
                                         ? 'bg-blue-500 hover:bg-blue-500'
                                         : 'bg-blue-100 cursor-not-allowed'
@@ -386,7 +399,8 @@ function Authentication() {
                                 onClick={handleConformNumberAndEmail}
                                 disabled={!numberRegister || !emailRegister}
                             >
-                                Đăng ký tài khoản
+                                {isLoading && <TbReload size={20} className={isLoading ? 'rotate' : ''} />}
+                                {!isLoading && <p>Đăng ký tài khoản</p>}
                             </button>
 
                             <div className="flex justify-center items-center mt-4">
