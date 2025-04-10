@@ -98,10 +98,12 @@ export default function EditPersonalInformation({ navigation }) {
             const token = await AsyncStorage.getItem('token');
             if (!token) throw new Error('Token not found');
 
+            // Upload avatar if a new image is selected
             if (selectedImage) {
-                await ProfileService.updateAvatar(token, selectedImage);
+                const updatedAvatar = await ProfileService.updateAvatar(token, selectedImage);
+                formData.avatar = updatedAvatar.avatar; // Update avatar URL in formData
             }
-
+            console.log(selectedImage);
             const parsedBirthday = formData.birthday
                 ? new Date(formData.birthday.split('/').reverse().join('-')) // Parse dd/MM/yyyy to yyyy-MM-dd
                 : null;
@@ -116,8 +118,6 @@ export default function EditPersonalInformation({ navigation }) {
             await AsyncStorage.setItem('user', JSON.stringify(response));
             setUser(response);
             navigation.goBack(); // Navigate back to ProfileScreen
-            // Navigate back to PersonalInformation with updated user data
-            // navigation.navigate('Personal Information', { user: response });
         } catch (error) {
             console.error('Error updating profile:', error);
             alert('Failed to update profile. Please try again.');
@@ -134,7 +134,12 @@ export default function EditPersonalInformation({ navigation }) {
             <View style={styles.container}>
                 <View style={styles.inforWrapper}>
                     <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
-                        <Image source={{ uri: selectedImage || formData.avatar }} style={styles.avatar} />
+                        <Image
+                            source={{
+                                uri: selectedImage || formData.avatar || 'https://i.pravatar.cc/150?img=20', // Fallback URL
+                            }}
+                            style={styles.avatar}
+                        />
                     </TouchableOpacity>
 
                     <View>

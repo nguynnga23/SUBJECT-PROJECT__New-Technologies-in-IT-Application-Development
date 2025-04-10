@@ -21,20 +21,29 @@ const ProfileService = {
             throw error.response?.data || error.message;
         }
     },
-    updateAvatar: async (token, avatar) => {
+    updateAvatar: async (token, imageUri) => {
         try {
-            const response = await axios.put(
-                `${BASE_URL}/update-avatar`,
-                { image: avatar },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
+            const formData = new FormData();
+            formData.append('image', {
+                uri: imageUri,
+                name: 'avatar.jpg', // Provide a default name
+                type: 'image/jpeg', // Specify the MIME type
+            });
+
+            const result = await axios.post(`${BASE_URL}/update-avatar`, formData, {
+                // Changed PUT to POST
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data',
                 },
-            );
-            return response.data;
+            });
+            return result.data;
         } catch (error) {
+            console.error('Error updating avatar:', {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status,
+            });
             throw error.response?.data || error.message;
         }
     },
