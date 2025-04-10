@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'reac
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from "@react-navigation/native";
-import { register, sendOtp } from '../../services/RegisterService';
+import { sendOtp } from '../../services/RegisterService';
 
 export default function SignUpScreen() {
     const navigation = useNavigation();
@@ -13,7 +13,9 @@ export default function SignUpScreen() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordStrength, setPasswordStrength] = useState('');
-    const [isLoading, setIsLoading] = useState(false); // Trạng thái để kiểm soát nút
+    const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false); // Trạng thái hiển thị mật khẩu
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Trạng thái hiển thị mật khẩu xác nhận
 
     // Regular expressions for validation
     const phoneRegex = /^(03|05|07|08|09|01|02)\d{8}$/;
@@ -51,21 +53,14 @@ export default function SignUpScreen() {
 
         setIsLoading(true); // Bắt đầu trạng thái loading
         try {
-            // Call register API
-            const registerResponse = await register(email, phone, password);
-            if (registerResponse.message === "Đăng ký thành công!") {
-                // Call sendOtp API
-                const otpResponse = await sendOtp(email);
-                if (otpResponse.message === "Mã OTP đã được gửi qua email!") {
-                    navigation.navigate('OTPConfirm', { email }); // Pass email to OTPConfirm
-                } else {
-                    Alert.alert("Error", "Failed to send OTP.");
-                }
+            const otpResponse = await sendOtp(email);
+            if (otpResponse.message === "Mã OTP đã được gửi qua email!") {
+                navigation.navigate('OTPConfirm', { email, phone, password });
             } else {
-                Alert.alert("Error", "Registration failed.");
+                Alert.alert("Error", "Failed to send OTP.");
             }
         } catch (error) {
-            Alert.alert("Error", "Phone number or email already exists.");
+            Alert.alert("Error", "An error occurred while processing your request.");
         } finally {
             setIsLoading(false); // Kết thúc trạng thái loading
         }
@@ -74,17 +69,16 @@ export default function SignUpScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <SafeAreaProvider>
-                <View style={{ paddingTop: 10 }}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                <View style={{ paddingTop: 10, flexDirection: 'row', paddingBottom: 20 }}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Ionicons name="arrow-back" size={30} color="black" />
                     </TouchableOpacity>
+                    <Text style={styles.title}>Register</Text>
                 </View>
-
-                <Text style={styles.title}>Enter phone number</Text>
 
                 {/* Phone Input */}
                 <TextInput
-                    style={[styles.input, { borderColor: isPhoneValid ? '#ccc' : 'red' }]}
+                    style={styles.input}
                     placeholder="Phone number"
                     keyboardType="phone-pad"
                     value={phone}
@@ -96,7 +90,7 @@ export default function SignUpScreen() {
 
                 {/* Email Input */}
                 <TextInput
-                    style={[styles.input, { borderColor: isEmailValid ? '#ccc' : 'red' }]}
+                    style={styles.input}
                     placeholder="Email"
                     keyboardType="email-address"
                     value={email}
@@ -107,16 +101,25 @@ export default function SignUpScreen() {
                 )}
 
                 {/* Password Input */}
-                <TextInput
-                    style={[styles.input, { borderColor: isPasswordValid ? '#ccc' : 'red' }]}
-                    placeholder="Password"
-                    secureTextEntry={true}
-                    value={password}
-                    onChangeText={(text) => {
-                        setPassword(text);
-                        evaluatePasswordStrength(text);
-                    }}
-                />
+                <View style={styles.inputContainer}>
+                    <TextInput
+                        style={styles.inputPassword}
+                        placeholder="Password"
+                        secureTextEntry={!showPassword}
+                        value={password}
+                        onChangeText={(text) => {
+                            setPassword(text);
+                            evaluatePasswordStrength(text);
+                        }}
+                    />
+                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+                        <Ionicons
+                            name={showPassword ? "eye-outline" : "eye-off-outline"}
+                            size={25}
+                            color="#666"
+                        />
+                    </TouchableOpacity>
+                </View>
                 {password.length > 0 && (
                     <Text
                         style={{
@@ -141,16 +144,30 @@ export default function SignUpScreen() {
                 )}
 
                 {/* Confirm Password Input */}
-                <TextInput
-                    style={[styles.input, { borderColor: isConfirmPasswordValid ? '#ccc' : 'red' }]}
-                    placeholder="Confirm Password"
-                    secureTextEntry={true}
-                    value={confirmPassword}
-                    onChangeText={setConfirmPassword}
-                />
+                <View style={styles.inputContainer}>
+                    <TextInput
+                        style={styles.inputPassword}
+                        placeholder="Confirm Password"
+                        secureTextEntry={!showConfirmPassword}
+                        value={confirmPassword}
+                        onChangeText={setConfirmPassword}
+                    />
+                    <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeIcon}>
+                        <Ionicons
+                            name={showConfirmPassword ? "eye-outline" : "eye-off-outline"}
+                            size={25}
+                            color="#666"
+                        />
+                    </TouchableOpacity>
+                </View>
                 {!isConfirmPasswordValid && confirmPassword.length > 0 && (
                     <Text style={styles.errorText}>Passwords do not match</Text>
                 )}
+
+                <Text style={styles.description}>
+                    Password must have at least 8 characters, including numbers and letters.
+                    We recommend your password should have uppercase letters and symbols.
+                </Text>
 
                 {/* Next Button */}
                 <TouchableOpacity
@@ -170,9 +187,31 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 20, backgroundColor: '#fff' },
 
-    title: { fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
+    title: { fontSize: 20, fontWeight: 'bold', marginBottom: 10, paddingLeft: 10 },
 
-    input: { borderWidth: 1, borderColor: '#ccc', padding: 10, borderRadius: 5, marginBottom: 10 },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'black',
+        borderRadius: 5,
+        marginBottom: 10,
+        paddingHorizontal: 10,
+    },
+
+    description: {
+        fontSize: 12,
+        color: '#666',
+        marginBottom: 15,
+        marginTop: 10,
+        textAlign: 'center',
+    },
+
+    input: { borderWidth: 1, borderColor: 'black', padding: 10, borderRadius: 5, marginBottom: 10, fontSize: 16 },
+
+    inputPassword: { flex: 1, fontSize: 16, paddingVertical: 10 },
+
+    eyeIcon: { padding: 5 },
 
     errorText: { color: 'red', fontSize: 12, marginBottom: 10 },
 

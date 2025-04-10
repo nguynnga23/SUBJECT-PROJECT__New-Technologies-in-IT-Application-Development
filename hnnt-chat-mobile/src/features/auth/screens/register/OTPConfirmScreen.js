@@ -3,12 +3,12 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'reac
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { verifyOtp, sendOtp } from '../../services/RegisterService';
+import { verifyOtp, sendOtp, register } from '../../services/RegisterService';
 
 export default function OTPConfirmScreen() {
     const navigation = useNavigation();
     const route = useRoute();
-    const { email } = route.params; // Lấy email từ route params
+    const { email, phone, password } = route.params; // Lấy email từ route params
     const [otp, setOtp] = useState('');
     const [isResending, setIsResending] = useState(false);
     const [countdown, setCountdown] = useState(300); // 5 phút = 300 giây
@@ -41,8 +41,13 @@ export default function OTPConfirmScreen() {
         try {
             const response = await verifyOtp(email, otp);
             if (response.success) {
-                Alert.alert("Success", "OTP verified successfully! Now you can log in.");
-                navigation.navigate('HomeScreen'); // Điều hướng đến HomeScreen
+                const registerResponse = await register(email, phone, password);
+                if (registerResponse.message === "Đăng ký thành công!") {
+                    Alert.alert("Success", "Registration successful! Now you can log in.");
+                    navigation.navigate('HomeScreen'); // Điều hướng đến HomeScreen
+                } else {
+                    Alert.alert("Error", "Registration failed.");
+                }
             } else {
                 Alert.alert("Error", response.message || "Invalid OTP.");
             }
