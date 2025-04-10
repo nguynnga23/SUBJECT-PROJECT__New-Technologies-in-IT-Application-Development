@@ -513,9 +513,9 @@ export const checkFriend = async (req: AuthRequest, res: Response): Promise<void
         });
 
         if (friendship) {
-            res.status(200).json({result: true, message: 'Các bạn đã là bạn của nhau!' });
+            res.status(200).json({ result: true, message: 'Các bạn đã là bạn của nhau!' });
         } else {
-            res.status(404).json({result: false, message: 'Không tìm thấy mối quan hệ bạn bè!' });
+            res.status(404).json({ result: false, message: 'Không tìm thấy mối quan hệ bạn bè!' });
         }
     } catch (error) {
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });

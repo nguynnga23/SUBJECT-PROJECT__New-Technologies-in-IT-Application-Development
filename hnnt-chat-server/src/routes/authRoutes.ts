@@ -8,6 +8,10 @@ import {
     forgotPassword,
     changePassword,
     changePasswordByToken,
+    createLoginToken,
+    confirmLoginToken,
+    checkLoginStatus,
+    loginQR,
 } from '../controllers/authController';
 import { authenticate } from '../middleware/auth';
 
@@ -21,5 +25,9 @@ authRouter.post('/forgot-password', forgotPassword);
 authRouter.post('/change-password', changePassword);
 authRouter.post('/logout', authenticate, logout);
 authRouter.post('/change-password-with-token', authenticate, changePasswordByToken);
+authRouter.post('/qr-login/create', createLoginToken);
+authRouter.post('/qr-login/confirm', confirmLoginToken);
+authRouter.get('/qr-login/status', checkLoginStatus);
+authRouter.post('/qr-login/login', loginQR);
 
 export default authRouter;

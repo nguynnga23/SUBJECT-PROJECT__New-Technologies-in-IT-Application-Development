@@ -63,3 +63,24 @@ export const updateAvatar = async (req: AuthRequest, res: Response): Promise<voi
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+
+export const getUserById = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.params.id;
+
+        const user = await prisma.account.findUnique({
+            where: { id: userId },
+        });
+
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        res.json(user);
+        return;
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error' });
+        return;
+    }
+};
