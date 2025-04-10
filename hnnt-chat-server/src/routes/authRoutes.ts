@@ -7,7 +7,6 @@ import {
     verifyOTP,
     forgotPassword,
     changePassword,
-    changePasswordByToken,
 } from '../controllers/authController';
 import { authenticate } from '../middleware/auth';
 
@@ -20,6 +19,5 @@ authRouter.post('/register', register);
 authRouter.post('/forgot-password', forgotPassword);
 authRouter.post('/change-password', changePassword);
 authRouter.post('/logout', authenticate, logout);
-authRouter.post('/change-password-with-token', authenticate, changePasswordByToken);
 
 export default authRouter;
