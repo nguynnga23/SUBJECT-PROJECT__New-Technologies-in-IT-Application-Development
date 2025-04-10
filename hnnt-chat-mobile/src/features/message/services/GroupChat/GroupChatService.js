@@ -3,6 +3,24 @@ import * as ImagePicker from "expo-image-picker";
 import { Audio } from "expo-av";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system";
+import axios from 'axios';
+import { localhost } from '../../../../utils/localhosts'
+
+const API_URL = `http://${localhost}/api`;
+
+export const fetchMessages = async (chatId, token) => {
+    try {
+        const response = await axios.get(`${API_URL}/messages/${chatId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Gửi token trong header
+            },
+        });
+        return response.data; // Trả về danh sách tin nhắn
+    } catch (error) {
+        console.error('Error fetching messages:', error.response?.data || error.message);
+        throw error;
+    }
+};
 
 let recording = null;
 let chatData = {
@@ -28,12 +46,22 @@ let chatData = {
 };
 
 //Hiển thị menu khi nhấn giữ tin nhắn
-export function handleLongPressMessage(messageId, messages, setMessages, setReplyingMessage, setModalVisible) {
+export function handleLongPressMessage(messageId, messages, setMessages, setReplyingMessage, setModalVisible, token) {
     const message = messages.find((msg) => msg.id === messageId);
     if (!message) return;
 
     let options = [
-        { text: "📌 Pin", onPress: () => pinMessage(messageId) },
+        {
+            text: "📌 Pin", onPress: async () => {
+                try {
+                    const response = await pinMessage(messageId, token); // Gọi API pinMessage
+                    Alert.alert("Success", response.message); // Hiển thị thông báo từ API
+                } catch (error) {
+                    console.error("Error pinning message:", error);
+                    Alert.alert("Error", "Failed to pin the message."); // Hiển thị lỗi nếu có
+                }
+            },
+        },
         {
             text: "↩️ Answer",
             onPress: () => {
@@ -51,8 +79,18 @@ export function handleLongPressMessage(messageId, messages, setMessages, setRepl
 }
 
 //Ghim tin nhắn
-function pinMessage(messageId) {
-    console.log("Ghim tin nhắn ID:", messageId);
+const pinMessage = async (messageId, token) => {
+    try {
+        const response = await axios.put(`${API_URL}/groups/message/${messageId}/pin`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Gửi token trong header
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching messages:', error.response?.data || error.message);
+        throw error;
+    }
 }
 
 //Xóa tin nhắn

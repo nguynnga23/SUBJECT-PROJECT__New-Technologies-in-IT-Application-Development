@@ -4,16 +4,24 @@ import { AuthRequest } from '../types/authRequest';
 
 const prisma = new PrismaClient();
 
-export const sendFriendRequest = async (req: Request, res: Response): Promise<void> => {
+export const sendFriendRequest = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { senderId, receiverId } = req.body;
+        // Lấy senderId từ token thay vì req.body
+        const senderId = req.user?.id; // Giả sử token decoded gắn vào req.user
+        const { receiverId } = req.body;
+
+        // Kiểm tra senderId có tồn tại từ token không
+        if (!senderId) {
+            res.status(401).json({ message: 'Không thể xác thực người dùng!' });
+            return;
+        }
 
         if (senderId === receiverId) {
             res.status(400).json({ message: 'Không thể gửi yêu cầu kết bạn cho chính mình!' });
             return;
         }
 
-        //Check senderId and receiverId
+        // Check senderId and receiverId
         const sender = await prisma.account.findUnique({ where: { id: senderId } });
         const receiver = await prisma.account.findUnique({ where: { id: receiverId } });
 
@@ -62,18 +70,33 @@ export const sendFriendRequest = async (req: Request, res: Response): Promise<vo
     }
 };
 
-// 📌 Cancel send friend request
-export const cancelFriendRequest = async (req: Request, res: Response): Promise<void> => {
+export const cancelFriendRequest = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { id } = req.params;
+        const { id } = req.params; // ID của friendRequest
+        const userId = req.user?.id; // ID của người đang đăng nhập (lấy từ token)
 
-        const request = await prisma.friendRequest.findUnique({ where: { id } });
-
-        if (!request) {
-            res.status(400).json({ message: 'Lời mời kết bạn không tồn tại!' });
+        // Kiểm tra userId từ token
+        if (!userId) {
+            res.status(401).json({ message: 'Không thể xác thực người dùng!' });
             return;
         }
 
+        // Tìm friendRequest và kiểm tra xem người đăng nhập có phải là sender không
+        const request = await prisma.friendRequest.findUnique({
+            where: {
+                id,
+                senderId: userId, // Đảm bảo chỉ sender mới có thể hủy
+            },
+        });
+
+        if (!request) {
+            res.status(400).json({
+                message: 'Lời mời kết bạn không tồn tại hoặc bạn không có quyền hủy!',
+            });
+            return;
+        }
+
+        // Xóa friendRequest
         await prisma.friendRequest.delete({ where: { id } });
 
         res.status(200).json({ message: 'Đã hủy lời mời kết bạn!' });
@@ -83,18 +106,51 @@ export const cancelFriendRequest = async (req: Request, res: Response): Promise<
 };
 
 // 📌 Accept friend request
-export const acceptFriendRequest = async (req: Request, res: Response): Promise<void> => {
+export const acceptFriendRequest = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { id } = req.params;
+        const { id } = req.params; // ID của friendRequest
+        const userId = req.user?.id; // ID của người đang đăng nhập (lấy từ token)
 
-        const request = await prisma.friendRequest.findUnique({ where: { id, block: false } });
-
-        if (!request) {
-            res.status(400).json({ message: 'Lời mời kết bạn không tồn tại hoặc bạn đã chặn họ!' });
+        // Kiểm tra userId từ token
+        if (!userId) {
+            res.status(401).json({ message: 'Không thể xác thực người dùng!' });
             return;
         }
 
-        // Create Friend
+        // Tìm friendRequest và kiểm tra xem người đăng nhập có phải là receiver không
+        const request = await prisma.friendRequest.findUnique({
+            where: {
+                id,
+                block: false,
+                receiverId: userId, // Đảm bảo chỉ receiver mới có thể chấp nhận
+            },
+        });
+
+        if (!request) {
+            res.status(400).json({
+                message: 'Lời mời kết bạn không tồn tại, đã bị chặn, hoặc bạn không có quyền chấp nhận!',
+            });
+            return;
+        }
+
+        // Kiểm tra xem đã là bạn chưa (để tránh trùng lặp)
+        const existingFriend = await prisma.friend.findFirst({
+            where: {
+                OR: [
+                    { user1Id: request.senderId, user2Id: request.receiverId },
+                    { user1Id: request.receiverId, user2Id: request.senderId },
+                ],
+            },
+        });
+
+        if (existingFriend) {
+            // Nếu đã là bạn, xóa request và trả về thông báo
+            await prisma.friendRequest.delete({ where: { id } });
+            res.status(400).json({ message: 'Các bạn đã là bạn của nhau!' });
+            return;
+        }
+
+        // Tạo mối quan hệ bạn bè
         await prisma.friend.create({
             data: {
                 user1Id: request.senderId,
@@ -102,7 +158,7 @@ export const acceptFriendRequest = async (req: Request, res: Response): Promise<
             },
         });
 
-        // Delete friendRequest
+        // Xóa friendRequest
         await prisma.friendRequest.delete({ where: { id } });
 
         res.status(200).json({ message: 'Đã chấp nhận lời mời kết bạn!' });
@@ -112,18 +168,38 @@ export const acceptFriendRequest = async (req: Request, res: Response): Promise<
 };
 
 // 📌 Delete friend
-export const deleteFriend = async (req: Request, res: Response): Promise<void> => {
+export const deleteFriend = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { id } = req.params;
+        const { id } = req.params; // ID của mối quan hệ bạn bè (bản ghi trong bảng friend)
+        const userId = req.user?.id; // ID của người đang đăng nhập (lấy từ token)
 
-        const request = await prisma.friend.findUnique({ where: { id } });
-
-        if (!request) {
-            res.status(400).json({ message: 'Thông tin bạn bè không tồn tại!' });
+        // Kiểm tra userId từ token
+        if (!userId) {
+            res.status(401).json({ message: 'Không thể xác thực người dùng!' });
             return;
         }
 
+        // Tìm mối quan hệ bạn bè và kiểm tra xem user có phải là một trong hai người không
+        const friendship = await prisma.friend.findUnique({
+            where: {
+                id,
+                OR: [
+                    { user1Id: userId }, // User là user1
+                    { user2Id: userId }, // User là user2
+                ],
+            },
+        });
+
+        if (!friendship) {
+            res.status(400).json({
+                message: 'Mối quan hệ bạn bè không tồn tại hoặc bạn không có quyền xóa!',
+            });
+            return;
+        }
+
+        // Xóa mối quan hệ bạn bè
         await prisma.friend.delete({ where: { id } });
+
         res.status(200).json({ message: 'Đã xóa kết bạn!' });
     } catch (error) {
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
@@ -134,6 +210,11 @@ export const deleteFriend = async (req: Request, res: Response): Promise<void> =
 export const getListFriend = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const userId = req.user.id;
+
+        if (!userId) {
+            res.status(401).json({ message: 'Unauthorized - No user ID found' });
+            return;
+        }
 
         const friends = await prisma.friend.findMany({
             where: {
@@ -150,53 +231,11 @@ export const getListFriend = async (req: AuthRequest, res: Response): Promise<vo
             return {
                 id: friendData.id,
                 name: friendData.name,
-                number: friendData.number,
                 avatar: friendData.avatar,
                 status: friendData.status,
-                birthDate: friendData.birthDate,
-                location: friendData.location,
-                gender: friendData.gender,
-                createdAt: friendData.createdAt,
             };
         });
-        res.json(friendList);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
-    }
-};
 
-export const getListFriendByKeyword = async (req: AuthRequest, res: Response): Promise<void> => {
-    try {
-        const userId = req.user.id;
-        const keyword = req.query.keyword;
-
-        const friends = await prisma.friend.findMany({
-            where: {
-                OR: [{ user1Id: userId }, { user2Id: userId }],
-            },
-            include: {
-                user1: true,
-                user2: true,
-            },
-        });
-
-        const friendList = friends
-            .map((friend) => {
-                const friendData = friend.user1Id === userId ? friend.user2 : friend.user1;
-                return {
-                    id: friendData.id,
-                    name: friendData.name,
-                    number: friendData.number,
-                    avatar: friendData.avatar,
-                    status: friendData.status,
-                    birthDate: friendData.birthDate,
-                    location: friendData.location,
-                    gender: friendData.gender,
-                    createdAt: friendData.createdAt,
-                };
-            })
-            .filter((friend) => !keyword || friend.name.toLowerCase().includes(keyword.toString().toLowerCase()));
         res.json(friendList);
     } catch (error) {
         console.error(error);
@@ -205,32 +244,41 @@ export const getListFriendByKeyword = async (req: AuthRequest, res: Response): P
 };
 
 //📌 Get list friend request
-export const getListFriendRequest = async (req: Request, res: Response): Promise<void> => {
+export const getListFriendRequest = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { userId } = req.params; // id của user
+        const userId = req.user?.id; // Lấy ID của user từ token, không cần từ params
 
+        // Kiểm tra userId từ token
+        if (!userId) {
+            res.status(401).json({ message: 'Không thể xác thực người dùng!' });
+            return;
+        }
+
+        // Lấy danh sách lời mời kết bạn mà user này nhận được
         const friendRequests = await prisma.friendRequest.findMany({
             where: {
-                receiverId: userId,
+                receiverId: userId, // Lời mời gửi đến user hiện tại
             },
-            include: { receiver: true },
+            include: {
+                sender: true, // Lấy thông tin của người gửi lời mời
+            },
         });
 
-        const sentList = friendRequests.map((request) => {
-            return {
-                id: request.receiver.id,
-                name: request.receiver.name,
-                number: request.receiver.number,
-                avatar: request.receiver.avatar,
-                status: request.receiver.status,
-                birthDate: request.receiver.birthDate,
-                location: request.receiver.location,
-                gender: request.receiver.gender,
-                createdAt: request.receiver.createdAt,
-            };
-        });
+        // Map dữ liệu để trả về thông tin của sender
+        const receivedList = friendRequests.map((request) => ({
+            requestId: request.id, // ID của friendRequest để dùng cho accept/cancel
+            senderId: request.sender.id,
+            name: request.sender.name,
+            number: request.sender.number,
+            avatar: request.sender.avatar,
+            status: request.sender.status,
+            birthDate: request.sender.birthDate,
+            location: request.sender.location,
+            gender: request.sender.gender,
+            createdAt: request.createdAt, // Thời gian tạo lời mời
+        }));
 
-        res.json(sentList);
+        res.status(200).json(receivedList);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
@@ -357,6 +405,119 @@ export const CancelBlockRequest = async (req: Request, res: Response): Promise<v
         }
     } catch (error) {
         console.error(error);
+        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+    }
+};
+
+//📌 Get list friend request by sender
+export const getListFriendRequestBySender = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.id; // Lấy ID của user từ token, không cần từ params
+
+        // Kiểm tra userId từ token
+        if (!userId) {
+            res.status(401).json({ message: 'Không thể xác thực người dùng!' });
+            return;
+        }
+
+        const friendRequests = await prisma.friendRequest.findMany({
+            where: {
+                senderId: userId,
+            },
+            include: { receiver: true },
+        });
+
+        const sentList = friendRequests.map((request) => {
+            return {
+                id: request.receiver.id,
+                name: request.receiver.name,
+                number: request.receiver.number,
+                avatar: request.receiver.avatar,
+                status: request.receiver.status,
+                birthDate: request.receiver.birthDate,
+                location: request.receiver.location,
+                gender: request.receiver.gender,
+                createdAt: request.receiver.createdAt,
+            };
+        });
+
+        res.json(sentList);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+    }
+};
+
+// Cancel friend request by senderId and receiverId
+export const cancelFriendRequestBySender = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const senderId = req.user?.id; // Lấy senderId từ token
+        if (!senderId) {
+            res.status(401).json({ message: 'Không thể xác thực người dùng!' });
+            return;
+        }
+
+        // Lấy receiverId từ params
+        const receiverId = req.params.receiverId; // Lấy receiverId từ params
+
+        // Kiểm tra senderId và receiverId có tồn tại không
+        if (!senderId || !receiverId) {
+            res.status(400).json({ message: 'Thiếu thông tin senderId hoặc receiverId!' });
+            return;
+        }
+
+        // Kiểm tra xem có tồn tại yêu cầu kết bạn giữa sender và receiver không
+        const existingRequest = await prisma.friendRequest.findFirst({
+            where: {
+                OR: [
+                    { senderId, receiverId },
+                    { senderId: receiverId, receiverId: senderId },
+                ],
+            },
+        });
+
+        if (!existingRequest) {
+            res.status(404).json({ message: 'Không tìm thấy yêu cầu kết bạn!' });
+            return;
+        }
+
+        // Xóa yêu cầu kết bạn
+        await prisma.friendRequest.delete({ where: { id: existingRequest.id } });
+
+        res.status(200).json({ message: 'Đã hủy yêu cầu kết bạn!' });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+    }
+};
+
+// /friends/check-friend/:friendId
+export const checkFriend = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.id; // Lấy ID của user từ token
+        const friendId = req.params.friendId; // Lấy ID của bạn bè từ params
+
+        // Kiểm tra userId từ token
+        if (!userId) {
+            res.status(401).json({ message: 'Không thể xác thực người dùng!' });
+            return;
+        }
+
+        // Kiểm tra xem có tồn tại mối quan hệ bạn bè giữa user và friend không
+        const friendship = await prisma.friend.findFirst({
+            where: {
+                OR: [
+                    { user1Id: userId, user2Id: friendId },
+                    { user1Id: friendId, user2Id: userId },
+                ],
+            },
+        });
+
+        if (friendship) {
+            res.status(200).json({result: true, message: 'Các bạn đã là bạn của nhau!' });
+        } else {
+            res.status(404).json({result: false, message: 'Không tìm thấy mối quan hệ bạn bè!' });
+        }
+    } catch (error) {
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
     }
 };

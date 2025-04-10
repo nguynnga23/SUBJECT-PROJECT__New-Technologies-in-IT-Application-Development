@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function OTPConfirmScreen() {
+export default function Forgot_OTPConfirmScreen() {
     const navigation = useNavigation();
     const [otp, setOtp] = useState('');
 
@@ -41,9 +41,13 @@ export default function OTPConfirmScreen() {
                     <TouchableOpacity
                         style={[styles.button, { backgroundColor: isButtonEnabled ? '#007AFF' : '#D3D3D3' }]}
                         disabled={!isButtonEnabled}
-                        onPress={() => navigation.navigate('PasswordSignUp')}
+                        onPress={() => {
+                            navigation.navigate('ResetPassword');
+                            Alert.alert("OTP Confirmed", "Successful!");
+                        }
+                        }
                     >
-                        <Text style={styles.buttonText}>Next</Text>
+                        <Text style={styles.buttonText}>Confirm</Text>
                     </TouchableOpacity>
                 </View>
             </SafeAreaProvider>

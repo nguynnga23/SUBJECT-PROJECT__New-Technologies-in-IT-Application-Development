@@ -1,15 +1,36 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Keyboard } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Keyboard, Alert } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { login } from '../services/AuthService'; // Import hàm login từ AuthService
 
 export default function LoginScreen() {
   const navigation = useNavigation();
 
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const isFormFilled = phone.length > 0 && password.length > 0;
+  const isFormFilled = phone.length == 10 && password.length >= 3;
+
+  const handleLogin = async () => {
+    try {
+      Keyboard.dismiss(); // Ẩn bàn phím
+      const { token, user } = await login(phone, password);
+
+      // Lưu token vào AsyncStorage
+      await AsyncStorage.setItem('token', token);
+
+      console.log('Login successful:', user);
+      Alert.alert('Login Successful', `Welcome, ${user.name}!`);
+
+      // Điều hướng đến màn hình chính
+      navigation.navigate('HomeTab');
+    } catch (error) {
+      console.error('Login failed:', error);
+      Alert.alert('Login Failed', error || 'Invalid phone number or password.');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -22,7 +43,6 @@ export default function LoginScreen() {
             </TouchableOpacity>
             <Text style={styles.title}>Login</Text>
           </View>
-
 
           <View style={{ paddingHorizontal: 20, paddingTop: 20 }}>
             <Text style={styles.description}>
@@ -43,7 +63,7 @@ export default function LoginScreen() {
           <View style={{ paddingHorizontal: 20 }}>
             <TextInput
               style={styles.input}
-              placeholder="password"
+              placeholder="Password"
               value={password}
               onChangeText={setPassword}
               secureTextEntry={true}
@@ -52,22 +72,17 @@ export default function LoginScreen() {
 
           <View style={{ paddingHorizontal: 20 }}>
             <TouchableOpacity>
-              <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+              <Text style={styles.forgotPasswordText} onPress={() => navigation.navigate('ForgotPassword')}>
+                Forgot password?
+              </Text>
             </TouchableOpacity>
           </View>
 
-          {/* Nút "Next" */}
           <View style={{ paddingTop: 60 }}>
             <TouchableOpacity
               style={[styles.nextButton, isFormFilled ? styles.buttonEnabled : styles.buttonDisabled]}
-              disabled={!isFormFilled} // Chỉ bấm khi đã điền đầy đủ thông tin
-              onPress={() => {
-                if (isFormFilled) {
-                  Keyboard.dismiss(); // Ẩn bàn phím trước khi chuyển màn hình
-                  // Điều hướng hoặc xử lý đăng nhập
-                  navigation.navigate('HomeTab');
-                }
-              }}
+              disabled={!isFormFilled}
+              onPress={handleLogin}
             >
               <Text style={styles.nextButtonText}>→</Text>
             </TouchableOpacity>
