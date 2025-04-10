@@ -11,3 +11,26 @@ export const login = async (number, password) => {
         throw error.response?.data || error.message; // Trả về lỗi
     }
 };
+
+export const confirmQRLogin = async (token, userId) => {
+    try {
+        const response = await fetch(`${API_URL}/qr-login/confirm`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                token,
+                userId,
+            }),
+        });
+
+        const data = await response.json();
+        console.log("QR login confirm response:", data);
+        return data;
+    } catch (error) {
+        console.error("Error confirming QR login:", error);
+        throw error;
+    }
+};
+

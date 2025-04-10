@@ -90,11 +90,11 @@ export default function Home() {
                     {/* Dropdown menu */}
                     <div
                         id="dropdownAvatar"
-                        className={`z-10 bg-white divide-y divide-gray-100 rounded-lg ring-2 ring-gray-200 absolute top-0 left-14 min-w-64 z-20 ${
+                        className={`z-10 bg-white  dark:bg-[#20344c] divide-y  divide-gray-100 dark:divide-gray-700 rounded-lg ring-2 ring-gray-200 dark:ring-gray-900 absolute top-0 left-14 min-w-64 z-20 ${
                             isDropdownOpen ? 'block' : 'hidden'
                         }`}
                     >
-                        <div className="px-4 py-3 text-sm text-black ">
+                        <div className="px-4 py-3 text-sm text-black dark:text-white">
                             <p className="text-lg font-medium ">{userActive?.name}</p>
                         </div>
                         <ul
@@ -102,26 +102,28 @@ export default function Home() {
                             aria-labelledby="dropdownUserAvatarButton"
                         >
                             <li>
-                                <p className="block px-4 py-2 hover:bg-gray-100 text-black flex items-center gap-x-6 cursor-pointer">
+                                <p className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 text-black dark:text-white flex items-center gap-x-6 cursor-pointer">
                                     Nâng cấp tài khoản
                                     <CiShare1 />
                                 </p>
                             </li>
                             <li>
                                 <p
-                                    className="block px-4 py-2 hover:bg-gray-100  text-black cursor-pointer"
+                                    className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600  text-black dark:text-white cursor-pointer"
                                     onClick={() => setIsOpenModel(true)}
                                 >
                                     Hồ sơ của bạn
                                 </p>
                             </li>
                             <li>
-                                <p className="block px-4 py-2 hover:bg-gray-100 text-black cursor-pointer">Cài đặt</p>
+                                <p className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 text-black dark:text-white cursor-pointer">
+                                    Cài đặt
+                                </p>
                             </li>
                         </ul>
                         <div className="">
                             <p
-                                className="block px-4 py-2 hover:bg-gray-100 text-black cursor-pointer"
+                                className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 text-black dark:text-white cursor-pointer"
                                 onClick={handleLogout}
                             >
                                 Đăng xuất

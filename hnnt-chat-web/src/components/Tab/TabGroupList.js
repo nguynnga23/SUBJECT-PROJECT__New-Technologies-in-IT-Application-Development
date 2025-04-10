@@ -24,33 +24,33 @@ function TabGroupList(props) {
     } = props;
 
     return (
-        <div className="bg-white w-full rounded-lg">
+        <div className="bg-white dark:bg-gray-800 w-full rounded-lg">
             <div className="p-4">
                 <div className="flex">
-                    <div className="w-1/2 flex items-center group hover:bg-gray-100 p-1 rounded-lg border-2 focus-within:border-blue-400">
+                    <div className="w-1/2 flex items-center group hover:bg-gray-100 dark:hover:bg-gray-600 p-1 rounded-lg border-2 focus-within:border-blue-400">
                         <CiSearch size={20} />
                         <input
                             type="text"
                             placeholder="Tìm kiếm..."
-                            className="w-full group-hover:bg-gray-100 border-none outline-none p-1 placeholder:text-sm"
+                            className="w-full group-hover:bg-gray-100 dark:group-hover:bg-gray-600 dark:bg-gray-800 border-none outline-none p-1 placeholder:text-sm"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
                         {search ? (
                             <MdCancel
                                 size={20}
-                                className="text-gray-500 hover:text-blue-600"
+                                className="text-gray-500 dark:text-gray-100 hover:text-blue-600"
                                 onClick={() => setSearch('')}
                             />
                         ) : null}
                     </div>
 
-                    <div className="w-1/4 flex items-center group hover:bg-gray-100 p-1 rounded-lg border-2 focus-within:border-blue-400 text-gray-500 ml-2">
+                    <div className="w-1/4 flex items-center group hover:bg-gray-100 dark:hover:bg-gray-600 p-1 rounded-lg border-2 focus-within:border-blue-400 text-gray-500 dark:text-gray-50 ml-2">
                         <IoSwapVertical size={20} />
                         <Select
                             value={filterName}
                             onChange={(e) => setFilterName(e.target.value)}
-                            className="border-none outline-none p-1 w-full group-hover:bg-gray-100 "
+                            className="border-none outline-none p-1 w-full group-hover:bg-gray-100 dark:group-hover:bg-gray-600"
                             sx={{
                                 boxShadow: 'none',
                                 color: 'gray',
@@ -82,12 +82,12 @@ function TabGroupList(props) {
                         </Select>
                     </div>
 
-                    <div className="w-1/4 flex items-center group hover:bg-gray-100 p-1 rounded-lg border-2 focus-within:border-blue-400 text-gray-500 ml-2">
+                    <div className="w-1/4 flex items-center group hover:bg-gray-100 dark:hover:bg-gray-600 p-1 rounded-lg border-2 focus-within:border-blue-400 text-gray-500 dark:text-gray-50 ml-2">
                         <CiFilter size={20} />
                         <Select
                             value={filter}
                             onChange={(e) => setFilter(e.target.value)}
-                            className="border-none outline-none p-1 w-full group-hover:bg-gray-100 "
+                            className="border-none outline-none p-1 w-full group-hover:bg-gray-100 dark:group-hover:bg-gray-600"
                             sx={{
                                 boxShadow: 'none',
                                 color: 'gray',
@@ -155,7 +155,7 @@ function TabGroupList(props) {
             {/* item trong danh sách nhóm */}
             {sortGroupsByName().map((group, index) => (
                 <div className="mt-4">
-                    <div className="flex items-center space-x-2 mt-3 px-4 cursor-pointer hover:bg-gray-100 py-2">
+                    <div className="flex items-center space-x-2 mt-3 px-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 py-2">
                         <AvatarGroup
                             total={group.members.length}
                             sx={{ '& .MuiAvatar-root': { width: 20, height: 20, fontSize: 10 } }}

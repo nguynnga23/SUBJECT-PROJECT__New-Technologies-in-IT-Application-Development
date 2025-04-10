@@ -20,6 +20,7 @@ export default function LoginScreen() {
 
       // Lưu token vào AsyncStorage
       await AsyncStorage.setItem('token', token);
+      await AsyncStorage.setItem('user', JSON.stringify(user));
 
       Alert.alert('Login Successful', `Welcome, ${user.name}!`);
       // Điều hướng đến màn hình chính

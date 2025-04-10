@@ -101,7 +101,7 @@ function ModalEditAvatar({ image, setIsType, onClose }) {
             <div className="border-t pt-2 flex justify-end mt-auto">
                 <button
                     onClick={() => setIsType('avatar')}
-                    className="bg-gray-200 hover:bg-gray-300 rounded-md flex items-center justify-center gap-2 p-2 cursor-pointer mr-2"
+                    className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-800 rounded-md flex items-center justify-center gap-2 p-2 cursor-pointer mr-2"
                 >
                     <p className="font-semibold">Hủy</p>
                 </button>
