@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Avatar } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { logout } from '../../auth/services/AuthService';
+
 const MenuItem = ({ icon, title, onPress }) => (
     <TouchableOpacity style={styles.viewProfile} onPress={onPress}>
         <MaterialCommunityIcons name={icon} size={24} color="#396AA5" />
@@ -19,11 +21,14 @@ export default function ProfileScreen() {
         const fetchUserFromStorage = async () => {
             try {
                 const userJson = await AsyncStorage.getItem('user');
-                if (!userJson) throw new Error('User not found in storage');
-
-                const userData = JSON.parse(userJson);
-                console.log(userData);
-                setUser(userData);
+                if (userJson) {
+                    const userData = JSON.parse(userJson);
+                    console.log(userData);
+                    setUser(userData);
+                } else {
+                    console.warn('User not found in storage');
+                    // navigation.navigate('Login'); // Navigate to login screen
+                }
             } catch (error) {
                 console.error('Lỗi lấy user từ AsyncStorage:', error);
             }
@@ -31,6 +36,35 @@ export default function ProfileScreen() {
 
         fetchUserFromStorage();
     }, []);
+
+    const handleLogout = async () => {
+        Alert.alert(
+            'Confirm Logout',
+            'Are you sure you want to log out?',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Logout',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            const token = await AsyncStorage.getItem('token');
+                            if (token) {
+                                await logout(token); // Call the logout API
+                            }
+                            await AsyncStorage.removeItem('user');
+                            await AsyncStorage.removeItem('token');
+                            navigation.navigate('Login');
+                        } catch (error) {
+                            console.error('Error during logout:', error);
+                        }
+                    },
+                },
+            ],
+            { cancelable: true },
+        );
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.viewProfileWrapper}>
@@ -45,7 +79,9 @@ export default function ProfileScreen() {
                         }}
                     />
                     <Text style={styles.username}>{user?.name || 'Loading...'}</Text>
-                    <MaterialCommunityIcons name="account-switch-outline" size={26} color="#396AA5" />
+                    <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+                        <MaterialCommunityIcons name="logout" size={24} color="#396AA5" />
+                    </TouchableOpacity>
                 </TouchableOpacity>
             </View>
             <View style={styles.actionWrapper}>
@@ -87,5 +123,15 @@ const styles = StyleSheet.create({
         marginLeft: 15,
         fontSize: 16,
         color: '#333',
+    },
+    logoutButton: {
+        padding: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    logoutText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });

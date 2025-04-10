@@ -27,8 +27,9 @@ export default function LoginScreen() {
             Keyboard.dismiss(); // Ẩn bàn phím
             const { token, user } = await login(phone, password);
 
-            // Lưu token vào AsyncStorage
+            // Lưu token và user vào AsyncStorage
             await AsyncStorage.setItem('token', token);
+            await AsyncStorage.setItem('user', JSON.stringify(user)); // Stringify user object
 
             Alert.alert('Login Successful', `Welcome, ${user.name}!`);
             // Điều hướng đến màn hình chính
