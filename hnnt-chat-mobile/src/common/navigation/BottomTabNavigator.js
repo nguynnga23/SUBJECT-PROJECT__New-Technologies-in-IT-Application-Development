@@ -1,6 +1,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient'; // Import LinearGradient
 import ContactScreen from '../../features/contact/screens/ContactScreen';
 import ProfileScreen from '../../features/profile/screens/ProfileScreen';
 import MessageStackNavigator from '../../features/message/components/MessageStackNavigator';
@@ -19,9 +20,14 @@ export default function BottomTabNavigator() {
     return (
         <Tab.Navigator
             screenOptions={({ route }) => ({
-                headerStyle: {
-                    backgroundColor: '#005ae0',
-                },
+                headerBackground: () => (
+                    <LinearGradient
+                        colors={['#0087FD', '#00ACF4']} // Gradient colors
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }} // Horizontal gradient
+                        style={{ flex: 1 }}
+                    />
+                ),
                 tabBarStyle: { backgroundColor: 'white', height: 60 },
                 tabBarIcon: ({ color, size }) => {
                     let iconName;
