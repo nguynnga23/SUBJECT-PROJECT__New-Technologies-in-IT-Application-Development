@@ -57,10 +57,6 @@ export default function HomeScreen() {
                     ))}
                 </ScrollView>
 
-                <Text style={styles.descriptionText}>
-                    HNNT Chat is your ultimate app for seamless communication and collaboration. Join us today!
-                </Text>
-
                 <View style={styles.dotsContainer}>
                     {images.map((_, index) => (
                         <View
@@ -105,7 +101,7 @@ const styles = StyleSheet.create({
     titleContainer: {
         alignSelf: 'center',
         borderRadius: 10,
-        marginTop: 50,
+        marginTop: 80,
         paddingHorizontal: 20,
         paddingVertical: 10,
     },
@@ -117,8 +113,8 @@ const styles = StyleSheet.create({
     },
     slider: {
         marginTop: 20,
-        marginBottom: 30,
-        maxHeight: 250, // Limit the height of the slider
+        marginBottom: 40,
+        maxHeight: 300, // Limit the height of the slider
     },
     sliderContent: {
         alignItems: 'center', // Center the content vertically
@@ -126,29 +122,21 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     sliderImage: {
-        width: 200,
-        height: 200,
+        width: 250,
+        height: 250,
         marginHorizontal: 0, // Remove extra spacing
         borderRadius: 10,
-    },
-    descriptionText: {
-        fontSize: 15,
-        color: '#555',
-        textAlign: 'center',
-        marginBottom: 20,
-        paddingHorizontal: 20,
     },
     dotsContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginBottom: 20,
+        marginBottom: 30,
     },
     dot: {
         width: 8,
         height: 8,
         borderRadius: 5,
-        marginHorizontal: 10,
-        marginBottom: 20,
+        marginHorizontal: 5,
     },
     activeDot: {
         backgroundColor: '#007AFF',
