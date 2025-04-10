@@ -3,53 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, SectionList, Image } from 're
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
 import friendService from '../../../services/FriendService';
-// Sample data for friend requests
-const receivedRequests = [
-    {
-        title: 'January, 2025',
-        data: [
-            {
-                id: '1',
-                name: 'Bùi Ngọc Thu',
-                date: '17/01',
-                mutual: 'From Mutual group',
-                avatar: 'https://i.pravatar.cc/150?img=5',
-            },
-        ],
-    },
-    {
-        title: 'Older',
-        data: [
-            {
-                id: '2',
-                name: 'BVinh',
-                message: 'Wants to be friends',
-                avatar: 'https://i.pravatar.cc/150?img=6',
-            },
-            {
-                id: '3',
-                name: 'Ngô Quốc Đạt',
-                message: 'Wants to be friends',
-                avatar: 'https://i.pravatar.cc/150?img=7',
-            },
-        ],
-    },
-];
-
-const sentRequests = [
-    {
-        title: 'January, 2025',
-        data: [
-            {
-                id: '4',
-                name: 'Trần Văn An',
-                date: '15/01',
-                mutual: 'From Mutual friends',
-                avatar: 'https://i.pravatar.cc/150?img=8',
-            },
-        ],
-    },
-];
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Sample data for "People You May Know"
 const peopleYouMayKnow = [
@@ -69,23 +23,45 @@ const TabButton = ({ title, isActive, onPress }) => (
 );
 
 // Friend Request Item Component
-const FriendRequestItem = ({ item }) => (
-    <View style={styles.requestItem}>
-        <Image source={{ uri: item.avatar }} style={styles.avatar} />
-        <View style={styles.requestInfo}>
-            <Text style={styles.requestName}>{item.name}</Text>
-            <Text style={styles.requestDetails}>{item.date ? `${item.date} • ${item.mutual}` : item.message}</Text>
+const FriendRequestItem = ({ item }) => {
+    const handleDecline = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            await friendService.cancelFriendRequest(item.requestId, token); // Call cancel API
+            alert('Friend request declined!');
+        } catch (error) {
+            console.error('Error declining friend request:', error);
+        }
+    };
+
+    const handleAccept = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            await friendService.acceptFriendRequest(item.requestId, token); // Call accept API
+            alert('Friend request accepted!');
+        } catch (error) {
+            console.error('Error accepting friend request:', error);
+        }
+    };
+
+    return (
+        <View style={styles.requestItem}>
+            <Image source={{ uri: item.avatar }} style={styles.avatar} />
+            <View style={styles.requestInfo}>
+                <Text style={styles.requestName}>{item.name}</Text>
+                <Text style={styles.requestDetails}>{item.date ? `${item.date} • ${item.mutual}` : item.message}</Text>
+            </View>
+            <View style={styles.actionButtons}>
+                <TouchableOpacity style={styles.declineButton} onPress={handleDecline}>
+                    <Text style={styles.declineText}>Decline</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.acceptButton} onPress={handleAccept}>
+                    <Text style={styles.acceptText}>Accept</Text>
+                </TouchableOpacity>
+            </View>
         </View>
-        <View style={styles.actionButtons}>
-            <TouchableOpacity style={styles.declineButton}>
-                <Text style={styles.declineText}>Decline</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.acceptButton}>
-                <Text style={styles.acceptText}>Accept</Text>
-            </TouchableOpacity>
-        </View>
-    </View>
-);
+    );
+};
 
 // People You May Know Item Component
 const PeopleYouMayKnowItem = ({ item }) => (
@@ -103,30 +79,50 @@ const PeopleYouMayKnowItem = ({ item }) => (
 
 export default function FriendRequestScreen() {
     const [selectedTab, setSelectedTab] = useState('received');
-    const navigation = useNavigation();
+    const [receivedRequests, setReceivedRequests] = useState([]);
     const [sentRequests, setSentRequests] = useState([]);
-    // Determine which list to show based on the selected tab
+    const navigation = useNavigation();
+
+    useEffect(() => {
+        const fetchFriendRequests = async () => {
+            try {
+                const token = await AsyncStorage.getItem('token'); // Retrieve token
+                const userId = await AsyncStorage.getItem('userId'); // Retrieve userId
+                const requests = await friendService.getFriendRequests(token, userId); // Pass userId
+                console.log(requests);
+                setReceivedRequests(requests); // Update received requests
+                setSentRequests(requests); // Update sent requests
+            } catch (error) {
+                console.error('Error fetching friend requests:', error);
+            }
+        };
+
+        fetchFriendRequests();
+    }, []);
 
     const requestsToShow = selectedTab === 'received' ? receivedRequests : sentRequests;
-    useEffect(() => {
-        friendService.getFriendRequests();
-    }, []);
 
     return (
         <View style={styles.container}>
             {/* Tab Navigation */}
             <View style={styles.tabContainer}>
                 <TabButton
-                    title="Received 22"
+                    title={`Received ${receivedRequests.length}`}
                     isActive={selectedTab === 'received'}
                     onPress={() => setSelectedTab('received')}
                 />
-                <TabButton title="Sent 1" isActive={selectedTab === 'sent'} onPress={() => setSelectedTab('sent')} />
+                <TabButton
+                    title={`Sent ${sentRequests.length}`}
+                    isActive={selectedTab === 'sent'}
+                    onPress={() => setSelectedTab('sent')}
+                />
             </View>
 
             {/* Friend Requests List */}
             <SectionList
-                sections={requestsToShow}
+                sections={[
+                    { title: selectedTab === 'received' ? 'Received Requests' : 'Sent Requests', data: requestsToShow },
+                ]}
                 renderItem={({ item }) => <FriendRequestItem item={item} />}
                 renderSectionHeader={({ section: { title } }) => (
                     <View style={styles.sectionHeader}>
@@ -136,23 +132,6 @@ export default function FriendRequestScreen() {
                 keyExtractor={(item) => item.id}
                 style={styles.listContainer}
                 stickySectionHeadersEnabled={true}
-                ListFooterComponent={
-                    <>
-                        {/* See More Button */}
-                        <TouchableOpacity style={styles.seeMoreButton}>
-                            <Text style={styles.seeMoreText}>SEE MORE</Text>
-                            <FontAwesome name="chevron-down" size={16} color="#000" style={styles.seeMoreIcon} />
-                        </TouchableOpacity>
-
-                        {/* People You May Know Section */}
-                        <View style={styles.peopleSection}>
-                            <Text style={styles.peopleSectionTitle}>People you may know</Text>
-                            {peopleYouMayKnow.map((item) => (
-                                <PeopleYouMayKnowItem key={item.id} item={item} />
-                            ))}
-                        </View>
-                    </>
-                }
             />
         </View>
     );

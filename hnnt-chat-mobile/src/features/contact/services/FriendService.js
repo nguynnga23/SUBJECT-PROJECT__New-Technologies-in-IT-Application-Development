@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { localhost } from '../../../utils/localhosts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-const BASE_URL = `http://${localhost}/api/friends`;
+const BASE_URL = `http://${localhost}/api/friends`; // Ensure the correct port is used
 
 const friendService = {
     // Lấy danh sách bạn bè
@@ -20,16 +20,18 @@ const friendService = {
     },
 
     // Lấy danh sách lời mời kết bạn
-    getFriendRequests: async (token) => {
+    getFriendRequests: async (token, userId) => {
         try {
-            const response = await axios.get(`${BASE_URL}/request`, {
+            const response = await axios.get(`${BASE_URL}/request/${userId}`, {
+                // Corrected endpoint
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
             });
-            return response.data;
+            return response.data; // Return the list of friend requests
         } catch (error) {
+            console.error('Error fetching friend requests:', error.response || error.message); // Log full error
             throw error.response?.data || error.message;
         }
     },
