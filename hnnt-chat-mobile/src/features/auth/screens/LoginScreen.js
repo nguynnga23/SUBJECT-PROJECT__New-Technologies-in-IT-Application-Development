@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
     View,
     Text,
@@ -8,6 +8,7 @@ import {
     KeyboardAvoidingView,
     Keyboard,
     Alert,
+    Animated,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
@@ -20,7 +21,24 @@ export default function LoginScreen() {
 
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
     const isFormFilled = phone.length == 10 && password.length >= 8;
+
+    const scaleValue = useRef(new Animated.Value(1)).current;
+
+    const handlePressIn = () => {
+        Animated.spring(scaleValue, {
+            toValue: 0.95,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const handlePressOut = () => {
+        Animated.spring(scaleValue, {
+            toValue: 1,
+            useNativeDriver: true,
+        }).start();
+    };
 
     const handleLogin = async () => {
         try {
@@ -44,20 +62,6 @@ export default function LoginScreen() {
         <SafeAreaView style={styles.container}>
             <SafeAreaProvider>
                 <KeyboardAvoidingView>
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            backgroundColor: '#D6EAF8',
-                            paddingTop: 10,
-                        }}
-                    >
-                        <TouchableOpacity style={{ paddingRight: 10 }} onPress={() => navigation.goBack()}>
-                            <Ionicons name="arrow-back" size={30} color="black" />
-                        </TouchableOpacity>
-                        <Text style={styles.title}>Login</Text>
-                    </View>
-
                     <View style={{ paddingHorizontal: 20, paddingTop: 20 }}>
                         <Text style={styles.description}>Please enter your phone number and password to login</Text>
                     </View>
@@ -73,34 +77,50 @@ export default function LoginScreen() {
                     </View>
 
                     <View style={{ paddingHorizontal: 20 }}>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Password"
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry={true}
-                        />
+                        <View style={styles.inputContainer}>
+                            <TextInput
+                                style={styles.inputPassword}
+                                placeholder="Password"
+                                value={password}
+                                onChangeText={setPassword}
+                                secureTextEntry={!showPassword}
+                            />
+                            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+                                <Ionicons
+                                    name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                                    size={25}
+                                    color="#666"
+                                />
+                            </TouchableOpacity>
+                        </View>
                     </View>
 
                     <View style={{ paddingHorizontal: 20 }}>
                         <TouchableOpacity>
                             <Text
                                 style={styles.forgotPasswordText}
-                                onPress={() => navigation.navigate('ForgotPassword')}
+                                onPress={() => navigation.navigate('Recover password')}
                             >
-                                Forgot password?
+                                Recover password ?
                             </Text>
                         </TouchableOpacity>
                     </View>
 
-                    <View style={{ paddingTop: 60 }}>
-                        <TouchableOpacity
-                            style={[styles.nextButton, isFormFilled ? styles.buttonEnabled : styles.buttonDisabled]}
-                            disabled={!isFormFilled}
-                            onPress={handleLogin}
-                        >
-                            <Text style={styles.nextButtonText}>→</Text>
-                        </TouchableOpacity>
+                    <View style={{ paddingTop: 20 }}>
+                        <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
+                            <TouchableOpacity
+                                style={[
+                                    styles.button,
+                                    isFormFilled ? { backgroundColor: '#007AFF' } : { backgroundColor: '#E5E5E5' },
+                                ]}
+                                disabled={!isFormFilled}
+                                onPressIn={handlePressIn}
+                                onPressOut={handlePressOut}
+                                onPress={handleLogin}
+                            >
+                                <Text style={styles.buttonText}>Login</Text>
+                            </TouchableOpacity>
+                        </Animated.View>
                     </View>
                 </KeyboardAvoidingView>
             </SafeAreaProvider>
@@ -125,37 +145,43 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     input: {
-        height: 40,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
-        marginBottom: 15,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        padding: 10,
+        borderRadius: 5,
+        marginBottom: 10,
         fontSize: 16,
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        marginBottom: 10,
         paddingHorizontal: 10,
+    },
+    inputPassword: {
+        flex: 1,
+        fontSize: 16,
+        paddingVertical: 10,
+    },
+    eyeIcon: {
+        padding: 5,
     },
     forgotPasswordText: {
         color: '#007AFF',
         fontSize: 14,
         marginBottom: 20,
     },
-    nextButton: {
-        position: 'absolute',
-        bottom: 30,
-        right: 30,
-        borderRadius: 50,
-        width: 60,
-        height: 60,
-        justifyContent: 'center',
+    button: {
+        padding: 15,
+        borderRadius: 5,
         alignItems: 'center',
+        marginHorizontal: 20,
     },
-    buttonEnabled: {
-        backgroundColor: '#007AFF',
-    },
-    buttonDisabled: {
-        backgroundColor: '#E5E5E5',
-    },
-    nextButtonText: {
+    buttonText: {
         color: '#fff',
-        fontSize: 28,
         fontWeight: 'bold',
     },
 });

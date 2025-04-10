@@ -30,13 +30,29 @@ export default function AppNavigator() {
         <NavigationContainer>
             <Stack.Navigator initialRouteName="HomeScreen">
                 <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false }} />
-                <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+                <Stack.Screen
+                    name="Login"
+                    component={LoginScreen}
+                    options={{
+                        headerShown: true,
+                    }}
+                />
                 <Stack.Screen name="HomeTab" component={BottomTabNavigator} options={{ headerShown: false }} />
 
-                <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} />
+                <Stack.Screen
+                    name="Register"
+                    component={SignUpScreen}
+                    options={{
+                        headerShown: true,
+                    }}
+                />
                 <Stack.Screen name="OTPConfirm" component={OTPConfirmScreen} options={{ headerShown: false }} />
 
-                <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ headerShown: false }} />
+                <Stack.Screen
+                    name="Recover password"
+                    component={ForgotPasswordScreen}
+                    options={{ headerShown: true }}
+                />
                 <Stack.Screen
                     name="Forgot_OTPConfirm"
                     component={Forgot_OTPConfirmScreen}

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from '@react-navigation/native';
 import { forgotPassword } from '../../services/ForgotPasswordService';
 
 export default function ForgotPasswordScreen() {
@@ -20,20 +20,20 @@ export default function ForgotPasswordScreen() {
 
     const handleNext = async () => {
         if (!isPhoneValid && !isEmailValid) {
-            Alert.alert("Invalid Input", "Please enter a valid phone number or email.");
+            Alert.alert('Invalid Input', 'Please enter a valid phone number or email.');
             return;
         }
 
         setIsLoading(true); // Bắt đầu trạng thái loading
         try {
             const response = await forgotPassword(phone, email);
-            if (response.message === "Mã OTP đã được gửi qua email!") {
+            if (response.message === 'Mã OTP đã được gửi qua email!') {
                 navigation.navigate('Forgot_OTPConfirm', { email, phone }); // Pass info to Forgot_OTPConfirm
             } else {
-                Alert.alert("Error", "Failed to process request.");
+                Alert.alert('Error', 'Failed to process request.');
             }
         } catch (error) {
-            Alert.alert("Error", "Phone number not registered yet!");
+            Alert.alert('Error', 'Phone number not registered yet!');
         } finally {
             setIsLoading(false); // Kết thúc trạng thái loading
         }
@@ -42,14 +42,6 @@ export default function ForgotPasswordScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <SafeAreaProvider>
-                <View style={{ paddingTop: 10 }}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                        <Ionicons name="arrow-back" size={30} color="black" />
-                    </TouchableOpacity>
-                </View>
-
-                <Text style={styles.title}>Enter phone number</Text>
-
                 <TextInput
                     style={[styles.input, { borderColor: isPhoneValid || phone.length === 0 ? '#ccc' : 'red' }]}
                     placeholder="Your phone number"
@@ -57,9 +49,7 @@ export default function ForgotPasswordScreen() {
                     value={phone}
                     onChangeText={setPhone}
                 />
-                {!isPhoneValid && phone.length > 0 && (
-                    <Text style={styles.errorText}>Invalid phone number</Text>
-                )}
+                {!isPhoneValid && phone.length > 0 && <Text style={styles.errorText}>Invalid phone number</Text>}
 
                 <TextInput
                     style={[styles.input, { borderColor: isEmailValid || email.length === 0 ? '#ccc' : 'red' }]}
@@ -68,24 +58,23 @@ export default function ForgotPasswordScreen() {
                     value={email}
                     onChangeText={setEmail}
                 />
-                {!isEmailValid && email.length > 0 && (
-                    <Text style={styles.errorText}>Invalid email</Text>
-                )}
+                {!isEmailValid && email.length > 0 && <Text style={styles.errorText}>Invalid email</Text>}
 
                 {/* Nút Tiếp tục */}
                 <TouchableOpacity
-                    style={[styles.button, { backgroundColor: isPhoneValid && isEmailValid && !isLoading ? '#007AFF' : '#D3D3D3' }]}
+                    style={[
+                        styles.button,
+                        { backgroundColor: isPhoneValid && isEmailValid && !isLoading ? '#007AFF' : '#D3D3D3' },
+                    ]}
                     disabled={!isPhoneValid || !isEmailValid || isLoading}
                     onPress={handleNext}
                 >
-                    <Text style={styles.buttonText}>
-                        {isLoading ? 'Processing...' : 'Next'}
-                    </Text>
+                    <Text style={styles.buttonText}>{isLoading ? 'Processing...' : 'Next'}</Text>
                 </TouchableOpacity>
             </SafeAreaProvider>
         </SafeAreaView>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 20, backgroundColor: '#fff' },
