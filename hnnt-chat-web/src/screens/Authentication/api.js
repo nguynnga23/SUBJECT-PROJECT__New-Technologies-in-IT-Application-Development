@@ -30,6 +30,48 @@ export const logout = async () => {
     return response.json();
 };
 
+export const register = async (number, password, email, name) => {
+    const response = await fetch('http://localhost:4000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ number, password, email, name }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Register failed');
+    }
+
+    return response.json();
+};
+
+export const sendOTPEmail = async (email) => {
+    const response = await fetch('http://localhost:4000/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Send OTP failed');
+    }
+
+    return response.json();
+};
+
+export const verifyOTP = async (email, otp) => {
+    const response = await fetch('http://localhost:4000/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Verify OTP failed');
+    }
+
+    return response.json();
+};
+
 export const changePasswordWithToken = async (currentPassWord, newPassword) => {
     const token = localStorage.getItem('token');
     const response = await fetch('http://localhost:4000/api/auth/change-password-with-token', {
