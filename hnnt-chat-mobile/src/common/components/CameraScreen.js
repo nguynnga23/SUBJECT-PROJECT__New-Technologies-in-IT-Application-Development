@@ -220,7 +220,7 @@ export default function CameraScreen() {
             </CameraView>
         </View>
     );
-}
+};
 
 
 const styles = StyleSheet.create({

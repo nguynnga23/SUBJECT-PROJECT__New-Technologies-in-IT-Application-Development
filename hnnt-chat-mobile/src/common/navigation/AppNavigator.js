@@ -17,9 +17,9 @@ import PersonalInformation from '../../features/profile/screens/personal-informa
 import EditPersonalInformation from '../../features/profile/screens/personal-information/EditPersonalInformation';
 import ForgotPasswordScreen from '../../features/auth/screens/forgot/ForgotPasswordScreen';
 import Forgot_OTPConfirmScreen from '../../features/auth/screens/forgot/Forgot_OTPConfirmScreen';
-import CameraScreen from '../components/CameraScreen';
 import ComfirmLoginQR from '../components/ComfirmLoginQR';
 
+import CameraScreen from '../components/CameraScreen';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {

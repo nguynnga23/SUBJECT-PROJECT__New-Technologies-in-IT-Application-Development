@@ -8,7 +8,7 @@ import dotenv from 'dotenv';
 import { AuthRequest } from '../types/authRequest';
 
 import { createClient } from 'redis';
-const { v4: uuidv4 } = require('uuid');
+import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
 
