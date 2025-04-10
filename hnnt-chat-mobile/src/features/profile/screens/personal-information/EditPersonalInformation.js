@@ -6,6 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { RadioButton } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ProfileService from '../../services/ProfileService';
+import { format } from 'date-fns'; // Import thư viện date-fns
 
 export default function EditPersonalInformation({ navigation }) {
     const [user, setUser] = useState(null);
@@ -35,12 +36,14 @@ export default function EditPersonalInformation({ navigation }) {
 
         fetchUserFromStorage();
     }, []);
-
+    const formattedBirthDate = user?.birthDate
+        ? format(new Date(user.birthDate), 'dd/MM/yyyy') // Format as dd/MM/yyyy
+        : 'Chưa cập nhật';
     const initialFormData = useMemo(
         () => ({
             avatar: user?.avatar || 'https://i.pravatar.cc/150?img=20',
             name: user?.name || '',
-            birthday: user?.birthDate || '',
+            birthday: formattedBirthDate || '',
             gender: user?.gender || 'Female',
         }),
         [user],
@@ -99,16 +102,22 @@ export default function EditPersonalInformation({ navigation }) {
                 await ProfileService.updateAvatar(token, selectedImage);
             }
 
+            const parsedBirthday = formData.birthday
+                ? new Date(formData.birthday.split('/').reverse().join('-')) // Parse dd/MM/yyyy to yyyy-MM-dd
+                : null;
+
             const updatedUser = {
-                ...formData,
-                avatar: selectedImage || formData.avatar,
-                birthDate: formData.birthday ? new Date(formData.birthday).toISOString() : null,
+                name: formData.name,
+                gender: formData.gender,
+                birthDate: parsedBirthday ? parsedBirthday.toISOString() : null,
             };
 
             const response = await ProfileService.updateProfile(token, updatedUser);
             await AsyncStorage.setItem('user', JSON.stringify(response));
             setUser(response);
-            navigation.goBack();
+            navigation.goBack(); // Navigate back to ProfileScreen
+            // Navigate back to PersonalInformation with updated user data
+            // navigation.navigate('Personal Information', { user: response });
         } catch (error) {
             console.error('Error updating profile:', error);
             alert('Failed to update profile. Please try again.');
@@ -149,13 +158,18 @@ export default function EditPersonalInformation({ navigation }) {
                 {showDatePicker && (
                     <View style={styles.footerDatePicker}>
                         <DateTimePicker
-                            value={formData.birthday ? new Date(formData.birthday) : new Date()}
+                            value={
+                                formData.birthday
+                                    ? new Date(formData.birthday.split('/').reverse().join('-'))
+                                    : new Date()
+                            } // Parse dd/MM/yyyy to yyyy-MM-dd
                             mode="date"
                             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                             onChange={(event, selectedDate) => {
                                 setShowDatePicker(false);
                                 if (selectedDate) {
-                                    handleChange('birthday', selectedDate.toISOString().split('T')[0]);
+                                    const formattedDate = format(selectedDate, 'dd/MM/yyyy'); // Format as dd/MM/yyyy
+                                    handleChange('birthday', formattedDate);
                                 }
                             }}
                         />

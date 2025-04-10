@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useRoute } from '@react-navigation/native';
-
+import { format } from 'date-fns'; // Import thư viện date-fns
 // Component hiển thị thông tin
 const InfoItem = ({ icon, title, value }) => (
     <View style={styles.infoContainer}>
@@ -19,7 +19,10 @@ export default function PersonalInformation() {
     const navigation = useNavigation();
     const route = useRoute();
     const { user } = route.params || {}; // fallback nếu chưa có
-
+    // Định dạng ngày sinh
+    const formattedBirthDate = user?.birthDate
+        ? format(new Date(user.birthDate), 'dd/MM/yyyy') // Định dạng mm/dd/yyyy
+        : 'Chưa cập nhật';
     return (
         <View style={styles.container}>
             {/* Avatar */}
@@ -27,7 +30,7 @@ export default function PersonalInformation() {
 
             {/* Thông tin cá nhân */}
             <InfoItem icon="account-circle-outline" title="Zalo name" value={user?.name || 'Chưa cập nhật'} />
-            <InfoItem icon="calendar-outline" title="Birthday" value={user?.birthday || 'Chưa cập nhật'} />
+            <InfoItem icon="calendar-outline" title="Birthday" value={formattedBirthDate || 'Chưa cập nhật'} />
             <InfoItem icon="gender-male-female" title="Gender" value={user?.gender || 'Chưa cập nhật'} />
 
             {/* Edit Button */}

@@ -4,11 +4,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const BASE_URL = `http://${localhost}/api/user`;
 
 const ProfileService = {
-    updateProfile: async (token, userUpdate) => {
+    updateProfile: async (token, { name, gender, birthDate }) => {
         try {
             const response = await axios.put(
                 `${BASE_URL}/update-user`,
-                userUpdate, // truyền body ở đây
+                { name, gender, birthDate }, // align with userController
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
