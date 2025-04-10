@@ -121,86 +121,98 @@ export default function PrivateChatScreen() {
                 <FlatList
                     data={messages}
                     keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => (
-                        <TouchableOpacity
-                            onLongPress={() =>
-                                handleLongPressMessage(
-                                    item.id,
-                                    messages,
-                                    setMessages,
-                                    setReplyingMessage,
-                                    setModalVisible,
-                                )
-                            }
-                        >
-                            <View style={[styles.messageContainer, item.isMe ? styles.myMessage : styles.otherMessage]}>
-                                {item.audioUri && (
-                                    <TouchableOpacity
-                                        onPress={() => playAudio(item.audioUri)}
-                                        style={styles.playButton}
-                                    >
-                                        <Ionicons name="play-circle" size={30} color="blue" />
-                                    </TouchableOpacity>
-                                )}
+                    renderItem={({ item }) => {
+                        const hasReaction = Object.keys(getReactionsForMessage(item.id)).length > 0;
+                        return (
+                            <TouchableOpacity
+                                onLongPress={() =>
+                                    handleLongPressMessage(
+                                        item.id,
+                                        messages,
+                                        setMessages,
+                                        setReplyingMessage,
+                                        setModalVisible,
+                                    )
+                                }
+                            >
+                                <View
+                                    style={[
+                                        styles.messageContainer,
+                                        item.isMe ? styles.myMessage : styles.otherMessage,
+                                    ]}
+                                >
+                                    {item.audioUri && (
+                                        <TouchableOpacity
+                                            onPress={() => playAudio(item.audioUri)}
+                                            style={styles.playButton}
+                                        >
+                                            <Ionicons name="play-circle" size={30} color="blue" />
+                                        </TouchableOpacity>
+                                    )}
 
-                                {item.image && (
-                                    <TouchableOpacity onPress={() => setSelectedImage(item.image)}>
-                                        <Image
-                                            source={{ uri: item.image }}
-                                            style={{ width: 200, height: 200, borderRadius: 10 }}
-                                        />
-                                    </TouchableOpacity>
-                                )}
+                                    {item.image && (
+                                        <TouchableOpacity onPress={() => setSelectedImage(item.image)}>
+                                            <Image
+                                                source={{ uri: item.image }}
+                                                style={{ width: 200, height: 200, borderRadius: 10 }}
+                                            />
+                                        </TouchableOpacity>
+                                    )}
 
-                                {item.fileUri && (
-                                    <TouchableOpacity
-                                        onPress={() => downloadFile(item.fileUri, item.fileName)}
-                                        style={styles.fileContainer}
-                                    >
-                                        <Ionicons name="document-text-outline" size={24} color="blue" />
-                                        <Text style={styles.fileName}>
-                                            {item.fileName} ({(item.fileSize / 1024).toFixed(2)} KB)
-                                        </Text>
-                                    </TouchableOpacity>
-                                )}
+                                    {item.fileUri && (
+                                        <TouchableOpacity
+                                            onPress={() => downloadFile(item.fileUri, item.fileName)}
+                                            style={styles.fileContainer}
+                                        >
+                                            <Ionicons name="document-text-outline" size={24} color="blue" />
+                                            <Text style={styles.fileName}>
+                                                {item.fileName} ({(item.fileSize / 1024).toFixed(2)} KB)
+                                            </Text>
+                                        </TouchableOpacity>
+                                    )}
 
-                                {/* Nội dung tin nhắn */}
-                                <Text style={styles.message}>{item.message}</Text>
+                                    {/* Nội dung tin nhắn */}
+                                    <Text style={styles.message}>{item.message}</Text>
 
-                                {/* Hiển thị reaction và thời gian */}
-                                <View style={styles.timeReactionContainer}>
-                                    <Text style={styles.time}>{item.time}</Text>
+                                    {/* Hiển thị reaction và thời gian */}
+                                    <View style={styles.timeReactionContainer}>
+                                        <Text style={styles.time}>{item.time}</Text>
 
-                                    {/* Hiển thị reaction nếu có */}
-                                    {Object.keys(getReactionsForMessage(item.id)).length > 0 && (
-                                        <View style={styles.reactionContainer}>
-                                            {Object.entries(getReactionsForMessage(item.id)).map(([emoji, count]) => (
-                                                <TouchableOpacity
-                                                    key={emoji}
-                                                    onPress={() => deleteReaction(item.id, emoji)}
-                                                >
-                                                    <Text style={styles.reactionText}>
-                                                        {emoji} {count}
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            ))}
-                                        </View>
+                                        {/* Hiển thị reaction nếu có */}
+                                        {hasReaction && (
+                                            <View style={styles.reactionContainer}>
+                                                {Object.entries(getReactionsForMessage(item.id)).map(
+                                                    ([emoji, count]) => (
+                                                        <TouchableOpacity
+                                                            key={emoji}
+                                                            onPress={() => deleteReaction(item.id, emoji)}
+                                                        >
+                                                            <Text style={styles.reactionText}>
+                                                                {emoji} {count}
+                                                            </Text>
+                                                        </TouchableOpacity>
+                                                    ),
+                                                )}
+                                            </View>
+                                        )}
+                                    </View>
+
+                                    {/* Nút thả reaction */}
+                                    {!hasReaction && (
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                showReactionOptions(item.id);
+                                                setMessageId(item.id);
+                                            }}
+                                            style={{ position: 'absolute', right: 5, bottom: 10 }}
+                                        >
+                                            <FontAwesome name="smile-o" size={20} color="gray" />
+                                        </TouchableOpacity>
                                     )}
                                 </View>
-
-                                {/* Nút thả reaction */}
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        showReactionOptions(item.id);
-                                        setMessageId(item.id);
-                                    }}
-                                    style={{ position: 'absolute', right: 5, bottom: 10 }}
-                                >
-                                    <FontAwesome name="smile-o" size={20} color="gray" />
-                                </TouchableOpacity>
-                            </View>
-                        </TouchableOpacity>
-                    )}
+                            </TouchableOpacity>
+                        );
+                    }}
                 />
 
                 <View style={styles.inputContainer}>
@@ -327,130 +339,111 @@ export default function PrivateChatScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f4f4f4' },
+    container: { flex: 1, backgroundColor: '#E4E8F3' },
 
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: 10,
         paddingHorizontal: 10,
+        backgroundColor: '#e6f7ff', // Light blue header background
     },
 
     recipientName: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: 'white',
+        color: '#007AFF', // Match header text color
         flex: 1,
         textAlign: 'center',
     },
 
-    messageContainer: { padding: 10, marginVertical: 5, borderRadius: 5, maxWidth: '75%', paddingRight: 30 },
-
-    myMessage: { backgroundColor: '#aae7f3', alignSelf: 'flex-end', marginRight: 10 },
-
-    otherMessage: { backgroundColor: 'white', alignSelf: 'flex-start', marginLeft: 10 },
-
-    message: { fontSize: 16, marginVertical: 3 },
-
-    time: { fontSize: 12, color: 'gray', textAlign: 'right' },
-
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 10,
-        backgroundColor: 'white',
-        borderTopWidth: 1,
-        borderColor: '#ddd',
-    },
-    input: {
-        flex: 1,
-        paddingHorizontal: 10,
-        backgroundColor: '#f1f1f1',
-        borderRadius: 20,
-        height: 40,
-        marginHorizontal: 10,
-    },
-    modalContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    },
-    modalContent: {
-        width: '90%',
-        backgroundColor: 'white',
-        borderRadius: 10,
-        padding: 20,
-        alignItems: 'center',
-        elevation: 5,
+    messageContainer: {
+        padding: 12,
+        marginVertical: 6,
+        borderRadius: 15,
+        maxWidth: '75%',
+        position: 'relative',
+        borderWidth: 1, // Add border
+        borderColor: '#C6C6C6', // Border color
     },
 
-    modalRecordContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0,0.5)',
+    myMessage: {
+        backgroundColor: '#d1f0ff', // Light blue for sent messages
+        alignSelf: 'flex-end',
+        marginRight: 10,
     },
-    modalRecordTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        color: '#fff',
+
+    otherMessage: {
+        backgroundColor: '#ffffff', // White for received messages
+        alignSelf: 'flex-start',
+        marginLeft: 10,
     },
-    recordingText: {
+
+    message: {
         fontSize: 16,
-        color: 'red',
-        marginBottom: 10,
+        color: '#333', // Neutral text color
+        lineHeight: 22,
     },
-    buttonContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    button: {
-        backgroundColor: '#3498db',
-        padding: 10,
-        margin: 10,
-        borderRadius: 5,
-    },
-    cancelButton: {
-        backgroundColor: 'red',
-        padding: 10,
-        margin: 10,
-        borderRadius: 5,
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: 16,
-    },
-    fullImage: {
-        width: '90%',
-        height: '80%',
-    },
-    fileContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#f0f0f0',
-        padding: 10,
-        borderRadius: 8,
-        marginVertical: 5,
-        maxWidth: '80%',
-    },
+
     timeReactionContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between', // Căn time và reaction về hai phía
+        justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: 5,
+        marginTop: 8,
+    },
+
+    time: {
+        fontSize: 12,
+        color: '#999', // Softer gray for timestamps
     },
 
     reactionContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 16,
     },
 
     reactionText: {
-        marginLeft: 5, // Tạo khoảng cách giữa các reaction
+        marginLeft: 5,
         fontSize: 14,
-        color: 'gray',
+        color: '#666', // Softer gray for reactions
+    },
+
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 10,
+        backgroundColor: '#ffffff',
+        borderTopWidth: 1,
+        borderColor: '#ddd',
+    },
+
+    input: {
+        flex: 1,
+        paddingHorizontal: 15,
+        backgroundColor: '#f1f1f1',
+        borderRadius: 25,
+        height: 40,
+        marginHorizontal: 10,
+        fontSize: 16,
+    },
+
+    playButton: {
+        marginRight: 10,
+    },
+
+    fileContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f0f0f0',
+        padding: 10,
+        borderRadius: 10,
+        marginVertical: 5,
+        maxWidth: '80%',
+    },
+
+    fileName: {
+        marginLeft: 10,
+        fontSize: 14,
+        color: '#007AFF', // Match header accent color
     },
 });
