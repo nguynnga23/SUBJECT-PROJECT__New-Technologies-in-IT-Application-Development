@@ -38,7 +38,7 @@ function PopupMenuForMess({ setShowPopup, setHoveredMessage, chat }) {
             <div className="">
                 <ul>
                     <li
-                        className="flex text-[12px] items-center px-4 py-2 hover:bg-gray-100 cursor-pointer rounded-lg"
+                        className="flex text-[12px] items-center px-4 py-2 hover:bg-gray-100 hover:dark:bg-gray-700 cursor-pointer rounded-lg"
                         onClick={() => {
                             priorityChatOfUser(chat.chatId);
                             setShowPopup(false); // Đóng popup khi click ra ngoài
@@ -49,7 +49,7 @@ function PopupMenuForMess({ setShowPopup, setHoveredMessage, chat }) {
                         {!chat.priority ? 'Chuyển qua ưu tiên' : 'Chuyển qua khác'}
                     </li>
                     <li
-                        className="flex text-[12px] items-center px-4 py-2 hover:bg-gray-100 cursor-pointer rounded-lg"
+                        className="flex text-[12px] items-center px-4 py-2 hover:bg-gray-100 hover:dark:bg-gray-700 cursor-pointer rounded-lg"
                         onClick={() => {
                             pinMessage(chat.chatId);
                             setShowPopup(false); // Đóng popup khi click ra ngoài
@@ -60,7 +60,7 @@ function PopupMenuForMess({ setShowPopup, setHoveredMessage, chat }) {
                         {!chat.pin ? 'Ghim hội thoại' : 'Bỏ ghim hội thoại'}
                     </li>
                     <li
-                        className="flex text-[12px] items-center px-4 py-2 hover:bg-gray-100 cursor-pointer rounded-lg"
+                        className="flex text-[12px] items-center px-4 py-2 hover:bg-gray-100 hover:dark:bg-gray-700 cursor-pointer rounded-lg"
                         onClick={() => {
                             notifyMessage(chat.chatId);
                             setShowPopup(false); // Đóng popup khi click ra ngoài
@@ -71,7 +71,7 @@ function PopupMenuForMess({ setShowPopup, setHoveredMessage, chat }) {
                         {!chat.notify ? 'Mở thông báo' : 'Tắt thông báo'}
                     </li>
                     <li
-                        className="flex text-[12px] items-center text-red-500 px-4 py-2 hover:bg-gray-100 cursor-pointer rounded-lg"
+                        className="flex text-[12px] items-center text-red-500 px-4 py-2 hover:bg-gray-100 hover:dark:bg-gray-700 cursor-pointer rounded-lg"
                         onClick={() => {
                             deleteAllChatOfChat(chat.chatId);
                         }}

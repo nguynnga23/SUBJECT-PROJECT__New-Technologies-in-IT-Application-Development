@@ -15,14 +15,14 @@ export const initSocket = (server: HttpServer) => {
         console.log(`⚡ Client connected: ${socket.id}`);
 
         socket.on('send_message', (message) => {
-            console.log('📨 Tin nhắn mới:', message);
             io.emit('receive_message', message);
         });
 
-        socket.on('read_message', ({ chatId }) => {
-            console.log(`👀 Tin nhắn ${chatId} đã đọc`);
-            io.to(chatId).emit('read_message', { chatId });
-        });
+        // socket.on('read_chat', ({ chatId, userId }) => {
+        //     console.log('ac', chatId);
+
+        //     io.emit('receive_read_chat', { chatId, userId });
+        // });
 
         socket.on('disconnect', () => {
             console.log(`❌ Client disconnected: ${socket.id}`);

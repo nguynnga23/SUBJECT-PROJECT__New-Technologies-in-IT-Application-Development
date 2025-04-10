@@ -1,18 +1,20 @@
 import { PrismaClient } from '@prisma/client';
 import { log } from 'node:console';
 import { v4 as uuidv4 } from 'uuid';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
     console.log('🌱 Seeding database...');
+    const hashedPassword = await bcrypt.hash('123', 10);
 
     const user1 = await prisma.account.create({
         data: {
             id: uuidv4(),
             name: 'Nguyễn Lê Nhật Huy',
             number: '1111111111',
-            password: '123',
+            password: hashedPassword,
             email: 'email1@gmail.com',
             avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMZIA8q5YZgirXxhzjkXkoVG1LuwLd4WYkjg&s',
             status: 'no active',
@@ -27,7 +29,7 @@ async function main() {
             id: uuidv4(),
             name: 'Nguyễn Thị Nga',
             number: '2222222222',
-            password: '123',
+            password: hashedPassword,
             email: 'email2@gmail.com',
             avatar: 'https://www.catster.com/wp-content/uploads/2023/11/Beluga-Cat-e1714190563227.webp',
             status: 'no active',
@@ -42,7 +44,7 @@ async function main() {
             id: uuidv4(),
             name: 'Nguyễn Thiên Tứ',
             number: '3333333333',
-            password: '123',
+            password: hashedPassword,
             email: 'email3@gmail.com',
             avatar: 'https://m.media-amazon.com/images/I/518K-+yYl2L._AC_SL1000_.jpg',
             status: 'no active',
@@ -57,7 +59,7 @@ async function main() {
             id: uuidv4(),
             name: 'Phạm Lê Thanh Nhiệt',
             number: '4444444444',
-            password: '123',
+            password: hashedPassword,
             email: 'email4@gmail.com',
             avatar: 'https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/474174ewO/anh-meme-meo-khoc-cuc-cute_042216244.jpg',
             status: 'no active',

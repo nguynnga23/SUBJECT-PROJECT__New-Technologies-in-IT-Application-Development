@@ -5,14 +5,16 @@ import { BsGripVertical } from 'react-icons/bs';
 import PopupCategoryColor from './PopupCategoryColor';
 import { useDispatch } from 'react-redux';
 import { getAllCategory, addCategory, deleteCategory } from '../../screens/Messaging/api';
+import { setCategory } from '../../redux/slices/categorySlice';
 
 const PopupManageCategory = ({ setIsOpenManageCategory }) => {
     const [data, setData] = useState([]);
-    const [error, setError] = useState([]);
     const [newCategory, setNewCategory] = useState('');
     const [hoveredId, setHoveredId] = useState(null);
     const [showPopupColor, setShowPopupColor] = useState(false);
     const [color, setColor] = useState('');
+
+    const dispatch = useDispatch();
 
     useEffect(() => {
         const fetchChats = async () => {
@@ -20,7 +22,7 @@ const PopupManageCategory = ({ setIsOpenManageCategory }) => {
                 const chats = await getAllCategory();
                 setData(chats);
             } catch (err) {
-                setError(err.message);
+                console.log(err);
             }
         };
 
@@ -43,6 +45,7 @@ const PopupManageCategory = ({ setIsOpenManageCategory }) => {
     // Xóa phân loại
     const handleDeleteCategory = (id) => {
         deleteCategory(id);
+        dispatch(setCategory([]));
     };
 
     return (
