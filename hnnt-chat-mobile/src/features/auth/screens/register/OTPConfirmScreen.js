@@ -1,15 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { verifyOtp, sendOtp, register } from '../../services/RegisterService';
 
 export default function OTPConfirmScreen() {
     const navigation = useNavigation();
+    const route = useRoute();
+    const { email, phone, password } = route.params; // Lấy email từ route params
     const [otp, setOtp] = useState('');
+    const [isResending, setIsResending] = useState(false);
+    const [countdown, setCountdown] = useState(300); // 5 phút = 300 giây
 
     // Kiểm tra nếu đã nhập đủ 6 số thì mới cho bấm Next
     const isButtonEnabled = otp.length === 6;
+
+    useEffect(() => {
+        // Bắt đầu đếm ngược khi render màn hình
+        const timer = setInterval(() => {
+            setCountdown((prev) => {
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer); // Dọn dẹp timer khi component bị unmount
+    }, [countdown]);
+
+    const formatTime = (seconds) => {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+    };
+
+    const handleVerifyOtp = async () => {
+        try {
+            const response = await verifyOtp(email, otp);
+            if (response.success) {
+                const registerResponse = await register(email, phone, password);
+                if (registerResponse.message === "Đăng ký thành công!") {
+                    Alert.alert("Success", "Registration successful! Now you can log in.");
+                    navigation.navigate('HomeScreen'); // Điều hướng đến HomeScreen
+                } else {
+                    Alert.alert("Error", "Registration failed.");
+                }
+            } else {
+                Alert.alert("Error", response.message || "Invalid OTP.");
+            }
+        } catch (error) {
+            Alert.alert("Error", "An error occurred while verifying OTP.");
+        }
+    };
+
+    const handleResendOtp = async () => {
+        if (countdown > 0) return; // Không cho phép gửi lại nếu đang đếm ngược
+
+        setIsResending(true);
+        try {
+            const response = await sendOtp(email);
+            if (response.success) {
+                Alert.alert("Success", "OTP has been resent to your email.");
+                setCountdown(300); // Reset thời gian đếm ngược về 5 phút
+            } else {
+                Alert.alert("Error", response.message || "Failed to resend OTP.");
+            }
+        } catch (error) {
+            Alert.alert("Error", "An error occurred while resending OTP.");
+        } finally {
+            setIsResending(false);
+        }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -32,21 +96,27 @@ export default function OTPConfirmScreen() {
                         onChangeText={setOtp}
                     />
 
+                    {/* Hiển thị thời gian đếm ngược */}
+                    <Text style={styles.countdownText}>
+                        Resend available in: {formatTime(countdown)}
+                    </Text>
+
                     {/* Nút Gửi lại OTP */}
-                    <TouchableOpacity onPress={() => console.log("Resend OTP")} style={styles.resendButton}>
-                        <Text style={styles.resendText}>Resend OTP</Text>
+                    <TouchableOpacity
+                        onPress={handleResendOtp}
+                        style={styles.resendButton}
+                        disabled={countdown > 0 || isResending}
+                    >
+                        <Text style={[styles.resendText, { color: countdown > 0 ? 'gray' : '#007AFF' }]}>
+                            {isResending ? "Resending..." : "Resend OTP"}
+                        </Text>
                     </TouchableOpacity>
 
                     {/* Nút Tiếp tục */}
                     <TouchableOpacity
                         style={[styles.button, { backgroundColor: isButtonEnabled ? '#007AFF' : '#D3D3D3' }]}
                         disabled={!isButtonEnabled}
-                        onPress={() => {
-                            navigation.navigate('HomeScreen');
-                            Alert.alert("OTP Confirmed", "Registration successful!");
-                        }
-                        }
-
+                        onPress={handleVerifyOtp}
                     >
                         <Text style={styles.buttonText}>Confirm</Text>
                     </TouchableOpacity>
@@ -64,10 +134,6 @@ const styles = StyleSheet.create({
     },
     backButton: {
         paddingTop: 20
-    },
-    backIcon: {
-        width: 30,
-        height: 30,
     },
     content: {
         justifyContent: 'center',
@@ -89,11 +155,15 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         width: '80%',
     },
+    countdownText: {
+        fontSize: 16,
+        color: 'red',
+        marginBottom: 10,
+    },
     resendButton: {
         marginBottom: 20,
     },
     resendText: {
-        color: '#007AFF',
         fontSize: 16,
         fontWeight: '500',
     },
