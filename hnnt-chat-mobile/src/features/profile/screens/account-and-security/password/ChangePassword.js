@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import ProfileService from '../../../services/ProfileService'; // Import the service
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ChangePasswordScreen() {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [focusedInput, setFocusedInput] = useState(null); // Trạng thái focus
+    const [loading, setLoading] = useState(false); // Loading state
 
     const isValidPassword = (password) => {
         return password.length >= 6 && /\d/.test(password) && /[a-zA-Z]/.test(password);
@@ -13,6 +16,32 @@ export default function ChangePasswordScreen() {
 
     const isFormValid = () => {
         return isValidPassword(newPassword) && newPassword === confirmPassword && currentPassword.length > 0;
+    };
+
+    const handleChangePassword = async () => {
+        setLoading(true);
+        try {
+            const token = await AsyncStorage.getItem('token'); // Retrieve token from storage
+            if (!token) {
+                Alert.alert('Error', 'User not authenticated.');
+                setLoading(false);
+                return;
+            }
+
+            const response = await ProfileService.changePassword(token, {
+                currentPassword,
+                newPassword,
+            });
+
+            Alert.alert('Success', response.message || 'Password updated successfully!');
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+        } catch (error) {
+            Alert.alert('Error', error.message || 'Failed to update password.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -61,9 +90,12 @@ export default function ChangePasswordScreen() {
 
             <TouchableOpacity
                 style={[styles.button, isFormValid() ? styles.buttonActive : styles.buttonDisabled]}
-                disabled={!isFormValid()}
+                disabled={!isFormValid() || loading}
+                onPress={handleChangePassword}
             >
-                <Text style={isFormValid() ? styles.buttonTextActive : styles.buttonTextDisabled}>Update</Text>
+                <Text style={isFormValid() ? styles.buttonTextActive : styles.buttonTextDisabled}>
+                    {loading ? 'Updating...' : 'Update'}
+                </Text>
             </TouchableOpacity>
         </View>
     );

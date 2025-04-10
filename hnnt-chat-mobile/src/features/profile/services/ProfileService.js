@@ -47,6 +47,23 @@ const ProfileService = {
             throw error.response?.data || error.message;
         }
     },
+    changePassword: async (token, { currentPassword, newPassword }) => {
+        try {
+            const response = await axios.post(
+                `${BASE_URL}/change-password-with-token`,
+                { currentPassWord: currentPassword, newPassword },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                },
+            );
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
 };
 
 export default ProfileService;
