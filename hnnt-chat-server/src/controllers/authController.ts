@@ -7,6 +7,9 @@ import redis from '../config/redis';
 import dotenv from 'dotenv';
 import { AuthRequest } from '../types/authRequest';
 
+import { createClient } from 'redis';
+import { v4 as uuidv4 } from 'uuid';
+
 dotenv.config();
 
 const prisma = new PrismaClient();
@@ -110,6 +113,14 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
         if (!password || password.trim() === '') {
             res.status(400).json({ message: 'Mật khẩu không được để trống!' });
+            return;
+        }
+
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\S]{6,}$/;
+        if (!passwordRegex.test(password)) {
+            res.status(400).json({
+                message: 'Mật khẩu mới phải có ít nhất 6 ký tự, gồm chữ, số và ký tự đặc biệt.',
+            });
             return;
         }
 
@@ -284,8 +295,15 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
             res.status(400).json({ error: 'Thiếu thông tin' });
         }
 
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\S]{6,}$/;
+        if (!passwordRegex.test(newPassword)) {
+            res.status(400).json({
+                message: 'Mật khẩu mới phải có ít nhất 6 ký tự, gồm chữ, số và ký tự đặc biệt.',
+            });
+            return;
+        }
 
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
         const user = await prisma.account.update({
             where: { number },
             data: { password: hashedPassword },
@@ -294,5 +312,162 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
         res.status(200).json({ message: 'Đặt lại mật khẩu thành công!', success: true });
     } catch (error) {
         res.status(500).json({ error: 'Lỗi đặt lại mật khẩu', success: false });
+    }
+};
+
+export const changePasswordByToken = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.id;
+        const { currentPassWord, newPassword } = req.body;
+
+        if (!currentPassWord || !newPassword) {
+            res.status(400).json({ error: 'Thiếu thông tin' });
+        }
+
+        const userCurrent = await prisma.account.findUnique({
+            where: { id: userId },
+        });
+
+        if (!userCurrent) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        const isPasswordMatch = await bcrypt.compare(currentPassWord, userCurrent.password);
+        if (!isPasswordMatch) {
+            res.status(400).json({ message: 'Mật khẩu hiện tại không đúng!' });
+            return;
+        }
+
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\S]{6,}$/;
+
+        if (!passwordRegex.test(newPassword)) {
+            res.status(400).json({
+                message: 'Mật khẩu mới phải có ít nhất 6 ký tự, gồm chữ, số và ký tự đặc biệt.',
+            });
+            return;
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const user = await prisma.account.update({
+            where: { id: userId },
+            data: { password: hashedPassword },
+        });
+
+        res.status(200).json({ message: 'Đặt lại mật khẩu thành công!', success: true });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+
+// đăng nhập bằng QR code
+const redisClient = createClient();
+redisClient.connect();
+
+// Tạo loginTokenen
+export const createLoginToken = async (req: Request, res: Response): Promise<void> => {
+    const token = uuidv4();
+    await redisClient.set(`qr:${token}`, 'PENDING', { EX: 60 });
+    res.json({ token });
+};
+
+// Xác nhận đăng nhập từ app
+export const confirmLoginToken = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { token, userId } = req.body;
+
+        if (!token || !userId) {
+            res.status(400).json({ message: 'Thiếu token hoặc userId' });
+            return;
+        }
+
+        const status = await redisClient.get(`qr:${token}`);
+        if (!status) {
+            res.status(400).json({ message: 'Token không hợp lệ hoặc đã hết hạn' });
+            return;
+        }
+
+        if (status !== 'PENDING') {
+            res.status(400).json({ message: 'Token không hợp lệ' });
+            return;
+        }
+
+        const result = await redisClient.set(`qr:${token}`, `LOGGED_IN:${userId}`, { EX: 60 });
+        if (result !== 'OK') {
+            throw new Error('Không thể cập nhật trạng thái token');
+        }
+
+        res.status(200).json({
+            message: 'Đăng nhập thành công',
+            success: true,
+        });
+    } catch (error) {
+        console.error('Lỗi confirmLoginToken:', error);
+        if (!res.headersSent) {
+            res.status(500).json({
+                message: 'Lỗi server',
+                error: (error as Error).message,
+            });
+        }
+    }
+};
+
+// Web kiểm tra trạng thái
+export const checkLoginStatus = async (req: Request, res: Response): Promise<void> => {
+    const { token } = req.query;
+    const value = await redisClient.get(`qr:${token}`);
+    if (!value) {
+        res.json({ status: 'EXPIRED' });
+        return;
+    }
+    if (value.startsWith('LOGGED_IN:')) {
+        const userId = value.split(':')[1];
+        res.json({ status: 'LOGGED_IN', userId });
+        return;
+    }
+    res.json({ status: 'PENDING' });
+    return;
+};
+
+// handleLOGIN
+
+export const loginQR = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { userId } = req.body;
+
+        // Kiểm tra số điện thoại có tồn tại không
+        const user = await prisma.account.findUnique({
+            where: { id: userId },
+        });
+
+        if (!user) {
+            res.status(401).json({ message: 'Id không đúng' });
+            return;
+        }
+
+        // Update trạng thái tài khoản
+        await prisma.account.update({
+            where: {
+                id: user.id,
+            },
+            data: {
+                status: 'active',
+            },
+        });
+
+        const secretKey = process.env.JWT_SECRET;
+        if (!secretKey) {
+            throw new Error('Thiếu ACCESS_TOKEN_SECRET_SIGNATURE trong biến môi trường!');
+        }
+
+        // Tạo JWT token
+        const token = jwt.sign({ id: user.id, number: user.number, name: user.name }, secretKey as string, {
+            expiresIn: '7d',
+        });
+
+        res.status(200).json({ token, user });
+    } catch (error) {
+        console.error('Login Error:', error);
+        res.status(500).json({ message: 'Lỗi máy chủ' });
     }
 };

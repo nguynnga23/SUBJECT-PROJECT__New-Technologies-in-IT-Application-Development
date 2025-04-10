@@ -21,15 +21,15 @@ function TabFriendsList(props) {
     } = props;
 
     return (
-        <div className="bg-white w-full rounded-lg relative">
+        <div className="bg-white dark:bg-gray-800 w-full rounded-lg relative">
             <div className="p-4">
                 <div className="flex">
-                    <div className="w-1/2 flex items-center group hover:bg-gray-100 p-1 rounded-lg border-2 focus-within:border-blue-400">
+                    <div className="w-1/2 flex items-center group hover:bg-gray-100 dark:hover:bg-gray-600 p-1 rounded-lg border-2 focus-within:border-blue-400">
                         <CiSearch size={20} />
                         <input
                             type="text"
                             placeholder="Tìm bạn"
-                            className="w-full group-hover:bg-gray-100 border-none outline-none p-1 placeholder:text-sm"
+                            className="w-full group-hover:bg-gray-100 dark:group-hover:bg-gray-600 dark:bg-gray-800 border-none outline-none p-1 placeholder:text-sm"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -42,12 +42,12 @@ function TabFriendsList(props) {
                         ) : null}
                     </div>
 
-                    <div className="w-1/4 flex items-center group hover:bg-gray-100 p-1 rounded-lg border-2 focus-within:border-blue-400 text-gray-500 ml-2">
+                    <div className="w-1/4 flex items-center group hover:bg-gray-100 dark:hover:bg-gray-600 p-1 rounded-lg border-2 focus-within:border-blue-400 text-gray-500 ml-2">
                         <IoSwapVertical size={20} />
                         <Select
                             value={filterName}
                             onChange={(e) => setFilterName(e.target.value)}
-                            className="border-none outline-none p-1 w-full group-hover:bg-gray-100 "
+                            className="border-none outline-none p-1 w-full group-hover:bg-gray-100 dark:group-hover:bg-gray-600 dark:bg-gray-800"
                             sx={{
                                 boxShadow: 'none',
                                 color: 'gray',
@@ -73,12 +73,12 @@ function TabFriendsList(props) {
                         </Select>
                     </div>
 
-                    <div className="relative w-1/4 flex items-center group hover:bg-gray-100 p-1 rounded-lg border-2 focus-within:border-blue-400 text-gray-500 ml-2">
+                    <div className="relative w-1/4 flex items-center group hover:bg-gray-100 dark:hover:bg-gray-600 p-1 rounded-lg border-2 focus-within:border-blue-400 text-gray-500 ml-2">
                         <CiFilter size={20} />
                         <Select
                             value={filter}
                             onChange={(e) => setFilter(e.target.value)}
-                            className="border-none outline-none p-1 w-full group-hover:bg-gray-100 "
+                            className="border-none outline-none p-1 w-full group-hover:bg-gray-100 dark:group-hover:bg-gray-600 dark:bg-gray-800"
                             sx={{
                                 boxShadow: 'none',
                                 color: 'gray',
@@ -143,12 +143,14 @@ function TabFriendsList(props) {
                         <>
                             <div
                                 key={user.id}
-                                className="flex items-center space-x-2 mt-3 px-4 cursor-pointer hover:bg-gray-100 py-2"
+                                className="flex items-center space-x-2 mt-3 px-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 py-2"
                             >
                                 <img src={user.avatar} alt="avatar" className="w-12 h-12 rounded-full" />
                                 <h4 className="text-sm font-medium">{user.name}</h4>
                             </div>
-                            {index !== users.length - 1 && <div className="w-full bg-gray-200 h-[1px] mt-2 pl-4"></div>}
+                            {index !== users.length - 1 && (
+                                <div className="w-full bg-gray-200 dark:hover:bg-gray-700 h-[1px] mt-2 pl-4"></div>
+                            )}
                         </>
                     ))}
                 </div>

@@ -21,6 +21,7 @@ import ChangePassword from '../../features/profile/screens/account-and-security/
 import BlockMessage from '../../features/profile/screens/privacy/block-message/BlockMessage';
 import ForgotPasswordScreen from '../../features/auth/screens/forgot/ForgotPasswordScreen';
 import Forgot_OTPConfirmScreen from '../../features/auth/screens/forgot/Forgot_OTPConfirmScreen';
+import ComfirmLoginQR from '../components/ComfirmLoginQR';
 
 import CameraScreen from '../components/CameraScreen';
 const Stack = createNativeStackNavigator();
@@ -77,6 +78,7 @@ export default function AppNavigator() {
                 <Stack.Screen name="BLock messages" component={BlockMessage} />
 
                 <Stack.Screen name="CameraScreen" component={CameraScreen} options={{ headerShown: false }} />
+                <Stack.Screen name="ComfirmLoginQR" component={ComfirmLoginQR} options={{ headerShown: false }} />
             </Stack.Navigator>
         </NavigationContainer>
     );

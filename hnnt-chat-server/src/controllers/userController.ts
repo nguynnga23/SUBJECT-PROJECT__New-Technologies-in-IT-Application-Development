@@ -123,3 +123,52 @@ export const changePasswordByToken = async (req: AuthRequest, res: Response): Pr
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+
+export const getUserById = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.params.id;
+
+        const user = await prisma.account.findUnique({
+            where: { id: userId },
+        });
+
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        res.json(user);
+        return;
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error' });
+        return;
+    }
+};
+
+export const getUserByNumberAndEmail = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const { number, email } = req.body;
+
+        const existingAccount = await prisma.account.findFirst({
+            where: {
+                OR: [{ number: number }, { email: email }],
+            },
+        });
+
+        if (existingAccount) {
+            if (existingAccount.number === number && existingAccount.email === email) {
+                res.status(400).json({ message: 'Số điện thoại và email đã tồn tại' });
+            } else if (existingAccount.email === email) {
+                res.status(400).json({ message: 'Email đã tồn tại' });
+            } else if (existingAccount.number === number) {
+                res.status(400).json({ message: 'Số điện thoại đã tồn tại' });
+            }
+            return;
+        }
+
+        res.status(200).json({ exists: true, message: 'Số điện thoại và email chưa tồn tại' });
+        return;
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
