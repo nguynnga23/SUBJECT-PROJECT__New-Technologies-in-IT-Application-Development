@@ -4,5 +4,5 @@ const defaultLocalhost = 'localhost';
 const DHCN_TV = '192.168.137.1';
 const PORT = '4000';
 
-const localhost = `${IP_WIFI}:${PORT}`;
+const localhost = `${IP_4G}:${PORT}`;
 module.exports = { localhost }
