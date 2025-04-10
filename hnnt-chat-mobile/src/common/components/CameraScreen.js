@@ -147,7 +147,7 @@ export default function CameraScreen() {
             const userDataStr = await AsyncStorage.getItem('user');
             const userData = JSON.parse(userDataStr);
             await confirmQRLogin(token, userData?.id);
-            alert("Đăng nhập thành công!");
+            // navigation.navigate("ComfirmLoginQR")
             setTimeout(() => setScanned(false), 3000)
         }
     };

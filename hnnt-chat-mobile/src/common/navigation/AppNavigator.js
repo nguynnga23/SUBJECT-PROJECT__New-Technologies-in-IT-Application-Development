@@ -18,6 +18,7 @@ import EditPersonalInformation from '../../features/profile/screens/personal-inf
 import ForgotPasswordScreen from '../../features/auth/screens/forgot/ForgotPasswordScreen';
 import Forgot_OTPConfirmScreen from '../../features/auth/screens/forgot/Forgot_OTPConfirmScreen';
 import CameraScreen from '../components/CameraScreen';
+import ComfirmLoginQR from '../components/ComfirmLoginQR';
 
 const Stack = createNativeStackNavigator();
 
@@ -48,6 +49,7 @@ export default function AppNavigator() {
                 <Stack.Screen name="Profile Information" component={EditPersonalInformation} />
 
                 <Stack.Screen name="CameraScreen" component={CameraScreen} options={{ headerShown: false }} />
+                <Stack.Screen name="ComfirmLoginQR" component={ComfirmLoginQR} options={{ headerShown: false }} />
             </Stack.Navigator>
         </NavigationContainer>
     );
