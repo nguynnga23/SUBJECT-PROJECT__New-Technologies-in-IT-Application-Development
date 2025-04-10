@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SectionList, Image } from 'react-native';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
 import friendService from '../../../services/FriendService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -51,10 +50,16 @@ const FriendRequestItem = ({ item }) => {
 
     return (
         <View style={styles.requestItem}>
-            <Image source={{ uri: item.avatar }} style={styles.avatar} />
-            <View style={styles.requestInfo}>
-                <Text style={styles.requestName}>{item.name}</Text>
-                <Text style={styles.requestDetails}>{item.date ? `${item.date} • ${item.mutual}` : item.message}</Text>
+            <View style={styles.requestInfoBlock}>
+                <Image source={{ uri: item.avatar }} style={styles.avatar} />
+                <View style={styles.requestInfo}>
+                    <View style={{ paddingBottom: 6 }}>
+                        <Text style={styles.requestName}>{item.name}</Text>
+                    </View>
+                    <View>
+                        <Text style={styles.requestDetails}>Wants to be friends</Text>
+                    </View>
+                </View>
             </View>
             <View style={styles.actionButtons}>
                 <TouchableOpacity style={styles.declineButton} onPress={handleDecline}>
@@ -200,13 +205,16 @@ const styles = StyleSheet.create({
         color: '#6D6D6D',
     },
     requestItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
         paddingVertical: 10,
         paddingHorizontal: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: '#DEE3E7',
     },
+    requestInfoBlock: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 10, // Add spacing between the info block and buttons
+    },
+
     avatar: {
         width: 50,
         height: 50,
@@ -217,25 +225,29 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     requestName: {
-        fontSize: 16,
-        fontWeight: 'bold',
+        fontSize: 17,
+        fontWeight: '500',
         color: '#000',
     },
     requestDetails: {
-        fontSize: 14,
+        fontSize: 16,
         color: '#6D6D6D',
     },
     actionButtons: {
         flexDirection: 'row',
+        marginLeft: 65,
     },
     declineButton: {
         backgroundColor: '#E5E5EA',
         paddingVertical: 8,
-        paddingHorizontal: 15,
+        paddingHorizontal: 20,
+        width: 100,
+        alignItems: 'center',
         borderRadius: 20,
         marginRight: 10,
     },
     declineText: {
+        fontWeight: 600,
         fontSize: 14,
         color: '#000',
     },
@@ -243,9 +255,14 @@ const styles = StyleSheet.create({
         backgroundColor: '#E5F0FF',
         paddingVertical: 8,
         paddingHorizontal: 15,
+        width: 100,
         borderRadius: 20,
+        alignItems: 'center',
+        width: 100,
     },
     acceptText: {
+        fontWeight: 600,
+
         fontSize: 14,
         color: '#007AFF',
     },
