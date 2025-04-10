@@ -1,30 +1,40 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IoMdPhonePortrait } from 'react-icons/io';
 import { FaBars, FaLock } from 'react-icons/fa6';
+import { TbReload } from 'react-icons/tb';
 
 import { useDispatch } from 'react-redux';
 import { setUser } from '../../redux/slices/authSlice';
-import { login } from './api';
+import { login, loginQR } from './api';
+
+import QRLogin from '../../components/QR/QRLogin';
+import { getUserById } from '../Profile/api';
 
 function Authentication() {
     const [number, setNumber] = useState('');
     const [password, setPassword] = useState('');
     const [loginBy, setLoginBy] = useState('password');
     const [menuOpen, setMenuOpen] = useState(false);
+    const [resUser, setResUser] = useState(null);
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    // const handleLogin = () => {
-    //     const user = Accounts.find((account) => account.number === number && account.password === password);
-    //     if (user) {
-    //         dispatch(setUser({ userActive: user, token: null }));
-    //         navigate('/home');
-    //     } else {
-    //         alert('Sai số điện thoại hoặc mật khẩu!');
-    //     }
-    // };
+    const [startQR, setStartQR] = useState(false);
+    const [statusMessage, setStatusMessage] = useState('');
+    console.log('statusMessage', statusMessage.trim() === '');
+
+    const handleLoginQR = async () => {
+        try {
+            const data = await loginQR(statusMessage);
+            localStorage.setItem('token', data.token);
+            dispatch(setUser({ userActive: data.user, token: data.token }));
+            navigate('/home');
+        } catch (err) {
+            alert('Lỗi server!');
+        }
+    };
 
     const handleLogin = async () => {
         try {
@@ -36,6 +46,26 @@ function Authentication() {
             alert('Lỗi server!');
         }
     };
+
+    useEffect(() => {
+        const getUser = async () => {
+            try {
+                const data = await getUserById(statusMessage);
+                if (data) {
+                    dispatch(setUser({ userActive: data, token: null }));
+                    setResUser(data);
+                } else {
+                    console.warn('Không tìm thấy user');
+                }
+            } catch (error) {
+                console.error('Lỗi khi lấy user:', error);
+            }
+        };
+
+        if (statusMessage) {
+            getUser();
+        }
+    }, [statusMessage]);
 
     return (
         <div className="min-h-screen bg-blue-50">
@@ -94,7 +124,10 @@ function Authentication() {
 
                             <p
                                 className="text-center text-[14px] text-blue-500 mt-2 cursor-pointer hover:underline p-6"
-                                onClick={() => setLoginBy('QR')}
+                                onClick={() => {
+                                    setLoginBy('QR');
+                                    setStartQR(true);
+                                }}
                             >
                                 Đăng nhập qua mã QR
                             </p>
@@ -131,12 +164,50 @@ function Authentication() {
 
                             {/* QR Code */}
                             <div className="flex m-6 justify-center">
-                                <div className="p-1 border rounded-lg">
-                                    <img
-                                        src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Login"
-                                        alt="QR Code"
-                                        className="w-[200px] h-[200px] p-1"
-                                    />
+                                <div className="p-4 border rounded-lg w-full max-w-sm flex flex-col items-center">
+                                    {/* QR Code */}
+                                    {statusMessage.trim() === 'waiting for scan code' ||
+                                    statusMessage.trim() === 'QR expired' ||
+                                    statusMessage.trim() === '' ||
+                                    resUser?.avatar.trim() === '' ? (
+                                        <div className="relative w-[200px] h-[200px]">
+                                            {/* QR Component */}
+                                            <QRLogin
+                                                shouldStart={startQR}
+                                                onStatusChange={(msg) => setStatusMessage(msg)}
+                                                setShouldStart={setStartQR}
+                                            />
+
+                                            {/* Overlay phủ mờ */}
+                                            {statusMessage === 'QR expired' && (
+                                                <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center rounded">
+                                                    <p className="text-white text-sm">QR hết hạn...</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <img alt="avatar" src={resUser?.avatar} />
+                                    )}
+
+                                    {statusMessage !== 'waiting for scan code' && statusMessage !== 'QR expired' ? (
+                                        <button
+                                            className="px-6 py-3 bg-blue-500 text-white text-base font-medium rounded-lg mt-4 w-[220px] hover:bg-blue-600 transition duration-200"
+                                            onClick={handleLoginQR}
+                                        >
+                                            {`Đăng nhập với ${resUser?.name}`}
+                                        </button>
+                                    ) : statusMessage === 'QR expired' ? (
+                                        <button
+                                            className=" flex justify-center items-center px-6 py-3 bg-blue-500 text-white text-base font-medium rounded-lg mt-4 w-[220px] hover:bg-blue-600 transition duration-200"
+                                            onClick={() => {
+                                                setStartQR(true);
+                                            }}
+                                        >
+                                            <TbReload size={20} className="inline-block mr-2" />
+                                            <p>Làm mới lại QR</p>
+                                        </button>
+                                    ) : null}
+
                                     {/* Ghi chú */}
                                     <p className="text-center text-blue-500 mt-3 text-[12px]">Chỉ dùng để đăng nhập</p>
                                     <p className="text-center text-gray-500 text-[12px]">HNNT trên máy tính</p>

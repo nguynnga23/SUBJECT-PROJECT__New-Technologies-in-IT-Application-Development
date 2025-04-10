@@ -20,7 +20,6 @@ import PopupAddGroup from '../../components/Popup/PopupAddGroup';
 import { searchFollowKeyWord } from '../Messaging/api';
 import { getListFriendByKeyword } from './api';
 import TabSearch from '../../components/Tab/TabSearch';
-import TabChat from '../../components/Tab/TabChat';
 
 const TabsContacts = [
     { id: 1, icon: <PiUserList size={25} />, title: 'Danh sách bạn bè', content: 'Bạn bè' },

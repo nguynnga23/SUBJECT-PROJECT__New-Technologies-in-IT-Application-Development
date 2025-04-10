@@ -43,3 +43,20 @@ export const changePasswordWithToken = async (currentPassWord, newPassword) => {
 
     return response.json();
 };
+
+export const loginQR = async (userId) => {
+    const response = await fetch('http://localhost:4000/api/auth/qr-login/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Login failed');
+    }
+
+    const data = await response.json();
+    localStorage.setItem('token', data.token); // Lưu token mới vào localStorage
+
+    return data;
+};

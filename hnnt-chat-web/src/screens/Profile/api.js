@@ -50,3 +50,21 @@ export const updateAvatar = async (image) => {
         throw error;
     }
 };
+
+export const getUserById = async (userId) => {
+    try {
+        const response = await fetch(`http://localhost:4000/api/user/${userId}`, {
+            method: 'GET',
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.message || `Lỗi ${response.status}: ${response.statusText}`);
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error('Lỗi khi gọi API:', error);
+        throw error;
+    }
+};
