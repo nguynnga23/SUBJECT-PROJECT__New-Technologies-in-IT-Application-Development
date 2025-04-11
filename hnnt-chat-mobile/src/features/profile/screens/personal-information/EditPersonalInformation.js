@@ -7,6 +7,7 @@ import { RadioButton } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ProfileService from '../../services/ProfileService';
 import { format } from 'date-fns'; // Import thư viện date-fns
+import { fetchUserData } from '../../utils/fetchUserData';
 
 export default function EditPersonalInformation({ navigation }) {
     const [user, setUser] = useState(null);
@@ -22,19 +23,16 @@ export default function EditPersonalInformation({ navigation }) {
     const [isChanged, setIsChanged] = useState(false);
 
     useEffect(() => {
-        const fetchUserFromStorage = async () => {
+        const fetchUser = async () => {
             try {
-                const userJson = await AsyncStorage.getItem('user');
-                if (!userJson) throw new Error('User not found in storage');
-
-                const userData = JSON.parse(userJson);
+                const userData = await fetchUserData();
                 setUser(userData);
             } catch (error) {
-                console.error('Lỗi lấy user từ AsyncStorage:', error);
+                console.error(error);
             }
         };
 
-        fetchUserFromStorage();
+        fetchUser();
     }, []);
     const formattedBirthDate = user?.birthDate
         ? format(new Date(user.birthDate), 'dd/MM/yyyy') // Format as dd/MM/yyyy
@@ -103,7 +101,6 @@ export default function EditPersonalInformation({ navigation }) {
                 const updatedAvatar = await ProfileService.updateAvatar(token, selectedImage);
                 formData.avatar = updatedAvatar.avatar; // Update avatar URL in formData
             }
-            console.log(selectedImage);
             const parsedBirthday = formData.birthday
                 ? new Date(formData.birthday.split('/').reverse().join('-')) // Parse dd/MM/yyyy to yyyy-MM-dd
                 : null;

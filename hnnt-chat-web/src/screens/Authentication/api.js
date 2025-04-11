@@ -102,3 +102,44 @@ export const loginQR = async (userId) => {
 
     return data;
 };
+
+export const forgotPassword = async (number, email) => {
+    const response = await fetch('http://localhost:4000/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ number, email }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Forgot password failed');
+    }
+
+    return response.json();
+};
+
+export const changePassword = async (number, newPassword) => {
+    const response = await fetch('http://localhost:4000/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ number, newPassword }),
+    });
+    if (!response.ok) {
+        throw new Error('Change password failed');
+    }
+
+    return response.json();
+};
+
+export const addDevice = async (deviceId, deviceName, platform, accessToken, ipAddress) => {
+    const token = localStorage.getItem('token');
+    const response = await fetch('http://localhost:4000/api/loggedin-devices', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deviceId, deviceName, platform, accessToken, ipAddress }),
+    });
+    if (!response.ok) {
+        throw new Error('Save device info failed');
+    }
+
+    return response.json();
+};

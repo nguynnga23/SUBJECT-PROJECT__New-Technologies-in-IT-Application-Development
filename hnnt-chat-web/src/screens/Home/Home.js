@@ -18,7 +18,7 @@ import Modal from '../../components/Modal';
 
 import { logout } from '../Authentication/api';
 import { logoutOfSlice } from '../../redux/slices/authSlice';
-import { setShowOrOffRightBar, setShowOrOffRightBarSearch } from '../../redux/slices/chatSlice';
+import { setActiveChat, setShowOrOffRightBar, setShowOrOffRightBarSearch } from '../../redux/slices/chatSlice';
 
 export default function Home() {
     const navigate = useNavigate();
@@ -58,6 +58,7 @@ export default function Home() {
             dispatch(logoutOfSlice());
             dispatch(setShowOrOffRightBar(false));
             dispatch(setShowOrOffRightBarSearch(false));
+            dispatch(setActiveChat(null));
             await logout(); // Gọi API logout
         } catch (error) {
             console.error('Lỗi khi đăng xuất:', error);

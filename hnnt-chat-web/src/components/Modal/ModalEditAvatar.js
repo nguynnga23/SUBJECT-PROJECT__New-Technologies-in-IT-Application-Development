@@ -3,7 +3,7 @@ import { updateAvatar } from '../../screens/Profile/api';
 import { setUser } from '../../redux/slices/authSlice';
 import { useDispatch } from 'react-redux';
 
-function ModalEditAvatar({ image, setIsType, onClose }) {
+function ModalEditAvatar({ image, setIsType, showImage, onClose }) {
     const [zoom, setZoom] = useState(1);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [dragging, setDragging] = useState(false);
@@ -43,7 +43,10 @@ function ModalEditAvatar({ image, setIsType, onClose }) {
 
     const handleUpload = async () => {
         try {
-            const data = await updateAvatar(image);
+            const formData = new FormData();
+            formData.append('image', image); // Append the image file directly
+
+            const data = await updateAvatar(formData);
             dispatch(setUser({ userActive: data, token: null }));
             setIsType('profile');
         } catch (error) {
@@ -58,7 +61,7 @@ function ModalEditAvatar({ image, setIsType, onClose }) {
                 <div className="w-full flex justify-center relative overflow-hidden">
                     {/* Ảnh hiển thị */}
                     <img
-                        src={image}
+                        src={showImage}
                         alt="Preview"
                         className="mt-2 max-w-full h-80 object-cover cursor-move active:cursor-move"
                         style={{

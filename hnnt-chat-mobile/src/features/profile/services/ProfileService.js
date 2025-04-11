@@ -64,6 +64,18 @@ const ProfileService = {
             throw error.response?.data || error.message;
         }
     },
+    getUserById: async (token, userId) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/${userId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
 };
 
 export default ProfileService;

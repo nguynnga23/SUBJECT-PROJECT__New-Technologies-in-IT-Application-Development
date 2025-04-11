@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 
 import { useSelector } from 'react-redux';
 
-function ModalAvatar({ setImage, setIsType }) {
+function ModalAvatar({ setImage, setIsType, setShowImage }) {
     const userActive = useSelector((state) => state.auth.userActive);
     const Avatar = userActive?.avatar;
 
@@ -35,8 +35,9 @@ function ModalAvatar({ setImage, setIsType }) {
                     onChange={(e) => {
                         const file = e.target.files[0];
                         if (file) {
-                            const imageUrl = URL.createObjectURL(file); // Tạo URL tạm thời
-                            setImage(imageUrl);
+                            const imageUrl = URL.createObjectURL(file);
+                            setShowImage(imageUrl);
+                            setImage(file);
                             setIsType('editAvatar');
                         }
                     }}
