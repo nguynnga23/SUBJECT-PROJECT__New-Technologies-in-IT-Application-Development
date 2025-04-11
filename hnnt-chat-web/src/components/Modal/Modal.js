@@ -20,6 +20,8 @@ function Modal({ isOpen, onClose }) {
     const [year, setYear] = useState(2025);
     const [maxDays, setMaxDays] = useState(31);
 
+    const [showImage, setShowImage] = useState();
+
     // Hàm kiểm tra số ngày hợp lệ trong tháng
     const getMaxDays = (month, year) => {
         if ([4, 6, 9, 11].includes(month)) return 30; // Tháng 4, 6, 9, 11 có 30 ngày
@@ -93,11 +95,13 @@ function Modal({ isOpen, onClose }) {
                 </div>
 
                 {isType === 'avatar' ? (
-                    <ModalAvatar setImage={setImage} setIsType={setIsType} />
+                    <ModalAvatar setImage={setImage} setIsType={setIsType} setShowImage={setShowImage} />
                 ) : isType === 'edit' ? (
                     <ModalEdit setIsType={setIsType} onClose={onClose} />
                 ) : isType === 'editAvatar' ? (
-                    image && <ModalEditAvatar image={image} setIsType={setIsType} onClose={onClose} />
+                    image && (
+                        <ModalEditAvatar image={image} setIsType={setIsType} showImage={showImage} onClose={onClose} />
+                    )
                 ) : (
                     <ModalAccount setIsType={setIsType} />
                 )}
