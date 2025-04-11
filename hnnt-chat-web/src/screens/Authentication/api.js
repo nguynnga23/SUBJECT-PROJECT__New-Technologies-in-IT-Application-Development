@@ -72,6 +72,33 @@ export const verifyOTP = async (email, otp) => {
     return response.json();
 };
 
+export const forgotPassword = async (number, email) => {
+    const response = await fetch('http://localhost:4000/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ number, email }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Forgot password failed');
+    }
+
+    return response.json();
+};
+
+export const changePassword = async (number, newPassword) => {
+    const response = await fetch('http://localhost:4000/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ number, newPassword }),
+    });
+    if (!response.ok) {
+        throw new Error('Change password failed');
+    }
+
+    return response.json();
+};
+
 export const changePasswordWithToken = async (currentPassWord, newPassword) => {
     const token = localStorage.getItem('token');
     const response = await fetch('http://localhost:4000/api/auth/change-password-with-token', {
