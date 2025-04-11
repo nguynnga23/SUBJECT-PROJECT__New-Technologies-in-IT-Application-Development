@@ -46,6 +46,6 @@ app.use('/api/user', userRouter);
 
 app.use('/api/groups', groupChatManageRouter);
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server đang chạy trên cổng ${PORT}`);
 });
