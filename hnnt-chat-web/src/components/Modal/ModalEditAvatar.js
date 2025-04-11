@@ -43,7 +43,10 @@ function ModalEditAvatar({ image, setIsType, onClose }) {
 
     const handleUpload = async () => {
         try {
-            const data = await updateAvatar(image);
+            const formData = new FormData();
+            formData.append('image', image); // Append the image file directly
+
+            const data = await updateAvatar(formData); // Send FormData to the API
             dispatch(setUser({ userActive: data, token: null }));
             setIsType('profile');
         } catch (error) {

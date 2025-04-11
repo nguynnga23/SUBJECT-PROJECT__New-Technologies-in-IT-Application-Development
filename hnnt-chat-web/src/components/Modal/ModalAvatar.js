@@ -35,8 +35,7 @@ function ModalAvatar({ setImage, setIsType }) {
                     onChange={(e) => {
                         const file = e.target.files[0];
                         if (file) {
-                            const imageUrl = URL.createObjectURL(file); // Tạo URL tạm thời
-                            setImage(imageUrl);
+                            setImage(file);
                             setIsType('editAvatar');
                         }
                     }}
