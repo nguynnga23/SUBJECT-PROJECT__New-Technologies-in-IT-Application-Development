@@ -1,37 +1,74 @@
-import React from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import LoggedInDeviceService from '../../../services/LoggedInDeviceService';
 
 const LoggedInDevice = () => {
-    const currentDeviceId = '1'; // Example current device ID
-    const devices = [
-        { id: '1', name: 'iPhone 13', location: 'Tây Ninh', lastActive: '2023-03-01 10:00' },
-        { id: '2', name: 'Samsung Galaxy S21', location: 'Ninh Bình', lastActive: '2023-03-02 15:30' },
-        { id: '3', name: 'MacBook Pro', location: 'Tp. Hồ Chí Minh', lastActive: '2023-03-03 08:45' },
-    ];
+    const [devices, setDevices] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const thisDevice = devices.find((device) => device.id === currentDeviceId);
-    const otherDevices = devices.filter((device) => device.id !== currentDeviceId);
+    useEffect(() => {
+        const fetchDevices = async () => {
+            try {
+                const fetchedDevices = await LoggedInDeviceService.getDevices();
+                setDevices(fetchedDevices);
+            } catch (error) {
+                Alert.alert('Error', 'Failed to fetch devices', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchDevices();
+    }, []);
+
+    const handleLogoutDevice = async (id) => {
+        try {
+            await LoggedInDeviceService.deleteDevice(id);
+            setDevices((prevDevices) => prevDevices.filter((device) => device.id !== id));
+        } catch (error) {
+            Alert.alert('Error', 'Failed to log out device');
+        }
+    };
+
+    const handleLogoutAllDevices = async () => {
+        try {
+            await LoggedInDeviceService.logoutOtherDevices();
+            setDevices((prevDevices) => prevDevices.filter((device) => device.isCurrentDevice));
+        } catch (error) {
+            Alert.alert('Error', 'Failed to log out all devices');
+        }
+    };
+
+    const currentDevice = devices.find((device) => !device.isCurrentDevice);
+    const otherDevices = devices.filter((device) => !device.isCurrentDevice);
 
     const renderDevice = ({ item }) => (
         <View style={styles.deviceContainer}>
-            <Text style={styles.deviceName}>{item.name}</Text>
-            <Text style={styles.deviceDetails}>Location: {item.location}</Text>
+            <Text style={styles.deviceName}>{item.deviceName}</Text>
+            <Text style={styles.deviceDetails}>Platform: {item.platform}</Text>
             <Text style={styles.deviceDetails}>Last Active: {item.lastActive}</Text>
-            <TouchableOpacity style={styles.logoutButton}>
+            <TouchableOpacity style={styles.logoutButton} onPress={() => handleLogoutDevice(item.id)}>
                 <Text style={styles.logoutButtonText}>Log Out</Text>
             </TouchableOpacity>
         </View>
     );
 
+    if (loading) {
+        return (
+            <View style={styles.container}>
+                <Text>Loading...</Text>
+            </View>
+        );
+    }
+
     return (
         <View style={styles.container}>
-            {thisDevice && (
+            {currentDevice && (
                 <View>
                     <Text style={styles.sectionTitle}>This Device</Text>
                     <View style={styles.deviceContainer}>
-                        <Text style={styles.deviceName}>{thisDevice.name}</Text>
-                        <Text style={styles.deviceDetails}>Location: {thisDevice.location}</Text>
-                        <Text style={styles.deviceDetails}>Last Active: {thisDevice.lastActive}</Text>
+                        <Text style={styles.deviceName}>{currentDevice.deviceName}</Text>
+                        <Text style={styles.deviceDetails}>Platform: {currentDevice.platform}</Text>
+                        <Text style={styles.deviceDetails}>Last Active: {currentDevice.lastActive}</Text>
                     </View>
                 </View>
             )}
@@ -44,7 +81,7 @@ const LoggedInDevice = () => {
                         renderItem={renderDevice}
                         contentContainerStyle={styles.list}
                     />
-                    <TouchableOpacity style={styles.logoutAllButton}>
+                    <TouchableOpacity style={styles.logoutAllButton} onPress={handleLogoutAllDevices}>
                         <Text style={styles.logoutAllButtonText}>Log Out All Devices</Text>
                     </TouchableOpacity>
                 </View>

@@ -39,6 +39,7 @@ model Account {
   chatParticipants ChatParticipant[]
   messages        Message[]
   reactions       Reaction[]
+  loggedInDevices LoggedInDevice[]
 }
 
 model FriendRequest {
@@ -149,4 +150,18 @@ model Reaction {
   reaction  String   @db.VarChar(10)
   sum       Int      @default(1)
 }
+
+model LoggedInDevice {
+  id          String   @id @default(uuid())
+  user        Account  @relation(fields: [userId], references: [id])
+  userId      String
+  deviceId    String
+  deviceName  String
+  platform    String
+  accessToken String
+  ipAddress   String?
+  lastActive  DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
+
 
