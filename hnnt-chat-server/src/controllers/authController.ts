@@ -17,6 +17,7 @@ const prisma = new PrismaClient();
 export const login = async (req: Request, res: Response): Promise<void> => {
     try {
         const { number, password } = req.body;
+        console.log('number', number, password);
 
         // Kiểm tra số điện thoại có tồn tại không
         const user = await prisma.account.findUnique({

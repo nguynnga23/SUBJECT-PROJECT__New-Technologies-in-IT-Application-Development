@@ -25,17 +25,16 @@ export const updateUser = async (name, gender, birthDate) => {
     }
 };
 
-export const updateAvatar = async (image) => {
+export const updateAvatar = async (formData) => {
     try {
         const token = localStorage.getItem('token');
         if (!token) throw new Error('Token is required');
         const response = await fetch(`http://localhost:4000/api/user/update-avatar`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ image }),
+            body: formData,
         });
 
         if (!response.ok) {
