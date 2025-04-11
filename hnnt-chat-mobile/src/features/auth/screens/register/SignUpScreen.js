@@ -23,7 +23,7 @@ export default function SignUpScreen() {
 
     const isPhoneValid = phoneRegex.test(phone);
     const isEmailValid = emailRegex.test(email);
-    const isPasswordValid = password.length >= 8 && passwordStrength !== 'weak';
+    const isPasswordValid = password.length >= 8 && passwordStrength !== 'strong';
     const isConfirmPasswordValid = confirmPassword === password;
 
     const isButtonEnabled = isPhoneValid && isEmailValid && isPasswordValid && isConfirmPasswordValid;

@@ -65,7 +65,11 @@ export default function LoginScreen() {
 
             Alert.alert('Login Successful', `Welcome, ${user.name}!`);
             // Điều hướng đến màn hình chính
-            navigation.navigate('HomeTab');
+            // navigation.navigate('HomeTab');
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'HomeTab' }], // hoặc màn hình chính sau login
+            });
         } catch (error) {
             console.warn('Login failed:', error);
             Alert.alert('Login Failed', 'Số điện thoại hoặc mật khẩu không đúng');

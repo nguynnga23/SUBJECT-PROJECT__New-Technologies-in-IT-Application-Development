@@ -47,11 +47,16 @@ export default function ProfileScreen() {
                         try {
                             const token = await AsyncStorage.getItem('token');
                             if (token) {
-                                await logout(token); // Call the logout API
+                                await logout(token); // Gọi API logout nếu có
                             }
                             await AsyncStorage.removeItem('user');
                             await AsyncStorage.removeItem('token');
-                            navigation.navigate('Login');
+
+                            // ❗ Dùng reset để tránh back lại màn login
+                            navigation.reset({
+                                index: 0,
+                                routes: [{ name: 'HomeScreen' }],
+                            });
                         } catch (error) {
                             console.error('Error during logout:', error);
                         }
