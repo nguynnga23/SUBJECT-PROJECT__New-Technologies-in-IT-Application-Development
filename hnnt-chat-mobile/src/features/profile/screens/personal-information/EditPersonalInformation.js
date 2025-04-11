@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import DateTimePicker from '@react-native-community/datetimepicker';
+// import DateTimePicker from '@react-native-community/datetimepicker';
 import { Platform, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -162,7 +162,7 @@ export default function EditPersonalInformation({ navigation }) {
 
                 {showDatePicker && (
                     <View style={styles.footerDatePicker}>
-                        <DateTimePicker
+                        {/* <DateTimePicker
                             value={
                                 formData.birthday
                                     ? new Date(formData.birthday.split('/').reverse().join('-'))
@@ -177,7 +177,7 @@ export default function EditPersonalInformation({ navigation }) {
                                     handleChange('birthday', formattedDate);
                                 }
                             }}
-                        />
+                        /> */}
                     </View>
                 )}
 

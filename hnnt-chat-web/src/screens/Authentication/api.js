@@ -129,3 +129,18 @@ export const loginQR = async (userId) => {
 
     return data;
 };
+
+// lưu thông tin devide đăng nhập trên web
+export const addDevice = async (deviceId, deviceName, platform, accessToken, ipAddress) => {
+    const token = localStorage.getItem('token');
+    const response = await fetch('http://localhost:4000/api/loggedin-devices', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deviceId, deviceName, platform, accessToken, ipAddress }),
+    });
+    if (!response.ok) {
+        throw new Error('Save device info failed');
+    }
+
+    return response.json();
+};

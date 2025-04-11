@@ -12,7 +12,7 @@ import '../../index.css';
 
 import { useDispatch } from 'react-redux';
 import { setUser } from '../../redux/slices/authSlice';
-import { changePassword, forgotPassword, login, loginQR, register, sendOTPEmail, verifyOTP } from './api';
+import { addDevice, changePassword, forgotPassword, login, loginQR, register, sendOTPEmail, verifyOTP } from './api';
 
 import QRLogin from '../../components/QR/QRLogin';
 import { getUserById, getUserByNumberAndEmail } from '../Profile/api';
@@ -59,14 +59,23 @@ function Authentication() {
     const handleLogin = async () => {
         const parser = new UAParser();
         const result = parser.getResult();
+        const ipRes = await fetch('https://api.ipify.org?format=json');
+        const { ip: ipAddress } = await ipRes.json();
 
-        console.log(result);
+        const deviceId = result.os.name;
+        const deviceName = `${result.browser.name} on ${result.os.name}`;
+        const platform = navigator.platform || result.os.name;
 
         try {
             const data = await login(number, password);
-            localStorage.setItem('token', data.token);
-            dispatch(setUser({ userActive: data.user, token: data.token }));
-            navigate('/home');
+            if (data) {
+                localStorage.setItem('token', data.token);
+                dispatch(setUser({ userActive: data.user, token: data.token }));
+                navigate('/home');
+
+                const accessToken = data.token;
+                await addDevice(deviceId, deviceName, platform, accessToken, ipAddress);
+            }
         } catch (err) {
             alert('Lỗi server!');
         }
@@ -461,7 +470,7 @@ function Authentication() {
                                     ) : null}
 
                                     {/* Ghi chú */}
-                                    <p>Thời gian còn lại: {expired}s</p>
+                                    {/* <p>Thời gian còn lại: {expired}s</p> */}
                                     <p className="text-center text-blue-500 mt-3 text-[12px]">Chỉ dùng để đăng nhập</p>
                                     <p className="text-center text-gray-500 text-[12px]">HNNT trên máy tính</p>
                                 </div>
