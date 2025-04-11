@@ -6,6 +6,8 @@ import { TbReload } from 'react-icons/tb';
 import { IoMail } from 'react-icons/io5';
 import { MdOutlineDriveFileRenameOutline } from 'react-icons/md';
 
+import { UAParser } from 'ua-parser-js';
+
 import '../../index.css';
 
 import { useDispatch } from 'react-redux';
@@ -55,6 +57,11 @@ function Authentication() {
     };
 
     const handleLogin = async () => {
+        const parser = new UAParser();
+        const result = parser.getResult();
+
+        console.log(result);
+
         try {
             const data = await login(number, password);
             localStorage.setItem('token', data.token);
