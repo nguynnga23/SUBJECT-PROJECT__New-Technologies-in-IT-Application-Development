@@ -4,7 +4,8 @@ import { RiContactsBook3Line } from 'react-icons/ri';
 import { IoSettingsOutline } from 'react-icons/io5';
 import { IoMdCloudOutline } from 'react-icons/io';
 import { CiShare1 } from 'react-icons/ci';
-
+import { getUserById } from '../Profile/api';
+import { setUser } from '../../redux/slices/authSlice';
 // import { setChats } from '../../redux/slices/chatSlice';
 import Messaging from '../Messaging';
 import Contacts from '../Contacts';
@@ -51,7 +52,18 @@ export default function Home() {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
+    const handleOpenModel = async () => {
+        try {
+            const data = await getUserById(userActive.id);
+            const token = localStorage.getItem('token');
 
+            dispatch(setUser({ userActive: data, token: token }));
+        } catch (error) {
+            console.error('Lỗi khi gọi API:', error);
+        }
+
+        setIsOpenModel(true);
+    };
     const handleLogout = async () => {
         try {
             navigate('/'); // Điều hướng sau khi Redux cập nhật
@@ -111,7 +123,7 @@ export default function Home() {
                             <li>
                                 <p
                                     className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600  text-black dark:text-white cursor-pointer"
-                                    onClick={() => setIsOpenModel(true)}
+                                    onClick={handleOpenModel}
                                 >
                                     Hồ sơ của bạn
                                 </p>
