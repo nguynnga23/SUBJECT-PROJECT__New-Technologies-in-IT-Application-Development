@@ -24,14 +24,14 @@ export default function AccountAndSecurity() {
         {
             title: 'Security',
             items: [
-                { icon: 'lock-check-outline', title: 'Security checkup', screen: '' },
-                { icon: 'cellphone-lock', title: 'Lock Zalo', screen: '' },
+                { icon: 'lock-check-outline', title: 'Security checkup', screen: 'Managed logged-in devices' },
+                { icon: 'cellphone-lock', title: 'Lock Zalo', screen: 'Managed logged-in devices' },
             ],
         },
         {
             title: 'Login',
             items: [
-                { icon: 'cellphone', title: 'Logged-in devices', screen: '' },
+                { icon: 'cellphone', title: 'Logged-in devices', screen: 'Managed logged-in devices' },
                 { icon: 'lock-outline', title: 'Password', screen: 'Change password' },
             ],
         },
