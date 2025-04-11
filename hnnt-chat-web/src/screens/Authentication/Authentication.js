@@ -241,12 +241,17 @@ function Authentication() {
             alert('Mật khẩu không khớp!');
             return;
         }
+
         try {
             const data = await changePassword(numberForgetPassword, passwordForgetPassword);
             if (data) {
                 alert('Đổi mật khẩu thành công!');
                 setLoginBy('password');
                 setIsReSourceOTP('');
+
+                setNumberForgetPassword('');
+                setEmailForgetPassword('');
+                setOTP('');
             }
         } catch (err) {
             alert('Lỗi server!');
@@ -272,6 +277,18 @@ function Authentication() {
             getUser();
         }
     }, [statusMessage]);
+
+    // đếm ngược hết hạn QR
+    const [expired, setExpired] = useState(60);
+    useEffect(() => {
+        if (expired === 0) return;
+
+        const timer = setInterval(() => {
+            setExpired((prev) => prev - 1);
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [expired]);
 
     return (
         <div className="min-h-screen bg-blue-50">
@@ -418,10 +435,11 @@ function Authentication() {
 
                                     {statusMessage !== 'waiting for scan code' && statusMessage !== 'QR expired' ? (
                                         <button
-                                            className="px-6 py-3 bg-blue-500 text-white text-base font-medium rounded-lg mt-4 w-[220px] hover:bg-blue-600 transition duration-200"
+                                            className="flex flex-col px-6 py-3 bg-blue-500 text-white text-base font-medium rounded-lg mt-4 w-[220px] hover:bg-blue-600 transition duration-200"
                                             onClick={handleLoginQR}
                                         >
-                                            {`Đăng nhập với ${resUser?.name}`}
+                                            <p>Đăng nhập với</p>
+                                            <p>{resUser?.name}</p>
                                         </button>
                                     ) : statusMessage === 'QR expired' ? (
                                         <button
@@ -436,6 +454,7 @@ function Authentication() {
                                     ) : null}
 
                                     {/* Ghi chú */}
+                                    <p>Thời gian còn lại: {expired}s</p>
                                     <p className="text-center text-blue-500 mt-3 text-[12px]">Chỉ dùng để đăng nhập</p>
                                     <p className="text-center text-gray-500 text-[12px]">HNNT trên máy tính</p>
                                 </div>
