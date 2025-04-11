@@ -4,21 +4,30 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { MenuProvider, Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
 import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient'; // Import LinearGradient
 const { width } = Dimensions.get('window');
 export default function Header({ iconName1, iconName2, onPress1, onPress2, showMenu }) {
     const navigation = useNavigation();
     return (
-        <View style={styles.container}>
+        <LinearGradient
+            colors={['#0087FD', '#00ACF4']} // Gradient colors
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }} // Horizontal gradient
+            style={styles.container} // Apply gradient to header container
+        >
             <TouchableOpacity style={{ paddingRight: 15 }}>
                 <AntDesign name="search1" size={25} color="white" />
             </TouchableOpacity>
-            <View style={{ width: '60%' }}>
+            <View style={{ width: '55%' }}>
                 <TextInput style={styles.searchInput} placeholder="Search" placeholderTextColor="white" />
             </View>
 
             {showMenu ? (
                 <>
-                    <TouchableOpacity style={{ width: '10%', marginLeft: 30 }} onPress={() => navigation.navigate("CameraScreen")}>
+                    <TouchableOpacity
+                        style={{ width: '10%', marginLeft: 30 }}
+                        onPress={() => navigation.navigate('CameraScreen')}
+                    >
                         <MaterialCommunityIcons name={iconName1} size={20} color="white" />
                     </TouchableOpacity>
                     <Menu>
@@ -63,7 +72,7 @@ export default function Header({ iconName1, iconName2, onPress1, onPress2, showM
                     </TouchableOpacity>
                 </>
             )}
-        </View>
+        </LinearGradient>
     );
 }
 
@@ -72,7 +81,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         width: width,
-        zIndex: 1, // Đảm bảo header hiển thị trên cùng
+        zIndex: 1, // Ensure header is on top
+        paddingVertical: 10, // Add padding for better appearance
     },
     triangle: {
         position: 'absolute',
@@ -92,12 +102,12 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 10,
         marginTop: 60,
-        marginLeft: 6,
-        elevation: 10, // Bóng đổ trên Android
+        marginLeft: 0,
+        elevation: 100, // Bóng đổ trên Android
         shadowColor: '#000', // Màu bóng trên iOS
         shadowOffset: { width: 0, height: 4 }, // Đổ bóng phía dưới
         shadowOpacity: 0.3, // Độ mờ của bóng
-        shadowRadius: 5, // Độ lan tỏa của bóng
+        shadowRadius: 5, // Độ lan tỏa của 0bóng
         zIndex: 1000, // Đảm bảo hiển thị trên top
         position: 'absolute', // Định vị tuyệt đối
         right: 10, // Điều chỉnh vị trí theo chiều ngang

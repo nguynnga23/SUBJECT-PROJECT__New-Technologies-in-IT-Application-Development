@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from '@react-navigation/native';
 import { sendOtp } from '../../services/RegisterService';
 
 export default function SignUpScreen() {
@@ -14,8 +14,8 @@ export default function SignUpScreen() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordStrength, setPasswordStrength] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false); // Trạng thái hiển thị mật khẩu
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Trạng thái hiển thị mật khẩu xác nhận
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     // Regular expressions for validation
     const phoneRegex = /^(03|05|07|08|09|01|02)\d{8}$/;
@@ -26,11 +26,7 @@ export default function SignUpScreen() {
     const isPasswordValid = password.length >= 8 && passwordStrength !== 'weak';
     const isConfirmPasswordValid = confirmPassword === password;
 
-    const isButtonEnabled =
-        isPhoneValid &&
-        isEmailValid &&
-        isPasswordValid &&
-        isConfirmPasswordValid;
+    const isButtonEnabled = isPhoneValid && isEmailValid && isPasswordValid && isConfirmPasswordValid;
 
     // Function to evaluate password strength
     const evaluatePasswordStrength = (password) => {
@@ -38,7 +34,12 @@ export default function SignUpScreen() {
             setPasswordStrength('invalid');
         } else if (/^[0-9]+$/.test(password)) {
             setPasswordStrength('weak');
-        } else if (password.length >= 8 && /[a-zA-Z]/.test(password) && /[0-9]/.test(password) && !/[@$!%*?&#]/.test(password)) {
+        } else if (
+            password.length >= 8 &&
+            /[a-zA-Z]/.test(password) &&
+            /[0-9]/.test(password) &&
+            !/[@$!%*?&#]/.test(password)
+        ) {
             setPasswordStrength('medium');
         } else if (/[A-Z]/.test(password) && /[0-9]/.test(password) && /[@$!%*?&#]/.test(password)) {
             setPasswordStrength('strong');
@@ -47,35 +48,29 @@ export default function SignUpScreen() {
 
     const handleNext = async () => {
         if (!isButtonEnabled) {
-            Alert.alert("Invalid Input", "Please check your input fields.");
+            Alert.alert('Invalid Input', 'Please check your input fields.');
             return;
         }
 
-        setIsLoading(true); // Bắt đầu trạng thái loading
+        setIsLoading(true);
         try {
             const otpResponse = await sendOtp(email);
-            if (otpResponse.message === "Mã OTP đã được gửi qua email!") {
+            if (otpResponse.message === 'Mã OTP đã được gửi qua email!') {
                 navigation.navigate('OTPConfirm', { email, phone, password });
             } else {
-                Alert.alert("Error", "Failed to send OTP.");
+                Alert.alert('Error', 'Failed to send OTP.');
             }
         } catch (error) {
-            Alert.alert("Error", "An error occurred while processing your request.");
+            Alert.alert('Error', 'An error occurred while processing your request.');
         } finally {
-            setIsLoading(false); // Kết thúc trạng thái loading
+            setIsLoading(false);
         }
     };
 
     return (
         <SafeAreaView style={styles.container}>
             <SafeAreaProvider>
-                <View style={{ paddingTop: 10, flexDirection: 'row', paddingBottom: 20 }}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <Ionicons name="arrow-back" size={30} color="black" />
-                    </TouchableOpacity>
-                    <Text style={styles.title}>Register</Text>
-                </View>
-
+                {/* Removed custom header */}
                 {/* Phone Input */}
                 <TextInput
                     style={styles.input}
@@ -84,9 +79,7 @@ export default function SignUpScreen() {
                     value={phone}
                     onChangeText={setPhone}
                 />
-                {!isPhoneValid && phone.length > 0 && (
-                    <Text style={styles.errorText}>Invalid phone number</Text>
-                )}
+                {!isPhoneValid && phone.length > 0 && <Text style={styles.errorText}>Invalid phone number</Text>}
 
                 {/* Email Input */}
                 <TextInput
@@ -96,9 +89,7 @@ export default function SignUpScreen() {
                     value={email}
                     onChangeText={setEmail}
                 />
-                {!isEmailValid && email.length > 0 && (
-                    <Text style={styles.errorText}>Invalid email address</Text>
-                )}
+                {!isEmailValid && email.length > 0 && <Text style={styles.errorText}>Invalid email address</Text>}
 
                 {/* Password Input */}
                 <View style={styles.inputContainer}>
@@ -113,11 +104,7 @@ export default function SignUpScreen() {
                         }}
                     />
                     <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-                        <Ionicons
-                            name={showPassword ? "eye-outline" : "eye-off-outline"}
-                            size={25}
-                            color="#666"
-                        />
+                        <Ionicons name={showPassword ? 'eye-outline' : 'eye-off-outline'} size={25} color="#666" />
                     </TouchableOpacity>
                 </View>
                 {password.length > 0 && (
@@ -127,19 +114,19 @@ export default function SignUpScreen() {
                                 passwordStrength === 'weak'
                                     ? 'red'
                                     : passwordStrength === 'invalid'
-                                        ? 'red'
-                                        : passwordStrength === 'medium'
-                                            ? 'orange'
-                                            : 'green',
+                                    ? 'red'
+                                    : passwordStrength === 'medium'
+                                    ? 'orange'
+                                    : 'green',
                         }}
                     >
                         {passwordStrength === 'weak'
                             ? 'Weak password'
                             : passwordStrength === 'invalid'
-                                ? 'Password must be at least 8 characters'
-                                : passwordStrength === 'medium'
-                                    ? 'Medium password'
-                                    : 'Strong password'}
+                            ? 'Password must be at least 8 characters'
+                            : passwordStrength === 'medium'
+                            ? 'Medium password'
+                            : 'Strong password'}
                     </Text>
                 )}
 
@@ -152,9 +139,12 @@ export default function SignUpScreen() {
                         value={confirmPassword}
                         onChangeText={setConfirmPassword}
                     />
-                    <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeIcon}>
+                    <TouchableOpacity
+                        onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                        style={styles.eyeIcon}
+                    >
                         <Ionicons
-                            name={showConfirmPassword ? "eye-outline" : "eye-off-outline"}
+                            name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'}
                             size={25}
                             color="#666"
                         />
@@ -165,8 +155,8 @@ export default function SignUpScreen() {
                 )}
 
                 <Text style={styles.description}>
-                    Password must have at least 8 characters, including numbers and letters.
-                    We recommend your password should have uppercase letters and symbols.
+                    Password must have at least 8 characters, including numbers and letters. We recommend your password
+                    should have uppercase letters and symbols.
                 </Text>
 
                 {/* Next Button */}
@@ -175,14 +165,12 @@ export default function SignUpScreen() {
                     disabled={!isButtonEnabled || isLoading}
                     onPress={handleNext}
                 >
-                    <Text style={styles.buttonText}>
-                        {isLoading ? 'Sending OTP...' : 'Next'}
-                    </Text>
+                    <Text style={styles.buttonText}>{isLoading ? 'Sending OTP...' : 'Next'}</Text>
                 </TouchableOpacity>
             </SafeAreaProvider>
         </SafeAreaView>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 20, backgroundColor: '#fff' },
@@ -193,7 +181,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: 'black',
+        borderColor: '#ccc',
         borderRadius: 5,
         marginBottom: 10,
         paddingHorizontal: 10,
@@ -207,7 +195,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
 
-    input: { borderWidth: 1, borderColor: 'black', padding: 10, borderRadius: 5, marginBottom: 10, fontSize: 16 },
+    input: { borderWidth: 1, borderColor: '#ccc', padding: 10, borderRadius: 5, marginBottom: 10, fontSize: 16 },
 
     inputPassword: { flex: 1, fontSize: 16, paddingVertical: 10 },
 

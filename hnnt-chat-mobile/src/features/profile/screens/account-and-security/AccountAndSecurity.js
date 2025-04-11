@@ -17,22 +17,22 @@ export default function AccountAndSecurity() {
         {
             title: 'Account',
             items: [
-                { icon: 'phone-outline', title: 'Phone number', screen: 'PhoneNumberScreen' },
-                { icon: 'email-outline', title: 'Email', screen: 'EmailScreen' },
+                { icon: 'phone-outline', title: 'Phone number', screen: 'Change phone number' },
+                { icon: 'email-outline', title: 'Email', screen: 'Add your email' },
             ],
         },
         {
             title: 'Security',
             items: [
-                { icon: 'lock-check-outline', title: 'Security checkup', screen: 'SecurityCheckupScreen' },
-                { icon: 'cellphone-lock', title: 'Lock Zalo', screen: 'LockZaloScreen' },
+                { icon: 'lock-check-outline', title: 'Security checkup', screen: 'Managed logged-in devices' },
+                { icon: 'cellphone-lock', title: 'Lock Zalo', screen: 'Managed logged-in devices' },
             ],
         },
         {
             title: 'Login',
             items: [
-                { icon: 'cellphone', title: 'Logged-in devices', screen: 'LoggedInDevicesScreen' },
-                { icon: 'lock-outline', title: 'Password', screen: 'PasswordScreen' },
+                { icon: 'cellphone', title: 'Logged-in devices', screen: 'Managed logged-in devices' },
+                { icon: 'lock-outline', title: 'Password', screen: 'Change password' },
             ],
         },
     ];

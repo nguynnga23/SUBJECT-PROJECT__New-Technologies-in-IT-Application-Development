@@ -45,12 +45,11 @@ export default function AddFriendScreen() {
                         <PhoneInput
                             ref={phoneInputRef}
                             defaultValue={phoneNumber}
-                            defaultCode={countryCode}
+                            defaultCode={countryCode ?? 'VN'}
+                            withFlag={false}
                             layout="second"
                             onChangeText={(text) => setPhoneNumber(text)}
                             onChangeFormattedText={(text) => setFormattedPhoneNumber(text)}
-                            withDarkTheme
-                            withShadow
                         />
                     </View>
                     <TouchableOpacity style={styles.arrowRightButton} onPress={handleSubmitPhoneNumber}>

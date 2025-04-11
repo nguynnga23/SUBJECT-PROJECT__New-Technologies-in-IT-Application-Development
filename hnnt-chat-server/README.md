@@ -1,37 +1,44 @@
-## Necessary technologies
+## Necessary Technologies
 
--   Node, npm, PostgreSQL, pgAdmin, redis
+-   Node.js, npm, PostgreSQL, pgAdmin, Redis
 
-## Run script sql
+## Steps to Set Up the Project
 
--   step 1: Update node_modules by package-lock.json
+1. **Install Dependencies**  
+   Update `node_modules` using `package-lock.json`:
 
-```bash
-npm install
-```
+    ```bash
+    npm install
+    ```
 
--   step 2: Run script file .sql into src/prisma/migrations
+2. **Set Up Environment Variables**  
+   Create a `.env` file in the root directory of the project. Use `.env.sample` as a reference and update the values as needed for your local environment.
 
--   step 3: Add sample data by command
+3. **Run SQL Scripts**  
+   Execute the `.sql` script files located in `src/prisma/migrations`.
 
-```bash
-npm run seed
-```
+4. **Seed the Database**  
+   Add sample data using the command:
 
-3
+    ```bash
+    npm run seed
+    ```
 
-## (If any) Map directly down to PostgreSQL
+## Mapping Directly to PostgreSQL (If Needed)
 
--   step 1: Config database in file .env follow .env.sample
+1. **Configure the Database**  
+   Update the `.env` file based on `.env.sample`.
 
--   step 2: Map by command:
+2. **Run Migrations**  
+   Map the database using the command:
 
-```bash
-npm run migrate
-```
+    ```bash
+    npm run migrate
+    ```
 
--   step 3: Add sample data by command
+3. **Seed the Database**  
+   Add sample data using the command:
 
-```bash
-npm run seed
-```
+    ```bash
+    npm run seed
+    ```
