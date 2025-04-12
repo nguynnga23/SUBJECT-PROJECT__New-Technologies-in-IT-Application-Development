@@ -15,7 +15,7 @@ export const createGroupChat = async (req: AuthRequest, res: Response): Promise<
             return;
         }
 
-        const {name, avatar, chatParticipant } = req.body;
+        const { name, avatar, chatParticipant } = req.body;
         if (!name) {
             res.status(400).json({ message: 'Tên nhóm không thể để trống!' });
             return;
@@ -75,7 +75,7 @@ export const addMemberToGroup = async (req: AuthRequest, res: Response): Promise
         }
         const chatId = req.params.groupId;
         const members = req.body;
-        
+
         const membersWithChatId = members.map((member: any) => ({
             ...member,
             chatId: chatId,
@@ -209,7 +209,7 @@ export const muteGroup = async (req: AuthRequest, res: Response): Promise<void> 
 
         res.status(200).json({
             message: `Thông báo đã ${newNotify ? 'bật' : 'tắt'}!`,
-            notify: newNotify
+            notify: newNotify,
         });
     } catch (error) {
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
@@ -307,7 +307,6 @@ export const leaveGroup = async (req: AuthRequest, res: Response): Promise<void>
         }
 
         if (participant && participant.role === 'LEADER') {
-            
             const newLeader = await prisma.chatParticipant.findFirst({
                 where: { chatId, accountId: { not: accountId } },
                 orderBy: { accountId: 'asc' },
@@ -350,7 +349,7 @@ export const disbandGroup = async (req: AuthRequest, res: Response): Promise<voi
 
         // Kiểm tra xem người yêu cầu có phải là LEADER không
         const requester = await prisma.chatParticipant.findUnique({
-            where: { chatId_accountId: { chatId, accountId} },
+            where: { chatId_accountId: { chatId, accountId } },
             select: { role: true },
         });
 
@@ -450,4 +449,3 @@ export const updateGroupName = async (req: AuthRequest, res: Response): Promise<
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
     }
 };
-

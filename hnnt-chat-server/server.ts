@@ -6,6 +6,7 @@ import friendRouter from './src/routes/friendRoutes';
 import chatRouter from './src/routes/chatRoutes';
 import messageRouter from './src/routes/messageRoutes';
 import authRouter from './src/routes/authRoutes';
+import contactRouter from './src/routes/contactRoutes';
 
 import groupChatManageRouter from './src/routes/groupChatManageRoutes';
 
@@ -47,6 +48,7 @@ app.use('/api/user', userRouter);
 
 app.use('/api/groups', groupChatManageRouter);
 app.use('/api/loggedin-devices', loggedInDeviceRouter);
+app.use('/api/contacts', contactRouter);
 
 app.listen(PORT, () => {
     console.log(`Server đang chạy trên cổng ${PORT}`);

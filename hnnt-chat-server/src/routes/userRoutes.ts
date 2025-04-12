@@ -5,6 +5,8 @@ import {
     getUserById,
     changePasswordByToken,
     getUserByNumberAndEmail,
+    getUserByNumberOrEmail,
+    searchByPhone,
 } from '../controllers/userController';
 import { authenticate } from '../middleware/auth';
 import multer from 'multer';
@@ -17,5 +19,7 @@ userRoute.post('/update-avatar', authenticate, upload.single('image'), updateAva
 userRoute.post('/change-password-with-token', authenticate, changePasswordByToken);
 userRoute.get('/:id', getUserById);
 userRoute.post('/get-user-by-number-and-email', getUserByNumberAndEmail);
+userRoute.post('/get-user-by-number-or-email', getUserByNumberOrEmail);
+userRoute.post('/search-by-phone', authenticate, searchByPhone);
 
 export default userRoute;
