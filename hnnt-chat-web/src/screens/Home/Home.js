@@ -17,8 +17,9 @@ import { useNavigate } from 'react-router-dom';
 import Modal from '../../components/Modal';
 
 import { logout } from '../Authentication/api';
-import { logoutOfSlice } from '../../redux/slices/authSlice';
+import { logoutOfSlice, setUser } from '../../redux/slices/authSlice';
 import { setActiveChat, setShowOrOffRightBar, setShowOrOffRightBarSearch } from '../../redux/slices/chatSlice';
+import { getUserById } from '../Profile/api';
 
 export default function Home() {
     const navigate = useNavigate();
@@ -63,6 +64,19 @@ export default function Home() {
         } catch (error) {
             console.error('Lỗi khi đăng xuất:', error);
         }
+    };
+
+    const handleOpenModel = async () => {
+        try {
+            const data = await getUserById(userActive.id);
+            const token = localStorage.getItem('token');
+
+            dispatch(setUser({ userActive: data, token: token }));
+        } catch (error) {
+            console.error('Lỗi khi gọi API:', error);
+        }
+
+        setIsOpenModel(true);
     };
 
     return (
@@ -111,7 +125,7 @@ export default function Home() {
                             <li>
                                 <p
                                     className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600  text-black dark:text-white cursor-pointer"
-                                    onClick={() => setIsOpenModel(true)}
+                                    onClick={handleOpenModel}
                                 >
                                     Hồ sơ của bạn
                                 </p>

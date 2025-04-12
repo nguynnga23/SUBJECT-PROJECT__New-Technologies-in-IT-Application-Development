@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, use } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { RiUserAddLine } from 'react-icons/ri';
 import { AiOutlineUsergroupAdd } from 'react-icons/ai';
@@ -18,7 +18,7 @@ import TabFriendRequest from '../../components/Tab/TabFriendRequest';
 import PopupAddFriend from '../../components/Popup/PopupAddFriend';
 import PopupAddGroup from '../../components/Popup/PopupAddGroup';
 import { searchFollowKeyWord } from '../Messaging/api';
-import { getListFriendByKeyword } from './api';
+import { getListFriend, getListFriendByKeyword } from './api';
 import TabSearch from '../../components/Tab/TabSearch';
 
 const TabsContacts = [
@@ -28,12 +28,12 @@ const TabsContacts = [
     { id: 4, icon: <AiOutlineUsergroupAdd size={25} />, title: 'Lời mời vào nhóm cộng đồng' },
 ];
 
-const userdata = [
-    { id: 3, name: 'Nga Nguyễn', avatar: avatar },
-    { id: 4, name: 'Huyền Trang', avatar: avatar },
-    { id: 1, name: 'Anh Huy', avatar: avatar },
-    { id: 2, name: 'Anh Tài', avatar: avatar },
-];
+// const userdata = [
+//     { id: 3, name: 'Nga Nguyễn', avatar: avatar },
+//     { id: 4, name: 'Huyền Trang', avatar: avatar },
+//     { id: 1, name: 'Anh Huy', avatar: avatar },
+//     { id: 2, name: 'Anh Tài', avatar: avatar },
+// ];
 
 const groupData = [
     {
@@ -120,6 +120,22 @@ function Contacts() {
 
     // Tab danh sách bạn bè ----------------------------
     // Lọc dữ liệu theo tên
+    const [userdata, setUserdata] = useState([]);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getListFriend();
+                if (response) {
+                    setUserdata(response);
+                } else {
+                    console.warn('Không có dữ liệu bạn bè');
+                }
+            } catch (error) {
+                console.error('Lỗi khi lấy danh sách bạn bè:', error);
+            }
+        };
+        fetchData();
+    }, [userdata]);
     const filteredData = userdata.filter((user) => user.name.toLowerCase().includes(search.toLowerCase()));
 
     // chia đa ta theo chữ cái đầu tiên
