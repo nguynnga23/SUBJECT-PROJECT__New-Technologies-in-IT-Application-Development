@@ -8,23 +8,32 @@ import {
     TouchableOpacity,
     ScrollView,
     RefreshControl,
-    Alert, // Import Alert for confirmation dialogs
 } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import friendService from '../../features/contact/services/FriendService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { FontAwesome, AntDesign } from '@expo/vector-icons'; // Import FontAwesome for the icon
+import { FontAwesome, AntDesign } from '@expo/vector-icons';
+import CustomAlert from '../components/CustomAlert'; // Import CustomAlert
+import UndoModal from '../components/UndoModal'; // Import the new UndoModal component
 
 const FriendProfileScreen = () => {
     const route = useRoute();
     const [user, setUser] = useState(route.params?.user || null);
     const [refreshing, setRefreshing] = useState(false);
-    const [isFriend, setIsFriend] = useState(false);
-    const [requestSent, setRequestSent] = useState(false); // New state to track if a request was sent
-    const [requestExists, setRequestExists] = useState(false); // New state to track if a request exists
-    const [canAcceptRequest, setCanAcceptRequest] = useState(false); // New state to track if the request can be accepted
-    const [isSender, setIsSender] = useState(false); // New state to track if the user is the sender
-    const [isReceiver, setIsReceiver] = useState(false); // New state to track if the user is the receiver
+    const [friendStatus, setFriendStatus] = useState({
+        isFriend: false,
+        requestSent: false,
+        requestExists: false,
+        isSender: false,
+        isReceiver: false,
+    });
+    const [customAlert, setCustomAlert] = useState({
+        visible: false,
+        title: '',
+        message: '',
+        onConfirm: null,
+    });
+    const [undoModal, setUndoModal] = useState({ visible: false, message: '', onUndo: null });
 
     useEffect(() => {
         const checkFriendStatus = async () => {
@@ -32,118 +41,119 @@ const FriendProfileScreen = () => {
                 const token = await AsyncStorage.getItem('token');
                 if (user?.id && token) {
                     const response = await friendService.checkFriend(user.id, token);
-                    setIsFriend(response.result || false); // Set to false if not found
+                    const isFriend = response.result || false;
 
-                    // Check if a friend request exists
                     const requestResponse = await friendService.checkFriendRequest(user.id, token);
-                    if (requestResponse.exists) {
-                        setRequestExists(true);
-                        setIsSender(requestResponse.isSender || false); // Determine if the user is the sender
-                        setIsReceiver(requestResponse.isReceiver || false); // Determine if the user is the receiver
-                    } else {
-                        setRequestExists(false);
-                        setIsSender(false);
-                        setIsReceiver(false);
-                    }
+                    const requestExists = requestResponse.exists || false;
+
+                    setFriendStatus({
+                        isFriend,
+                        requestSent: false,
+                        requestExists,
+                        isSender: requestResponse.isSender || false,
+                        isReceiver: requestResponse.isReceiver || false,
+                    });
                 }
             } catch (error) {
-                setIsFriend(false); // Default to not a friend if an error occurs
-                setRequestExists(false); // Default to no request if an error occurs
-                setIsSender(false);
-                setIsReceiver(false);
+                setFriendStatus({
+                    isFriend: false,
+                    requestSent: false,
+                    requestExists: false,
+                    isSender: false,
+                    isReceiver: false,
+                });
             }
         };
 
         checkFriendStatus();
     }, [user]);
 
+    const showCustomAlert = (title, message, onConfirm) => {
+        setCustomAlert({ visible: true, title, message, onConfirm });
+    };
+
+    const showUndoModal = (message, onUndo) => {
+        setUndoModal({ visible: true, message, onUndo });
+        setTimeout(() => setUndoModal({ visible: false, message: '', onUndo: null }), 3000);
+    };
+
     const handleSendFriendRequest = async () => {
-        Alert.alert('Confirm Friend Request', 'Are you sure you want to send a friend request?', [
-            { text: 'Cancel', style: 'cancel' },
-            {
-                text: 'Send',
-                onPress: async () => {
-                    try {
-                        const token = await AsyncStorage.getItem('token');
-                        if (user?.id && token) {
-                            await friendService.sendFriendRequest(user.id, token);
-                            alert('Friend request sent!');
-                            setRequestSent(true); // Update state to reflect the request was sent
-                        }
-                    } catch (error) {
-                        console.error('Error sending friend request:', error);
-                        alert('Failed to send friend request.');
-                    }
-                },
-            },
-        ]);
+        showCustomAlert('Confirm Friend Request', 'Are you sure you want to send a friend request?', async () => {
+            try {
+                const token = await AsyncStorage.getItem('token');
+                if (user?.id && token) {
+                    await friendService.sendFriendRequest(user.id, token);
+                    showUndoModal('Friend request sent!');
+                    setFriendStatus((prev) => ({
+                        ...prev,
+                        requestSent: true,
+                        requestExists: true,
+                    }));
+                }
+            } catch (error) {
+                console.error('Error sending friend request:', error);
+                alert('Failed to send friend request.');
+            }
+        });
     };
 
     const handleRecallFriendRequest = async () => {
-        Alert.alert('Confirm Recall', 'Are you sure you want to recall the friend request?', [
-            { text: 'Cancel', style: 'cancel' },
-            {
-                text: 'Recall',
-                onPress: async () => {
-                    try {
-                        const token = await AsyncStorage.getItem('token');
-                        if (user?.id && token) {
-                            await friendService.cancelSentFriendRequest(user.id, token);
-                            alert('Friend request recalled!');
-                            setRequestSent(false); // Update state to reflect the request was recalled
-                        }
-                    } catch (error) {
-                        console.error('Error recalling friend request:', error);
-                        alert('Failed to recall friend request.');
-                    }
-                },
-            },
-        ]);
+        showCustomAlert('Confirm Recall', 'Are you sure you want to recall the friend request?', async () => {
+            try {
+                const token = await AsyncStorage.getItem('token');
+                if (user?.id && token) {
+                    await friendService.cancelSentFriendRequest(user.id, token);
+                    showUndoModal('Friend request recalled!');
+                    setFriendStatus((prev) => ({
+                        ...prev,
+                        requestSent: false,
+                        requestExists: false,
+                    }));
+                }
+            } catch (error) {
+                console.error('Error recalling friend request:', error);
+                alert('Failed to recall friend request.');
+            }
+        });
     };
 
     const handleUnfriend = async () => {
-        Alert.alert('Confirm Unfriend', 'Are you sure you want to unfriend this user?', [
-            { text: 'Cancel', style: 'cancel' },
-            {
-                text: 'Unfriend',
-                onPress: async () => {
-                    try {
-                        const token = await AsyncStorage.getItem('token');
-                        if (user?.id && token) {
-                            await friendService.deleteFriend(user.id, token);
-                            alert('Unfriended successfully!');
-                            setIsFriend(false); // Update state to reflect the change
-                        }
-                    } catch (error) {
-                        console.error('Error unfriending:', error);
-                        alert('Failed to unfriend.');
-                    }
-                },
-            },
-        ]);
+        showCustomAlert('Confirm Unfriend', 'Are you sure you want to unfriend this user?', async () => {
+            try {
+                const token = await AsyncStorage.getItem('token');
+                if (user?.id && token) {
+                    await friendService.deleteFriend(user.id, token);
+                    showUndoModal('Unfriended successfully!');
+                    setFriendStatus((prev) => ({
+                        ...prev,
+                        isFriend: false,
+                    }));
+                }
+            } catch (error) {
+                console.error('Error unfriending:', error);
+                alert('Failed to unfriend.');
+            }
+        });
     };
 
     const handleAcceptFriendRequest = async () => {
-        Alert.alert('Confirm Accept', 'Are you sure you want to accept this friend request?', [
-            { text: 'Cancel', style: 'cancel' },
-            {
-                text: 'Accept',
-                onPress: async () => {
-                    try {
-                        const token = await AsyncStorage.getItem('token');
-                        if (user?.id && token) {
-                            await friendService.acceptFriendRequest(user.id, token);
-                            alert('Friend request accepted!');
-                            setIsFriend(true); // Update state to reflect the change
-                            setRequestExists(false); // Clear the request state
-                        }
-                    } catch (error) {
-                        console.error('Error accepting friend request:', error);
-                        alert('Failed to accept friend request.');
-                    }
-                },
-            },
-        ]);
+        showCustomAlert('Confirm Accept', 'Are you sure you want to accept this friend request?', async () => {
+            try {
+                const token = await AsyncStorage.getItem('token');
+                if (user?.id && token) {
+                    await friendService.acceptFriendRequest(user.id, token);
+                    showUndoModal('Friend request accepted!');
+                    setFriendStatus((prev) => ({
+                        ...prev,
+                        isFriend: true,
+                        requestExists: false,
+                    }));
+                }
+            } catch (error) {
+                console.error('Error accepting friend request:', error);
+                alert('Failed to accept friend request.');
+            }
+        });
     };
 
     const onRefresh = async () => {
@@ -164,6 +174,20 @@ const FriendProfileScreen = () => {
 
     return (
         <View style={styles.container}>
+            {/* Undo Modal */}
+            <UndoModal visible={undoModal.visible} message={undoModal.message} onUndo={undoModal.onUndo} />
+            {/* Custom Alert */}
+            <CustomAlert
+                visible={customAlert.visible}
+                title={customAlert.title}
+                message={customAlert.message}
+                onCancel={() => setCustomAlert({ ...customAlert, visible: false })}
+                onConfirm={() => {
+                    customAlert.onConfirm();
+                    setCustomAlert({ ...customAlert, visible: false });
+                }}
+            />
+
             {/* Background Image as Fixed Header */}
             <ImageBackground source={require('../../assets/images/background.png')} style={styles.backgroundImage}>
                 {/* Profile Picture */}
@@ -183,7 +207,6 @@ const FriendProfileScreen = () => {
                 {/* Username and Privacy Message */}
                 <View style={styles.profileInfo}>
                     <Text style={styles.name}>{user.name || 'Unknown User'}</Text>
-                    <Text style={styles.privacyMessage}>{user.privacyMessage || 'This is your profile.'}</Text>
                 </View>
 
                 {/* Buttons Container */}
@@ -191,16 +214,16 @@ const FriendProfileScreen = () => {
                     <TouchableOpacity style={styles.sendMessageButton}>
                         <Text style={styles.sendMessageText}>Send message</Text>
                     </TouchableOpacity>
-                    {isFriend ? (
+                    {friendStatus.isFriend ? (
                         <TouchableOpacity style={styles.unfriendButton} onPress={handleUnfriend}>
                             <Text style={styles.unfriendText}>Unfriend</Text>
                         </TouchableOpacity>
-                    ) : requestExists ? (
-                        isReceiver ? (
+                    ) : friendStatus.requestExists ? (
+                        friendStatus.isReceiver ? (
                             <TouchableOpacity style={styles.acceptButton} onPress={handleAcceptFriendRequest}>
                                 <Text style={styles.acceptText}>Accept</Text>
                             </TouchableOpacity>
-                        ) : isSender ? (
+                        ) : friendStatus.isSender ? (
                             <TouchableOpacity style={styles.recallButton} onPress={handleRecallFriendRequest}>
                                 <Text style={styles.recallText}>Recall</Text>
                             </TouchableOpacity>
@@ -399,6 +422,85 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: '600',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.3)', // Slightly transparent background
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContainer: {
+        width: '85%',
+        backgroundColor: '#F9F9F9', // Light gray background
+        borderRadius: 15,
+        padding: 20,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5, // For Android shadow
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: '#000',
+        marginBottom: 10,
+        textAlign: 'center',
+    },
+    modalMessage: {
+        fontSize: 16,
+        color: '#555',
+        textAlign: 'center',
+        marginBottom: 20,
+        lineHeight: 22,
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+    },
+    modalButtonCancel: {
+        flex: 1,
+        backgroundColor: '#E0E0E0', // Light gray for cancel
+        paddingVertical: 12,
+        borderRadius: 10,
+        marginRight: 5,
+        alignItems: 'center',
+    },
+    modalButtonConfirm: {
+        flex: 1,
+        backgroundColor: '#007AFF', // iOS blue for confirm
+        paddingVertical: 12,
+        borderRadius: 10,
+        marginLeft: 5,
+        alignItems: 'center',
+    },
+    modalButtonText: {
+        color: '#FFF',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    undoModal: {
+        position: 'absolute',
+        bottom: 10,
+        left: 10,
+        right: 10,
+        backgroundColor: '#333',
+        padding: 15,
+        borderRadius: 10,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    undoMessage: {
+        color: '#fff',
+        fontSize: 14,
+    },
+    undoButton: {
+        color: '#1E90FF',
+        fontWeight: 'bold',
+        fontSize: 14,
     },
 });
 
