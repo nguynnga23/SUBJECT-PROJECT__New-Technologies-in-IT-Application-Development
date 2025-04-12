@@ -16,8 +16,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // ];
 
 const recentlyOnlineFriends = [
-    { id: '1', name: 'Nguyễn Lê Nhật Huy', group: 'Close Friends', avatar: 'https://i.pravatar.cc/150?img=13' },
-    { id: '2', name: 'Nguyễn Thị Nga', avatar: 'https://i.pravatar.cc/150?img=10' },
+    // { id: '1', name: 'Nguyễn Lê Nhật Huy', group: 'Close Friends', avatar: 'https://i.pravatar.cc/150?img=13' },
+    // { id: '2', name: 'Nguyễn Thị Nga', avatar: 'https://i.pravatar.cc/150?img=10' },
 ];
 
 // Function to group friends by the first letter of their name
@@ -154,7 +154,7 @@ export default function ListFriendsScreen() {
             {/* Action Section */}
             <View style={styles.actionWrapper}>
                 <ActionItem
-                    title="Friend requests (22)"
+                    title="Friend requests"
                     onPress={() => navigation.navigate('FriendRequest')}
                     iconName="users"
                 />
