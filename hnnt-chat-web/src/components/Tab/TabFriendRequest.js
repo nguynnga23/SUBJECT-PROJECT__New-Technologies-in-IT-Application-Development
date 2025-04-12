@@ -39,7 +39,7 @@ function TabFriendRequest(props) {
                     <div key={index} className="bg-white dark:bg-gray-800 rounded-lg w-full cursor-pointer h-fit">
                         <div className="p-4 w-full">
                             <div className="flex justify-center">
-                                <img src={avatar} alt="avatar" className="w-12 h-12 rounded-full" />
+                                <img src={user?.avatar} alt="avatar" className="w-12 h-12 rounded-full" />
                                 <div className="ml-3 mr-20">
                                     <h4 className="text-sm font-medium">{user.name}</h4>
                                     <p className="text-xs text-gray-500 dark:text-gray-100">
