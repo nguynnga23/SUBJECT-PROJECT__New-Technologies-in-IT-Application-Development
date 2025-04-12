@@ -14,6 +14,7 @@ import {
     getListFriendRequestBySender,
     cancelFriendRequestBySender,
     checkFriend,
+    getSentFriendRequests,
 } from '../controllers/friendController';
 
 const friendRouter = Router();
@@ -23,7 +24,7 @@ friendRouter.delete('/request/cancel/:id', authenticate, cancelFriendRequest); /
 friendRouter.post('/request/accept/:id', authenticate, acceptFriendRequest); // User2 accept request User1
 friendRouter.delete('/delete/:id', authenticate, deleteFriend); // User1/User2 delete friendship relationship
 friendRouter.get('/list', authenticate, getListFriend); // Get list friends by userId
-friendRouter.get('/request/:userId', authenticate, getListFriendRequest); // Ensure this matches the client request
+friendRouter.get('/request', authenticate, getListFriendRequest); // Ensure this matches the client request
 friendRouter.post('/user/block', authenticate, blockRequest); // Block user
 friendRouter.get('/user/block/list/:userId', authenticate, ListBlockRequest); // Get list block requests
 friendRouter.delete('/user/block/:id', authenticate, CancelBlockRequest); // Cancel block request
@@ -31,5 +32,5 @@ friendRouter.delete('/user/block/:id', authenticate, CancelBlockRequest); // Can
 friendRouter.get('/request/sender/:userId', authenticate, getListFriendRequestBySender); // Get list friend request by senderId
 friendRouter.delete('/request/cancel-by-sender/:receiverId', authenticate, cancelFriendRequestBySender); // User1/User2 cancel request
 friendRouter.get('/check-friend/:friendId', authenticate, checkFriend); // Check friendship relationship between userId and friendId
-
+friendRouter.get('/request/sender/', authenticate, getSentFriendRequests); // Ensure this matches the client request
 export default friendRouter;
