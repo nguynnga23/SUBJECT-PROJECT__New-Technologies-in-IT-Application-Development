@@ -15,6 +15,7 @@ import {
     cancelFriendRequestBySender,
     checkFriend,
     getSentFriendRequests,
+    checkFriendRequest,
 } from '../controllers/friendController';
 
 const friendRouter = Router();
@@ -33,4 +34,6 @@ friendRouter.get('/request/sender/:userId', authenticate, getListFriendRequestBy
 friendRouter.delete('/request/cancel-by-sender/:receiverId', authenticate, cancelFriendRequestBySender); // Updated to match client request
 friendRouter.get('/check-friend/:friendId', authenticate, checkFriend); // Check friendship relationship between userId and friendId
 friendRouter.get('/request/sender', authenticate, getSentFriendRequests); // Removed redundant userId param
+friendRouter.get('/request/check/:friendId', authenticate, checkFriendRequest); // Check if a friend request exists
+
 export default friendRouter;

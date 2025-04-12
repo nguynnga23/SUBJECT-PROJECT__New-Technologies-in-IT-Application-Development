@@ -511,7 +511,7 @@ export const checkFriend = async (req: AuthRequest, res: Response): Promise<void
         if (friendship) {
             res.status(200).json({ result: true, message: 'Các bạn đã là bạn của nhau!' });
         } else {
-            res.status(404).json({ result: false, message: 'Không tìm thấy mối quan hệ bạn bè!' });
+            res.status(200).json({ result: false, message: 'Không tìm thấy mối quan hệ bạn bè!' });
         }
     } catch (error) {
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
@@ -556,6 +556,40 @@ export const getSentFriendRequests = async (req: AuthRequest, res: Response): Pr
         res.status(200).json(receivedList);
     } catch (error) {
         console.error(error);
+        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+    }
+};
+
+// Check if a friend request exists and determine the role of the logged-in user
+export const checkFriendRequest = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.id; // ID of the logged-in user
+        const friendId = req.params.friendId; // ID of the friend
+
+        if (!userId) {
+            res.status(401).json({ message: 'Không thể xác thực người dùng!' });
+            return;
+        }
+
+        const friendRequest = await prisma.friendRequest.findFirst({
+            where: {
+                OR: [
+                    { senderId: userId, receiverId: friendId },
+                    { senderId: friendId, receiverId: userId },
+                ],
+            },
+        });
+
+        if (friendRequest) {
+            res.status(200).json({
+                exists: true,
+                isSender: friendRequest.senderId === userId, // Check if the logged-in user is the sender
+                isReceiver: friendRequest.receiverId === userId, // Check if the logged-in user is the receiver
+            });
+        } else {
+            res.status(200).json({ exists: false });
+        }
+    } catch (error) {
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
     }
 };

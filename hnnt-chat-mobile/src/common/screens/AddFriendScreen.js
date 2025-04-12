@@ -32,8 +32,17 @@ export default function AddFriendScreen() {
         try {
             setErrorMessage(''); // Clear any previous error message
             const token = await AsyncStorage.getItem('token');
-            if (!token) {
-                console.error('Token not found');
+            const currentUserData = await AsyncStorage.getItem('user'); // Retrieve current user data
+            if (!token || !currentUserData) {
+                console.error('Token or current user data not found');
+                return;
+            }
+
+            const currentUser = JSON.parse(currentUserData); // Parse the current user data
+
+            // Check if the entered phone number matches the logged-in user
+            if (currentUser.number === phoneNumber || currentUser.email === phoneNumber) {
+                setErrorMessage('You cannot add yourself as a friend.');
                 return;
             }
 
@@ -53,7 +62,6 @@ export default function AddFriendScreen() {
             }
         }
     };
-    console.log(phoneNumber);
 
     return (
         <View style={styles.container}>

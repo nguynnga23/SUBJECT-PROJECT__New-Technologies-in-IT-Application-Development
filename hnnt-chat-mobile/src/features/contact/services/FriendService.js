@@ -89,6 +89,21 @@ const friendService = {
         }
     },
 
+    // Kiểm tra lời mời kết bạn
+    checkFriendRequest: async (friendId, token) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/request/check/${friendId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
     // Xóa bạn bè
     deleteFriend: async (friendId, token) => {
         try {
