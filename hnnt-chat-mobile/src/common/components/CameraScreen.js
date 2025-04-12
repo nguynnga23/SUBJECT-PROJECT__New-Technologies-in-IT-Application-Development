@@ -1,32 +1,22 @@
-import { CameraView, Camera } from "expo-camera";
-import { useState, useRef, useEffect } from "react";
-import {
-    Button,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    SafeAreaView,
-    Image,
-    Alert
-} from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { useNavigation } from "@react-navigation/native";
-import * as MediaLibrary from "expo-media-library";
-import Slider from "@react-native-community/slider";
+import { CameraView, Camera } from 'expo-camera';
+import { useState, useRef, useEffect } from 'react';
+import { Button, StyleSheet, Text, TouchableOpacity, View, SafeAreaView, Image, Alert } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
+import * as MediaLibrary from 'expo-media-library';
+import Slider from '@react-native-community/slider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { confirmQRLogin } from "../../features/auth/services/AuthService"; // Import hàm confirmQRLogin từ CameraService
-
+import { confirmQRLogin } from '../../features/auth/services/AuthService'; // Import hàm confirmQRLogin từ CameraService
 
 export default function CameraScreen() {
     const [cameraPermission, setCameraPermission] = useState(); //State variable for camera permission
     const [mediaLibraryPermission, setMediaLibraryPermission] = useState(); //State variable for media library permission
     const [micPermission, setMicPermission] = useState(); //// state variable for microphone permission
-    const [cameraMode, setCameraMode] = useState("picture"); //State variable for picture or video. By default it will be for picture
-    const [facing, setFacing] = useState("back");
+    const [cameraMode, setCameraMode] = useState('picture'); //State variable for picture or video. By default it will be for picture
+    const [facing, setFacing] = useState('back');
     const [photo, setPhoto] = useState(); //After picture is taken this state will be updated with the picture
     const [video, setVideo] = useState(); //After video is recorded this state will be updated
-    const [flashMode, setFlashMode] = useState("on"); //Camera Flash will be ON by default
+    const [flashMode, setFlashMode] = useState('on'); //Camera Flash will be ON by default
     const [recording, setRecording] = useState(false); //State will be true when the camera will be recording
     const [zoom, setZoom] = useState(0); //State to control the digital zoom
     const [scanned, setScanned] = useState(false);
@@ -34,45 +24,33 @@ export default function CameraScreen() {
     let cameraRef = useRef(); //Creates a ref object and assigns it to the variable cameraRef.
     const navigation = useNavigation();
 
-
     //When the screen is rendered initially the use effect hook will run and check if permission is granted to the app to access the Camera, Microphone and Media Library.
     useEffect(() => {
         (async () => {
             const cameraPermission = await Camera.requestCameraPermissionsAsync();
-            const mediaLibraryPermission =
-                await MediaLibrary.requestPermissionsAsync();
-            const microphonePermission =
-                await Camera.requestMicrophonePermissionsAsync();
-            setCameraPermission(cameraPermission.status === "granted");
-            setMediaLibraryPermission(mediaLibraryPermission.status === "granted");
-            setMicPermission(microphonePermission.status === "granted");
+            const mediaLibraryPermission = await MediaLibrary.requestPermissionsAsync();
+            const microphonePermission = await Camera.requestMicrophonePermissionsAsync();
+            setCameraPermission(cameraPermission.status === 'granted');
+            setMediaLibraryPermission(mediaLibraryPermission.status === 'granted');
+            setMicPermission(microphonePermission.status === 'granted');
         })();
     }, []);
 
     //If permissions are not granted app will have to wait for permissions
-    if (
-        cameraPermission === undefined ||
-        mediaLibraryPermission === undefined ||
-        micPermission === undefined
-    ) {
+    if (cameraPermission === undefined || mediaLibraryPermission === undefined || micPermission === undefined) {
         return <Text>Request Permissions....</Text>;
     } else if (!cameraPermission) {
-        return (
-            <Text>
-                Permission for camera not granted. Please change this in settings
-            </Text>
-        );
+        return <Text>Permission for camera not granted. Please change this in settings</Text>;
     }
 
     function toggleCameraFacing() {
-        setFacing((current) => (current === "back" ? "front" : "back"));
+        setFacing((current) => (current === 'back' ? 'front' : 'back'));
     }
 
     //Function to toggle flash on or off
     function toggleFlash() {
-        setFlashMode((current) => (current === "on" ? "off" : "on"));
+        setFlashMode((current) => (current === 'on' ? 'off' : 'on'));
     }
-
 
     //Function to capture picture
     let takePic = async () => {
@@ -105,10 +83,7 @@ export default function CameraScreen() {
                             <Ionicons name="save-outline" size={30} color="black" />
                         </TouchableOpacity>
                     ) : undefined}
-                    <TouchableOpacity
-                        style={styles.btn}
-                        onPress={() => setPhoto(undefined)}
-                    >
+                    <TouchableOpacity style={styles.btn} onPress={() => setPhoto(undefined)}>
                         <Ionicons name="trash-outline" size={30} color="black" />
                     </TouchableOpacity>
                 </View>
@@ -119,38 +94,51 @@ export default function CameraScreen() {
     //Video Recorder
     async function recordVideo() {
         setRecording(true); //Updates the recording state to true. This will also toggle record button to stop button.
-        cameraRef.current.recordAsync({ //cameraRef is a useRef hook pointing to the camera component. It provides access to the camera's methods, such as recordAsync. Starts recording a video and returns a Promise that resolves with the recorded video’s details.
-            maxDuration: 30, //Limits the recording duration to 30 seconds. After 30 seconds, the recording automatically stops, and the Promise resolves.
-        })
-            .then((newVideo) => { //The result of this Promise is an object (newVideo) containing information about the recorded video, such as the file's URI and other metadata. This callback runs when the recording completes successfully. 
+        cameraRef.current
+            .recordAsync({
+                //cameraRef is a useRef hook pointing to the camera component. It provides access to the camera's methods, such as recordAsync. Starts recording a video and returns a Promise that resolves with the recorded video’s details.
+                maxDuration: 30, //Limits the recording duration to 30 seconds. After 30 seconds, the recording automatically stops, and the Promise resolves.
+            })
+            .then((newVideo) => {
+                //The result of this Promise is an object (newVideo) containing information about the recorded video, such as the file's URI and other metadata. This callback runs when the recording completes successfully.
                 setVideo(newVideo); // Stores the recorded video details in the state, which can later be used for playback, uploading, or other actions.
                 setRecording(false);
-            })
-        console.log(video.uri)
+            });
+        console.log(video.uri);
     }
 
     function stopRecording() {
         setRecording(false);
         cameraRef.current.stopRecording();
-        console.log("Recording stopped");
+        console.log('Recording stopped');
     }
 
     if (video) {
         let uri = video.uri;
-        navigation.navigate("Video", { uri })
+        navigation.navigate('Video', { uri });
     }
 
     const handleBarCodeScanned = async ({ type, data }) => {
         if (!scanned) {
             setScanned(true);
-            const token = data.replace("qr-login://", "");
-            const userDataStr = await AsyncStorage.getItem('user');
-            const userData = JSON.parse(userDataStr);
-            await confirmQRLogin(token, userData?.id);
-            // navigation.navigate("ComfirmLoginQR")
-            setTimeout(() => setScanned(false), 3000)
+
+            if (data.startsWith('hnnt-chat://user/')) {
+                const userId = data.split('/').pop(); // Extract user ID
+                console.log('Scanned User ID:', userId); // Log the scanned user ID
+                navigation.navigate('FriendProfileScreen', { userId });
+            } else if (data.startsWith('qr-login://')) {
+                const token = data.replace('qr-login://', '');
+                const userDataStr = await AsyncStorage.getItem('user');
+                const userData = JSON.parse(userDataStr);
+                await confirmQRLogin(token, userData?.id);
+            } else {
+                Alert.alert('Invalid QR Code', 'The scanned QR code is not recognized.');
+            }
+
+            setTimeout(() => setScanned(false), 3000); // Reset scanned state after 3 seconds
         }
     };
+
     //We will design the camera UI first
     return (
         <View style={styles.container}>
@@ -165,10 +153,9 @@ export default function CameraScreen() {
                     barcodeTypes: ['qr'], // hoặc để trống để mặc định tất cả
                 }}
                 onBarcodeScanned={handleBarCodeScanned}
-
             >
                 <Slider
-                    style={{ width: "100%", height: 40, position: "absolute", top: "75%" }}
+                    style={{ width: '100%', height: 40, position: 'absolute', top: '75%' }}
                     minimumValue={0}
                     maximumValue={1}
                     minimumTrackTintColor="cyan"
@@ -180,21 +167,15 @@ export default function CameraScreen() {
                     <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
                         <Ionicons name="camera-reverse-outline" size={20} color="white" />
                     </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.button}
-                        onPress={() => setCameraMode("picture")}
-                    >
+                    <TouchableOpacity style={styles.button} onPress={() => setCameraMode('picture')}>
                         <Ionicons name="camera-outline" size={20} color="white" />
                     </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.button}
-                        onPress={() => setCameraMode("video")}
-                    >
+                    <TouchableOpacity style={styles.button} onPress={() => setCameraMode('video')}>
                         <Ionicons name="videocam-outline" size={20} color="white" />
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.button} onPress={toggleFlash}>
                         <Text>
-                            {flashMode === "on" ? (
+                            {flashMode === 'on' ? (
                                 <Ionicons name="flash-outline" size={20} color="white" />
                             ) : (
                                 <Ionicons name="flash-off-outline" size={20} color="white" />
@@ -203,7 +184,7 @@ export default function CameraScreen() {
                     </TouchableOpacity>
                 </View>
                 <View style={styles.shutterContainer}>
-                    {cameraMode === "picture" ? (
+                    {cameraMode === 'picture' ? (
                         <TouchableOpacity style={styles.button} onPress={takePic}>
                             <Ionicons name="aperture-outline" size={40} color="white" />
                         </TouchableOpacity>
@@ -220,16 +201,15 @@ export default function CameraScreen() {
             </CameraView>
         </View>
     );
-};
-
+}
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: "center",
+        justifyContent: 'center',
     },
     message: {
-        textAlign: "center",
+        textAlign: 'center',
         paddingBottom: 10,
     },
     camera: {
@@ -237,45 +217,45 @@ const styles = StyleSheet.create({
     },
     buttonContainer: {
         flex: 1,
-        flexDirection: "row",
-        backgroundColor: "transparent",
+        flexDirection: 'row',
+        backgroundColor: 'transparent',
         margin: 20,
     },
     shutterContainer: {
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center",
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
         margin: 20,
     },
     button: {
         flex: 1,
-        alignSelf: "flex-end",
-        alignItems: "center",
+        alignSelf: 'flex-end',
+        alignItems: 'center',
     },
     btnContainer: {
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "space-evenly",
-        backgroundColor: "white",
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        backgroundColor: 'white',
     },
     btn: {
-        justifyContent: "center",
+        justifyContent: 'center',
         margin: 10,
         elevation: 5,
     },
     imageContainer: {
-        height: "95%",
-        width: "100%",
+        height: '95%',
+        width: '100%',
     },
     preview: {
-        alignSelf: "stretch",
+        alignSelf: 'stretch',
         flex: 1,
-        width: "auto",
+        width: 'auto',
     },
     text: {
         fontSize: 24,
-        fontWeight: "bold",
-        color: "white",
+        fontWeight: 'bold',
+        color: 'white',
     },
 });

@@ -15,6 +15,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FontAwesome, AntDesign } from '@expo/vector-icons';
 import CustomAlert from '../components/CustomAlert'; // Import CustomAlert
 import UndoModal from '../components/UndoModal'; // Import the new UndoModal component
+import ProfileService from '../../features/profile/services/ProfileService';
 
 const FriendProfileScreen = () => {
     const route = useRoute();
@@ -67,6 +68,30 @@ const FriendProfileScreen = () => {
 
         checkFriendStatus();
     }, [user]);
+
+    useEffect(() => {
+        const fetchUserById = async () => {
+            try {
+                const token = await AsyncStorage.getItem('token');
+                console.log('Token:', token);
+
+                const userId = route.params?.userId;
+                console.log('UserID from params:', route.params?.userId);
+                if (userId && token) {
+                    const fetchedUser = await ProfileService.getUserById(token, userId);
+                    setUser(fetchedUser);
+                } else {
+                    console.warn('Missing token or userId');
+                }
+            } catch (error) {
+                console.error('Error fetching user by IDD:', error);
+            }
+        };
+
+        if (!user && route.params?.userId) {
+            fetchUserById();
+        }
+    }, [route.params?.userId]);
 
     const showCustomAlert = (title, message, onConfirm) => {
         setCustomAlert({ visible: true, title, message, onConfirm });
