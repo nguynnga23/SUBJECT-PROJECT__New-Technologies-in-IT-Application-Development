@@ -15,7 +15,9 @@ import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { login } from '../services/AuthService'; // Import hàm login từ AuthService
-
+import LoggedInDeviceService from '../../profile/services/LoggedInDeviceService'; // Import LoggedInDeviceService
+import * as Device from 'expo-device';
+import { Platform } from 'react-native';
 export default function LoginScreen() {
     const navigation = useNavigation();
 
@@ -49,9 +51,25 @@ export default function LoginScreen() {
             await AsyncStorage.setItem('token', token);
             await AsyncStorage.setItem('user', JSON.stringify(user)); // Stringify user object
 
+            // Add the current device to the logged-in devices list
+            const deviceInfo = {
+                userId: user.id,
+                deviceId: Device.osInternalBuildId || 'unknown-device-id',
+                deviceName: Device.deviceName || 'unknown-device',
+                platform: Platform.OS,
+                accessToken: token,
+                ipAddress: '192.168.1.100', // giống đoạn fetch ở trên
+            };
+            console.log(deviceInfo);
+            await LoggedInDeviceService.addDevice(deviceInfo);
+
             Alert.alert('Login Successful', `Welcome, ${user.name}!`);
             // Điều hướng đến màn hình chính
-            navigation.navigate('HomeTab');
+            // navigation.navigate('HomeTab');
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'HomeTab' }], // hoặc màn hình chính sau login
+            });
         } catch (error) {
             console.warn('Login failed:', error);
             Alert.alert('Login Failed', 'Số điện thoại hoặc mật khẩu không đúng');

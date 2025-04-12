@@ -17,6 +17,7 @@ const prisma = new PrismaClient();
 export const login = async (req: Request, res: Response): Promise<void> => {
     try {
         const { number, password } = req.body;
+        console.log('number', number, password);
 
         // Kiểm tra số điện thoại có tồn tại không
         const user = await prisma.account.findUnique({
@@ -171,24 +172,29 @@ let otpStore: { [key: string]: { otp: string; expiry: number } } = {};
 
 // Gửi OTP qua email
 const sendOTP = async (email: string, otp: string): Promise<void> => {
-    const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        service: 'Gmail',
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-        },
-    });
+    try {
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            service: 'Gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
 
-    const message = {
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: 'Mã OTP xác thực tài khoản',
-        text: `Mã OTP của bạn là: ${otp}. Vui lòng không chia sẻ mã này với bất kỳ ai khác.`,
-        html: `<p>Mã OTP của bạn là: <strong>${otp}</strong></p><p>Vui lòng không chia sẻ mã này với bất kỳ ai khác.</p>`,
-    };
+        const message = {
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'Mã OTP xác thực tài khoản',
+            text: `Mã OTP của bạn là: ${otp}. Vui lòng không chia sẻ mã này với bất kỳ ai khác.`,
+            html: `<p>Mã OTP của bạn là: <strong>${otp}</strong></p><p>Vui lòng không chia sẻ mã này với bất kỳ ai khác.</p>`,
+        };
 
-    await transporter.sendMail(message);
+        await transporter.sendMail(message);
+    } catch (error) {
+        console.error('Lỗi khi gửi OTP:', error);
+        throw new Error('Không thể gửi mã OTP. Vui lòng thử lại sau.');
+    }
 };
 
 // API gửi OTP qua email

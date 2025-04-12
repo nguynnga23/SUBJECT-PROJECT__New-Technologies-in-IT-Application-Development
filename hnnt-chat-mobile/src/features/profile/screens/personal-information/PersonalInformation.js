@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useRoute } from '@react-navigation/native';
 import { format } from 'date-fns'; // Import thư viện date-fns
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import ProfileService from '../../services/ProfileService';
+import { fetchUserData } from '../../utils/fetchUserData';
+
 // Component hiển thị thông tin
 const InfoItem = ({ icon, title, value }) => (
     <View style={styles.infoContainer}>
@@ -18,8 +23,23 @@ const InfoItem = ({ icon, title, value }) => (
 export default function PersonalInformation() {
     const navigation = useNavigation();
     const route = useRoute();
-    const { user } = route.params || {}; // fallback nếu chưa có
-    // Định dạng ngày sinh
+    const [user, setUser] = useState(route.params?.user || null);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            const fetchUser = async () => {
+                try {
+                    const userData = await fetchUserData();
+                    setUser(userData);
+                } catch (error) {
+                    console.error(error);
+                }
+            };
+
+            fetchUser();
+        }, []),
+    );
+
     const formattedBirthDate = user?.birthDate
         ? format(new Date(user.birthDate), 'dd/MM/yyyy') // Định dạng mm/dd/yyyy
         : 'Chưa cập nhật';

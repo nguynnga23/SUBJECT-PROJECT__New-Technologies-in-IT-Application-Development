@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Avatar } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logout } from '../../auth/services/AuthService';
+import ProfileService from '../services/ProfileService';
+import { fetchUserData } from '../utils/fetchUserData';
 
 const MenuItem = ({ icon, title, onPress }) => (
     <TouchableOpacity style={styles.viewProfile} onPress={onPress}>
@@ -17,25 +19,20 @@ export default function ProfileScreen() {
     const navigation = useNavigation();
     const [user, setUser] = useState(null);
 
-    useEffect(() => {
-        const fetchUserFromStorage = async () => {
-            try {
-                const userJson = await AsyncStorage.getItem('user');
-                if (userJson) {
-                    const userData = JSON.parse(userJson);
-                    console.log(userData);
+    useFocusEffect(
+        React.useCallback(() => {
+            const fetchUser = async () => {
+                try {
+                    const userData = await fetchUserData();
                     setUser(userData);
-                } else {
-                    console.warn('User not found in storage');
-                    // navigation.navigate('Login'); // Navigate to login screen
+                } catch (error) {
+                    console.error(error);
                 }
-            } catch (error) {
-                console.error('Lỗi lấy user từ AsyncStorage:', error);
-            }
-        };
+            };
 
-        fetchUserFromStorage();
-    }, []);
+            fetchUser();
+        }, []),
+    );
 
     const handleLogout = async () => {
         Alert.alert(
@@ -50,11 +47,16 @@ export default function ProfileScreen() {
                         try {
                             const token = await AsyncStorage.getItem('token');
                             if (token) {
-                                await logout(token); // Call the logout API
+                                await logout(token); // Gọi API logout nếu có
                             }
                             await AsyncStorage.removeItem('user');
                             await AsyncStorage.removeItem('token');
-                            navigation.navigate('Login');
+
+                            // ❗ Dùng reset để tránh back lại màn login
+                            navigation.reset({
+                                index: 0,
+                                routes: [{ name: 'HomeScreen' }],
+                            });
                         } catch (error) {
                             console.error('Error during logout:', error);
                         }

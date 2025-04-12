@@ -155,7 +155,7 @@ export default function FriendRequestScreen() {
                         <Text style={styles.sectionHeaderText}>{title}</Text>
                     </View>
                 )}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item, index) => `${selectedTab}-${item.id || `fallback-${index}`}`} // Ensure unique keys
                 style={styles.listContainer}
                 stickySectionHeadersEnabled={true}
             />
