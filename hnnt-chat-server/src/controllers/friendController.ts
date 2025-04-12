@@ -593,3 +593,41 @@ export const checkFriendRequest = async (req: AuthRequest, res: Response): Promi
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
     }
 };
+
+export const syncContacts = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.id; // ID of the logged-in user
+        const { phoneNumbers } = req.body; // List of phone numbers from the client
+
+        if (!userId) {
+            res.status(401).json({ message: 'Không thể xác thực người dùng!' });
+            return;
+        }
+
+        if (!Array.isArray(phoneNumbers) || phoneNumbers.length === 0) {
+            res.status(400).json({ message: 'Danh sách số điện thoại không hợp lệ!' });
+            return;
+        }
+
+        // Find users whose phone numbers match the provided list
+        const matchedUsers = await prisma.account.findMany({
+            where: {
+                number: {
+                    in: phoneNumbers,
+                },
+            },
+            select: {
+                id: true,
+                name: true,
+                avatar: true,
+                status: true,
+                number: true,
+            },
+        });
+
+        res.status(200).json({ matchedUsers });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+    }
+};

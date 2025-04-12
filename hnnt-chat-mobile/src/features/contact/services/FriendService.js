@@ -215,6 +215,25 @@ const friendService = {
             throw error.response?.data || error.message;
         }
     },
+
+    // Đồng bộ danh bạ
+    syncContacts: async (phoneNumbers, token) => {
+        try {
+            const response = await axios.post(
+                `${BASE_URL}/sync-contacts`,
+                { phoneNumbers },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                },
+            );
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
 };
 
 export default friendService;

@@ -16,6 +16,7 @@ import {
     checkFriend,
     getSentFriendRequests,
     checkFriendRequest,
+    syncContacts, // Import the syncContacts function
 } from '../controllers/friendController';
 
 const friendRouter = Router();
@@ -35,5 +36,6 @@ friendRouter.delete('/request/cancel-by-sender/:receiverId', authenticate, cance
 friendRouter.get('/check-friend/:friendId', authenticate, checkFriend); // Check friendship relationship between userId and friendId
 friendRouter.get('/request/sender', authenticate, getSentFriendRequests); // Removed redundant userId param
 friendRouter.get('/request/check/:friendId', authenticate, checkFriendRequest); // Check if a friend request exists
+friendRouter.post('/sync-contacts', authenticate, syncContacts); // Sync contacts with the server
 
 export default friendRouter;
