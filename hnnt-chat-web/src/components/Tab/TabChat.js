@@ -41,7 +41,26 @@ function TabChat() {
         };
 
         fetchChats(); // Gọi hàm async bên trong useEffect
-    }, [data]);
+    }, []);
+
+    useEffect(() => {
+        // Lắng nghe tin nhắn đến từ server
+        const handleReceiveMessage = async ({ chatId: receivedChatId }) => {
+            let check = data.some((chat) => chat.id === receivedChatId);
+
+            if (check) {
+                const chats = await getChat();
+                setData(chats);
+            } else {
+            }
+        };
+
+        socket.on('receive_message', handleReceiveMessage);
+
+        return () => {
+            socket.off('receive_message', handleReceiveMessage);
+        };
+    }, []);
 
     const dispatch = useDispatch();
 

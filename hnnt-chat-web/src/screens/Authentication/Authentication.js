@@ -348,30 +348,18 @@ function Authentication() {
                                     onChange={(e) => setPassword(e.target.value)}
                                 />
                             </div>
-                            <div className="flex  justify-between">
-                                <button
-                                    className={`w-[65%] text-white py-2 mt-4 rounded-lg ${
-                                        number && password
-                                            ? 'bg-blue-500 hover:bg-blue-500'
-                                            : 'bg-blue-100 cursor-not-allowed'
-                                    }`}
-                                    onClick={handleLogin}
-                                    disabled={!number || !password}
-                                >
-                                    Đăng nhập
-                                </button>
-                                <button
-                                    className={`w-[30%] text-white py-2 rounded-lg mt-4 bg-blue-500 hover:bg-blue-500`}
-                                    onClick={() => {
-                                        setOpenRegister(true);
-                                    }}
-                                >
-                                    Đăng Ký
-                                </button>
-                                {openRegister && (
-                                    <Register setOpenRegister={setOpenRegister} openRegister={openRegister} />
-                                )}
-                            </div>
+
+                            <button
+                                className={`w-full text-white py-2 rounded-lg mt-4 ${
+                                    number && password
+                                        ? 'bg-blue-500 hover:bg-blue-500'
+                                        : 'bg-blue-100 cursor-not-allowed'
+                                }`}
+                                onClick={handleLogin}
+                                disabled={!number || !password}
+                            >
+                                Đăng nhập với mật khẩu
+                            </button>
 
                             <p
                                 className="text-center text-[14px] mt-2 cursor-pointer hover:underline"

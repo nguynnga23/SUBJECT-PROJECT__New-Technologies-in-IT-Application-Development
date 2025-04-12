@@ -95,22 +95,26 @@ function TabMessage() {
         };
 
         fetchMessages();
-    }, [chatId, data]);
+    }, []);
 
     useEffect(() => {
         // Lắng nghe tin nhắn đến từ server
-        socket.on('receive_message', (message) => {
-            setData((prev) => [...prev, message.message]);
+        const handleReceiveMessage = ({ chatId: receivedChatId, newMessage }) => {
+            if (activeChat.id !== receivedChatId) {
+                return;
+            }
+            setData((prev) => [...prev, newMessage]);
             setTimeout(() => {
                 if (chatContainerRef.current) {
                     chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
                 }
             }, 100);
-        });
+        };
 
-        // Clean up khi component unmount
+        socket.on('receive_message', handleReceiveMessage);
+
         return () => {
-            socket.off('receive_message');
+            socket.off('receive_message', handleReceiveMessage);
         };
     }, []);
     useEffect(() => {
@@ -150,13 +154,15 @@ function TabMessage() {
     const handleSendMessage = async () => {
         if (message.trim() !== '') {
             const sendMess = await sendMessage(chatId, message, 'text', replyMessage?.id, null, null, null);
+            if (!sendMess) return;
 
             await readedChatOfUser(chatId);
             dispatch(setReadedChatWhenSendNewMessage({ chatId: chatId, userId: userId }));
             setMessage('');
             setReplyMessage(null);
             socket.emit('send_message', {
-                message: sendMess,
+                chatId: activeChat.id,
+                newMessage: sendMess,
             });
         }
         setTimeout(() => {
@@ -176,7 +182,7 @@ function TabMessage() {
     const handleFileChange = async (event, type) => {
         const file = event.target.files[0];
         if (file) {
-            await sendMessage(
+            const sendFile = await sendMessage(
                 chatId,
                 URL.createObjectURL(file),
                 type,
@@ -185,6 +191,10 @@ function TabMessage() {
                 file.type,
                 (file.size / 1024).toFixed(2) + ' KB',
             );
+            socket.emit('send_message', {
+                chatId: activeChat.id,
+                newMessage: sendFile,
+            });
         }
         event.target.value = '';
         setTimeout(() => {
@@ -461,7 +471,7 @@ function TabMessage() {
                                                     alt="avatar"
                                                     className="w-full h-full rounded-full border object-cover"
                                                 />
-                                                {leader && (
+                                                {leader.id === message.sender.id && (
                                                     <RiKey2Line
                                                         size={15}
                                                         color="yellow"
