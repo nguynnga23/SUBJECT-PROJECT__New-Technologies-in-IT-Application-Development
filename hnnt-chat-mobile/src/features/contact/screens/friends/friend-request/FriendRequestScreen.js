@@ -22,7 +22,7 @@ const TabButton = ({ title, isActive, onPress }) => (
 );
 
 // Friend Request Item Component
-const FriendRequestItem = ({ item }) => {
+const FriendRequestItem = ({ item, isSentTab }) => {
     const handleDecline = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
@@ -48,6 +48,21 @@ const FriendRequestItem = ({ item }) => {
         }
     };
 
+    const handleRecall = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!item.requestId) {
+                alert('Invalid request ID!');
+                return;
+            }
+            await friendService.cancelFriendRequest(item.requestId, token); // Call cancel API
+            alert('Friend request recalled!');
+        } catch (error) {
+            console.error('Error recalling friend request:', error);
+            alert(error.response?.data?.message || 'Failed to recall friend request.');
+        }
+    };
+
     return (
         <View style={styles.requestItem}>
             <View style={styles.requestInfoBlock}>
@@ -57,17 +72,27 @@ const FriendRequestItem = ({ item }) => {
                         <Text style={styles.requestName}>{item.name}</Text>
                     </View>
                     <View>
-                        <Text style={styles.requestDetails}>Wants to be friends</Text>
+                        <Text style={styles.requestDetails}>
+                            {isSentTab ? 'Friend request sent' : 'Wants to be friends'}
+                        </Text>
                     </View>
                 </View>
             </View>
             <View style={styles.actionButtons}>
-                <TouchableOpacity style={styles.declineButton} onPress={handleDecline}>
-                    <Text style={styles.declineText}>Decline</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.acceptButton} onPress={handleAccept}>
-                    <Text style={styles.acceptText}>Accept</Text>
-                </TouchableOpacity>
+                {isSentTab ? (
+                    <TouchableOpacity style={styles.recallButton} onPress={handleRecall}>
+                        <Text style={styles.recallText}>Recall</Text>
+                    </TouchableOpacity>
+                ) : (
+                    <>
+                        <TouchableOpacity style={styles.declineButton} onPress={handleDecline}>
+                            <Text style={styles.declineText}>Decline</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.acceptButton} onPress={handleAccept}>
+                            <Text style={styles.acceptText}>Accept</Text>
+                        </TouchableOpacity>
+                    </>
+                )}
             </View>
         </View>
     );
@@ -114,10 +139,11 @@ export default function FriendRequestScreen() {
             try {
                 const token = await AsyncStorage.getItem('token'); // Retrieve token
                 const userId = await AsyncStorage.getItem('userId'); // Retrieve userId
-                const requests = await friendService.getFriendRequests(token, userId); // Pass userId
-                console.log(requests);
-                setReceivedRequests(requests); // Update received requests
-                setSentRequests(requests); // Update sent requests
+                const receivedRequestList = await friendService.getFriendRequests(token, userId); // Pass userId
+                const sentRequestList = await friendService.getSentFriendRequests(token, userId); // Pass userId
+
+                setReceivedRequests(receivedRequestList); // Update received requests
+                setSentRequests(sentRequestList); // Update sent requests
             } catch (error) {
                 console.error('Error fetching friend requests:', error);
             }
@@ -149,7 +175,7 @@ export default function FriendRequestScreen() {
                 sections={[
                     { title: selectedTab === 'received' ? 'Received Requests' : 'Sent Requests', data: requestsToShow },
                 ]}
-                renderItem={({ item }) => <FriendRequestItem item={item} />}
+                renderItem={({ item }) => <FriendRequestItem item={item} isSentTab={selectedTab === 'sent'} />}
                 renderSectionHeader={({ section: { title } }) => (
                     <View style={styles.sectionHeader}>
                         <Text style={styles.sectionHeaderText}>{title}</Text>
@@ -337,5 +363,17 @@ const styles = StyleSheet.create({
     addText: {
         fontSize: 14,
         color: '#007AFF',
+    },
+    recallButton: {
+        backgroundColor: '#E5E5EA',
+        paddingVertical: 8,
+        paddingHorizontal: 20,
+        alignItems: 'center',
+        borderRadius: 20,
+    },
+    recallText: {
+        fontWeight: '600',
+        fontSize: 14,
+        color: '#000',
     },
 });

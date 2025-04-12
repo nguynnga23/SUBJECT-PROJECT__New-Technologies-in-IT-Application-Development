@@ -1,8 +1,11 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import React, { useRef, useState } from 'react';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import PhoneInput from 'react-native-phone-number-input';
+import ProfileService from '../../features/profile/services/ProfileService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
 const ActionItem = ({ title, onPress, iconName }) => (
     <TouchableOpacity style={styles.actionItem} onPress={onPress} activeOpacity={0.7}>
@@ -14,19 +17,43 @@ const ActionItem = ({ title, onPress, iconName }) => (
 );
 
 export default function AddFriendScreen() {
+    const navigation = useNavigation(); // Add navigation hook
     const phoneInputRef = useRef(null);
     const [phoneNumber, setPhoneNumber] = useState('');
     const [formattedPhoneNumber, setFormattedPhoneNumber] = useState('');
     const [countryCode] = useState('VN'); // Mặc định Việt Nam
+    const [errorMessage, setErrorMessage] = useState(''); // New state for error message
 
     // Hàm xử lý từng ActionItem
     const handleScanQR = () => console.log('Scan QR Code');
     const handlePhonebook = () => console.log('Open Phonebook');
     const handlePeopleYouMayKnow = () => console.log('View People You May Know');
-    const handleSubmitPhoneNumber = () => {
-        console.log('Số điện thoại nhập:', phoneNumber);
-        console.log('Số điện thoại đã format:', formattedPhoneNumber);
+    const handleSubmitPhoneNumber = async () => {
+        try {
+            setErrorMessage(''); // Clear any previous error message
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                console.error('Token not found');
+                return;
+            }
+
+            const user = await ProfileService.getUserByNumberOrEmail(token, {
+                number: phoneNumber,
+                email: '',
+            });
+            console.log('User found:', user);
+            navigation.navigate('FriendProfileScreen', { user }); // Navigate to FriendProfileScreen with user data
+        } catch (error) {
+            if (error.message === 'User not found') {
+                console.warn('No user found with the provided phone number.');
+                setErrorMessage('No user found with the provided phone number.');
+            } else {
+                console.error('Error fetching user by phone number:', error);
+                setErrorMessage('An error occurred. Please try again.');
+            }
+        }
     };
+    console.log(phoneNumber);
 
     return (
         <View style={styles.container}>
@@ -42,20 +69,25 @@ export default function AddFriendScreen() {
             <View style={styles.enterNumberPhoneWrapper}>
                 <View style={styles.phoneInputWrapper}>
                     <View style={{ marginVertical: 10 }}>
-                        <PhoneInput
-                            ref={phoneInputRef}
-                            defaultValue={phoneNumber}
-                            defaultCode={countryCode ?? 'VN'}
-                            withFlag={false}
-                            layout="second"
-                            onChangeText={(text) => setPhoneNumber(text)}
-                            onChangeFormattedText={(text) => setFormattedPhoneNumber(text)}
+                        <TextInput
+                            value={phoneNumber}
+                            onChangeText={setPhoneNumber}
+                            placeholder="Nhập số điện thoại"
+                            keyboardType="phone-pad"
+                            style={{
+                                borderWidth: 1,
+                                borderColor: '#ccc',
+                                padding: 10,
+                                borderRadius: 8,
+                                width: 310,
+                            }}
                         />
                     </View>
                     <TouchableOpacity style={styles.arrowRightButton} onPress={handleSubmitPhoneNumber}>
                         <AntDesign name="arrowright" size={24} color="black" />
                     </TouchableOpacity>
                 </View>
+                {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
                 <ActionItem title="Scan QR code" iconName="qrcode" onPress={handleScanQR} />
             </View>
 
@@ -126,4 +158,9 @@ const styles = StyleSheet.create({
     },
     actionText: { textAlign: 'center' },
     viewSendRequestWrapper: { flex: 1, paddingHorizontal: 15 },
+    errorText: {
+        color: 'red',
+        marginTop: 10,
+        textAlign: 'center',
+    },
 });

@@ -345,7 +345,7 @@ export const blockRequest = async (req: Request, res: Response): Promise<void> =
 };
 
 //📌 List Block request
-export const ListBlockRequest = async (req: Request, res: Response): Promise<void> => {
+export const listBlockRequest = async (req: Request, res: Response): Promise<void> => {
     try {
         const { userId } = req.params; // id của user
 
@@ -379,7 +379,7 @@ export const ListBlockRequest = async (req: Request, res: Response): Promise<voi
 };
 
 //📌 List Block request
-export const CancelBlockRequest = async (req: Request, res: Response): Promise<void> => {
+export const cancelBlockRequest = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.params; // id của friend request
 
@@ -518,7 +518,7 @@ export const checkFriend = async (req: AuthRequest, res: Response): Promise<void
     }
 };
 
-// Get list friend user1 -> user2
+//📌 Get list friend user1 -> user2
 export const getSentFriendRequests = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const userId = req.user?.id; // Lấy ID của user từ token, không cần từ params

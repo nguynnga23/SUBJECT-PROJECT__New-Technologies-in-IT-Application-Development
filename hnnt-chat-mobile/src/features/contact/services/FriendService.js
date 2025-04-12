@@ -20,10 +20,10 @@ const friendService = {
     },
 
     // Lấy danh sách lời mời kết bạn
-    getFriendRequests: async (token, userId) => {
+    getFriendRequests: async (token) => {
         try {
-            const response = await axios.get(`${BASE_URL}/request/${userId}`, {
-                // Corrected endpoint
+            const response = await axios.get(`${BASE_URL}/request`, {
+                // Updated endpoint
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
@@ -124,6 +124,7 @@ const friendService = {
     getSentFriendRequests: async (token) => {
         try {
             const response = await axios.get(`${BASE_URL}/request/sender`, {
+                // Updated endpoint
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
@@ -139,6 +140,7 @@ const friendService = {
     cancelSentFriendRequest: async (receiverId, token) => {
         try {
             const response = await axios.delete(`${BASE_URL}/request/cancel-by-sender/${receiverId}`, {
+                // Updated endpoint
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',

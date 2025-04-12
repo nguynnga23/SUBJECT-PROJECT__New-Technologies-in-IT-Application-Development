@@ -172,3 +172,29 @@ export const getUserByNumberAndEmail = async (req: AuthRequest, res: Response): 
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+
+export const getUserByNumberOrEmail = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const { number, email } = req.body;
+        console.log(req.body);
+        if (!number && !email) {
+            res.status(400).json({ message: 'Số điện thoại hoặc email phải được cung cấp' });
+            return;
+        }
+
+        const user = await prisma.account.findFirst({
+            where: {
+                OR: [{ number: number }, { email: email }],
+            },
+        });
+
+        if (!user) {
+            res.status(404).json({ message: 'Không tìm thấy người dùng' });
+            return;
+        }
+
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error });
+    }
+};

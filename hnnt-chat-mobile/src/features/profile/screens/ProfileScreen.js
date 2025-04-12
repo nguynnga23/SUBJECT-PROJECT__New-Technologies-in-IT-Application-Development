@@ -72,7 +72,7 @@ export default function ProfileScreen() {
             <View style={styles.viewProfileWrapper}>
                 <TouchableOpacity
                     style={styles.viewProfile}
-                    onPress={() => navigation.navigate('Personal Information', { user })}
+                    onPress={() => navigation.navigate('UserProfile', { user })}
                 >
                     <Avatar.Image
                         size={50}
