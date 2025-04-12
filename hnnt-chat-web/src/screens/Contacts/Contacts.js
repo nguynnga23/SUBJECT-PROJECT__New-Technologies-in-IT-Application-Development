@@ -17,6 +17,9 @@ import TabGroupList from '../../components/Tab/TabGroupList';
 import TabFriendRequest from '../../components/Tab/TabFriendRequest';
 import PopupAddFriend from '../../components/Popup/PopupAddFriend';
 import PopupAddGroup from '../../components/Popup/PopupAddGroup';
+import { searchFollowKeyWord } from '../Messaging/api';
+import { getListFriendByKeyword } from './api';
+import TabSearch from '../../components/Tab/TabSearch';
 
 const TabsContacts = [
     { id: 1, icon: <PiUserList size={25} />, title: 'Danh sách bạn bè', content: 'Bạn bè' },
@@ -112,6 +115,9 @@ function Contacts() {
     const [filterName, setFilterName] = useState('AZ');
     const [filter, setFilter] = useState('Tất cả');
 
+    const [data, setData] = useState([]);
+    const [dataContact, setDataContact] = useState([]);
+
     // Tab danh sách bạn bè ----------------------------
     // Lọc dữ liệu theo tên
     const filteredData = userdata.filter((user) => user.name.toLowerCase().includes(search.toLowerCase()));
@@ -161,22 +167,43 @@ function Contacts() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    // Chức năng search
+    useEffect(() => {
+        const delayDebounce = setTimeout(async () => {
+            if (subSearch.trim()) {
+                try {
+                    const response1 = await searchFollowKeyWord(subSearch);
+                    const response2 = await getListFriendByKeyword(subSearch);
+                    setData(response1.messages);
+                    setDataContact(response2);
+                } catch (error) {
+                    console.error('Lỗi khi tìm kiếm:', error);
+                }
+            } else {
+                setData([]);
+                setDataContact([]);
+            }
+        }, 1000);
+
+        return () => clearTimeout(delayDebounce);
+    }, [subSearch]);
+
     return (
         <div className="h-screen flex flex-col">
             <div className="flex-1 flex min-h-0">
-                <div className="w-1/4 bg-white border-r p-4">
+                <div className="w-1/4 bg-white dark:bg-gray-800 border-r p-4 dark:text-white">
                     <div className="flex justify-between items-center relative pb-2">
                         <input
                             type="text"
                             placeholder="Tìm kiếm..."
-                            className="w-full pl-8 pr-6 p-1.5 border bg-gray-200 rounded-lg text-[14px] focus:border-blue-500 focus:outline-none"
+                            className="w-full pl-8 pr-6 p-1.5 border bg-gray-200 dark:bg-gray-700 rounded-lg text-[14px] focus:border-blue-500 focus:outline-none"
                             value={subSearch}
                             onChange={(e) => setSubSearch(e.target.value)}
                         />
                         <FaSearch className="absolute left-2 top-3 text-gray-500 text-xs" />
                         {subSearch !== '' && (
                             <TiDelete
-                                className="absolute right-[70px] top-3 text-gray-500 text-xs cursor-pointer bg-gray-200"
+                                className="absolute right-[70px] top-3 text-gray-500 dark:text-gray-100 text-xs cursor-pointer bg-gray-200 dark:bg-gray-700"
                                 size={16}
                                 onClick={() => {
                                     setSubSearch('');
@@ -192,32 +219,42 @@ function Contacts() {
                             <PopupAddGroup isOpen={addGroupButton} onClose={() => setAddGroupButton(false)} />
                         </div>
                     </div>
-                    <div>
-                        {TabsContacts.map((tab) => (
-                            <div
-                                key={tab.id}
-                                className={`p-3 cursor-pointer flex ${selectTab?.id === tab.id ? 'bg-blue-100' : ''}`}
-                                onClick={() => {
-                                    setSelectTab(tab);
-                                    setSearch('');
-                                    setFilterName('AZ');
-                                    setFilter('Tất cả');
-                                }}
-                            >
-                                <h3 className="font-bold">{tab.icon}</h3>
-                                <p className="text-base font-semibold pl-3 text-gray-600">{tab.title}</p>
-                            </div>
-                        ))}
-                    </div>
+                    {subSearch !== '' ? (
+                        <TabSearch keyword={subSearch} data={data} dataContact={dataContact} />
+                    ) : (
+                        <div>
+                            {TabsContacts.map((tab) => (
+                                <div
+                                    key={tab.id}
+                                    className={`p-3 cursor-pointer flex ${
+                                        selectTab?.id === tab.id ? 'bg-blue-100 dark:bg-gray-600' : ''
+                                    }`}
+                                    onClick={() => {
+                                        setSelectTab(tab);
+                                        setSearch('');
+                                        setFilterName('AZ');
+                                        setFilter('Tất cả');
+                                    }}
+                                >
+                                    <h3 className="font-bold">{tab.icon}</h3>
+                                    <p className="text-base font-semibold pl-3 text-gray-600 dark:text-gray-100">
+                                        {tab.title}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
-                <div className="w-3/4 flex flex-col bg-white">
+                <div className="w-3/4 flex flex-col bg-white dark:bg-gray-800 dark:text-white">
                     <div className="p-4 border-b flex items-center">
                         {selectTab.icon}
                         <h3 className="font-semibold text-lg pl-3">{selectTab.title}</h3>
                     </div>
-                    <div className="flex-1 p-4 overflow-y-auto bg-gray-200">
-                        <p className="bg-gray-200 p-2 rounded-lg w-fit mb-2 font-semibold">{selectTab.content}</p>
+                    <div className="flex-1 p-4 overflow-y-auto bg-gray-200 dark:bg-gray-700">
+                        <p className="bg-gray-200 dark:bg-gray-700 p-2 rounded-lg w-fit mb-2 font-semibold">
+                            {selectTab.content}
+                        </p>
                         {selectTab.id === 1 ? (
                             <TabFriendsList
                                 search={search}

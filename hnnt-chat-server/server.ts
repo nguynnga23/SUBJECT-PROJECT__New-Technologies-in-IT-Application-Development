@@ -13,6 +13,7 @@ import userRouter from './src/routes/userRoutes';
 
 import categoryRouter from './src/routes/categoryRoutes';
 import { initSocket } from './src/utils/socket';
+import loggedInDeviceRouter from './src/routes/loggedInDeviceRoutes';
 
 // Load environment variables
 dotenv.config();
@@ -45,6 +46,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/user', userRouter);
 
 app.use('/api/groups', groupChatManageRouter);
+app.use('/api/loggedin-devices', loggedInDeviceRouter);
 
 server.listen(PORT, () => {
     console.log(`Server đang chạy trên cổng ${PORT}`);

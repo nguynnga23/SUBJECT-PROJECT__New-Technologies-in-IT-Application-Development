@@ -1,12 +1,17 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { uploadToS3 } from '../utils/s3Uploader'; // Import the new utility
+import multer from 'multer';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
+const upload = multer(); // Use multer for handling multipart/form-data
 
 interface User {
     number: string;
     id: string;
     name: string;
+    email: string;
     password: string;
     avatar: string | null;
     status: string | null;
@@ -45,19 +50,124 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
 export const updateAvatar = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const userId = req.user?.id;
-        const { image } = req.body;
+        const file = req.file;
 
-        if (!image) {
-            res.status(400).json({ message: 'No avatar provided' });
+        if (!file) {
+            res.status(400).json({ message: 'No file provided' });
             return;
         }
 
+        // Validate file type
+        if (!file.mimetype.startsWith('image/')) {
+            res.status(400).json({ message: 'Invalid file type. Only images are allowed.' });
+            return;
+        }
+
+        // Upload file to S3
+        const key = `avatars/${userId}-${Date.now()}.jpg`;
+        const uploadResult = await uploadToS3(file.buffer.toString('base64'), key); // Convert Buffer to Base64 string
+
+        // Update user avatar in the database
         const updatedUser = await prisma.account.update({
             where: { id: userId },
-            data: { avatar: image },
+            data: { avatar: uploadResult.Location },
         });
 
         res.json(updatedUser);
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error });
+    }
+};
+
+export const changePasswordByToken = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.id;
+        const { currentPassWord, newPassword } = req.body;
+
+        if (!currentPassWord || !newPassword) {
+            res.status(400).json({ error: 'Thiếu thông tin' });
+        }
+
+        const userCurrent = await prisma.account.findUnique({
+            where: { id: userId },
+        });
+
+        if (!userCurrent) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        const isPasswordMatch = await bcrypt.compare(currentPassWord, userCurrent.password);
+        if (!isPasswordMatch) {
+            res.status(400).json({ message: 'Mật khẩu hiện tại không đúng!' });
+            return;
+        }
+
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\S]{6,}$/;
+
+        if (!passwordRegex.test(newPassword)) {
+            res.status(400).json({
+                message: 'Mật khẩu mới phải có ít nhất 6 ký tự, gồm chữ, số và ký tự đặc biệt.',
+            });
+            return;
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const user = await prisma.account.update({
+            where: { id: userId },
+            data: { password: hashedPassword },
+        });
+
+        res.status(200).json({ message: 'Đặt lại mật khẩu thành công!', success: true });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+
+export const getUserById = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.params.id;
+
+        const user = await prisma.account.findUnique({
+            where: { id: userId },
+        });
+
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        res.json(user);
+        return;
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error' });
+        return;
+    }
+};
+
+export const getUserByNumberAndEmail = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const { number, email } = req.body;
+
+        const existingAccount = await prisma.account.findFirst({
+            where: {
+                OR: [{ number: number }, { email: email }],
+            },
+        });
+
+        if (existingAccount) {
+            if (existingAccount.number === number && existingAccount.email === email) {
+                res.status(400).json({ message: 'Số điện thoại và email đã tồn tại' });
+            } else if (existingAccount.email === email) {
+                res.status(400).json({ message: 'Email đã tồn tại' });
+            } else if (existingAccount.number === number) {
+                res.status(400).json({ message: 'Số điện thoại đã tồn tại' });
+            }
+            return;
+        }
+
+        res.status(200).json({ exists: true, message: 'Số điện thoại và email chưa tồn tại' });
+        return;
     } catch (error) {
         res.status(500).json({ message: 'Internal Server Error' });
     }

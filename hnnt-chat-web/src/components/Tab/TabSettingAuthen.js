@@ -1,12 +1,49 @@
 import { useState } from 'react';
+import { changePasswordWithToken } from '../../screens/Authentication/api';
 
 function TabSettingAuthen() {
-    const [currentPassword, setCurrentPassword] = useState('');
+    const [currentPassWord, setCurrentPassWord] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showCurrent, setShowCurrent] = useState(false);
     const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
+
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\S]{6,}$/; // Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ cái, số và ký tự đặc biệt
+    const handleUpdatePassword = async () => {
+        if (!currentPassWord || !newPassword || !confirmPassword) {
+            alert('Vui lòng nhập đầy đủ thông tin.');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            alert('Mật khẩu xác nhận không khớp.');
+            return;
+        }
+
+        if (!passwordRegex.test(newPassword)) {
+            alert('Mật khẩu mới phải có ít nhất 6 ký tự, gồm chữ, số và ký tự đặc biệt.');
+            return;
+        }
+
+        try {
+            const data = await changePasswordWithToken(currentPassWord, newPassword);
+
+            // LƯU LẠI MẬT KHẨU MỚI VÀ TOKEN MỚI VÀO LOCAL STORAGE
+            // dispatch(setUser({ userActive: data.user, token: data.token }));
+
+            if (data?.success) {
+                alert('Đổi mật khẩu thành công!');
+            }
+
+            setCurrentPassWord('');
+            setNewPassword('');
+            setConfirmPassword('');
+        } catch (error) {
+            console.error(error);
+            alert(error.response?.data?.message || 'Có lỗi xảy ra khi đổi mật khẩu');
+        }
+    };
 
     return (
         <div className="max-w-md mx-auto">
@@ -24,8 +61,8 @@ function TabSettingAuthen() {
                             type={showCurrent ? 'text' : 'password'}
                             className="w-full px-3 py-2 focus:outline-none dark:bg-gray-800 dark:text-gray-300"
                             placeholder="Nhập mật khẩu hiện tại"
-                            value={currentPassword}
-                            onChange={(e) => setCurrentPassword(e.target.value)}
+                            value={currentPassWord}
+                            onChange={(e) => setCurrentPassWord(e.target.value)}
                         />
                         <button
                             className="px-3 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
@@ -86,6 +123,7 @@ function TabSettingAuthen() {
                             newPassword && confirmPassword ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-500'
                         }`}
                         disabled={!newPassword || !confirmPassword}
+                        onClick={() => handleUpdatePassword()}
                     >
                         Cập nhật
                     </button>

@@ -72,31 +72,28 @@ export const sendFriendRequest = async (req: AuthRequest, res: Response): Promis
 
 export const cancelFriendRequest = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { id } = req.params; // ID của friendRequest
-        const userId = req.user?.id; // ID của người đang đăng nhập (lấy từ token)
+        const { id } = req.params; // ID of the friendRequest
+        const userId = req.user?.id; // ID of the logged-in user (from token)
 
-        // Kiểm tra userId từ token
+        // Check if userId exists
         if (!userId) {
             res.status(401).json({ message: 'Không thể xác thực người dùng!' });
             return;
         }
 
-        // Tìm friendRequest và kiểm tra xem người đăng nhập có phải là sender không
+        // Find the friendRequest and check if the user is either the sender or receiver
         const request = await prisma.friendRequest.findUnique({
-            where: {
-                id,
-                senderId: userId, // Đảm bảo chỉ sender mới có thể hủy
-            },
+            where: { id },
         });
 
-        if (!request) {
+        if (!request || (request.senderId !== userId && request.receiverId !== userId)) {
             res.status(400).json({
                 message: 'Lời mời kết bạn không tồn tại hoặc bạn không có quyền hủy!',
             });
             return;
         }
 
-        // Xóa friendRequest
+        // Delete the friendRequest
         await prisma.friendRequest.delete({ where: { id } });
 
         res.status(200).json({ message: 'Đã hủy lời mời kết bạn!' });
@@ -170,22 +167,21 @@ export const acceptFriendRequest = async (req: AuthRequest, res: Response): Prom
 // 📌 Delete friend
 export const deleteFriend = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { id } = req.params; // ID của mối quan hệ bạn bè (bản ghi trong bảng friend)
-        const userId = req.user?.id; // ID của người đang đăng nhập (lấy từ token)
+        const { id } = req.params; // ID of the friend (friendId)
+        const userId = req.user?.id; // ID of the logged-in user (from token)
 
-        // Kiểm tra userId từ token
+        // Check if userId exists
         if (!userId) {
             res.status(401).json({ message: 'Không thể xác thực người dùng!' });
             return;
         }
 
-        // Tìm mối quan hệ bạn bè và kiểm tra xem user có phải là một trong hai người không
-        const friendship = await prisma.friend.findUnique({
+        // Find the friendship relationship where the user is either user1 or user2
+        const friendship = await prisma.friend.findFirst({
             where: {
-                id,
                 OR: [
-                    { user1Id: userId }, // User là user1
-                    { user2Id: userId }, // User là user2
+                    { user1Id: userId, user2Id: id },
+                    { user1Id: id, user2Id: userId },
                 ],
             },
         });
@@ -197,8 +193,8 @@ export const deleteFriend = async (req: AuthRequest, res: Response): Promise<voi
             return;
         }
 
-        // Xóa mối quan hệ bạn bè
-        await prisma.friend.delete({ where: { id } });
+        // Delete the friendship relationship
+        await prisma.friend.delete({ where: { id: friendship.id } });
 
         res.status(200).json({ message: 'Đã xóa kết bạn!' });
     } catch (error) {
@@ -513,9 +509,9 @@ export const checkFriend = async (req: AuthRequest, res: Response): Promise<void
         });
 
         if (friendship) {
-            res.status(200).json({result: true, message: 'Các bạn đã là bạn của nhau!' });
+            res.status(200).json({ result: true, message: 'Các bạn đã là bạn của nhau!' });
         } else {
-            res.status(404).json({result: false, message: 'Không tìm thấy mối quan hệ bạn bè!' });
+            res.status(404).json({ result: false, message: 'Không tìm thấy mối quan hệ bạn bè!' });
         }
     } catch (error) {
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });

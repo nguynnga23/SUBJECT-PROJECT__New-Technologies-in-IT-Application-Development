@@ -4,7 +4,8 @@ import { RiContactsBook3Line } from 'react-icons/ri';
 import { IoSettingsOutline } from 'react-icons/io5';
 import { IoMdCloudOutline } from 'react-icons/io';
 import { CiShare1 } from 'react-icons/ci';
-
+import { getUserById } from '../Profile/api';
+import { setUser } from '../../redux/slices/authSlice';
 // import { setChats } from '../../redux/slices/chatSlice';
 import Messaging from '../Messaging';
 import Contacts from '../Contacts';
@@ -18,7 +19,7 @@ import Modal from '../../components/Modal';
 
 import { logout } from '../Authentication/api';
 import { logoutOfSlice } from '../../redux/slices/authSlice';
-import { setShowOrOffRightBar, setShowOrOffRightBarSearch } from '../../redux/slices/chatSlice';
+import { setActiveChat, setShowOrOffRightBar, setShowOrOffRightBarSearch } from '../../redux/slices/chatSlice';
 
 export default function Home() {
     const navigate = useNavigate();
@@ -51,13 +52,25 @@ export default function Home() {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
+    const handleOpenModel = async () => {
+        try {
+            const data = await getUserById(userActive.id);
+            const token = localStorage.getItem('token');
 
+            dispatch(setUser({ userActive: data, token: token }));
+        } catch (error) {
+            console.error('Lỗi khi gọi API:', error);
+        }
+
+        setIsOpenModel(true);
+    };
     const handleLogout = async () => {
         try {
             navigate('/'); // Điều hướng sau khi Redux cập nhật
             dispatch(logoutOfSlice());
             dispatch(setShowOrOffRightBar(false));
             dispatch(setShowOrOffRightBarSearch(false));
+            dispatch(setActiveChat(null));
             await logout(); // Gọi API logout
         } catch (error) {
             console.error('Lỗi khi đăng xuất:', error);
@@ -90,11 +103,11 @@ export default function Home() {
                     {/* Dropdown menu */}
                     <div
                         id="dropdownAvatar"
-                        className={`z-10 bg-white divide-y divide-gray-100 rounded-lg ring-2 ring-gray-200 absolute top-0 left-14 min-w-64 z-20 ${
+                        className={`z-10 bg-white  dark:bg-[#20344c] divide-y  divide-gray-100 dark:divide-gray-700 rounded-lg ring-2 ring-gray-200 dark:ring-gray-900 absolute top-0 left-14 min-w-64 z-20 ${
                             isDropdownOpen ? 'block' : 'hidden'
                         }`}
                     >
-                        <div className="px-4 py-3 text-sm text-black ">
+                        <div className="px-4 py-3 text-sm text-black dark:text-white">
                             <p className="text-lg font-medium ">{userActive?.name}</p>
                         </div>
                         <ul
@@ -102,26 +115,28 @@ export default function Home() {
                             aria-labelledby="dropdownUserAvatarButton"
                         >
                             <li>
-                                <p className="block px-4 py-2 hover:bg-gray-100 text-black flex items-center gap-x-6 cursor-pointer">
+                                <p className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 text-black dark:text-white flex items-center gap-x-6 cursor-pointer">
                                     Nâng cấp tài khoản
                                     <CiShare1 />
                                 </p>
                             </li>
                             <li>
                                 <p
-                                    className="block px-4 py-2 hover:bg-gray-100  text-black cursor-pointer"
-                                    onClick={() => setIsOpenModel(true)}
+                                    className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600  text-black dark:text-white cursor-pointer"
+                                    onClick={handleOpenModel}
                                 >
                                     Hồ sơ của bạn
                                 </p>
                             </li>
                             <li>
-                                <p className="block px-4 py-2 hover:bg-gray-100 text-black cursor-pointer">Cài đặt</p>
+                                <p className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 text-black dark:text-white cursor-pointer">
+                                    Cài đặt
+                                </p>
                             </li>
                         </ul>
                         <div className="">
                             <p
-                                className="block px-4 py-2 hover:bg-gray-100 text-black cursor-pointer"
+                                className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 text-black dark:text-white cursor-pointer"
                                 onClick={handleLogout}
                             >
                                 Đăng xuất

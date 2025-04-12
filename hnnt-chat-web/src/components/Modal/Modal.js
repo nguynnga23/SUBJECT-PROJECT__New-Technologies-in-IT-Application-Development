@@ -20,6 +20,8 @@ function Modal({ isOpen, onClose }) {
     const [year, setYear] = useState(2025);
     const [maxDays, setMaxDays] = useState(31);
 
+    const [showImage, setShowImage] = useState();
+
     // Hàm kiểm tra số ngày hợp lệ trong tháng
     const getMaxDays = (month, year) => {
         if ([4, 6, 9, 11].includes(month)) return 30; // Tháng 4, 6, 9, 11 có 30 ngày
@@ -49,7 +51,7 @@ function Modal({ isOpen, onClose }) {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.5, opacity: 0 }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}
-                className="bg-white rounded-md shadow-lg py-2 w-full max-w-sm h-[80vh] flex flex-col relative overflow-hidden"
+                className="bg-white dark:bg-[#20344c] dark:text-white rounded-md shadow-lg py-2 w-full max-w-sm h-[80vh] flex flex-col relative overflow-hidden"
             >
                 <div className="flex justify-between px-4 items-center mb-4">
                     {isType === 'avatar' || isType === 'editAvatar' ? (
@@ -62,7 +64,7 @@ function Modal({ isOpen, onClose }) {
                                         setIsType('avatar');
                                     }
                                 }}
-                                className="w-8 h-8 flex items-center justify-center text-black hover:text-gray-700 hover:bg-gray-200 rounded-full text-xl"
+                                className="w-8 h-8 flex items-center justify-center text-black dark:text-white hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full text-xl"
                             >
                                 <IoIosArrowBack />
                             </button>
@@ -72,7 +74,7 @@ function Modal({ isOpen, onClose }) {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setIsType('profile')}
-                                className="w-8 h-8 flex items-center justify-center text-black hover:text-gray-700 hover:bg-gray-200 rounded-full text-xl"
+                                className="w-8 h-8 flex items-center justify-center text-black dark:text-white hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full text-xl"
                             >
                                 <IoIosArrowBack />
                             </button>
@@ -86,18 +88,20 @@ function Modal({ isOpen, onClose }) {
                             onClose();
                             setIsType('profile');
                         }}
-                        className="w-8 h-8 flex items-center justify-center text-black hover:text-gray-700 hover:bg-gray-200 rounded-full text-xl"
+                        className="w-8 h-8 flex items-center justify-center text-black hover:text-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 dark:text-white rounded-full text-xl"
                     >
                         ✕
                     </button>
                 </div>
 
                 {isType === 'avatar' ? (
-                    <ModalAvatar setImage={setImage} setIsType={setIsType} />
+                    <ModalAvatar setImage={setImage} setIsType={setIsType} setShowImage={setShowImage} />
                 ) : isType === 'edit' ? (
                     <ModalEdit setIsType={setIsType} onClose={onClose} />
                 ) : isType === 'editAvatar' ? (
-                    image && <ModalEditAvatar image={image} setIsType={setIsType} onClose={onClose} />
+                    image && (
+                        <ModalEditAvatar image={image} setIsType={setIsType} showImage={showImage} onClose={onClose} />
+                    )
                 ) : (
                     <ModalAccount setIsType={setIsType} />
                 )}
