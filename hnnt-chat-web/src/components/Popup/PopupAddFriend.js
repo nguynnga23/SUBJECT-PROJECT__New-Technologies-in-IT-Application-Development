@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { IoClose } from 'react-icons/io5';
+import { getUserByNumberOrEmail, searchByPhone, sendFriendRequest } from '../../screens/Home/api';
 
 const data = [
     'Trần Văn A',
@@ -21,11 +22,57 @@ const data = [
 
 const PopupAddFriend = ({ isOpen, onClose }) => {
     const [visibleCount, setVisibleCount] = useState(5);
+    const [searchNumber, setSearchNumber] = useState('');
+    const [results, setResults] = useState([]);
+
+    const handleSearch = async () => {
+        if (searchNumber.trim() === '') {
+            alert('Vui lòng nhập số điện thoại');
+            return;
+        }
+
+        try {
+            const data = await getUserByNumberOrEmail(searchNumber);
+            if (data) {
+                console.log('Kết quả tìm kiếm:', data);
+            } else {
+                alert('Không tìm thấy người dùng nào');
+            }
+        } catch (error) {
+            console.error('Lỗi khi tìm kiếm', error);
+        }
+    };
+
+    //debounce tìm kiếm
+    useEffect(() => {
+        if (searchNumber.length === 0) return;
+
+        const timeout = setTimeout(() => {
+            const fetchData = async () => {
+                const data = await searchByPhone(searchNumber);
+                setResults(data);
+            };
+            fetchData();
+        }, 300);
+
+        return () => clearTimeout(timeout);
+    }, [searchNumber]);
+
+    console.log('results', results);
+
+    const handleRequestFriend = async (user) => {
+        try {
+            await sendFriendRequest(user?.id);
+            alert(`Đã gửi lời mời kết bạn đến ${user?.name}`);
+        } catch (error) {}
+    };
 
     // Mỗi khi mở popup, reset lại số người hiển thị
     useEffect(() => {
         if (isOpen) {
             setVisibleCount(5);
+            setSearchNumber('');
+            setResults([]);
         }
     }, [isOpen]);
 
@@ -51,6 +98,8 @@ const PopupAddFriend = ({ isOpen, onClose }) => {
                             type="text"
                             placeholder="Số điện thoại"
                             className="bg-transparent border-none outline-none w-full"
+                            value={searchNumber}
+                            onChange={(e) => setSearchNumber(e.target.value)}
                         />
                     </div>
 
@@ -59,20 +108,25 @@ const PopupAddFriend = ({ isOpen, onClose }) => {
                         <h3 className="text-sm text-gray-400">Có thể bạn quen</h3>
                         <div className="mt-2 max-h-[300px] overflow-y-auto">
                             <ul className="space-y-3">
-                                {data.slice(0, visibleCount).map((name, index) => (
+                                {/* {results.map((user, index) => (
                                     <li key={index} className="flex justify-between items-center">
                                         <div className="flex items-center space-x-3">
-                                            <div className="w-10 h-10 bg-gray-500 rounded-full"></div>
+                                            <div className="w-10 h-10 bg-gray-500 rounded-full">
+                                                <img src={user.avatar} alt="avatar" />
+                                            </div>
                                             <div>
-                                                <p className="text-sm">{name}</p>
+                                                <p className="text-sm">{user.name}</p>
                                                 <p className="text-xs text-gray-400">Từ gợi ý kết bạn</p>
                                             </div>
                                         </div>
-                                        <button className="text-blue-500 border border-blue-500 px-3 py-1 rounded-lg text-xs">
+                                        <button
+                                            onClick={() => handleRequestFriend(user)}
+                                            className="text-blue-500 border border-blue-500 px-3 py-1 rounded-lg text-xs"
+                                        >
                                             Kết bạn
                                         </button>
                                     </li>
-                                ))}
+                                ))} */}
                             </ul>
                         </div>
                         {visibleCount < data.length && (
@@ -91,7 +145,9 @@ const PopupAddFriend = ({ isOpen, onClose }) => {
                     <button onClick={onClose} className="px-4 py-2 text-white bg-gray-400 rounded-lg">
                         Hủy
                     </button>
-                    <button className="px-4 py-2 text-white bg-blue-600 text rounded-lg">Tìm kiếm</button>
+                    <button className="px-4 py-2 text-white bg-blue-600 text rounded-lg" onClick={handleSearch}>
+                        Tìm kiếm
+                    </button>
                 </div>
             </div>
         </div>
