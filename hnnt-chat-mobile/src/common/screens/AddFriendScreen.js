@@ -88,7 +88,7 @@ export default function AddFriendScreen() {
     const qrCodeRef = useRef(null); // Ref for QRCode component
 
     // Hàm xử lý từng ActionItem
-    const handleScanQR = () => console.log('Scan QR Code');
+    const handleScanQR = () => navigation.navigate('CameraScreen');
     const handlePhonebook = () => console.log('Open Phonebook');
     const handlePeopleYouMayKnow = () => console.log('View People You May Know');
     const handleSubmitPhoneNumber = async () => {

@@ -1,6 +1,6 @@
 import { CameraView, Camera } from 'expo-camera';
 import { useState, useRef, useEffect } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View, SafeAreaView, Image, Alert } from 'react-native';
+import { Button, StyleSheet, Text, TouchableOpacity, View, SafeAreaView, Image, Alert, Animated } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import * as MediaLibrary from 'expo-media-library';
@@ -20,6 +20,7 @@ export default function CameraScreen() {
     const [recording, setRecording] = useState(false); //State will be true when the camera will be recording
     const [zoom, setZoom] = useState(0); //State to control the digital zoom
     const [scanned, setScanned] = useState(false);
+    const [focusAnimation] = useState(new Animated.Value(1)); // Animation state for pulsing effect
 
     let cameraRef = useRef(); //Creates a ref object and assigns it to the variable cameraRef.
     const navigation = useNavigation();
@@ -34,6 +35,24 @@ export default function CameraScreen() {
             setMediaLibraryPermission(mediaLibraryPermission.status === 'granted');
             setMicPermission(microphonePermission.status === 'granted');
         })();
+    }, []);
+
+    useEffect(() => {
+        // Start pulsing animation
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(focusAnimation, {
+                    toValue: 1.2,
+                    duration: 1000,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(focusAnimation, {
+                    toValue: 1,
+                    duration: 1000,
+                    useNativeDriver: true,
+                }),
+            ]),
+        ).start();
     }, []);
 
     //If permissions are not granted app will have to wait for permissions
@@ -154,6 +173,22 @@ export default function CameraScreen() {
                 }}
                 onBarcodeScanned={handleBarCodeScanned}
             >
+                {/* Modern overlay with instructions */}
+                <View style={styles.overlay}>
+                    <Text style={styles.appName}>HNNT Chat</Text>
+                    <Text style={styles.instructions}>Scan all QR codes</Text>
+                    <Animated.View
+                        style={[
+                            styles.focusSquare,
+                            { transform: [{ scale: focusAnimation }] }, // Apply pulsing animation
+                        ]}
+                    >
+                        <View style={styles.cornerTopLeft} />
+                        <View style={styles.cornerTopRight} />
+                        <View style={styles.cornerBottomLeft} />
+                        <View style={styles.cornerBottomRight} />
+                    </Animated.View>
+                </View>
                 <Slider
                     style={{ width: '100%', height: 40, position: 'absolute', top: '75%' }}
                     minimumValue={0}
@@ -254,8 +289,75 @@ const styles = StyleSheet.create({
         width: 'auto',
     },
     text: {
-        fontSize: 24,
+        fontSize: 20,
         fontWeight: 'bold',
         color: 'white',
+    },
+    overlay: {
+        position: 'absolute',
+        top: -200,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.1)', // Dark semi-transparent overlay
+    },
+    appName: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: 'white',
+        marginBottom: 10,
+    },
+    instructions: {
+        fontSize: 16,
+        color: 'white',
+        marginBottom: 70,
+        textAlign: 'center',
+    },
+    focusSquare: {
+        width: 200, // Adjust size as needed
+        height: 200,
+        position: 'relative',
+    },
+    cornerTopLeft: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: 25,
+        height: 25,
+        borderTopWidth: 5,
+        borderLeftWidth: 5,
+        borderColor: '#fff',
+    },
+    cornerTopRight: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        width: 25,
+        height: 25,
+        borderTopWidth: 5,
+        borderRightWidth: 5,
+        borderColor: '#fff',
+    },
+    cornerBottomLeft: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        width: 25,
+        height: 25,
+        borderBottomWidth: 5,
+        borderLeftWidth: 5,
+        borderColor: '#fff',
+    },
+    cornerBottomRight: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        width: 25,
+        height: 25,
+        borderBottomWidth: 5,
+        borderRightWidth: 5,
+        borderColor: '#fff',
     },
 });
