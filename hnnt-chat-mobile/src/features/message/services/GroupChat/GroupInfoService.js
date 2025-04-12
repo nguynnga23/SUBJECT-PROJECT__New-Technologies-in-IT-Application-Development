@@ -1,10 +1,66 @@
 import * as ImagePicker from 'expo-image-picker';
 import { Alert } from 'react-native';
+import axios from 'axios';
+import { localhost } from '../../../../utils/localhosts'
 
-export const handleEditGroupName = (setEditVisible, newGroupName, setGroupName) => {
-    console.log("Updating group name:", newGroupName);
-    setGroupName(newGroupName);
-    setEditVisible(false);
+const API_URL = `http://${localhost}/api`;
+
+export const fetchChat = async (chatId, token) => {
+    try {
+        const response = await axios.get(`${API_URL}/chats/${chatId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Gửi token trong header
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching chat info:', error.response?.data || error.message);
+        throw error;
+    }
+};
+
+export const getPinMess = async (chatId, token) => {
+    try {
+        const response = await axios.get(`${API_URL}/groups/message/${chatId}/show-pin`, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Gửi token trong header
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.warn('Error fetching:', error.response?.data || error.message);
+        throw error;
+    }
+};
+
+export const unPinMess = async (messageId, token) => {
+    try {
+        const response = await axios.put(`${API_URL}/groups/message/${messageId}/un-pin`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Gửi token trong header
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.warn('Error fetching:', error.response?.data || error.message);
+        throw error;
+    }
+};
+
+export const editGroupName = async (e_name, chatId, token) => {
+    try {
+        const response = await axios.put(`${API_URL}/groups/${chatId}/edit-name`,
+            { "name": e_name },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Gửi token trong header
+                },
+            });
+        return response.data;
+    } catch (error) {
+        console.warn('Error fetching:', error.response?.data || error.message);
+        throw error;
+    }
 };
 
 export const handleReport = (reportReason, setReportVisible) => {
@@ -13,17 +69,41 @@ export const handleReport = (reportReason, setReportVisible) => {
     setReportVisible(false);
 };
 
-export const handleLeaveGroup = (setLeaveVisible, navigation) => {
-    console.log("User confirmed leaving group");
-    setLeaveVisible(false);
-    navigation.reset({
-        index: 0,
-        routes: [{ name: "MessageScreen" }],
-    });
+export const leaveGroup = async (chatId, token) => {
+    try {
+        const groupId = chatId;
+        const response = await axios.delete(
+            `${API_URL}/groups/${groupId}/leave`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Gửi token trong header
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.warn('Error fetching:', error.response?.data || error.message);
+        throw error;
+    }
 };
 
-export const toggleMute = (isMuted, setIsMuted) => {
-    setIsMuted(!isMuted);
+export const toggleMute = async (chatId, token) => {
+    try {
+        const response = await axios.put(
+            `${API_URL}/groups/mute`,
+            { chatId }, // Body request
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Gửi token trong header
+                },
+            }
+        );
+        console.log('Response from toggleMute:', response.data); // Log thông tin từ response
+        return response.data;
+    } catch (error) {
+        console.error('Error toggling mute:', error.response?.data || error.message);
+        throw error;
+    }
 };
 
 export const handleChangeAvatar = async (setAvatar) => {
@@ -53,11 +133,20 @@ export const handleChangeAvatar = async (setAvatar) => {
     }
 };
 
-export const handleDisbandGroup = (setDisbandVisible, navigation) => {
-    console.log("Group has been disbanded.");
-    setDisbandVisible(false);
-    navigation.reset({
-        index: 0,
-        routes: [{ name: "MessageScreen" }],
-    });
+export const disbandGroup = async (chatId, token) => {
+    try {
+        const groupId = chatId;
+        const response = await axios.delete(
+            `${API_URL}/groups/${groupId}/disband`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Gửi token trong header
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.warn('Error fetching:', error.response?.data || error.message);
+        throw error;
+    }
 };

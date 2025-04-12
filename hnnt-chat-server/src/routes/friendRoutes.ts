@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import { authenticate } from '../middleware/auth';
+
 import {
     sendFriendRequest,
     cancelFriendRequest,
@@ -9,21 +11,25 @@ import {
     blockRequest,
     ListBlockRequest,
     CancelBlockRequest,
-    getListFriendByKeyword,
+    getListFriendRequestBySender,
+    cancelFriendRequestBySender,
+    checkFriend,
 } from '../controllers/friendController';
-import { authenticate } from '../middleware/auth';
 
 const friendRouter = Router();
 
-friendRouter.post('/request', sendFriendRequest); //User1 request friend to User2
-friendRouter.delete('/request/cancel/:id', cancelFriendRequest); // User1/User2 cancel request
-friendRouter.post('/request/accept/:id', acceptFriendRequest); // User2 accept request User1
-friendRouter.delete('/delete/:id', deleteFriend); // User1/User2 delete friendship relationship
-friendRouter.get('/list/search/', authenticate, getListFriendByKeyword);
+friendRouter.post('/request', authenticate, sendFriendRequest); //User1 request friend to User2
+friendRouter.delete('/request/cancel/:id', authenticate, cancelFriendRequest); // User1/User2 cancel request
+friendRouter.post('/request/accept/:id', authenticate, acceptFriendRequest); // User2 accept request User1
+friendRouter.delete('/delete/:id', authenticate, deleteFriend); // User1/User2 delete friendship relationship
 friendRouter.get('/list', authenticate, getListFriend); // Get list friends by userId
-friendRouter.get('/request/:userId', getListFriendRequest); // Get list friend request by userId
-friendRouter.post('/user/block', blockRequest); // Block user
-friendRouter.get('/user/block/list/:userId', ListBlockRequest); // Get list block requests
-friendRouter.delete('/user/block/:id', CancelBlockRequest); // Cancel block request
+friendRouter.get('/request/:userId', authenticate, getListFriendRequest); // Ensure this matches the client request
+friendRouter.post('/user/block', authenticate, blockRequest); // Block user
+friendRouter.get('/user/block/list/:userId', authenticate, ListBlockRequest); // Get list block requests
+friendRouter.delete('/user/block/:id', authenticate, CancelBlockRequest); // Cancel block request
+
+friendRouter.get('/request/sender/:userId', authenticate, getListFriendRequestBySender); // Get list friend request by senderId
+friendRouter.delete('/request/cancel-by-sender/:receiverId', authenticate, cancelFriendRequestBySender); // User1/User2 cancel request
+friendRouter.get('/check-friend/:friendId', authenticate, checkFriend); // Check friendship relationship between userId and friendId
 
 export default friendRouter;

@@ -74,7 +74,7 @@ function ModalEdit({ setIsType, onClose }) {
                 <input
                     type="text"
                     id="default-search"
-                    class="w-full border-2 border-gray-200 p-2 rounded-md mt-1 focus:ring-blue-500 focus:border-blue-500"
+                    class="w-full border-2 border-gray-200 dark:border-gray-700 dark:bg-gray-500 p-2 rounded-md mt-1 focus:ring-blue-500 focus:border-blue-500"
                     required
                     value={isName}
                     onChange={(e) => setIsName(e.target.value)}
@@ -91,8 +91,18 @@ function ModalEdit({ setIsType, onClose }) {
                             value={gender}
                             onChange={(e) => setGender(e.target.value)}
                         >
-                            <FormControlLabel className="text-gray-700" value="Nam" control={<Radio />} label="Nam" />
-                            <FormControlLabel className="text-gray-700" value="Nữ" control={<Radio />} label="Nữ" />
+                            <FormControlLabel
+                                className="text-gray-700 dark:text-gray-200"
+                                value="Nam"
+                                control={<Radio />}
+                                label="Nam"
+                            />
+                            <FormControlLabel
+                                className="text-gray-700 dark:text-gray-200"
+                                value="Nữ"
+                                control={<Radio />}
+                                label="Nữ"
+                            />
                         </RadioGroup>
                     </FormControl>
                 </div>
@@ -106,7 +116,7 @@ function ModalEdit({ setIsType, onClose }) {
                         onChange={(e) => setDay(e.target.value)}
                         style={{ minWidth: '30%' }}
                         MenuProps={{ PaperProps: { sx: { maxHeight: 230 } } }}
-                        className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                        className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500 "
                     >
                         {Array.from({ length: maxDays }, (_, i) => (
                             <MenuItem key={i + 1} value={i + 1}>
@@ -154,7 +164,7 @@ function ModalEdit({ setIsType, onClose }) {
             <div className="border-t pt-2 flex justify-end mt-auto">
                 <button
                     onClick={() => setIsType('profile')}
-                    className="bg-gray-200 hover:bg-gray-300 rounded-md flex items-center justify-center gap-2 p-2 cursor-pointer mr-2"
+                    className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-800 rounded-md flex items-center justify-center gap-2 p-2 cursor-pointer mr-2"
                 >
                     <p className="font-semibold">Hủy</p>
                 </button>

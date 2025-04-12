@@ -1,7 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
+import { format } from 'date-fns'; // Import thư viện date-fns
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import ProfileService from '../../services/ProfileService';
+import { fetchUserData } from '../../utils/fetchUserData';
 
 // Component hiển thị thông tin
 const InfoItem = ({ icon, title, value }) => (
@@ -16,21 +22,42 @@ const InfoItem = ({ icon, title, value }) => (
 
 export default function PersonalInformation() {
     const navigation = useNavigation();
+    const route = useRoute();
+    const [user, setUser] = useState(route.params?.user || null);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            const fetchUser = async () => {
+                try {
+                    const userData = await fetchUserData();
+                    setUser(userData);
+                } catch (error) {
+                    console.error(error);
+                }
+            };
+
+            fetchUser();
+        }, []),
+    );
+
+    const formattedBirthDate = user?.birthDate
+        ? format(new Date(user.birthDate), 'dd/MM/yyyy') // Định dạng mm/dd/yyyy
+        : 'Chưa cập nhật';
     return (
         <View style={styles.container}>
             {/* Avatar */}
-            <Image source={{ uri: 'https://i.pravatar.cc/150?img=20' }} style={styles.avatar} />
+            <Image source={{ uri: user?.avatar || 'https://i.pravatar.cc/150?img=20' }} style={styles.avatar} />
 
             {/* Thông tin cá nhân */}
-            <InfoItem icon="account-circle-outline" title="Zalo name" value="Nguyễn Nga" />
-            <InfoItem icon="calendar-outline" title="Birthday" value="23/09/2003" />
-            <InfoItem icon="gender-male-female" title="Gender" value="Female" />
+            <InfoItem icon="account-circle-outline" title="Zalo name" value={user?.name || 'Chưa cập nhật'} />
+            <InfoItem icon="calendar-outline" title="Birthday" value={formattedBirthDate || 'Chưa cập nhật'} />
+            <InfoItem icon="gender-male-female" title="Gender" value={user?.gender || 'Chưa cập nhật'} />
 
             {/* Edit Button */}
             <TouchableOpacity
                 style={styles.editButton}
                 onPress={() => {
-                    navigation.navigate('Profile Information');
+                    navigation.navigate('Profile Information', { user }); // có thể truyền tiếp nếu cần
                 }}
             >
                 <MaterialCommunityIcons name="pencil" size={20} color="gray" />
@@ -71,7 +98,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#EDEDED',
-        paddingVertical: 5,
+        paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 20,
         width: '100%',
