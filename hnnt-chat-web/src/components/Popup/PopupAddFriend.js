@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { IoClose } from 'react-icons/io5';
 import { getUserByNumberOrEmail, searchByPhone, sendFriendRequest } from '../../screens/Home/api';
+import { acceptFriendReponse, refuseFriendReponse } from '../../screens/Contacts/api';
 
 const data = [
     'Trần Văn A',
@@ -58,13 +59,29 @@ const PopupAddFriend = ({ isOpen, onClose }) => {
         return () => clearTimeout(timeout);
     }, [searchNumber]);
 
-    console.log('results', results);
-
     const handleRequestFriend = async (user) => {
         try {
             await sendFriendRequest(user?.id);
             alert(`Đã gửi lời mời kết bạn đến ${user?.name}`);
         } catch (error) {}
+    };
+
+    const handleCancelRequest = async (user) => {
+        try {
+            await refuseFriendReponse(user?.friendRequestId);
+            alert(`Đã hủy lời mời kết bạn đến ${user?.name}`);
+        } catch (error) {
+            console.error('Lỗi khi hủy lời mời kết bạn', error);
+        }
+    };
+
+    const handleAcceptRequest = async (user) => {
+        try {
+            await acceptFriendReponse(user?.friendRequestId);
+            alert(`Đã chấp nhận lời mời kết bạn từ ${user?.name}`);
+        } catch (error) {
+            console.error('Lỗi khi chấp nhận lời mời kết bạn', error);
+        }
     };
 
     // Mỗi khi mở popup, reset lại số người hiển thị
@@ -108,7 +125,7 @@ const PopupAddFriend = ({ isOpen, onClose }) => {
                         <h3 className="text-sm text-gray-400">Có thể bạn quen</h3>
                         <div className="mt-2 max-h-[300px] overflow-y-auto">
                             <ul className="space-y-3">
-                                {/* {results.map((user, index) => (
+                                {results.map((user, index) => (
                                     <li key={index} className="flex justify-between items-center">
                                         <div className="flex items-center space-x-3">
                                             <div className="w-10 h-10 bg-gray-500 rounded-full">
@@ -119,24 +136,43 @@ const PopupAddFriend = ({ isOpen, onClose }) => {
                                                 <p className="text-xs text-gray-400">Từ gợi ý kết bạn</p>
                                             </div>
                                         </div>
-                                        <button
-                                            onClick={() => handleRequestFriend(user)}
-                                            className="text-blue-500 border border-blue-500 px-3 py-1 rounded-lg text-xs"
-                                        >
-                                            Kết bạn
-                                        </button>
+
+                                        {user.status === 'none' && (
+                                            <button
+                                                onClick={() => handleRequestFriend(user)}
+                                                className="text-blue-500 border border-blue-500 px-3 py-1 rounded-lg text-xs"
+                                            >
+                                                Kết bạn
+                                            </button>
+                                        )}
+                                        {user.status === 'sent' && (
+                                            <button
+                                                onClick={() => handleCancelRequest(user)}
+                                                className="text-red-500 border border-red-500 px-3 py-1 rounded-lg text-xs"
+                                            >
+                                                Hủy lời mời
+                                            </button>
+                                        )}
+                                        {user.status === 'received' && (
+                                            <button
+                                                onClick={() => handleAcceptRequest(user)}
+                                                className="text-green-500 border border-green-500 px-3 py-1 rounded-lg text-xs"
+                                            >
+                                                Chấp nhận lời mời
+                                            </button>
+                                        )}
                                     </li>
-                                ))} */}
+                                ))}
                             </ul>
                         </div>
-                        {visibleCount < data.length && (
+                        {/* {visibleCount < data.length && (
                             <button
                                 className="mt-3 text-blue-500 text-sm w-full text-center"
                                 onClick={() => setVisibleCount(visibleCount + 10)}
                             >
                                 Xem thêm
                             </button>
-                        )}
+                        )} */}
                     </div>
                 </div>
 
