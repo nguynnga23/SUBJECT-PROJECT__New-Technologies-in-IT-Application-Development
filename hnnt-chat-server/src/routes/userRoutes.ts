@@ -6,6 +6,7 @@ import {
     changePasswordByToken,
     getUserByNumberAndEmail,
     getUserByNumberOrEmail,
+    searchUsers,
 } from '../controllers/userController';
 import { authenticate } from '../middleware/auth';
 import multer from 'multer';
@@ -19,5 +20,6 @@ userRoute.post('/change-password-with-token', authenticate, changePasswordByToke
 userRoute.get('/:id', getUserById);
 userRoute.post('/get-user-by-number-and-email', getUserByNumberAndEmail);
 userRoute.post('/get-user-by-number-or-email', getUserByNumberOrEmail);
+userRoute.post('/search', searchUsers); // Tìm kiếm người dùng
 
 export default userRoute;

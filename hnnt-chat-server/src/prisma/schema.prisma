@@ -40,6 +40,8 @@ model Account {
   messages        Message[]
   reactions       Reaction[]
   loggedInDevices LoggedInDevice[]
+  blockedUsers BlockedUser[] @relation("Blocker") // Người dùng đã chặn
+  blockedBy    BlockedUser[] @relation("Blocked") // Người dùng bị chặn bởi người khác
 }
 
 model FriendRequest {
@@ -162,6 +164,17 @@ model LoggedInDevice {
   ipAddress   String?
   lastActive  DateTime @default(now())
   createdAt   DateTime @default(now())
+}
+
+model BlockedUser {
+  id          String   @id @default(uuid()) // ID dạng UUID
+  blocker     Account  @relation("Blocker", fields: [blockerAccountId], references: [id], onDelete: Cascade)
+  blocked     Account  @relation("Blocked", fields: [blockedAccountId], references: [id], onDelete: Cascade)
+  blockerAccountId   String
+  blockedAccountId   String
+  createdAt   DateTime @default(now()) // Thời gian chặn
+
+  @@unique([blockerAccountId, blockedAccountId]) // Đảm bảo một người chỉ chặn một người khác một lần
 }
 
 
