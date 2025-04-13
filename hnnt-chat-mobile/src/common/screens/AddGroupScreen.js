@@ -60,16 +60,14 @@ export default function AddGroupScreen() {
     // Xử lý tìm kiếm
     const handleSearch = (text) => {
         setSearchText(text);
-        const filtered = friends.filter((friend) =>
-            friend.name.toLowerCase().includes(text.toLowerCase())
-        );
+        const filtered = friends.filter((friend) => friend.name.toLowerCase().includes(text.toLowerCase()));
         setFilteredFriends(filtered);
     };
 
     // Xử lý chọn/bỏ chọn bạn bè
     const toggleSelection = (id) => {
         setSelectedUsers((prevSelected) =>
-            prevSelected.includes(id) ? prevSelected.filter((userId) => userId !== id) : [...prevSelected, id]
+            prevSelected.includes(id) ? prevSelected.filter((userId) => userId !== id) : [...prevSelected, id],
         );
     };
 
@@ -91,7 +89,7 @@ export default function AddGroupScreen() {
             const response = await createGroup(groupName, selectedImage || '', participants, token);
 
             Alert.alert('Success', 'Nhóm đã được tạo thành công!');
-            navigation.navigate('HomeTab')
+            navigation.navigate('HomeTab');
         } catch (error) {
             console.error('Error creating group:', error);
             Alert.alert('Error', 'Không thể tạo nhóm. Vui lòng thử lại.');
@@ -101,11 +99,16 @@ export default function AddGroupScreen() {
     // Render từng bạn bè
     const renderFriendItem = ({ item }) => (
         <TouchableOpacity style={styles.friendItem} onPress={() => toggleSelection(item.id)}>
-            <RadioButton
-                value={item.id}
-                status={selectedUsers.includes(item.id) ? 'checked' : 'unchecked'}
-                onPress={() => toggleSelection(item.id)}
-            />
+            <View
+                style={[
+                    styles.radioButtonWrapper,
+                    selectedUsers.includes(item.id) && styles.radioButtonSelected, // Thêm style khi được chọn
+                ]}
+            >
+                {selectedUsers.includes(item.id) && (
+                    <MaterialIcons name="check" size={16} color="#fff" /> // Dấu tick màu trắng
+                )}
+            </View>
             <Image source={{ uri: item.avatar }} style={styles.avatar} />
             <Text style={styles.friendName}>{item.name}</Text>
         </TouchableOpacity>
@@ -117,7 +120,7 @@ export default function AddGroupScreen() {
             <View style={styles.setNameWrapper}>
                 <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
                     {selectedImage ? (
-                        <Image source={{ uri: selectedImage }} style={styles.avatar} />
+                        <Image source={{ uri: selectedImage }} style={styles.avatarGroup} />
                     ) : (
                         <MaterialIcons name="camera-alt" size={30} color="#888" />
                     )}
@@ -154,9 +157,25 @@ export default function AddGroupScreen() {
 
             {/* Nút tạo nhóm */}
             {selectedUsers.length >= 2 && (
-                <TouchableOpacity style={styles.createButton} onPress={handleCreateGroup}>
-                    <Text style={styles.createButtonText}>Create</Text>
-                </TouchableOpacity>
+                <View style={styles.selectedUsersContainer}>
+                    <FlatList
+                        data={friends.filter((friend) => selectedUsers.includes(friend.id))}
+                        horizontal
+                        keyExtractor={(item) => item.id}
+                        renderItem={({ item }) => (
+                            <View style={styles.selectedAvatarWrapper}>
+                                <Image source={{ uri: item.avatar }} style={styles.selectedAvatar} />
+                                <TouchableOpacity style={styles.removeButton} onPress={() => toggleSelection(item.id)}>
+                                    <MaterialIcons name="close" size={10} />
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                        contentContainerStyle={styles.selectedAvatarsList}
+                    />
+                    <TouchableOpacity style={styles.createButton} onPress={handleCreateGroup}>
+                        <MaterialIcons name="send" size={24} color="#fff" />
+                    </TouchableOpacity>
+                </View>
             )}
         </View>
     );
@@ -174,15 +193,15 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     avatarContainer: {
-        width: 50,
-        height: 50,
+        width: 40,
+        height: 40,
         borderRadius: 25,
         backgroundColor: '#f2f2f2',
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 15,
     },
-    avatar: {
+    avatarGroup: {
         width: '100%',
         height: '100%',
         borderRadius: 25,
@@ -230,20 +249,65 @@ const styles = StyleSheet.create({
         fontSize: 16,
         flex: 1,
     },
-    createButton: {
+    selectedUsersContainer: {
+        margin: '-15',
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fff', // Ensure the background is visible
+        borderRadius: 10,
+        shadowColor: '#000', // iOS shadow color
+        shadowOffset: { width: 0, height: 2 }, // iOS shadow offset
+        shadowOpacity: 0.25, // iOS shadow opacity
+        shadowRadius: 3.84, // iOS shadow radius
+        elevation: 5, // Android shadow
+    },
+    selectedAvatarsList: {
+        flexDirection: 'row',
+    },
+    selectedAvatarWrapper: {
+        position: 'relative',
+        marginHorizontal: 5,
+    },
+    selectedAvatar: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+    },
+    removeButton: {
         position: 'absolute',
-        bottom: 20,
-        right: 20,
-        backgroundColor: '#4CAF50',
-        padding: 15,
+        top: -1,
+        right: -4,
+        backgroundColor: '#f0f0f0',
+        borderRadius: 10,
+        width: 15,
+        height: 15,
+        borderWidth: 1,
+        borderColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    createButton: {
+        backgroundColor: '#007BFF', // Blue background
+        padding: 10,
         borderRadius: 50,
         alignItems: 'center',
         justifyContent: 'center',
         elevation: 5,
     },
-    createButtonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: 'bold',
+    radioButtonWrapper: {
+        width: 24,
+        height: 24,
+        borderWidth: 2,
+        borderColor: '#ccc', // Border mặc định
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'transparent', // Không có nền mặc định
+    },
+    radioButtonSelected: {
+        borderColor: '#007BFF', // Border màu xanh dương khi được chọn
+        backgroundColor: '#007BFF', // Nền màu xanh dương khi được chọn
     },
 });
