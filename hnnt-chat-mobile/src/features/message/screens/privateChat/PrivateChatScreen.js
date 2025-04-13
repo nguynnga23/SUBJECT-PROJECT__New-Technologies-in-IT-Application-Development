@@ -16,6 +16,8 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import Header from '../../../../common/components/Header';
+import { useRoute } from '@react-navigation/native';
+
 import {
     handleLongPressMessage,
     handleDeleteMessage,
@@ -29,7 +31,6 @@ import {
     playAudio,
     handleReaction,
 } from '../../services/privateChat/PrivateChatService';
-import { LinearGradient } from 'expo-linear-gradient';
 
 const chatData = {
     recipient_name: 'Nga Nguyễn',
@@ -62,6 +63,7 @@ const chatData = {
 
 export default function PrivateChatScreen() {
     const navigation = useNavigation();
+    const route = useRoute();
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState(chatData.messages);
     const [replyingMessage, setReplyingMessage] = useState(null);
@@ -75,6 +77,7 @@ export default function PrivateChatScreen() {
     const reactionsList = ['❤️', '😂', '👍', '😮', '😢'];
     const [reactVisible, setReactVisible] = useState(false);
     const [messageId, setMessageId] = useState(null);
+    const { chatId, chatName } = route.params; // Lấy chatId và chatName từ route params
 
     useEffect(() => {
         const parentNav = navigation.getParent();
@@ -116,7 +119,7 @@ export default function PrivateChatScreen() {
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <SafeAreaProvider>
                 <FlatList
                     data={messages}
@@ -334,7 +337,7 @@ export default function PrivateChatScreen() {
                     </TouchableWithoutFeedback>
                 </Modal>
             </SafeAreaProvider>
-        </SafeAreaView>
+        </View>
     );
 }
 

@@ -10,7 +10,7 @@ import PrivateCallScreen from '../screens/privateChat/PrivateCallScreen';
 import PrivateChatInfoScreen from '../screens/privateChat/PrivateChatInfoScreen';
 import FindPrMessagesScreen from '../screens/privateChat/FindPrMessageScreen';
 import AddMembersScreen from '../screens/groupChat/AddMembersScreen';
-import PrivateChatHeader from '../components/PrivateChatHeader';
+import SharedChatHeader from './SharedChatHeader';
 
 const MessageStack = createNativeStackNavigator();
 
@@ -19,18 +19,72 @@ export default function MessageStackNavigator() {
         <MessageStack.Navigator screenOptions={{ headerShown: false }}>
             <MessageStack.Screen name="MessageScreen" component={MessageScreen} />
 
-            <MessageStack.Screen name="GroupChatScreen" component={GroupChatScreen} />
+            <MessageStack.Screen
+                name="GroupChatScreen"
+                component={GroupChatScreen}
+                options={({ navigation, route }) => ({
+                    headerShown: true,
+                    header: () => (
+                        <SharedChatHeader
+                            navigation={navigation}
+                            chatName={route.params?.chatName}
+                            chatId={route.params?.chatId}
+                            actions={[
+                                { icon: 'video', onPress: () => navigation.navigate('GroupCallScreen') },
+                                { icon: 'search', onPress: () => navigation.navigate('GroupCallScreen') },
+
+                                {
+                                    icon: 'info',
+                                    onPress: () =>
+                                        navigation.navigate('GroupInfoScreen', { chatId: route.params?.chatId }),
+                                },
+                            ]}
+                        />
+                    ),
+                })}
+            />
             <MessageStack.Screen
                 name="PrivateChatScreen"
                 component={PrivateChatScreen}
-                options={({ navigation }) => ({
-                    headerShown: true, // Enable the header for this screen
-                    header: () => <PrivateChatHeader navigation={navigation} recipientName="Nga Nguyễn" />,
+                options={({ navigation, route }) => ({
+                    headerShown: true,
+                    header: () => (
+                        <SharedChatHeader
+                            navigation={navigation}
+                            chatName={route.params?.chatName}
+                            chatId={route.params?.chatId}
+                            actions={[
+                                { icon: 'phone', onPress: () => navigation.navigate('PrivateVoiceCallScreen') },
+                                { icon: 'video', onPress: () => navigation.navigate('PrivateCallScreen') },
+                                {
+                                    icon: 'info',
+                                    onPress: () =>
+                                        navigation.navigate('PrivateChatInfoScreen', { chatId: route.params?.chatId }),
+                                },
+                            ]}
+                        />
+                    ),
                 })}
             />
             <MessageStack.Screen name="GroupCallScreen" component={GroupCallScreen} />
-            <MessageStack.Screen name="GroupInfoScreen" component={GroupInfoScreen} />
-            <MessageStack.Screen name="MemberListScreen" component={MemberListScreen} />
+            <MessageStack.Screen
+                name="GroupInfoScreen"
+                component={GroupInfoScreen}
+                options={({ navigation, route }) => ({
+                    headerShown: true,
+                    header: () => <SharedChatHeader navigation={navigation} chatName="Information" actions={[]} />,
+                })}
+            />
+            <MessageStack.Screen
+                name="MemberListScreen"
+                component={MemberListScreen}
+                options={({ navigation, route }) => ({
+                    headerShown: true,
+                    header: () => (
+                        <SharedChatHeader navigation={navigation} chatName="Member management" actions={[]} />
+                    ),
+                })}
+            />
             <MessageStack.Screen name="FindGrMessagesScreen" component={FindGrMessagesScreen} />
             <MessageStack.Screen name="AddMemberScreen" component={AddMembersScreen} />
 

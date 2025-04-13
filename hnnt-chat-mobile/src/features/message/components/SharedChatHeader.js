@@ -1,33 +1,28 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Feather } from '@expo/vector-icons'; // Modern and thin icons
+import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
-export default function PrivateChatHeader({ navigation, recipientName }) {
+export default function SharedChatHeader({ navigation, chatName, chatId, onBack, actions }) {
     return (
         <LinearGradient
-            colors={['#0087FD', '#00ACF4']} // xanh dương đậm -> xanh dương nhạt
+            colors={['#0087FD', '#00ACF4']}
             start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }} // chiều ngang
+            end={{ x: 1, y: 0 }}
             style={styles.header}
         >
             <View style={styles.leftContainer}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
+                <TouchableOpacity onPress={onBack || (() => navigation.goBack())}>
                     <Feather name="arrow-left" size={22} color="#fff" />
                 </TouchableOpacity>
-                <Text style={styles.recipientName}>{recipientName}</Text>
+                <Text style={styles.chatName}>{chatName}</Text>
             </View>
             <View style={styles.rightContainer}>
-                <TouchableOpacity onPress={() => navigation.navigate('PrivateVoiceCallScreen')}>
-                    <Feather name="phone" size={21} color="#fff" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('PrivateCallScreen')}>
-                    <Feather name="video" size={22} color="#fff" />
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => navigation.navigate('PrivateChatInfoScreen', { recipientName })}>
-                    <Feather name="info" size={22} color="#fff" />
-                </TouchableOpacity>
+                {actions.map((action, index) => (
+                    <TouchableOpacity key={index} onPress={action.onPress}>
+                        <Feather name={action.icon} size={22} color="#fff" />
+                    </TouchableOpacity>
+                ))}
             </View>
         </LinearGradient>
     );
@@ -48,7 +43,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    recipientName: {
+    chatName: {
         fontSize: 18,
         fontWeight: '600',
         color: '#fff',
@@ -58,6 +53,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        width: 100, // Adjusted width to fit the new button
+        width: 100,
     },
 });
