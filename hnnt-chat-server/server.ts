@@ -28,7 +28,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Tạo HTTP server từ Express
 const server = createServer(app);
-// initSocket(server);
+initSocket(server);
 
 // Routes
 
