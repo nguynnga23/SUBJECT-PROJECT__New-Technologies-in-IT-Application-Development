@@ -6,7 +6,7 @@ import friendRouter from './src/routes/friendRoutes';
 import chatRouter from './src/routes/chatRoutes';
 import messageRouter from './src/routes/messageRoutes';
 import authRouter from './src/routes/authRoutes';
-
+import contactRouter from './src/routes/contactRoutes';
 import groupChatManageRouter from './src/routes/groupChatManageRoutes';
 
 import userRouter from './src/routes/userRoutes';
@@ -44,7 +44,7 @@ app.use('/api/categories', categoryRouter);
 app.use('/api/messages', messageRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/user', userRouter);
-
+app.use('/api/contacts', contactRouter);
 app.use('/api/groups', groupChatManageRouter);
 app.use('/api/loggedin-devices', loggedInDeviceRouter);
 
