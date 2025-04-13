@@ -86,7 +86,16 @@ export default function MessageStackNavigator() {
                 })}
             />
             <MessageStack.Screen name="FindGrMessagesScreen" component={FindGrMessagesScreen} />
-            <MessageStack.Screen name="AddMemberScreen" component={AddMembersScreen} />
+            <MessageStack.Screen
+                name="AddMemberScreen"
+                component={AddMembersScreen}
+                options={({ navigation, route }) => ({
+                    headerShown: true,
+                    header: () => (
+                        <SharedChatHeader navigation={navigation} chatName="Add friends to group" actions={[]} />
+                    ),
+                })}
+            />
 
             <MessageStack.Screen name="PrivateCallScreen" component={PrivateCallScreen} />
             <MessageStack.Screen name="PrivateChatInfoScreen" component={PrivateChatInfoScreen} />
