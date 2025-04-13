@@ -6,15 +6,6 @@ import { useNavigation } from '@react-navigation/native';
 import FriendService from '../../services/FriendService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Sample data for the friends list
-// const allFriends = [
-//     { id: '1', name: 'Nguyễn Lê Nhật Huy', avatar: 'https://i.pravatar.cc/150?img=20' },
-//     { id: '2', name: 'Nguyễn Thị Nga', avatar: 'https://i.pravatar.cc/150?img=10' },
-//     { id: '3', name: 'Nguyễn Thiên Tứ', avatar: 'https://i.pravatar.cc/150?img=14' },
-//     { id: '4', name: 'Thanh Nhiệt', avatar: 'https://i.pravatar.cc/150?img=12' },
-//     { id: '5', name: 'Anh Long', avatar: 'https://i.pravatar.cc/150?img=17' },
-// ];
-
 const recentlyOnlineFriends = [
     // { id: '1', name: 'Nguyễn Lê Nhật Huy', group: 'Close Friends', avatar: 'https://i.pravatar.cc/150?img=13' },
     // { id: '2', name: 'Nguyễn Thị Nga', avatar: 'https://i.pravatar.cc/150?img=10' },
@@ -131,15 +122,30 @@ export default function ListFriendsScreen() {
     };
 
     const handleUnfriend = async () => {
-        try {
-            const token = await AsyncStorage.getItem('token');
-            await FriendService.deleteFriend(selectedFriend.id, token); // Pass correct friendId
-            alert(`Unfriended ${selectedFriend.name}`);
-            setModalVisible(false);
-            setAllFriends((prevFriends) => prevFriends.filter((friend) => friend.id !== selectedFriend.id));
-        } catch (error) {
-            console.error('Error unfriending:', error);
-            alert(error.message || 'Failed to unfriend.');
+        if (window.confirm(`Are you sure you want to unfriend ${selectedFriend.name}?`)) {
+            try {
+                const token = await AsyncStorage.getItem('token');
+                await FriendService.deleteFriend(selectedFriend.id, token); // Pass correct friendId
+                alert(`Unfriended ${selectedFriend.name}`);
+                setModalVisible(false);
+                setAllFriends((prevFriends) => prevFriends.filter((friend) => friend.id !== selectedFriend.id));
+            } catch (error) {
+                console.error('Error unfriending:', error);
+                alert(error.message || 'Failed to unfriend.');
+            }
+        }
+    };
+
+    const handleBlock = async () => {
+        if (window.confirm(`Are you sure you want to block ${selectedFriend.name}?`)) {
+            try {
+                // Logic for blocking the user
+                alert(`${selectedFriend.name} has been blocked.`);
+                setModalVisible(false);
+            } catch (error) {
+                console.error('Error blocking:', error);
+                alert(error.message || 'Failed to block.');
+            }
         }
     };
 
@@ -196,6 +202,24 @@ export default function ListFriendsScreen() {
                         <View style={styles.modalContent}>
                             <Image source={{ uri: selectedFriend.avatar }} style={styles.modalAvatar} />
                             <Text style={styles.modalName}>{selectedFriend.name}</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <TouchableOpacity style={styles.largeButton} onPress={() => alert('View Profile')}>
+                                    <FontAwesome name="user" size={20} color="#FFFFFF" style={styles.largeButtonIcon} />
+                                    <Text style={styles.largeButtonText}>View Profile</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.largeButton} onPress={handleBlock}>
+                                    <FontAwesome name="ban" size={20} color="#FFFFFF" style={styles.largeButtonIcon} />
+                                    <Text style={styles.largeButtonText}>Manage Blocking</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            <Text style={styles.modalSubtitle}>
+                                Added {selectedFriend.addedYearsAgo || 'x'} years ago via{' '}
+                                {selectedFriend.addedVia || '...'}
+                            </Text>
+                            <TouchableOpacity style={styles.modalSubtitle}>
+                                <Text style={{ fontSize: 16 }}>View mutual groups</Text>
+                            </TouchableOpacity>
                             <View style={styles.modalButtons}>
                                 <TouchableOpacity style={styles.unfriendButton} onPress={handleUnfriend}>
                                     <Text style={styles.unfriendText}>Unfriend</Text>
@@ -340,10 +364,27 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 20,
     },
-    modalButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+    modalSubtitle: {
+        fontSize: 16,
+        borderBottomWidth: 1,
+        paddingVertical: 15,
+        borderColor: '#f0f0f0',
         width: '100%',
+    },
+    modalButtons: {
+        justifyContent: 'space-between',
+        marginTop: 10,
+        flexDirection: 'row',
+        width: '100%',
+    },
+    modalOptions: {},
+    modalOptionButton: {
+        paddingVertical: 10,
+        marginBottom: 10,
+    },
+    modalOptionText: {
+        fontSize: 14,
+        color: '#007AFF',
     },
     unfriendButton: {
         backgroundColor: '#E5E5EA',
@@ -351,19 +392,42 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         borderRadius: 20,
         marginRight: 10,
+        width: 130,
     },
     unfriendText: {
         fontSize: 14,
+        textAlign: 'center',
         color: '#000',
+        fontWeight: 600,
     },
     messageButton: {
         backgroundColor: '#E5F0FF',
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 20,
+        width: 130,
     },
     messageText: {
+        textAlign: 'center',
         fontSize: 14,
         color: '#007AFF',
+        fontWeight: 600,
+    },
+    largeButton: {
+        alignItems: 'center',
+        width: 130,
+        margin: 5,
+        height: 60,
+        justifyContent: 'space-around',
+        backgroundColor: '#f0f0f0', // Modern blue
+        borderRadius: 10,
+        marginBottom: 15,
+    },
+    largeButtonText: {
+        marginBottom: 5,
+    },
+    largeButtonIcon: {
+        color: '#2563EB',
+        marginTop: 7,
     },
 });
