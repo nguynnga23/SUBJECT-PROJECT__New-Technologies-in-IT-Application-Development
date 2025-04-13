@@ -43,6 +43,25 @@ function TabChat() {
         fetchChats(); // Gọi hàm async bên trong useEffect
     }, [data]);
 
+    useEffect(() => {
+        // Lắng nghe tin nhắn đến từ server
+        const handleReceiveMessage = async ({ chatId: receivedChatId }) => {
+            let check = data.some((chat) => chat.id === receivedChatId);
+
+            if (check) {
+                const chats = await getChat();
+                setData(chats);
+            } else {
+            }
+        };
+
+        socket.on('receive_message', handleReceiveMessage);
+
+        return () => {
+            socket.off('receive_message', handleReceiveMessage);
+        };
+    }, [data]);
+
     const dispatch = useDispatch();
 
     const timeoutRef = useRef(null);
@@ -105,7 +124,11 @@ function TabChat() {
                     .sort((a, b) => {
                         const pinA = a.participants.find((p) => p.accountId === userId)?.pin || false;
                         const pinB = b.participants.find((p) => p.accountId === userId)?.pin || false;
-                        return Number(pinB) - Number(pinA);
+                        if (pinA !== pinB) return Number(pinB) - Number(pinA);
+
+                        const timeA = new Date(a.messages[0]?.time || 0).getTime();
+                        const timeB = new Date(b.messages[0]?.time || 0).getTime();
+                        return timeB - timeA;
                     })
                     .map((chat, index) => {
                         const notMe = chat.participants?.find((user) => user.accountId !== userId);
@@ -161,9 +184,9 @@ function TabChat() {
 
                                 <div
                                     className="flex item-center"
-                                    onClick={() => {
+                                    onClick={async () => {
                                         dispatch(setActiveChat(chat));
-                                        readedChatOfUser(chat.id);
+                                        await readedChatOfUser(chat.id);
                                         dispatch(setShowOrOffRightBarSearch(false));
                                         // socket.emit('read_chat', { chatId: chat.id, userId });
                                     }}

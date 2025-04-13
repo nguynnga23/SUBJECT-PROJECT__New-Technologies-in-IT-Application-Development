@@ -14,8 +14,14 @@ export const initSocket = (server: HttpServer) => {
     io.on('connection', (socket) => {
         console.log(`⚡ Client connected: ${socket.id}`);
 
-        socket.on('send_message', (message) => {
-            io.emit('receive_message', message);
+        socket.on('send_message', ({ chatId, newMessage }) => {
+            io.emit('receive_message', { chatId, newMessage });
+        });
+        socket.on('reaction_message', ({ chatId }) => {
+            io.emit('receive_reaction_message', { chatId });
+        });
+        socket.on('pin_message', ({ chatId }) => {
+            io.emit('receive_pin_message', { chatId });
         });
 
         // socket.on('read_chat', ({ chatId, userId }) => {
