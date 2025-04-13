@@ -17,8 +17,11 @@ export const initSocket = (server: HttpServer) => {
         socket.on('send_message', ({ chatId, newMessage }) => {
             io.emit('receive_message', { chatId, newMessage });
         });
-        socket.on('reaction_message', ({ chatId, messageId, reaction }) => {
-            io.emit('receive_reaction_message', { chatId, messageId, reaction });
+        socket.on('reaction_message', ({ chatId }) => {
+            io.emit('receive_reaction_message', { chatId });
+        });
+        socket.on('pin_message', ({ chatId }) => {
+            io.emit('receive_pin_message', { chatId });
         });
 
         // socket.on('read_chat', ({ chatId, userId }) => {

@@ -27,6 +27,8 @@ function TabChatLeftBar() {
                 try {
                     const response1 = await searchFollowKeyWord(search);
                     const response2 = await getListFriendByKeyword(search);
+                    console.log(response1.messages);
+
                     setData(response1.messages);
                     setDataContact(response2);
                 } catch (error) {

@@ -35,6 +35,7 @@ import {
     openEmojiTab,
     sendEmoji,
     setReadedChatWhenSendNewMessage,
+    addReaction,
 } from '../../redux/slices/chatSlice';
 import ChatText from '../Chat/ChatText';
 import ChatGif from '../Chat/ChatGif';
@@ -95,12 +96,12 @@ function TabMessage() {
         };
 
         fetchMessages();
-    }, []);
+    }, [chatId, data]);
 
     useEffect(() => {
         // Lắng nghe tin nhắn đến từ server
         const handleReceiveMessage = ({ chatId: receivedChatId, newMessage }) => {
-            if (activeChat.id !== receivedChatId) {
+            if (activeChat?.id !== receivedChatId) {
                 return;
             }
             setData((prev) => [...prev, newMessage]);
@@ -116,7 +117,8 @@ function TabMessage() {
         return () => {
             socket.off('receive_message', handleReceiveMessage);
         };
-    }, []);
+    }, [activeChat?.id]);
+
     useEffect(() => {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -471,7 +473,7 @@ function TabMessage() {
                                                     alt="avatar"
                                                     className="w-full h-full rounded-full border object-cover"
                                                 />
-                                                {leader.id === message.sender.id && (
+                                                {leader?.id === message.sender.id && (
                                                     <RiKey2Line
                                                         size={15}
                                                         color="yellow"

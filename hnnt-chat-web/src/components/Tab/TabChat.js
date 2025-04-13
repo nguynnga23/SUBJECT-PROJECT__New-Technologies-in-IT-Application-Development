@@ -41,7 +41,7 @@ function TabChat() {
         };
 
         fetchChats(); // Gọi hàm async bên trong useEffect
-    }, []);
+    }, [data]);
 
     useEffect(() => {
         // Lắng nghe tin nhắn đến từ server
@@ -60,7 +60,7 @@ function TabChat() {
         return () => {
             socket.off('receive_message', handleReceiveMessage);
         };
-    }, []);
+    }, [data]);
 
     const dispatch = useDispatch();
 
@@ -180,9 +180,9 @@ function TabChat() {
 
                                 <div
                                     className="flex item-center"
-                                    onClick={() => {
+                                    onClick={async () => {
                                         dispatch(setActiveChat(chat));
-                                        readedChatOfUser(chat.id);
+                                        await readedChatOfUser(chat.id);
                                         dispatch(setShowOrOffRightBarSearch(false));
                                         // socket.emit('read_chat', { chatId: chat.id, userId });
                                     }}
