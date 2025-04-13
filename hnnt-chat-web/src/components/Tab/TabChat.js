@@ -124,7 +124,11 @@ function TabChat() {
                     .sort((a, b) => {
                         const pinA = a.participants.find((p) => p.accountId === userId)?.pin || false;
                         const pinB = b.participants.find((p) => p.accountId === userId)?.pin || false;
-                        return Number(pinB) - Number(pinA);
+                        if (pinA !== pinB) return Number(pinB) - Number(pinA);
+
+                        const timeA = new Date(a.messages[0]?.time || 0).getTime();
+                        const timeB = new Date(b.messages[0]?.time || 0).getTime();
+                        return timeB - timeA;
                     })
                     .map((chat, index) => {
                         const notMe = chat.participants?.find((user) => user.accountId !== userId);
