@@ -23,8 +23,9 @@
             "permissions": [
                 "android.permission.CAMERA",
                 "android.permission.RECORD_AUDIO",
-                "android.permission.CAMERA",
-                "android.permission.RECORD_AUDIO"
+                "android.permission.READ_EXTERNAL_STORAGE",
+                "android.permission.WRITE_EXTERNAL_STORAGE",
+                "android.permission.ACCESS_MEDIA_LOCATION"
             ],
             "package": "com.anonymous.hnntchatmobile"
         },
@@ -48,6 +49,19 @@
                     "isAccessMediaLocationEnabled": true
                 }
             ]
-        ]
+        ],
+        "notification": {
+            "icon": "./assets/icon.png",
+            "color": "#000000"
+        },
+        "updates": {
+            "fallbackToCacheTimeout": 0
+        },
+        "extra": {
+            "eas": {
+                "projectId": "9e9d93f8-301f-4c3c-90ee-c56e1f0af997"
+            }
+        },
+        "owner": "nga23"
     }
 }
