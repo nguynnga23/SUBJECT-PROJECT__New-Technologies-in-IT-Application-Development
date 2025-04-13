@@ -246,7 +246,7 @@ export default function GroupInfoScreen() {
                     )}
 
                     {/* edit groupname modal */}
-                    <Modal visible={editVisible} transparent animationType="slide">
+                    <Modal visible={editVisible} transparent animationType="fade">
                         <View style={styles.modalContainer}>
                             <View style={styles.modalContent}>
                                 <Text style={styles.modalTitle}>Edit Group Name</Text>
@@ -285,7 +285,7 @@ export default function GroupInfoScreen() {
                     </Modal> */}
 
                     {/* Leave Group Modal */}
-                    <Modal visible={leaveVisible} transparent animationType="slide">
+                    <Modal visible={leaveVisible} transparent animationType="fade">
                         <View style={styles.modalContainer}>
                             <View style={styles.modalContent}>
                                 <Text style={styles.modalTitle}>Leave Group</Text>
@@ -299,7 +299,7 @@ export default function GroupInfoScreen() {
                     </Modal>
 
                     {/* Disband Group Modal */}
-                    <Modal visible={disbandVisible} transparent animationType="slide">
+                    <Modal visible={disbandVisible} transparent animationType="fade">
                         <View style={styles.modalContainer}>
                             <View style={styles.modalContent}>
                                 <Text style={styles.modalTitle}>Disband Group</Text>
@@ -326,7 +326,7 @@ export default function GroupInfoScreen() {
                             </View>
                         </TouchableWithoutFeedback>
                     </Modal> */}
-                    <Modal visible={pinVisible} transparent animationType="slide">
+                    <Modal visible={pinVisible} transparent animationType="fade">
                         <TouchableWithoutFeedback onPress={() => setPinVisible(false)}>
                             <View style={styles.modalContainer}>
                                 <View style={styles.modalContent}>

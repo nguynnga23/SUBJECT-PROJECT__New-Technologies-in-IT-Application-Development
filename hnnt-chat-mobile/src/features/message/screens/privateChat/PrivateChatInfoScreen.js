@@ -1,77 +1,79 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, Image, TouchableOpacity, ScrollView, Linking, StyleSheet, Modal, TextInput, Button, TouchableWithoutFeedback } from "react-native";
-import { Ionicons, AntDesign } from "@expo/vector-icons";
-import { useRoute } from "@react-navigation/native";
-import { useNavigation } from "@react-navigation/native";
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { handleBlock, handleReport, toggleMute } from "../../services/privateChat/PrivateChatInfoService";
+import React, { useEffect, useState } from 'react';
+import {
+    View,
+    Text,
+    Image,
+    TouchableOpacity,
+    ScrollView,
+    Linking,
+    StyleSheet,
+    Modal,
+    TextInput,
+    Button,
+    TouchableWithoutFeedback,
+} from 'react-native';
+import { Ionicons, AntDesign } from '@expo/vector-icons';
+import { useRoute } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { handleBlock, handleReport, toggleMute } from '../../services/privateChat/PrivateChatInfoService';
 
 export default function PrivateChatInfoScreen() {
     const navigation = useNavigation();
     const route = useRoute();
-    const recipientName = route.params?.recipientName || "null";
+    const recipientName = route.params?.recipientName || 'null';
     const [isMuted, setIsMuted] = useState(false);
     const [reportVisible, setReportVisible] = useState(false);
     const [blockVisible, setBlockVisible] = useState(false);
-    const [reportReason, setReportReason] = useState("");
+    const [reportReason, setReportReason] = useState('');
     const [pinVisible, setPinVisible] = useState(false);
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <SafeAreaProvider>
-                {/* Header */}
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <Ionicons name="arrow-back" size={24} color="white" />
-                    </TouchableOpacity>
-                    <Text style={styles.headerText}>Infomation</Text>
-                </View>
-
                 <View style={styles.chatInfo}>
-                    <Image
-                        source={require("../../../../assets/icon.png")}
-                        style={styles.avatar}
-                    />
+                    <Image source={require('../../../../assets/icon.png')} style={styles.avatar} />
                     <Text style={styles.recipientName}>{recipientName}</Text>
                 </View>
 
                 {/* Actions */}
                 <View style={styles.actions}>
-                    <TouchableOpacity onPress={() => navigation.navigate("FindPrMessagesScreen")}>
+                    <TouchableOpacity onPress={() => navigation.navigate('FindPrMessagesScreen')}>
                         <ActionButton icon="search" label="Find messages" />
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.actionButton} onPress={() => toggleMute(isMuted, setIsMuted)}>
-                        <Ionicons name={isMuted ? "notifications" : "notifications-off"} size={24} color="black" />
-                        <Text style={styles.actionText}>{isMuted ? "Unmute" : "Mute"}</Text>
+                        <Ionicons name={isMuted ? 'notifications' : 'notifications-off'} size={24} color="black" />
+                        <Text style={styles.actionText}>{isMuted ? 'Unmute' : 'Mute'}</Text>
                     </TouchableOpacity>
                 </View>
 
                 {/* Other Options */}
                 <TouchableOpacity>
-                    <OptionItem label="Image, file, link" />
+                    <OptionItem label="Image, file, link" icon="folder" />
                 </TouchableOpacity>
+
                 <TouchableOpacity onPress={() => setPinVisible(true)}>
-                    <OptionItem label="Pin messenge" />
+                    <OptionItem label="Pinned message" icon="pin" />
                 </TouchableOpacity>
 
                 {/* Danger Zone */}
                 <TouchableOpacity onPress={() => setReportVisible(true)}>
-                    <OptionItem label="Report" textColor="red" />
+                    <OptionItem label="Report" icon="flag" textColor="red" />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => setBlockVisible(true)}>
-                    <OptionItem label="Block user" textColor="red" />
+                    <OptionItem label="Block user" icon="ban" textColor="red" />
                 </TouchableOpacity>
 
                 {/* Report Modal */}
-                <Modal visible={reportVisible} transparent animationType="slide">
+                <Modal visible={reportVisible} transparent animationType="fade">
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
                             <Text style={styles.modalTitle}>Report</Text>
-                            <TouchableOpacity onPress={() => setReportReason("Sensitive content")}>
+                            <TouchableOpacity onPress={() => setReportReason('Sensitive content')}>
                                 <Text style={styles.option}>Sensitive content</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setReportReason("Scam")}>
+                            <TouchableOpacity onPress={() => setReportReason('Scam')}>
                                 <Text style={styles.option}>Scam</Text>
                             </TouchableOpacity>
                             <TextInput
@@ -82,28 +84,38 @@ export default function PrivateChatInfoScreen() {
                             />
                             <View style={styles.modalActions}>
                                 <Button title="Cancel" onPress={() => setReportVisible(false)} />
-                                <Button title="Submit" onPress={() => { handleReport(reportReason, setReportReason); setReportVisible(false) }} />
+                                <Button
+                                    title="Submit"
+                                    onPress={() => {
+                                        handleReport(reportReason, setReportReason);
+                                        setReportVisible(false);
+                                    }}
+                                />
                             </View>
                         </View>
                     </View>
                 </Modal>
 
                 {/* Block modal */}
-                <Modal visible={blockVisible} transparent animationType="slide">
+                <Modal visible={blockVisible} transparent animationType="fade">
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
                             <Text style={styles.modalTitle}>Block user</Text>
                             <Text>Are you sure you want to block this user?</Text>
                             <View style={styles.modalActions}>
                                 <Button title="Cancel" onPress={() => setBlockVisible(false)} />
-                                <Button title="Yes" color="red" onPress={() => handleBlock(setBlockVisible, navigation)} />
+                                <Button
+                                    title="Yes"
+                                    color="red"
+                                    onPress={() => handleBlock(setBlockVisible, navigation)}
+                                />
                             </View>
                         </View>
                     </View>
                 </Modal>
 
                 {/* Pin messenge modal */}
-                <Modal visible={pinVisible} transparent animationType="slide">
+                <Modal visible={pinVisible} transparent animationType="fade">
                     <TouchableWithoutFeedback onPress={() => setPinVisible(false)}>
                         <View style={styles.modalContainer}>
                             <View style={styles.modalContent}>
@@ -114,22 +126,27 @@ export default function PrivateChatInfoScreen() {
                     </TouchableWithoutFeedback>
                 </Modal>
             </SafeAreaProvider>
-        </SafeAreaView>
+        </View>
     );
-};
+}
 
 // Component tái sử dụng cho các nút chức năng
 const ActionButton = ({ icon, label }) => (
     <View style={styles.actionButton}>
-        <Ionicons name={icon} size={24} color="black" />
+        <View style={styles.iconContainer}>
+            <Ionicons name={`${icon}-outline`} size={22} color="black" />
+        </View>
         <Text style={styles.actionText}>{label}</Text>
     </View>
 );
 
 // Component tái sử dụng cho danh sách tùy chọn
-const OptionItem = ({ label, textColor = "black", links = [] }) => (
+const OptionItem = ({ label, icon, textColor = 'black', links = [] }) => (
     <View style={styles.optionItem}>
-        <Text style={[styles.optionText, { color: textColor }]}>{label}</Text>
+        <View style={styles.optionItemContent}>
+            {icon && <Ionicons name={`${icon}-outline`} size={20} color="gray" style={styles.optionIcon} />}
+            <Text style={[styles.optionText, { color: textColor }]}>{label}</Text>
+        </View>
         {links.map((link, index) => (
             <TouchableOpacity key={index} onPress={() => Linking.openURL(link.url)}>
                 <Text style={[styles.linkText, { color: textColor }]}>{link.text}</Text>
@@ -141,96 +158,123 @@ const OptionItem = ({ label, textColor = "black", links = [] }) => (
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#f2f2f2",
+        backgroundColor: '#f9f9f9',
     },
     header: {
-        backgroundColor: "#005ae0",
+        backgroundColor: '#005ae0',
         padding: 15,
-        flexDirection: "row",
-        alignItems: "center",
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     headerText: {
-        color: "white",
-        fontSize: 18,
-        fontWeight: "bold",
+        color: 'white',
+        fontSize: 20,
+        fontWeight: '600',
         marginLeft: 10,
     },
     chatInfo: {
-        alignItems: "center",
-        padding: 15,
-        backgroundColor: "white",
+        alignItems: 'center',
+        padding: 20,
+        backgroundColor: 'white',
     },
     avatar: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: 90,
+        height: 90,
+        borderRadius: 45,
+        borderColor: '#0078D7',
     },
     recipientName: {
-        paddingRight: 10,
         fontSize: 18,
-        fontWeight: "bold",
+        fontWeight: '600',
         marginTop: 10,
+        color: '#333',
     },
     actions: {
-        flexDirection: "row",
-        justifyContent: "space-around",
+        flexDirection: 'row',
+        justifyContent: 'space-around',
         padding: 15,
-        backgroundColor: "white",
+        backgroundColor: 'white',
+        borderBottomWidth: 10,
+        borderBottomColor: '#f9f9f9',
     },
     actionButton: {
-        alignItems: "center",
+        alignItems: 'center',
+        width: 80,
+    },
+    iconContainer: {
+        padding: 10,
+        borderRadius: 20,
+        borderColor: '#ccc',
+        backgroundColor: '#f9f9f9',
     },
     actionText: {
-        textAlign: "center",
+        textAlign: 'center',
         marginTop: 5,
-        width: 70,
+        fontSize: 13,
+        fontWeight: '500',
+        color: '#555',
     },
     optionItem: {
         marginTop: 1,
-        backgroundColor: "white",
-        padding: 15,
+        backgroundColor: 'white',
+        padding: 16,
+        marginBottom: 2,
+    },
+    optionItemContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    optionIcon: {
+        marginRight: 10,
     },
     optionText: {
         fontSize: 16,
-        fontWeight: "bold",
+        color: '#333',
     },
+
     linkText: {
         fontSize: 14,
         marginTop: 5,
-        textDecorationLine: "underline",
+        textDecorationLine: 'underline',
+        color: '#0078D7',
     },
-
     modalContainer: {
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "rgba(0,0,0,0.5)",
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.6)',
     },
     modalContent: {
-        width: "80%",
-        backgroundColor: "white",
-        padding: 20,
-        borderRadius: 10,
-        alignItems: "center",
+        width: '85%',
+        backgroundColor: 'white',
+        padding: 25,
+        borderRadius: 15,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
     },
     modalTitle: {
         fontSize: 18,
-        fontWeight: "bold",
-        marginBottom: 10,
+        fontWeight: '600',
+        marginBottom: 15,
+        color: '#333',
     },
     input: {
-        width: "100%",
+        width: '100%',
         borderWidth: 1,
-        borderColor: "#ccc",
-        padding: 8,
+        borderColor: '#ccc',
+        padding: 10,
         marginTop: 10,
-        borderRadius: 5,
+        borderRadius: 8,
+        backgroundColor: '#f9f9f9',
     },
     modalActions: {
-        flexDirection: "row",
-        justifyContent: "space-between",
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         marginTop: 20,
-        width: "100%",
+        width: '100%',
     },
 });
-

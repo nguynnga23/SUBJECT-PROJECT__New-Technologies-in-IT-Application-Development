@@ -1,25 +1,25 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import React, { useState } from 'react';
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 const mockServerMessages = [
-    { id: 201, sender: "me", message: "Chào Nga!", time: "18:55" },
-    { id: 202, sender: "Nga Nguyễn", message: "Chào bạn!", time: "18:56" },
-    { id: 203, sender: "me", message: "Bạn đã hoàn thành task chưa?", time: "18:57" },
-    { id: 204, sender: "Nga Nguyễn", message: "Tôi đang làm, sắp xong rồi!", time: "19:00" },
+    { id: 201, sender: 'me', message: 'Chào Nga!', time: '18:55' },
+    { id: 202, sender: 'Nga Nguyễn', message: 'Chào bạn!', time: '18:56' },
+    { id: 203, sender: 'me', message: 'Bạn đã hoàn thành task chưa?', time: '18:57' },
+    { id: 204, sender: 'Nga Nguyễn', message: 'Tôi đang làm, sắp xong rồi!', time: '19:00' },
 ];
 
 // Giả lập server trả về kết quả dựa trên từ khóa tìm kiếm
 const fetchMessagesFromServer = (query) => {
     return new Promise((resolve) => {
         setTimeout(() => {
-            if (query.trim() === "") {
+            if (query.trim() === '') {
                 resolve([]); // Nếu không nhập gì thì không trả về gì
             } else {
                 const filtered = mockServerMessages.filter((msg) =>
-                    msg.message.toLowerCase().includes(query.toLowerCase())
+                    msg.message.toLowerCase().includes(query.toLowerCase()),
                 );
                 resolve(filtered);
             }
@@ -29,7 +29,7 @@ const fetchMessagesFromServer = (query) => {
 
 export default function FindPrMessagesScreen() {
     const navigation = useNavigation();
-    const [searchQuery, setSearchQuery] = useState("");
+    const [searchQuery, setSearchQuery] = useState('');
     const [filteredMessages, setFilteredMessages] = useState([]);
     const [loading, setLoading] = useState(false); // Trạng thái tải dữ liệu
 
@@ -41,16 +41,8 @@ export default function FindPrMessagesScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <SafeAreaProvider>
-                {/* Header */}
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <Ionicons name="arrow-back" size={24} color="black" />
-                    </TouchableOpacity>
-                    <Text style={styles.headerText}>Find Messages</Text>
-                </View>
-
                 {/* Search Bar */}
                 <View style={styles.searchBar}>
                     <Ionicons name="search-outline" size={20} color="gray" style={styles.searchIcon} />
@@ -83,30 +75,30 @@ export default function FindPrMessagesScreen() {
                     />
                 ) : null}
             </SafeAreaProvider>
-        </SafeAreaView>
+        </View>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "white",
+        backgroundColor: 'white',
         padding: 10,
     },
     header: {
-        flexDirection: "row",
-        alignItems: "center",
+        flexDirection: 'row',
+        alignItems: 'center',
         paddingBottom: 10,
     },
     headerText: {
         fontSize: 18,
-        fontWeight: "bold",
+        fontWeight: 'bold',
         marginLeft: 10,
     },
     searchBar: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "#f0f0f0",
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f0f0f0',
         borderRadius: 8,
         paddingHorizontal: 10,
         marginBottom: 10,
@@ -119,43 +111,43 @@ const styles = StyleSheet.create({
         height: 40,
     },
     searchButton: {
-        backgroundColor: "#007AFF",
+        backgroundColor: '#007AFF',
         paddingVertical: 8,
         paddingHorizontal: 12,
         borderRadius: 6,
     },
     searchButtonText: {
-        color: "white",
-        fontWeight: "bold",
+        color: 'white',
+        fontWeight: 'bold',
     },
     messageItem: {
         padding: 10,
         borderBottomWidth: 1,
-        borderBottomColor: "#ddd",
+        borderBottomColor: '#ddd',
     },
     sender: {
-        fontWeight: "bold",
-        color: "#007AFF",
+        fontWeight: 'bold',
+        color: '#007AFF',
     },
     messageText: {
-        color: "#333",
+        color: '#333',
     },
     loadingContainer: {
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     loadingText: {
-        color: "gray",
+        color: 'gray',
         fontSize: 16,
     },
     noResults: {
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     noResultsText: {
-        color: "gray",
+        color: 'gray',
         fontSize: 16,
     },
 });

@@ -98,8 +98,22 @@ export default function MessageStackNavigator() {
             />
 
             <MessageStack.Screen name="PrivateCallScreen" component={PrivateCallScreen} />
-            <MessageStack.Screen name="PrivateChatInfoScreen" component={PrivateChatInfoScreen} />
-            <MessageStack.Screen name="FindPrMessagesScreen" component={FindPrMessagesScreen} />
+            <MessageStack.Screen
+                name="PrivateChatInfoScreen"
+                component={PrivateChatInfoScreen}
+                options={({ navigation, route }) => ({
+                    headerShown: true,
+                    header: () => <SharedChatHeader navigation={navigation} chatName="Information" actions={[]} />,
+                })}
+            />
+            <MessageStack.Screen
+                name="FindPrMessagesScreen"
+                component={FindPrMessagesScreen}
+                options={({ navigation, route }) => ({
+                    headerShown: true,
+                    header: () => <SharedChatHeader navigation={navigation} chatName="Search messangs" actions={[]} />,
+                })}
+            />
         </MessageStack.Navigator>
     );
 }
