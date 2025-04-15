@@ -6,6 +6,7 @@ import { sendEmoji } from '../../redux/slices/chatSlice';
 import { readedChatOfUser, sendMessage } from '../../screens/Messaging/api';
 
 import listSticker from '../../sample_data/listSticker';
+import { socket } from '../../configs/socket';
 
 function TabChatSymbol() {
     const activeChat = useSelector((state) => state.chat.activeChat);
@@ -20,13 +21,21 @@ function TabChatSymbol() {
         dispatch(sendEmoji(emojiData));
     };
 
-    const onGifClick = (gifObject) => {
-        sendMessage(activeChat.id, gifObject.url, 'gif', null, null, null, null);
-        readedChatOfUser(activeChat.id);
+    const onGifClick = async (gifObject) => {
+        const sendGif = await sendMessage(activeChat.id, gifObject.url, 'gif', null, null, null, null);
+        if (!sendGif) readedChatOfUser(activeChat.id);
+        socket.emit('send_message', {
+            chatId: activeChat.id,
+            newMessage: sendGif,
+        });
     };
-    const onStickerClick = (sticker) => {
-        sendMessage(activeChat.id, sticker, 'sticker', null, null, null, null);
+    const onStickerClick = async (sticker) => {
+        const sendSticker = await sendMessage(activeChat.id, sticker, 'sticker', null, null, null, null);
         readedChatOfUser(activeChat.id);
+        socket.emit('send_message', {
+            chatId: activeChat.id,
+            newMessage: sendSticker,
+        });
     };
 
     return (

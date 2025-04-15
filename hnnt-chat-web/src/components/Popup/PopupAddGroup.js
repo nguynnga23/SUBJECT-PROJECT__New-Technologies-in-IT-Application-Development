@@ -1,51 +1,65 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { IoClose } from 'react-icons/io5';
 import { useDispatch, useSelector } from 'react-redux';
-import { createGroup, addMemberToGroup } from '../../redux/slices/chatSlice';
+import { addMemberToGroup, createGroupChat } from '../../screens/Messaging/api';
+import { getListFriend } from '../../screens/Contacts/api';
 
 const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
     const dispatch = useDispatch();
 
     const userActive = useSelector((state) => state.auth.userActive);
-    const friend = userActive?.friends;
+
     const [groupName, setGroupName] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [avatar, setAvatar] = useState('');
 
-    const existingMembers = activeChat?.group ? activeChat?.members : [];
+    const existingMembers = activeChat?.isGroup ? activeChat?.participants : [];
     const [selectedMembers, setSelectedMembers] = useState(existingMembers);
+
+    const [friend, setFriend] = useState([]);
+    const fileInputRef = useRef(null);
+    useEffect(() => {
+        const fetchChats = async () => {
+            try {
+                const friends = await getListFriend();
+                const transformedFriends = friends.map((friend) => ({
+                    ...friend,
+                    accountId: friend.id,
+                }));
+                setFriend(transformedFriends);
+            } catch (err) {
+                console.log(err.message);
+            }
+        };
+
+        fetchChats();
+    }, []);
 
     if (!isOpen) return null;
 
     const toggleMember = (member) => {
-        if (existingMembers.some((m) => m.id === member.id)) {
+        if (existingMembers.some((m) => m.accountId === member.accountId)) {
             return; // Không thêm nếu đã là thành viên trong nhóm
         }
+
         setSelectedMembers((prev) =>
-            prev.some((m) => m.id === member.id) ? prev.filter((m) => m.id !== member.id) : [...prev, member],
+            prev.some((m) => m.accountId === member.accountId)
+                ? prev.filter((m) => m.accountId !== member.accountId)
+                : [...prev, member],
         );
     };
 
     const filteredMembers = friend.filter((member) => member.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const handleCreateGroup = () => {
-        dispatch(
-            createGroup({
-                name: groupName,
-                avatar: 'https://cdn-icons-png.flaticon.com/512/6387/6387947.png',
-                members: selectedMembers, // Thêm bạn bè vào nhóm
-            }),
-        );
+        createGroupChat(groupName, avatar, selectedMembers);
         clear();
         onClose();
     };
     const handleAddMemberToGroup = () => {
-        const selectedFullMembers = selectedMembers.filter((member) => member.id !== userActive.id); // Lọc các member hợp lệ
-        dispatch(
-            addMemberToGroup({
-                groupId: activeChat.id,
-                members: selectedFullMembers, // Thêm bạn bè vào nhóm
-            }),
-        );
+        const selectedFullMembers = selectedMembers.filter((member) => member.accountId !== userActive.id); // Lọc các member hợp lệ
+        addMemberToGroup(activeChat.id, selectedFullMembers);
+
         clear();
         onClose();
     };
@@ -56,12 +70,18 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
         setSelectedMembers([]);
     };
 
+    const handleTakePhoto = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white w-[400px] rounded-lg shadow-lg  dark:bg-gray-900 dark:text-gray-300">
                 {/* Header */}
                 <div className="flex justify-between items-center p-3 border-b border-gray-300">
-                    <h2 className="text-lg font-semibold">{activeChat?.group ? 'Thêm thành viên' : 'Tạo nhóm'}</h2>
+                    <h2 className="text-lg font-semibold">{activeChat?.isGroup ? 'Thêm thành viên' : 'Tạo nhóm'}</h2>
                     <button
                         onClick={() => {
                             clear();
@@ -75,14 +95,40 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
                 {/* Body */}
                 <div className="p-4">
                     {/* Nhập tên nhóm */}
-                    {!activeChat?.group && (
-                        <input
-                            type="text"
-                            placeholder="Nhập tên nhóm..."
-                            value={groupName}
-                            onChange={(e) => setGroupName(e.target.value)}
-                            className="w-full border-b border-gray-300 p-2 focus:outline-none dark:bg-gray-900 dark:text-gray-300"
-                        />
+                    {!activeChat?.isGroup && (
+                        <div className="flex relative group">
+                            <div onClick={handleTakePhoto} className="w-[45px] h-[45px] cursor-pointer relative">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    onChange={(e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                            const imageUrl = URL.createObjectURL(file); // Tạo URL tạm thời
+                                            setAvatar(imageUrl);
+                                        }
+                                    }}
+                                />
+                                <img
+                                    src={
+                                        avatar ||
+                                        'https://img.freepik.com/premium-vector/chat-vector-icon_676179-133.jpg'
+                                    }
+                                    alt="avatar"
+                                    className="w-[40px] h-[40px] object-cover rounded-full border border-gray-500 absolute"
+                                />
+                            </div>
+
+                            <input
+                                type="text"
+                                placeholder="Nhập tên nhóm..."
+                                value={groupName}
+                                onChange={(e) => setGroupName(e.target.value)}
+                                className="w-full border-b border-gray-300 p-2 ml-2 focus:outline-none dark:bg-gray-900 dark:text-gray-300"
+                            />
+                        </div>
                     )}
 
                     {/* Ô tìm kiếm */}
@@ -97,20 +143,25 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
                     {/* Danh sách thành viên */}
                     <div className="mt-4 h-60 overflow-y-auto">
                         {filteredMembers.map((member) => {
-                            const isExistingMember = existingMembers.some((m) => m.id === member.id);
+                            const isExistingMember = existingMembers.some((m) => m.accountId === member.accountId);
                             return (
                                 <div
-                                    key={member.id}
+                                    key={member.accountId}
                                     className={`flex items-center p-2 border-b border-gray-200 dark:border-b-black ${
                                         isExistingMember
                                             ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700'
                                             : 'cursor-pointer hover:bg-gray-100 hover:dark:bg-gray-700'
                                     }`}
-                                    onClick={() => toggleMember(member)}
+                                    onClick={() => {
+                                        toggleMember(member);
+                                    }}
                                 >
                                     <input
                                         type="checkbox"
-                                        checked={selectedMembers.some((m) => m.id === member.id) || isExistingMember}
+                                        checked={
+                                            selectedMembers.some((m) => m.accountId === member.accountId) ||
+                                            isExistingMember
+                                        }
                                         className="mr-3"
                                     />
                                     <img
@@ -128,7 +179,7 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
                 {/* Footer */}
                 <div className="flex justify-between items-center p-4 border-t border-gray-200 space-x-3">
                     <p className="text-[10px] text-red-500">
-                        {activeChat?.group ? 'Tối thiểu 1 thành viên' : 'Tối thiểu 2 thành viên, và xác định group'}
+                        {activeChat?.isGroup ? 'Tối thiểu 1 thành viên' : 'Tối thiểu 2 thành viên, và xác định group'}
                     </p>
                     <div className="flex">
                         <button
@@ -140,7 +191,7 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
                         >
                             Hủy
                         </button>
-                        {activeChat?.group ? (
+                        {activeChat?.isGroup ? (
                             <button
                                 className={`px-4 py-2 text-white rounded-lg ${
                                     selectedMembers.length === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-600'

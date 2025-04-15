@@ -342,8 +342,6 @@ export const ReadedChatOfUser = async (req: AuthRequest, res: Response): Promise
             },
         });
 
-        // io.to(chatId).emit('read_message', { chatId, userId });
-
         res.status(200).json({ message: 'Đã cập nhật trạng thái readed' });
         return;
     } catch (error) {
