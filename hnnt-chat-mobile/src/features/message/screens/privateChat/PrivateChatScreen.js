@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
     View,
     Text,
@@ -23,9 +23,11 @@ import { useRoute } from '@react-navigation/native';
 import ChatInputContainer from '../../components/ChatInputContainer';
 
 import {
+    fetchMessages,
     handleLongPressMessage,
-    handleDeleteMessage,
     sendMessage,
+    sendReaction,
+    removeReaction,
     sendImage,
     sendFile,
     downloadFile,
@@ -33,7 +35,6 @@ import {
     stopRecording,
     sendVoiceMessage,
     playAudio,
-    fetchMessages
 } from '../../services/privateChat/PrivateChatService';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -42,6 +43,7 @@ import { formatDateTime } from '../../../../utils/formatDateTime';
 import { socket } from '../../../../configs/socket';
 
 export default function PrivateChatScreen() {
+    const flatListRef = useRef(null);
     const navigation = useNavigation();
     const route = useRoute();
     const { chatId, chatName } = route.params;
@@ -60,8 +62,11 @@ export default function PrivateChatScreen() {
     const [recordingSaved, setRecordingSaved] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
     const [selectedMessage, setSelectedMessage] = useState(null);
-    const reactionsList = ['❤️', '😂', '👍', '😮', '😢'];
+    const reactionsList = ['👍', '❤️', '😂', '😮', '😢', '😡'];
     const [reactVisible, setReactVisible] = useState(false);
+
+    const [selectedReaction, setSelectedReaction] = useState(null);
+    const [reactionDetailsVisible, setReactionDetailsVisible] = useState(false);
 
     useEffect(() => {
         const parentNav = navigation.getParent();
@@ -90,6 +95,11 @@ export default function PrivateChatScreen() {
 
             const data = await fetchMessages(chatId, token); // Gọi API để lấy danh sách tin nhắn
             setMessages(data);
+
+            // Cuộn đến tin nhắn cuối cùng
+            setTimeout(() => {
+                flatListRef.current?.scrollToEnd({ animated: true });
+            }, 100);
         } catch (error) {
             Alert.alert('Error', 'Failed to fetch messages.');
         } finally {
@@ -101,20 +111,48 @@ export default function PrivateChatScreen() {
         loadMessages();
     }, []);
 
+    //send message
     useEffect(() => {
-        // Lắng nghe sự kiện nhận tin nhắn từ server
         const handleReceiveMessage = ({ chatId: receivedChatId, newMessage }) => {
             if (chatId !== receivedChatId) {
-                return; // Bỏ qua nếu tin nhắn không thuộc chat hiện tại
+                return;
             }
             // loadMessages();
-            setMessages((prevMessages) => [...prevMessages, newMessage]); // Cập nhật danh sách tin nhắn
+            setMessages((prevMessages) => [...prevMessages, newMessage]);
         };
 
         socket.on('receive_message', handleReceiveMessage);
 
         return () => {
-            socket.off('receive_message', handleReceiveMessage); // Hủy lắng nghe khi component unmount
+            socket.off('receive_message', handleReceiveMessage);
+        };
+    }, [chatId]);
+
+    //del and destroy
+    useEffect(() => {
+        const handleRender = ({ chatId: receivedChatId }) => {
+            if (chatId !== receivedChatId) {
+                return;
+            }
+            loadMessages();
+        };
+        socket.on('render_message', handleRender);
+        return () => {
+            socket.off('render_message', handleRender);
+        };
+    }, [chatId]);
+
+    //reaction
+    useEffect(() => {
+        const handleRender = ({ chatId: receivedChatId }) => {
+            if (chatId !== receivedChatId) {
+                return;
+            }
+            loadMessages();
+        };
+        socket.on('receive_reaction_message', handleRender);
+        return () => {
+            socket.off('receive_reaction_message', handleRender);
         };
     }, [chatId]);
 
@@ -132,36 +170,51 @@ export default function PrivateChatScreen() {
         );
     }
 
-    const getReactionsForMessage = (messageId) => {
-        // return chatData.reaction
-        //     .filter((reaction) => reaction.messageId.toString() === messageId.toString())
-        //     .reduce((acc, curr) => {
-        //         acc[curr.reaction] = (acc[curr.reaction] || 0) + curr.sum;
-        //         return acc;
-        //     }, {});
-        return {};
-    };
-
     const handleSendMessage = async (content) => {
         Keyboard.dismiss();
         try {
             const response = await sendMessage(chatId, content, 'text', null, null, null, null, token);
-            console.log('Message sent:', response);
-
             socket.emit('send_message', {
                 chatId: chatId,
                 newMessage: response,
             });
             // loadMessages();
-            // setMessages((prevMessages) => [...prevMessages, response]);
         } catch (error) {
             console.warn('Error sending message:', error);
             Alert.alert('Error', 'Failed to send message.');
         }
     };
 
-    const deleteMessage = (messageId) => {
-        handleDeleteMessage(messageId, messages, setMessages);
+    const handleSelectReaction = async (emoji) => {
+        if (selectedMessage) {
+            try {
+                const userId = getUserIdFromToken(token);
+                const response = await sendReaction(selectedMessage, userId, emoji, token);
+                socket.emit('reaction_message', {
+                    chatId: chatId
+                });
+                setReactVisible(false);
+            } catch (error) {
+                console.warn('Error sending reaction:', error);
+                Alert.alert('Error', 'Failed to send reaction.');
+            }
+        }
+    };
+
+    const handleRemoveReaction = async () => {
+        if (selectedMessage) {
+            try {
+                const userId = getUserIdFromToken(token);
+                await removeReaction(selectedMessage, userId, token);
+                socket.emit('reaction_message', {
+                    chatId: chatId,
+                });
+                setReactionDetailsVisible(false); // Đóng modal sau khi xóa
+            } catch (error) {
+                console.warn('Error removing reaction:', error);
+                Alert.alert('Error', 'Failed to remove reaction.');
+            }
+        }
     };
 
     const sendVoice = async () => {
@@ -173,15 +226,35 @@ export default function PrivateChatScreen() {
         setReactVisible(true);
     }
 
+    const handleShowReactionDetails = (reaction, reactions, id) => {
+        setSelectedMessage(id);
+        const filteredReactions = reactions.filter((r) => r.reaction === reaction);
+        setSelectedReaction(filteredReactions);
+        setReactionDetailsVisible(true);
+    };
+
+    const groupReactions = (reactions) => {
+        const grouped = reactions.reduce((acc, curr) => {
+            if (!acc[curr.reaction]) {
+                acc[curr.reaction] = 0;
+            }
+            acc[curr.reaction] += curr.sum;
+            return acc;
+        }, {});
+        return Object.entries(grouped).map(([reaction, sum]) => ({ reaction, sum }));
+    };
+
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <View style={styles.container}>
                 <SafeAreaProvider>
                     <FlatList
+                        ref={flatListRef}
                         data={messages}
                         keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => {
-                            const hasReaction = Object.keys(getReactionsForMessage(item.id)).length > 0;
+                            const hasReactions = item.reactions && item.reactions.length > 0;
+                            const groupedReactions = hasReactions ? groupReactions(item.reactions) : [];
                             return (
                                 <TouchableOpacity
                                     onLongPress={() =>
@@ -189,6 +262,7 @@ export default function PrivateChatScreen() {
                                             item.id,
                                             messages,
                                             setMessages,
+                                            chatId,
                                             token
                                         )
                                     }
@@ -199,74 +273,93 @@ export default function PrivateChatScreen() {
                                             item.senderId === currentUserId ? styles.myMessage : styles.otherMessage,
                                         ]}
                                     >
-
                                         <Text style={styles.sender}>{item.sender.name}</Text>
 
-                                        {item.audioUri && (
-                                            <TouchableOpacity
-                                                onPress={() => playAudio(item.audioUri)}
-                                                style={styles.playButton}
-                                            >
-                                                <Ionicons name="play-circle" size={30} color="blue" />
-                                            </TouchableOpacity>
-                                        )}
+                                        {/* Kiểm tra nếu tin nhắn bị thu hồi */}
+                                        {item.destroy ? (
+                                            <Text style={styles.recalledMessage}>message had recall</Text>
+                                        ) : (
+                                            <>
+                                                {/* Hiển thị nội dung tin nhắn */}
+                                                <Text style={styles.message}>{item.content}</Text>
 
-                                        {item.image && (
-                                            <TouchableOpacity onPress={() => setSelectedImage(item.image)}>
-                                                <Image
-                                                    source={{ uri: item.image }}
-                                                    style={{ width: 200, height: 200, borderRadius: 10 }}
-                                                />
-                                            </TouchableOpacity>
-                                        )}
+                                                {/* Hiển thị file, hình ảnh, hoặc audio nếu có */}
+                                                {item.audioUri && (
+                                                    <TouchableOpacity
+                                                        onPress={() => playAudio(item.audioUri)}
+                                                        style={styles.playButton}
+                                                    >
+                                                        <Ionicons name="play-circle" size={30} color="blue" />
+                                                    </TouchableOpacity>
+                                                )}
 
-                                        {item.fileUri && (
-                                            <TouchableOpacity
-                                                onPress={() => downloadFile(item.fileUri, item.fileName)}
-                                                style={styles.fileContainer}
-                                            >
-                                                <Ionicons name="document-text-outline" size={24} color="blue" />
-                                                <Text style={styles.fileName}>
-                                                    {item.fileName} ({(item.fileSize / 1024).toFixed(2)} KB)
-                                                </Text>
-                                            </TouchableOpacity>
-                                        )}
+                                                {item.image && (
+                                                    <TouchableOpacity onPress={() => setSelectedImage(item.image)}>
+                                                        <Image
+                                                            source={{ uri: item.image }}
+                                                            style={{ width: 200, height: 200, borderRadius: 10 }}
+                                                        />
+                                                    </TouchableOpacity>
+                                                )}
 
-                                        {/* Nội dung tin nhắn */}
-                                        <Text style={styles.message}>{item.content}</Text>
+                                                {item.fileUri && (
+                                                    <TouchableOpacity
+                                                        onPress={() => downloadFile(item.fileUri, item.fileName)}
+                                                        style={styles.fileContainer}
+                                                    >
+                                                        <Ionicons name="document-text-outline" size={24} color="blue" />
+                                                        <Text style={styles.fileName}>
+                                                            {item.fileName} ({(item.fileSize / 1024).toFixed(2)} KB)
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                )}
+                                            </>
+                                        )}
 
                                         {/* Hiển thị reaction và thời gian */}
                                         <View style={styles.timeReactionContainer}>
                                             <Text style={styles.time}>{formatDateTime(item.time)}</Text>
 
-                                            {Object.keys(getReactionsForMessage(item.id)).length > 0 && (
+                                            {/* {hasReactions && (
                                                 <View style={styles.reactionContainer}>
-                                                    {Object.entries(getReactionsForMessage(item.id)).map(
-                                                        ([emoji, count]) => (
-                                                            <TouchableOpacity
-                                                                key={emoji}
-                                                                onPress={() => deleteReaction(item.id, emoji)}
-                                                            >
-                                                                <Text style={styles.reactionText}>
-                                                                    {emoji} {count}
-                                                                </Text>
-                                                            </TouchableOpacity>
-                                                        ),
-                                                    )}
+                                                    {groupedReactions.map((reaction, index) => (
+                                                        <View key={index} style={styles.reactionItem}>
+                                                            <Text style={styles.reactionText}>
+                                                                {reaction.reaction} {reaction.sum}
+                                                            </Text>
+                                                        </View>
+                                                    ))}
                                                 </View>
-                                            )}
+                                            )} */}
                                         </View>
 
-                                        {/* Nút thả reaction */}
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                showReactionOptions(item.id);
-                                                setMessageId(item.id);
-                                            }}
-                                            style={{ position: 'absolute', right: 5, bottom: 9 }}
-                                        >
-                                            <FontAwesome name="smile-o" size={20} color="gray" />
-                                        </TouchableOpacity>
+                                        {hasReactions && (
+                                            <View style={styles.reactionContainer}>
+                                                {groupedReactions.map((reaction, index) => (
+                                                    <TouchableOpacity
+                                                        key={index}
+                                                        style={styles.reactionItem}
+                                                        onPress={() => handleShowReactionDetails(reaction.reaction, item.reactions, item.id)}
+                                                    >
+                                                        <Text style={styles.reactionText}>
+                                                            {reaction.reaction} {reaction.sum}
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                ))}
+                                            </View>
+                                        )}
+
+                                        {!item.destroy && (
+                                            <TouchableOpacity
+                                                onPress={() => {
+                                                    showReactionOptions(item.id);
+                                                    setMessageId(item.id);
+                                                }}
+                                                style={{ position: 'absolute', right: 2, bottom: 12 }}
+                                            >
+                                                <FontAwesome name="smile-o" size={20} color="gray" />
+                                            </TouchableOpacity>
+                                        )}
                                     </View>
                                 </TouchableOpacity>
                             );
@@ -278,9 +371,35 @@ export default function PrivateChatScreen() {
                         onSendMessage={() => handleSendMessage(message)}
                         onSendFile={() => sendFile(messages, setMessages)}
                         onSendImage={() => sendImage(messages, setMessages)}
-                        onOpenEmojiPicker={() => setReactVisible(true)}
                         onOpenVoiceRecorder={() => setModalRecordVisible(true)}
                     />
+
+                    {/* Modal reaction detail */}
+                    <Modal visible={reactionDetailsVisible} transparent={true} animationType="fade">
+                        <TouchableWithoutFeedback onPress={() => setReactionDetailsVisible(false)}>
+                            <View style={styles.modalContainer}>
+                                <View style={styles.reactionDetailsModal}>
+                                    <Text style={styles.modalTitle}>Reaction Details</Text>
+                                    {selectedReaction?.map((reaction, index) => (
+                                        <View key={index} style={styles.reactionDetailItem}>
+                                            <Image
+                                                source={{ uri: reaction.user.avatar }}
+                                                style={styles.userAvatar}
+                                            />
+                                            <Text style={styles.userName}>{reaction.user.name}</Text>
+                                            <TouchableOpacity
+                                                style={styles.removeButton}
+                                                onPress={() => handleRemoveReaction()}
+                                            >
+                                                <Text style={styles.removeButtonText}>Remove</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    ))}
+                                </View>
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </Modal>
+
                     {/* Modal ghi âm */}
                     <Modal animationType="slide" transparent={true} visible={modalRecordVisible}>
                         <View style={styles.modalRecordContainer}>
@@ -434,6 +553,12 @@ const styles = StyleSheet.create({
         lineHeight: 22,
     },
 
+    recalledMessage: {
+        fontStyle: 'italic',
+        color: '#999', // Màu xám nhạt
+        fontSize: 16,
+    },
+
     timeReactionContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -447,14 +572,80 @@ const styles = StyleSheet.create({
     },
 
     reactionContainer: {
+        flexDirection: 'row', // Hiển thị các emoji theo hàng ngang
+        alignItems: 'center',
+        marginTop: 5,
+        flexWrap: 'wrap', // Đảm bảo các emoji không bị tràn ra ngoài
+        justifyContent: 'flex-start', // Căn trái
+        maxWidth: '100%', // Giới hạn chiều rộng để không vượt quá messageContainer
+    },
+    reactionItem: {
         flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        backgroundColor: '#f0f0f0',
+        borderRadius: 15,
+        marginRight: 8,
+        marginBottom: 5,
+    },
+    reactionText: {
+        fontSize: 14,
+        color: '#666',
+        marginLeft: 5,
+    },
+
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+
+    reactionDetailsModal: {
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 10,
+        width: '80%',
         alignItems: 'center',
     },
 
-    reactionText: {
+    removeButton: {
         marginLeft: 5,
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        backgroundColor: '#FF3B30',
+        borderRadius: 5,
+    },
+
+    removeButtonText: {
+        color: 'white',
         fontSize: 14,
-        color: '#666', // Softer gray for reactions
+        fontWeight: 'bold',
+    },
+
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+
+    reactionDetailItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 5,
+    },
+
+    userAvatar: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        marginRight: 10,
+    },
+
+    userName: {
+        fontSize: 16,
+        color: '#333',
     },
 
     inputContainer: {

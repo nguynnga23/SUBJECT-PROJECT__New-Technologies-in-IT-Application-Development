@@ -6,43 +6,102 @@ import * as FileSystem from "expo-file-system";
 import { getUserIdFromToken } from "../../../../utils/auth";
 import axios from 'axios';
 import { localhost } from '../../../../utils/localhosts'
+import { socket } from '../../../../configs/socket';
 
 const API_URL = `http://${localhost}/api`;
 
 let recording = null;
 
 //Hiển thị menu khi nhấn giữ tin nhắn
-export function handleLongPressMessage(messageId, messages, setMessages, token) {
+export function handleLongPressMessage(messageId, messages, setMessages, chatId, token) {
     const message = messages.find((msg) => msg.id === messageId);
 
     if (!message) return;
 
-    let options = [
-        {
-            text: "📌 Pin", onPress: async () => {
+    let options = [];
+
+    if (message.destroy) {
+        // Nếu tin nhắn bị thu hồi, chỉ hiển thị tùy chọn "Delete"
+        options.push({
+            text: "🗑️ Delete",
+            onPress: async () => {
                 try {
-                    console.log("Pinning message:", messageId);
-                    console.log("Token:", token);
                     if (!messageId || !token) {
-                        console.error("Invalid messageId or token:", { messageId, token });
+                        console.warn("Invalid messageId or token:", { messageId, token });
                         return;
                     }
-                    const response = await pinMessage(messageId, token); // Gọi API pinMessage
-                    console.log("Message pinned:", response);
-                    Alert.alert("Success", 'pinned!'); // Hiển thị thông báo từ API
+                    const response = await deleteMessage(messageId, token);
+                    socket.emit('del_message', {
+                        chatId: chatId,
+                    });
+                    Alert.alert("Success", response.message);
                 } catch (error) {
-                    console.error("Error pinning message:", error);
-                    Alert.alert("Error", "Failed to pin the message."); // Hiển thị lỗi nếu có
+                    console.warn("Error deleting message:", error);
+                    Alert.alert("Error", "Failed to delete the message.");
                 }
             },
-        },
-        {
-            text: "🗑️ Delete", onPress: () => handleDeleteMessage(messageId, messages, setMessages),
-        }
-    ];
+        });
+    } else {
+        // Nếu tin nhắn chưa bị thu hồi, hiển thị các tùy chọn khác
+        options = [
+            {
+                text: "📌 Pin",
+                onPress: async () => {
+                    try {
+                        if (!messageId || !token) {
+                            console.error("Invalid messageId or token:", { messageId, token });
+                            return;
+                        }
+                        await pinMessage(messageId, token);
+                        Alert.alert("Success", "Pinned!");
+                    } catch (error) {
+                        console.warn("Error pinning message:", error);
+                        Alert.alert("Error", "Failed to pin the message.");
+                    }
+                },
+            },
+            {
+                text: "🗑️ Delete",
+                onPress: async () => {
+                    try {
+                        if (!messageId || !token) {
+                            console.warn("Invalid messageId or token:", { messageId, token });
+                            return;
+                        }
+                        const response = await deleteMessage(messageId, token);
+                        socket.emit('del_message', {
+                            chatId: chatId,
+                        });
+                        Alert.alert("Success", response.message);
+                    } catch (error) {
+                        console.warn("Error deleting message:", error);
+                        Alert.alert("Error", "Failed to delete the message.");
+                    }
+                },
+            },
+        ];
 
-    if (message.sender.id === getUserIdFromToken(token)) {
-        options.splice(1, 0, { text: "Recall", onPress: () => handleDeleteMessage(messageId, messages, setMessages) });
+        if (message.sender.id === getUserIdFromToken(token)) {
+            options.splice(2, 0, {
+                text: "Recall",
+                onPress: async () => {
+                    try {
+                        if (!messageId || !token) {
+                            console.warn("Invalid messageId or token:", { messageId, token });
+                            return;
+                        }
+                        const response = await destroyMessage(messageId, token);
+                        socket.emit('del_message', {
+                            chatId: chatId,
+                        });
+                        Alert.alert("Success", "Recall message success!");
+                    } catch (error) {
+                        console.warn("Error recalling message:", error);
+                        Alert.alert("Error", "Failed to recall the message.");
+                    }
+                },
+            });
+        }
     }
 
     Alert.alert("Select an action", "What do you want to do with this message?", options, { cancelable: true });
@@ -76,27 +135,48 @@ const pinMessage = async (messageId, token) => {
     }
 }
 
-export function handleDeleteMessage(messageId, messages, setMessages) {
-    setMessages(messages.filter(msg => msg.id !== messageId));  // Cập nhật state
-}
+const deleteMessage = async (messageId, token) => {
+    if (!token) {
+        console.error("Token is missing!");
+        throw new Error("Token is required to delete the message.");
+    }
+    try {
+        const response = await axios.put(`${API_URL}/messages/${messageId}`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Đảm bảo định dạng đúng
+            },
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting message:', error.response?.data || error.message);
+        throw error;
+    }
+};
+
+const destroyMessage = async (messageId, token) => {
+    if (!token) {
+        console.error("Token is missing!");
+        throw new Error("Token is required to delete the message.");
+    }
+    try {
+        const response = await axios.put(`${API_URL}/messages/${messageId}/destroy`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Đảm bảo định dạng đúng
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting message:', error.response?.data || error.message);
+        throw error;
+    }
+};
 
 //Gửi tin nhắn
 export const sendMessage = async (chatId, content, type, replyToId, fileName, fileType, fileSize, token) => {
     if (!content.trim()) throw new Error("Content is empty");
     if (!chatId) throw new Error("Chat ID is required");
     if (!token) throw new Error("Token is required");
-
-    // const newMessage = {
-    //     id: Date.now(),
-    //     sender: "@nhietpham",
-    //     name: "Nhiệt Phạm",
-    //     message: text,
-    //     time: new Date().toLocaleTimeString().slice(0, 5),
-    //     isMe: true,
-    //     replyTo: replyingMessage ? { name: replyingMessage.name, message: replyingMessage.message } : null,
-    // };
-    // setMessages([...messages, newMessage]);
-    // setReplyingMessage(null);
     try {
         const response = await axios.post(`${API_URL}/messages/${chatId}`, {
             content, type, replyToId, fileName, fileType, fileSize
@@ -278,6 +358,37 @@ export async function playAudio(uri) {
 }
 
 //reaction
-export function handleReaction(userId, emoji, messageId) {
+export const sendReaction = async (messageId, userId, reaction, token) => {
+    try {
+        const response = await axios.put(`${API_URL}/messages/${messageId}/reaction`, {
+            userId,
+            reaction,
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error sending reaction:', error.response?.data || error.message);
+        throw error;
+    }
+};
 
-}
+//remove reaction
+export const removeReaction = async (messageId, userId, token) => {
+    try {
+        const response = await axios.delete(`${API_URL}/messages/${messageId}/reaction`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            data: {
+                userId,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error removing reaction:', error.response?.data || error.message);
+        throw error;
+    }
+};
