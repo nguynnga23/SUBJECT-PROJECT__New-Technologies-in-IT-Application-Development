@@ -25,7 +25,7 @@ import ChatInputContainer from '../../components/ChatInputContainer';
 import {
     handleLongPressMessage,
     handleDeleteMessage,
-    handleSendMessage,
+    sendMessage,
     sendImage,
     sendFile,
     downloadFile,
@@ -39,6 +39,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUserIdFromToken } from '../../../../utils/auth';
 import { formatDateTime } from '../../../../utils/formatDateTime';
+import { socket } from '../../../../configs/socket';
 
 export default function PrivateChatScreen() {
     const navigation = useNavigation();
@@ -100,6 +101,23 @@ export default function PrivateChatScreen() {
         loadMessages();
     }, []);
 
+    useEffect(() => {
+        // Lắng nghe sự kiện nhận tin nhắn từ server
+        const handleReceiveMessage = ({ chatId: receivedChatId, newMessage }) => {
+            if (chatId !== receivedChatId) {
+                return; // Bỏ qua nếu tin nhắn không thuộc chat hiện tại
+            }
+            // loadMessages();
+            setMessages((prevMessages) => [...prevMessages, newMessage]); // Cập nhật danh sách tin nhắn
+        };
+
+        socket.on('receive_message', handleReceiveMessage);
+
+        return () => {
+            socket.off('receive_message', handleReceiveMessage); // Hủy lắng nghe khi component unmount
+        };
+    }, [chatId]);
+
     useFocusEffect(
         useCallback(() => {
             loadMessages();
@@ -124,9 +142,22 @@ export default function PrivateChatScreen() {
         return {};
     };
 
-    const sendMessage = (text) => {
-
+    const handleSendMessage = async (content) => {
         Keyboard.dismiss();
+        try {
+            const response = await sendMessage(chatId, content, 'text', null, null, null, null, token);
+            console.log('Message sent:', response);
+
+            socket.emit('send_message', {
+                chatId: chatId,
+                newMessage: response,
+            });
+            // loadMessages();
+            // setMessages((prevMessages) => [...prevMessages, response]);
+        } catch (error) {
+            console.warn('Error sending message:', error);
+            Alert.alert('Error', 'Failed to send message.');
+        }
     };
 
     const deleteMessage = (messageId) => {
@@ -244,7 +275,7 @@ export default function PrivateChatScreen() {
                     <ChatInputContainer
                         message={message}
                         setMessage={setMessage}
-                        onSendMessage={sendMessage}
+                        onSendMessage={() => handleSendMessage(message)}
                         onSendFile={() => sendFile(messages, setMessages)}
                         onSendImage={() => sendImage(messages, setMessages)}
                         onOpenEmojiPicker={() => setReactVisible(true)}

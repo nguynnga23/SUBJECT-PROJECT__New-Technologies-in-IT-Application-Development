@@ -81,20 +81,37 @@ export function handleDeleteMessage(messageId, messages, setMessages) {
 }
 
 //Gửi tin nhắn
-export function handleSendMessage(text, messages, setMessages, replyingMessage, setReplyingMessage) {
-    if (!text.trim()) return;
-    const newMessage = {
-        id: Date.now(),
-        sender: "@nhietpham",
-        name: "Nhiệt Phạm",
-        message: text,
-        time: new Date().toLocaleTimeString().slice(0, 5),
-        isMe: true,
-        replyTo: replyingMessage ? { name: replyingMessage.name, message: replyingMessage.message } : null,
-    };
-    setMessages([...messages, newMessage]);
-    setReplyingMessage(null);
-}
+export const sendMessage = async (chatId, content, type, replyToId, fileName, fileType, fileSize, token) => {
+    if (!content.trim()) throw new Error("Content is empty");
+    if (!chatId) throw new Error("Chat ID is required");
+    if (!token) throw new Error("Token is required");
+
+    // const newMessage = {
+    //     id: Date.now(),
+    //     sender: "@nhietpham",
+    //     name: "Nhiệt Phạm",
+    //     message: text,
+    //     time: new Date().toLocaleTimeString().slice(0, 5),
+    //     isMe: true,
+    //     replyTo: replyingMessage ? { name: replyingMessage.name, message: replyingMessage.message } : null,
+    // };
+    // setMessages([...messages, newMessage]);
+    // setReplyingMessage(null);
+    try {
+        const response = await axios.post(`${API_URL}/messages/${chatId}`, {
+            content, type, replyToId, fileName, fileType, fileSize
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Gửi token trong header
+            },
+        });
+        return response.data;
+    }
+    catch (error) {
+        console.error('Error sending message:', error.response?.data || error.message);
+        throw error;
+    }
+};
 
 //Gửi ảnh
 export async function sendImage(messages, setMessages) {
