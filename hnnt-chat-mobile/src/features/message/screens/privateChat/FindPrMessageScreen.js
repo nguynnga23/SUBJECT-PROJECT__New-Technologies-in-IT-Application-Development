@@ -1,43 +1,31 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-
-const mockServerMessages = [
-    { id: 201, sender: 'me', message: 'Chào Nga!', time: '18:55' },
-    { id: 202, sender: 'Nga Nguyễn', message: 'Chào bạn!', time: '18:56' },
-    { id: 203, sender: 'me', message: 'Bạn đã hoàn thành task chưa?', time: '18:57' },
-    { id: 204, sender: 'Nga Nguyễn', message: 'Tôi đang làm, sắp xong rồi!', time: '19:00' },
-];
-
-// Giả lập server trả về kết quả dựa trên từ khóa tìm kiếm
-const fetchMessagesFromServer = (query) => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            if (query.trim() === '') {
-                resolve([]); // Nếu không nhập gì thì không trả về gì
-            } else {
-                const filtered = mockServerMessages.filter((msg) =>
-                    msg.message.toLowerCase().includes(query.toLowerCase()),
-                );
-                resolve(filtered);
-            }
-        }, 500); // Mô phỏng độ trễ server (500ms)
-    });
-};
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { searchMessage } from '../../services/privateChat/PrivateChatInfoService';
 
 export default function FindPrMessagesScreen() {
     const navigation = useNavigation();
+    const route = useRoute();
+    const { chatId } = route.params || 'null';
     const [searchQuery, setSearchQuery] = useState('');
     const [filteredMessages, setFilteredMessages] = useState([]);
-    const [loading, setLoading] = useState(false); // Trạng thái tải dữ liệu
+    const [loading, setLoading] = useState(false);
 
     const handleSearch = async () => {
         setLoading(true);
-        const results = await fetchMessagesFromServer(searchQuery);
-        setFilteredMessages(results);
-        setLoading(false);
+        const token = await AsyncStorage.getItem('token');
+        try {
+            const results = await searchMessage(chatId, token, searchQuery);
+            console.log('Search results:', results);
+            setFilteredMessages(results.messages); // Lấy danh sách tin nhắn từ `messages`
+        } catch (error) {
+            console.error('Error searching messages:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -68,12 +56,22 @@ export default function FindPrMessagesScreen() {
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
                             <TouchableOpacity style={styles.messageItem}>
-                                <Text style={styles.sender}>{item.sender}</Text>
-                                <Text style={styles.messageText}>{item.message}</Text>
+                                <Image source={{ uri: item.sender.avatar }} style={styles.avatar} />
+                                <View style={styles.messageContent}>
+                                    <Text style={styles.senderName}>{item.sender.name}</Text>
+                                    <Text style={styles.messageText}>{item.content}</Text>
+                                    <Text style={styles.messageTime}>
+                                        {new Date(item.time).toLocaleString()}
+                                    </Text>
+                                </View>
                             </TouchableOpacity>
                         )}
                     />
-                ) : null}
+                ) : (
+                    <View style={styles.noResults}>
+                        <Text style={styles.noResultsText}>No messages found.</Text>
+                    </View>
+                )}
             </SafeAreaProvider>
         </View>
     );
@@ -84,16 +82,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: 'white',
         padding: 10,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingBottom: 10,
-    },
-    headerText: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginLeft: 10,
     },
     searchBar: {
         flexDirection: 'row',
@@ -121,16 +109,31 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     messageItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
         padding: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
     },
-    sender: {
+    avatar: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        marginRight: 10,
+    },
+    messageContent: {
+        flex: 1,
+    },
+    senderName: {
         fontWeight: 'bold',
         color: '#007AFF',
     },
     messageText: {
         color: '#333',
+    },
+    messageTime: {
+        fontSize: 12,
+        color: 'gray',
     },
     loadingContainer: {
         flex: 1,

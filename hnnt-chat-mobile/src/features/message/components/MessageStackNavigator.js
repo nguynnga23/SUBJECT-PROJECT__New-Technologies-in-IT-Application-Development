@@ -31,7 +31,7 @@ export default function MessageStackNavigator() {
                             chatId={route.params?.chatId}
                             actions={[
                                 { icon: 'video', onPress: () => navigation.navigate('GroupCallScreen') },
-                                { icon: 'search', onPress: () => navigation.navigate('GroupCallScreen') },
+                                { icon: 'search', onPress: () => navigation.navigate('FindGrMessagesScreen') },
 
                                 {
                                     icon: 'info',
