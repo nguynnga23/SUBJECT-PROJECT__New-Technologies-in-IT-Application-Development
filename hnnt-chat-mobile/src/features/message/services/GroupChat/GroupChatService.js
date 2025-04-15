@@ -4,6 +4,7 @@ import { Audio } from "expo-av";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system";
 import axios from 'axios';
+import { getUserIdFromToken } from "../../../../utils/auth";
 import { localhost } from '../../../../utils/localhosts'
 
 const API_URL = `http://${localhost}/api`;
@@ -69,10 +70,13 @@ export function handleLongPressMessage(messageId, messages, setMessages, setRepl
                 setModalVisible(true); // Chỉ bật modal khi chọn Answer
             }
         },
+        {
+            text: "🗑️ Delete", onPress: () => handleDeleteMessage(messageId, messages, setMessages),
+        }
     ];
 
-    if (message.isMe) {
-        options.splice(1, 0, { text: "🗑️ Delete", onPress: () => handleDeleteMessage(messageId, messages, setMessages) });
+    if (message.sender.id === getUserIdFromToken(token)) {
+        options.splice(1, 0, { text: "Recall", onPress: () => handleDeleteMessage(messageId, messages, setMessages) });
     }
 
     Alert.alert("Select an action", "What do you want to do with this message?", options, { cancelable: true });

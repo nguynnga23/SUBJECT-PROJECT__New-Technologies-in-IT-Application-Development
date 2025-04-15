@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     View,
     Text,
@@ -12,8 +12,9 @@ import {
     Keyboard,
     KeyboardAvoidingView,
     Platform,
+    Alert
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
@@ -32,44 +33,25 @@ import {
     stopRecording,
     sendVoiceMessage,
     playAudio,
-    handleReaction,
+    fetchMessages
 } from '../../services/privateChat/PrivateChatService';
 
-const chatData = {
-    recipient_name: 'Nga Nguyễn',
-    messages: [
-        { id: 201, sender: '@nhietpham', name: 'Nhiệt Phạm', message: 'Chào Nga!', time: '18:55', isMe: true },
-        { id: 202, sender: '@nganguyen', name: 'Nga Nguyễn', message: 'Chào bạn!', time: '18:56' },
-        {
-            id: 203,
-            sender: '@nhietpham',
-            name: 'Nhiệt Phạm',
-            message: 'Bạn đã hoàn thành task chưa?',
-            time: '18:57',
-            isMe: true,
-        },
-        { id: 204, sender: '@nganguten', name: 'Nga Nguyễn', message: 'Tôi đang làm, sắp xong rồi!', time: '19:00' },
-        { id: 205, sender: '@nhietpham', name: 'Nhiệt Phạm', message: 'Chào Nga!', time: '19:55', isMe: true },
-        { id: 206, sender: '@nganguyen', name: 'Nga Nguyễn', message: 'Chào bạn!', time: '20:56' },
-        {
-            id: 207,
-            sender: '@nhietpham',
-            name: 'Nhiệt Phạm',
-            message: 'Bạn đã hoàn thành task chưa?',
-            time: '21:57',
-            isMe: true,
-        },
-        { id: 208, sender: '@nganguten', name: 'Nga Nguyễn', message: 'Tôi đang làm, sắp xong rồi!', time: '22:00' },
-    ],
-    reaction: [{ id: 1, reaction: '❤️', messageId: 204, userId: '@nhietpham', sum: 1 }],
-};
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getUserIdFromToken } from '../../../../utils/auth';
+import { formatDateTime } from '../../../../utils/formatDateTime';
 
 export default function PrivateChatScreen() {
     const navigation = useNavigation();
     const route = useRoute();
+    const { chatId, chatName } = route.params;
+    const [currentUserId, setCurrentUserId] = useState(null);
+    const [token, setToken] = useState(null);
+
     const [message, setMessage] = useState('');
-    const [messages, setMessages] = useState(chatData.messages);
-    const [replyingMessage, setReplyingMessage] = useState(null);
+    const [messages, setMessages] = useState([]);
+    const [messageId, setMessageId] = useState(null);
+    const [loading, setLoading] = useState(true);
+
     const [modalVisible, setModalVisible] = useState(false);
     const [modalRecordVisible, setModalRecordVisible] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
@@ -79,8 +61,6 @@ export default function PrivateChatScreen() {
     const [selectedMessage, setSelectedMessage] = useState(null);
     const reactionsList = ['❤️', '😂', '👍', '😮', '😢'];
     const [reactVisible, setReactVisible] = useState(false);
-    const [messageId, setMessageId] = useState(null);
-    const { chatId, chatName } = route.params; // Lấy chatId và chatName từ route params
 
     useEffect(() => {
         const parentNav = navigation.getParent();
@@ -94,17 +74,58 @@ export default function PrivateChatScreen() {
         };
     }, [navigation]);
 
+    const loadMessages = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token'); // Lấy token từ AsyncStorage
+            setToken(token); // Lưu token vào state
+
+            if (!token) {
+                Alert.alert('Error', 'You are not logged in!');
+                return;
+            }
+
+            const userId = getUserIdFromToken(token);
+            setCurrentUserId(userId);
+
+            const data = await fetchMessages(chatId, token); // Gọi API để lấy danh sách tin nhắn
+            setMessages(data);
+        } catch (error) {
+            Alert.alert('Error', 'Failed to fetch messages.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadMessages();
+    }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            loadMessages();
+        }, []),
+    );
+
+    if (loading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <Text>Loading messages...</Text>
+            </View>
+        );
+    }
+
     const getReactionsForMessage = (messageId) => {
-        return chatData.reaction
-            .filter((reaction) => reaction.messageId.toString() === messageId.toString())
-            .reduce((acc, curr) => {
-                acc[curr.reaction] = (acc[curr.reaction] || 0) + curr.sum;
-                return acc;
-            }, {});
+        // return chatData.reaction
+        //     .filter((reaction) => reaction.messageId.toString() === messageId.toString())
+        //     .reduce((acc, curr) => {
+        //         acc[curr.reaction] = (acc[curr.reaction] || 0) + curr.sum;
+        //         return acc;
+        //     }, {});
+        return {};
     };
 
     const sendMessage = (text) => {
-        handleSendMessage(text, messages, setMessages, replyingMessage, setReplyingMessage);
+
         Keyboard.dismiss();
     };
 
@@ -137,17 +158,19 @@ export default function PrivateChatScreen() {
                                             item.id,
                                             messages,
                                             setMessages,
-                                            setReplyingMessage,
-                                            setModalVisible,
+                                            token
                                         )
                                     }
                                 >
                                     <View
                                         style={[
                                             styles.messageContainer,
-                                            item.isMe ? styles.myMessage : styles.otherMessage,
+                                            item.senderId === currentUserId ? styles.myMessage : styles.otherMessage,
                                         ]}
                                     >
+
+                                        <Text style={styles.sender}>{item.sender.name}</Text>
+
                                         {item.audioUri && (
                                             <TouchableOpacity
                                                 onPress={() => playAudio(item.audioUri)}
@@ -179,14 +202,13 @@ export default function PrivateChatScreen() {
                                         )}
 
                                         {/* Nội dung tin nhắn */}
-                                        <Text style={styles.message}>{item.message}</Text>
+                                        <Text style={styles.message}>{item.content}</Text>
 
                                         {/* Hiển thị reaction và thời gian */}
                                         <View style={styles.timeReactionContainer}>
-                                            <Text style={styles.time}>{item.time}</Text>
+                                            <Text style={styles.time}>{formatDateTime(item.time)}</Text>
 
-                                            {/* Hiển thị reaction nếu có */}
-                                            {hasReaction && (
+                                            {Object.keys(getReactionsForMessage(item.id)).length > 0 && (
                                                 <View style={styles.reactionContainer}>
                                                     {Object.entries(getReactionsForMessage(item.id)).map(
                                                         ([emoji, count]) => (
@@ -205,17 +227,15 @@ export default function PrivateChatScreen() {
                                         </View>
 
                                         {/* Nút thả reaction */}
-                                        {!hasReaction && (
-                                            <TouchableOpacity
-                                                onPress={() => {
-                                                    showReactionOptions(item.id);
-                                                    setMessageId(item.id);
-                                                }}
-                                                style={{ position: 'absolute', right: 5, bottom: 10 }}
-                                            >
-                                                <FontAwesome name="smile-o" size={20} color="gray" />
-                                            </TouchableOpacity>
-                                        )}
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                showReactionOptions(item.id);
+                                                setMessageId(item.id);
+                                            }}
+                                            style={{ position: 'absolute', right: 5, bottom: 9 }}
+                                        >
+                                            <FontAwesome name="smile-o" size={20} color="gray" />
+                                        </TouchableOpacity>
                                     </View>
                                 </TouchableOpacity>
                             );
@@ -370,6 +390,11 @@ const styles = StyleSheet.create({
         backgroundColor: '#ffffff', // White for received messages
         alignSelf: 'flex-start',
         marginLeft: 10,
+    },
+
+    sender: {
+        fontWeight: 'bold',
+        color: '#007AFF',
     },
 
     message: {

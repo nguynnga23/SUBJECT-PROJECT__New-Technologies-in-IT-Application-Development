@@ -3,28 +3,77 @@ import * as ImagePicker from "expo-image-picker";
 import { Audio } from "expo-av";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system";
+import { getUserIdFromToken } from "../../../../utils/auth";
+import axios from 'axios';
+import { localhost } from '../../../../utils/localhosts'
+
+const API_URL = `http://${localhost}/api`;
 
 let recording = null;
 
 //Hiển thị menu khi nhấn giữ tin nhắn
-export function handleLongPressMessage(messageId, messages, setMessages, setReplyingMessage, setModalVisible) {
+export function handleLongPressMessage(messageId, messages, setMessages, token) {
     const message = messages.find((msg) => msg.id === messageId);
 
     if (!message) return;
 
     let options = [
-        { text: "📌 Pin", onPress: () => pinMessage(messageId) },
+        {
+            text: "📌 Pin", onPress: async () => {
+                try {
+                    console.log("Pinning message:", messageId);
+                    console.log("Token:", token);
+                    if (!messageId || !token) {
+                        console.error("Invalid messageId or token:", { messageId, token });
+                        return;
+                    }
+                    const response = await pinMessage(messageId, token); // Gọi API pinMessage
+                    console.log("Message pinned:", response);
+                    Alert.alert("Success", 'pinned!'); // Hiển thị thông báo từ API
+                } catch (error) {
+                    console.error("Error pinning message:", error);
+                    Alert.alert("Error", "Failed to pin the message."); // Hiển thị lỗi nếu có
+                }
+            },
+        },
+        {
+            text: "🗑️ Delete", onPress: () => handleDeleteMessage(messageId, messages, setMessages),
+        }
     ];
 
-    if (message.isMe) {
-        options.splice(1, 0, { text: "🗑️ Delete", onPress: () => handleDeleteMessage(messageId, messages, setMessages) });
+    if (message.sender.id === getUserIdFromToken(token)) {
+        options.splice(1, 0, { text: "Recall", onPress: () => handleDeleteMessage(messageId, messages, setMessages) });
     }
 
     Alert.alert("Select an action", "What do you want to do with this message?", options, { cancelable: true });
 }
 
-function pinMessage(messageId) {
-    console.log("Ghim tin nhắn ID:", messageId);
+export const fetchMessages = async (chatId, token) => {
+    try {
+        const response = await axios.get(`${API_URL}/messages/${chatId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Gửi token trong header
+            },
+        });
+        return response.data; // Trả về danh sách tin nhắn
+    } catch (error) {
+        console.error('Error fetching messages:', error.response?.data || error.message);
+        throw error;
+    }
+};
+
+const pinMessage = async (messageId, token) => {
+    try {
+        const response = await axios.put(`${API_URL}/groups/message/${messageId}/pin`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Gửi token trong header
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching messages:', error.response?.data || error.message);
+        throw error;
+    }
 }
 
 export function handleDeleteMessage(messageId, messages, setMessages) {
