@@ -48,9 +48,18 @@ export default function PrivateChatInfoScreen() {
             const chatInfo = await fetchChat(chatId, token); // Replace with actual token
             setNewGroupName(chatInfo.name);
             setAvatar(chatInfo.avatar);
-            const userId = getUserIdFromToken(token);
-            setUserId(userId);
-            setReceiverId(chatInfo.participants.find((member) => member.id !== userId).id);
+
+            const uid = getUserIdFromToken(token);
+            setUserId(uid);
+            const participant = chatInfo.participants.find((member) => member.accountId === uid);
+            if (participant) {
+                setIsMuted(participant.notify);
+            } else {
+                console.warn('User ID not found in participants list');
+            }
+
+            setReceiverId(chatInfo.participants.find((member) => member.accountId !== uid).accountId);
+
             try {
                 const pin_Mess = await getPinMess(chatId, token);
                 setPinMess(pin_Mess);
