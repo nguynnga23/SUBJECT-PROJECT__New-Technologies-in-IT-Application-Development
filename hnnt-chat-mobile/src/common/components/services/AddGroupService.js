@@ -4,7 +4,7 @@ import { localhost } from '../../../utils/localhosts';
 const API_URL = `http://${localhost}/api`;
 
 // Hàm tạo nhóm
-export const createGroup = async (name, avatar, chatParticipants, token) => {
+export const createGroup = async (name, avatar, chatPartiocipants, token) => {
     try {
         const response = await axios.post(
             `${API_URL}/groups/create`,
@@ -17,7 +17,7 @@ export const createGroup = async (name, avatar, chatParticipants, token) => {
                 headers: {
                     Authorization: `Bearer ${token}`, // Gửi token trong header
                 },
-            }
+            },
         );
         return response.data; // Trả về dữ liệu từ API
     } catch (error) {

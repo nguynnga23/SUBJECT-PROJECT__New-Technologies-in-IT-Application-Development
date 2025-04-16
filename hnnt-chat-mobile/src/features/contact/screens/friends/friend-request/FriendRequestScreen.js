@@ -23,6 +23,8 @@ const TabButton = ({ title, isActive, onPress }) => (
 
 // Friend Request Item Component
 const FriendRequestItem = ({ item, isSentTab }) => {
+    const navigation = useNavigation(); // Add navigation hook
+
     const handleDecline = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
@@ -41,8 +43,11 @@ const FriendRequestItem = ({ item, isSentTab }) => {
     const handleAccept = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
-            await friendService.acceptFriendRequest(item.requestId, token); // Call accept API
+            const response = await friendService.acceptFriendRequest(item.requestId, token); // Call accept API
             alert('Friend request accepted!');
+
+            // Navigate to MessageScreen with chatId and chatName
+            navigation.navigate('MessageScreen', { chatId: response.chatId, chatName: item.name });
         } catch (error) {
             console.error('Error accepting friend request:', error);
         }
