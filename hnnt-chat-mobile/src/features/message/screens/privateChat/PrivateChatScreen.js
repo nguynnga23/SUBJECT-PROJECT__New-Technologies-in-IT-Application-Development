@@ -266,29 +266,11 @@ export default function PrivateChatScreen() {
         }
     };
 
-    const handleSendVoiceMessage = async () => {
+    const handleSendVoiceMessage = async (uri) => {
         try {
-            if (recordingUri) {
-                const response = await sendMessage(
-                    chatId,
-                    '[Voice Message]',
-                    'audio',
-                    null,
-                    recordingUri,
-                    null,
-                    null,
-                    token,
-                );
-                // Ensure the audioUri is included in the message object
-                response.audioUri = recordingUri;
-
-                socket.emit('send_message', {
-                    chatId: chatId,
-                    newMessage: response,
-                });
-                setRecordingUri(null); // Clear the recording URI after sending
-                setModalRecordVisible(false); // Close the modal
-            }
+            const response = await sendMessage(chatId, '[Voice Message]', 'audio', null, uri, null, null, token);
+            response.audioUri = uri;
+            socket.emit('send_message', { chatId: chatId, newMessage: response });
         } catch (error) {
             console.warn('Error sending voice message:', error);
             Alert.alert('Error', 'Failed to send voice message.');
@@ -453,7 +435,7 @@ export default function PrivateChatScreen() {
                         onSendMessage={() => handleSendMessage(message)}
                         onSendFile={() => prepareFile(chatId, token)}
                         onSendImage={() => prepareImage(chatId, token)}
-                        onOpenVoiceRecorder={() => setModalRecordVisible(true)}
+                        onSendVoiceMessage={handleSendVoiceMessage}
                     />
 
                     {/* Modal ghi âm */}
