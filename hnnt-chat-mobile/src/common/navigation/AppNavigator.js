@@ -26,6 +26,7 @@ import LoggedInDevice from '../../features/profile/screens/account-and-security/
 import CameraScreen from '../components/CameraScreen';
 import UserProfile from '../../features/profile/screens/profile/UserProfile';
 import FriendProfileScreen from '../screens/FriendProfileScreen';
+import MessageStackNavigator from '../../features/message/components/MessageStackNavigator';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -89,6 +90,11 @@ export default function AppNavigator() {
 
                 <Stack.Screen name="CameraScreen" component={CameraScreen} options={{ headerShown: false }} />
                 <Stack.Screen name="ComfirmLoginQR" component={ComfirmLoginQR} options={{ headerShown: false }} />
+                <Stack.Screen
+                    name="MessageStackNavigator"
+                    component={MessageStackNavigator}
+                    options={{ headerShown: false }}
+                />
             </Stack.Navigator>
         </NavigationContainer>
     );

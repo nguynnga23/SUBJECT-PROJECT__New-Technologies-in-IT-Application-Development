@@ -163,8 +163,8 @@ export default function ListFriendsScreen() {
     };
 
     const handleMessage = () => {
-        // Logic for messaging the selected friend
         alert(`Messaging ${selectedFriend.name}`);
+        navigation.navigate('MessageStackNavigator', { screen: 'PrivateChatScreen' });
         setModalVisible(false);
     };
 

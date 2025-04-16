@@ -18,7 +18,6 @@ export default function MessageStackNavigator() {
     return (
         <MessageStack.Navigator screenOptions={{ headerShown: false }}>
             <MessageStack.Screen name="MessageScreen" component={MessageScreen} />
-
             <MessageStack.Screen
                 name="GroupChatScreen"
                 component={GroupChatScreen}
