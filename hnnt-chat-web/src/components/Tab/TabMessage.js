@@ -119,12 +119,6 @@ function TabMessage() {
         };
     }, [activeChat?.id]);
 
-    useEffect(() => {
-        if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-        }
-    }, [data]);
-
     const MessageComponent = {
         text: ChatText,
         gif: ChatGif,

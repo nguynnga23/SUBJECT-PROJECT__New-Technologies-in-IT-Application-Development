@@ -12,7 +12,7 @@ import {
     Keyboard,
     KeyboardAvoidingView,
     Platform,
-    Alert
+    Alert,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -207,7 +207,7 @@ export default function PrivateChatScreen() {
                 const userId = getUserIdFromToken(token);
                 const response = await sendReaction(selectedMessage, userId, emoji, token);
                 socket.emit('reaction_message', {
-                    chatId: chatId
+                    chatId: chatId,
                 });
                 setReactVisible(false);
             } catch (error) {
@@ -296,7 +296,9 @@ export default function PrivateChatScreen() {
                                             <>
                                                 {item.replyToId !== null && (
                                                     <View style={styles.replyBox}>
-                                                        <Text style={styles.replyUser}>Replying to {item.replyTo.sender.name}</Text>
+                                                        <Text style={styles.replyUser}>
+                                                            Replying to {item.replyTo.sender.name}
+                                                        </Text>
                                                         <Text style={styles.replyMessage}>{item.replyTo.content}</Text>
                                                     </View>
                                                 )}
@@ -362,7 +364,13 @@ export default function PrivateChatScreen() {
                                                     <TouchableOpacity
                                                         key={index}
                                                         style={styles.reactionItem}
-                                                        onPress={() => handleShowReactionDetails(reaction.reaction, item.reactions, item.id)}
+                                                        onPress={() =>
+                                                            handleShowReactionDetails(
+                                                                reaction.reaction,
+                                                                item.reactions,
+                                                                item.id,
+                                                            )
+                                                        }
                                                     >
                                                         <Text style={styles.reactionText}>
                                                             {reaction.reaction} {reaction.sum}
@@ -559,10 +567,7 @@ export default function PrivateChatScreen() {
                                     <Text style={styles.modalTitle}>Reaction Details</Text>
                                     {selectedReaction?.map((reaction, index) => (
                                         <View key={index} style={styles.reactionDetailItem}>
-                                            <Image
-                                                source={{ uri: reaction.user.avatar }}
-                                                style={styles.userAvatar}
-                                            />
+                                            <Image source={{ uri: reaction.user.avatar }} style={styles.userAvatar} />
                                             <Text style={styles.userName}>{reaction.user.name}</Text>
 
                                             {reaction.user.id === currentUserId && (
@@ -612,7 +617,6 @@ export default function PrivateChatScreen() {
                             </View>
                         </TouchableWithoutFeedback>
                     </Modal>
-
                 </SafeAreaProvider>
             </View>
         </KeyboardAvoidingView>
