@@ -186,7 +186,7 @@ export default function GroupInfoScreen() {
 
                     {/* Actions */}
                     <View style={styles.actions}>
-                        <TouchableOpacity onPress={() => navigation.navigate('FindGrMessagesScreen')}>
+                        <TouchableOpacity onPress={() => navigation.navigate('FindGrMessagesScreen', { chatId })}>
                             <ActionButton icon="search" label="Search messages" />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => navigation.navigate('FindGrMessagesScreen')}>

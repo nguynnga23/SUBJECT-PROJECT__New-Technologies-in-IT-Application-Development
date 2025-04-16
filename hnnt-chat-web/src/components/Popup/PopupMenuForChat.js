@@ -3,6 +3,7 @@ import { MdContentCopy, MdPushPin, MdDelete } from 'react-icons/md';
 import { IoReload } from 'react-icons/io5';
 import { useSelector } from 'react-redux';
 import { deleteMessage, destroyMessage, pinOfMessage } from '../../screens/Messaging/api';
+import { socket } from '../../configs/socket';
 
 function PopupMenuForChat({ setIsPopupOpen, position, message }) {
     const popupRef = useRef(null);
@@ -28,7 +29,11 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
     };
 
     const handlePinMessages = (messageId) => {
-        pinOfMessage(messageId);
+        const pinMess = pinOfMessage(messageId);
+        if (!pinMess) return;
+        // socket.emit('pin_message', {
+        //     chatId: chat.id,
+        // });
     };
 
     useEffect(() => {

@@ -13,17 +13,17 @@ export default function ChatInputContainer({
 }) {
     return (
         <View style={styles.inputContainer}>
-            <TouchableOpacity onPress={onOpenEmojiPicker} style={styles.iconButton}>
+            {/* <TouchableOpacity onPress={onOpenEmojiPicker} style={styles.iconButton}>
                 <Ionicons name="happy-outline" size={24} color="gray" />
+            </TouchableOpacity> */}
+            <TouchableOpacity onPress={onSendImage} style={styles.iconButton}>
+                <Ionicons name="image-outline" size={24} color="gray" />
             </TouchableOpacity>
             <TextInput style={styles.input} placeholder="Message" value={message} onChangeText={setMessage} />
             {!message && (
                 <>
                     <TouchableOpacity onPress={onSendFile} style={styles.iconButton}>
                         <Ionicons name="document-outline" size={24} color="gray" />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={onSendImage} style={styles.iconButton}>
-                        <Ionicons name="image-outline" size={24} color="gray" />
                     </TouchableOpacity>
                 </>
             )}

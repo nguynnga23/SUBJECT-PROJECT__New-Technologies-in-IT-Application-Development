@@ -155,13 +155,12 @@ const chatSlice = createSlice({
         },
 
         addReaction: (state, action) => {
-            const { chatId, messageId, reaction, userId } = action.payload;
+            const { messageId, reaction, userId } = action.payload;
             const userActive = state.userActive;
 
-            const chat = state.data.find((chat) => chat.id === chatId);
-            if (!chat) return;
+            const message = state.activeChat.messages.find((mess) => mess.id === messageId);
+            console.log(state.activeChat);
 
-            const message = chat.messages.find((mess) => mess.id === messageId);
             if (!message) return;
 
             const existingUserReaction = message.reactions.find((r) => r.id === userId && r.reaction === reaction);

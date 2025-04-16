@@ -48,6 +48,6 @@ app.use('/api/contacts', contactRouter);
 app.use('/api/groups', groupChatManageRouter);
 app.use('/api/loggedin-devices', loggedInDeviceRouter);
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server đang chạy trên cổng ${PORT}`);
 });

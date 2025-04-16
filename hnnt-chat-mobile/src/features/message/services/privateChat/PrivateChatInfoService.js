@@ -1,3 +1,84 @@
+import { Alert } from 'react-native';
+import axios from 'axios';
+import { localhost } from '../../../../utils/localhosts'
+
+const API_URL = `http://${localhost}/api`;
+
+export const fetchChat = async (chatId, token) => {
+    try {
+        const response = await axios.get(`${API_URL}/chats/${chatId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.warn('Error fetching chat info:', error.response?.data || error.message);
+        throw error;
+    }
+};
+
+export const getPinMess = async (chatId, token) => {
+    try {
+        const response = await axios.get(`${API_URL}/groups/message/${chatId}/show-pin`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.warn('Error fetching:', error.response?.data || error.message);
+        throw error;
+    }
+};
+
+export const unPinMess = async (messageId, token) => {
+    try {
+        const response = await axios.put(`${API_URL}/groups/message/${messageId}/un-pin`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.warn('Error fetching:', error.response?.data || error.message);
+        throw error;
+    }
+};
+
+export const deleteAllMessage = async (chatId, token) => {
+    try {
+        const response = await axios.put(`${API_URL}/chats/${chatId}/all-delete`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.warn('Error fetching:', error.response?.data || error.message);
+        throw error;
+    }
+}
+
+export const blockUser = async (senderID, receiverID, token) => {
+    try {
+        const response = await axios.post(`${API_URL}/friends/user/block`,
+            {
+                senderId: senderID,
+                receiverId: receiverID
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+        return response.data;
+    } catch (error) {
+        console.warn('Error fetching:', error.response?.data || error.message);
+        throw error;
+    }
+}
+
 export const handleReport = (reportReason, setReportVisible) => {
     if (!reportReason) return;
     console.log("Report reason:", reportReason);
@@ -13,6 +94,38 @@ export const handleBlock = (setBlockVisible, navigation) => {
     });
 };
 
-export const toggleMute = (isMuted, setIsMuted) => {
-    setIsMuted(!isMuted);
+export const toggleMute = async (chatId, token) => {
+    try {
+        const response = await axios.put(
+            `${API_URL}/groups/mute`,
+            { chatId }, // Body request
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.warn('Error fetching:', error.response?.data || error.message);
+        throw error;
+    }
+};
+
+export const searchMessage = async (chatId, token, keyword) => {
+    try {
+        const response = await axios.get(
+            `${API_URL}/messages/search/${chatId}/?keyword=${keyword}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.warn('Error fetching:', error.response?.data || error.message);
+        throw error;
+    }
 };

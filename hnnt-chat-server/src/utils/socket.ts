@@ -30,6 +30,10 @@ export const initSocket = (server: HttpServer) => {
         //     io.emit('receive_read_chat', { chatId, userId });
         // });
 
+        socket.on('del_message', ({ chatId }) => {
+            io.emit('render_message', { chatId });
+        });
+
         socket.on('disconnect', () => {
             console.log(`❌ Client disconnected: ${socket.id}`);
         });

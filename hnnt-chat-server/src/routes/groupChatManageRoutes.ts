@@ -21,7 +21,7 @@ router.post('/:groupId/add', authenticate, addMemberToGroup);
 router.put('/message/:messageId/pin', authenticate, pinMessage);
 router.put('/message/:messageId/un-pin', authenticate, unPinMessage);
 router.get('/message/:chatId/show-pin', authenticate, getPinnedMessage);
-router.put('/mute', authenticate , muteGroup);
+router.put('/mute', authenticate, muteGroup);
 router.put('/role', authenticate, changeGroupRole);
 router.delete('/:groupId/leave', authenticate, leaveGroup);
 router.delete('/:groupId/disband', authenticate, disbandGroup);
