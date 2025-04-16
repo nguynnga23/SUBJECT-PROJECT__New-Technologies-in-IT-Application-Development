@@ -69,7 +69,10 @@ export default function Groups() {
     }, []);
 
     const handlePress = (item) => {
-        navigation.navigate('GroupChatScreen', { chatId: item.id, chatName: item.name });
+        navigation.navigate('MessageStackNavigator', {
+            screen: 'GroupChatScreen',
+            params: { chatId: item.id, chatName: item.name },
+        });
     };
 
     const handleSort = (criteria) => {
