@@ -8,7 +8,7 @@ export default function ChatInputContainer({
     onSendMessage,
     onSendFile,
     onSendImage,
-    onOpenEmojiPicker,
+    // onOpenEmojiPicker,
     onOpenVoiceRecorder,
 }) {
     return (

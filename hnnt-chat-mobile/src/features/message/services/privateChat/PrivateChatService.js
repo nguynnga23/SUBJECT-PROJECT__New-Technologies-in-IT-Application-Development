@@ -3,7 +3,9 @@ import * as ImagePicker from "expo-image-picker";
 import { Audio } from "expo-av";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system";
+import * as MediaLibrary from 'expo-media-library';
 import { getUserIdFromToken } from "../../../../utils/auth";
+import { getCurrentTimeString } from "../../../../utils/dateNow";
 import axios from 'axios';
 import { localhost } from '../../../../utils/localhosts'
 import { socket } from '../../../../configs/socket';
@@ -13,7 +15,7 @@ const API_URL = `http://${localhost}/api`;
 let recording = null;
 
 //Hiển thị menu khi nhấn giữ tin nhắn
-export function handleLongPressMessage(messageId, messages, setMessages, chatId, token) {
+export function handleLongPressMessage(messageId, messages, setMessages, chatId, token, setReplyMessage, setModalReplyVisible) {
     const message = messages.find((msg) => msg.id === messageId);
 
     if (!message) return;
@@ -61,6 +63,13 @@ export function handleLongPressMessage(messageId, messages, setMessages, chatId,
                 },
             },
             {
+                text: "↩️ Answer",
+                onPress: () => {
+                    setReplyMessage(message);
+                    setModalReplyVisible(true); // Chỉ bật modal khi chọn Answer
+                }
+            },
+            {
                 text: "🗑️ Delete",
                 onPress: async () => {
                     try {
@@ -82,7 +91,7 @@ export function handleLongPressMessage(messageId, messages, setMessages, chatId,
         ];
 
         if (message.sender.id === getUserIdFromToken(token)) {
-            options.splice(2, 0, {
+            options.splice(4, 0, {
                 text: "Recall",
                 onPress: async () => {
                     try {
@@ -178,6 +187,10 @@ export const sendMessage = async (chatId, content, type, replyToId, fileName, fi
     if (!chatId) throw new Error("Chat ID is required");
     if (!token) throw new Error("Token is required");
     try {
+        // const formData = new FormData();
+        //     formData.append('image', {
+        //         fileName
+        //     });
         const response = await axios.post(`${API_URL}/messages/${chatId}`, {
             content, type, replyToId, fileName, fileType, fileSize
         }, {
@@ -194,87 +207,81 @@ export const sendMessage = async (chatId, content, type, replyToId, fileName, fi
 };
 
 //Gửi ảnh
-export async function sendImage(messages, setMessages) {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (permission.status !== "granted") {
-        alert("Permission to access media library is required!");
-        return;
-    }
+export async function prepareImage(chatId, token) {
+    try {
+        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (permission.status !== "granted") {
+            Alert.alert("Permission Denied", "Permission to access media library is required!");
+            return;
+        }
 
-    let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: false,
-        quality: 1,
-    });
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: false,
+            quality: 1,
+        });
 
-    if (!result.canceled) {
-        const newMessage = {
-            id: Date.now(),
-            sender: "@nhietpham",
-            name: "Nhiệt Phạm",
-            image: result.assets[0].uri, // Lưu đường dẫn ảnh
-            time: new Date().toLocaleTimeString().slice(0, 5),
-            isMe: true,
-        };
-        setMessages([...messages, newMessage]);
+        if (result.canceled || !result.assets || result.assets.length === 0) {
+            console.log("Image selection canceled.");
+            return;
+        }
+
+        const image = result.assets[0];
+        const fileUri = image.uri;
+        const originalName = fileUri.split('/').pop() || "image.jpg";
+
+        // Lấy phần mở rộng file (jpg, png,...)
+        const extension = originalName.includes('.') ? originalName.split('.').pop() : 'jpg';
+
+        // Tạo tên file mới có chứa giờ hiện tại
+        const timeStamp = getCurrentTimeString();
+        // const fileName = `image_${timeStamp}.${extension}`;
+
+        const fileType = image.type || "image/jpeg";
+        const fileSize = image.fileSize || 0;
+        const fileSize_String = fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : "Unknown size";
+        await sendMessage(chatId, 'sent image', 'image', null, fileUri, fileType, fileSize_String, token);
+
+        socket.emit('del_message', { chatId });
+
+        Alert.alert("Success", "Image sent successfully!");
+    } catch (error) {
+        console.error("Error preparing image:", error);
+        Alert.alert("Error", "Failed to send the image.");
     }
 }
 
 //Gửi tài liệu
-export async function sendFile(messages, setMessages) {
+export async function prepareFile(chatId, token) {
     try {
         const result = await DocumentPicker.getDocumentAsync({
-            type: "*/*", // Cho phép tất cả loại file
+            copyToCacheDirectory: true,
+            type: "*/*"
         });
 
-        if (result.canceled || !result.assets) return;
-
-        const fileUri = result.assets[0].uri;
-        const fileName = result.assets[0].name;
-        const fileSize = result.assets[0].size;
-
-        const newMessage = {
-            id: Date.now(),
-            sender: "@nhietpham",
-            name: "Nhiệt Phạm",
-            message: "📄 File: " + fileName,
-            fileUri,
-            fileName,
-            fileSize,
-            time: new Date().toLocaleTimeString().slice(0, 5),
-            isMe: true,
-        };
-
-        setMessages([...messages, newMessage]);
-    } catch (error) {
-        console.error("Lỗi khi gửi file:", error);
-    }
-}
-
-export async function downloadFile(fileUri, fileName) {
-    try {
-        if (fileUri.startsWith("file://")) {
-            Alert.alert("Warning", "Device already had this file.");
+        if (result.canceled || !result.assets || result.assets.length === 0) {
+            console.log("File selection canceled.");
             return;
         }
 
-        const fileDest = FileSystem.documentDirectory + fileName;
-        const downloadResumable = FileSystem.createDownloadResumable(
-            fileUri,
-            fileDest,
-            {},
-            (downloadProgress) => {
-                const progress =
-                    downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite;
-                console.log(`Tải xuống: ${Math.round(progress * 100)}%`);
-            }
-        );
+        const file = result.assets ? result.assets[0] : result;
+        const fileUri = file.uri;
+        const originalName = file.name || "file";
+        const extension = originalName.includes('.') ? originalName.split('.').pop() : '';
+        const timeStamp = getCurrentTimeString();
+        const fileName = `${originalName.replace(`.${extension}`, '')}_${timeStamp}.${extension}`;
+        const fileType = file.mimeType || "application/octet-stream";
+        const fileSize = file.size || 0;
+        const fileSizeString = fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : "Unknown size";
 
-        const { uri } = await downloadResumable.downloadAsync();
-        Alert.alert("Download complete", `File is saved at: ${uri}`);
+        await sendMessage(chatId, fileName, 'file', null, fileUri, fileType, fileSizeString, token);
+
+        socket.emit('del_message', { chatId });
+
+        Alert.alert("Success", "File sent successfully!");
     } catch (error) {
-        console.error("Lỗi khi tải file:", error);
-        Alert.alert("Error", "Can't down file.");
+        console.error("Error preparing file:", error);
+        Alert.alert("Error", "Failed to send the file.");
     }
 }
 
@@ -390,5 +397,73 @@ export const removeReaction = async (messageId, userId, token) => {
     } catch (error) {
         console.error('Error removing reaction:', error.response?.data || error.message);
         throw error;
+    }
+};
+
+export const downloadImage = async (imageUrl) => {
+    try {
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert('Permission Denied', 'You need to grant storage permissions to download the image.');
+            return;
+        }
+
+        // Tạo tên file an toàn
+        let fileName = imageUrl.split('/').pop();
+        if (!fileName || !fileName.includes('.')) {
+            fileName = `image_${Date.now()}.jpg`; // fallback tên và định dạng
+        }
+
+        const fileUri = `${FileSystem.documentDirectory}${fileName}`;
+
+        const downloadResumable = FileSystem.createDownloadResumable(imageUrl, fileUri);
+
+        const { uri } = await downloadResumable.downloadAsync();
+        console.log('Download finished. File saved to:', uri);
+
+        const asset = await MediaLibrary.createAssetAsync(uri);
+        await MediaLibrary.createAlbumAsync('Download', asset, false);
+
+        Alert.alert('Download Complete', 'The image has been saved to your gallery.');
+    } catch (error) {
+        console.error('Error downloading image:', error);
+        Alert.alert('Error', 'Failed to download the image.');
+    }
+};
+
+export const downloadAnyFile = async (fileUrl) => {
+    try {
+        console.log('Downloading file from URL:', fileUrl);
+
+        // Xin quyền truy cập media
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert('Permission Denied', 'Bạn cần cấp quyền lưu trữ để tải file.');
+            return;
+        }
+
+        // Tạo tên file an toàn
+        let fileName = fileUrl.split('?')[0].split('/').pop(); // loại bỏ query string
+        if (!fileName || !fileName.includes('.')) {
+            // fallback nếu không có đuôi
+            const extension = '.bin';
+            fileName = `file_${Date.now()}${extension}`;
+        }
+
+        const fileUri = `${FileSystem.documentDirectory}${fileName}`;
+
+        // Tạo tiến trình tải
+        const downloadResumable = FileSystem.createDownloadResumable(fileUrl, fileUri);
+        const { uri } = await downloadResumable.downloadAsync();
+
+        console.log('Tải xong, lưu file:', uri);
+
+        const asset = await MediaLibrary.createAssetAsync(uri);
+        await MediaLibrary.createAlbumAsync('Download', asset, false);
+
+        Alert.alert('Tải thành công', `Đã lưu file: ${fileName}`);
+    } catch (error) {
+        console.error('Lỗi khi tải file:', error);
+        Alert.alert('Lỗi', 'Không thể tải file.');
     }
 };
