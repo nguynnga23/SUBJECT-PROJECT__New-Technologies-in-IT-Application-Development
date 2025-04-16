@@ -50,7 +50,7 @@ const TabButton = ({ title, isActive, onPress }) => (
     </TouchableOpacity>
 );
 
-const ListContent = ({ friends, onLongPress }) => {
+const ListContent = ({ friends, onLongPress, onPress }) => {
     // Group friends by first letter
     const sections = groupFriendsByLetter(friends);
 
@@ -59,6 +59,7 @@ const ListContent = ({ friends, onLongPress }) => {
         <TouchableOpacity
             style={styles.friendItem}
             onLongPress={() => onLongPress(item)} // Add long press handler
+            onPress={() => onPress(item)}
         >
             <Image source={{ uri: item.avatar }} style={styles.avatar} />
             <View style={styles.friendInfo}>
@@ -215,7 +216,7 @@ export default function ListFriendsScreen() {
 
             {/* Tab Content */}
             <View style={styles.content}>
-                <ListContent friends={friendsToShow} onLongPress={handleLongPress} />
+                <ListContent friends={friendsToShow} onLongPress={handleLongPress} onPress={handleMessage} />
             </View>
 
             {/* Friend Details Modal */}
