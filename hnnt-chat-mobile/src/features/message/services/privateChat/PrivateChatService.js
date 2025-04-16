@@ -14,108 +14,6 @@ const API_URL = `http://${localhost}/api`;
 
 let recording = null;
 
-//Hiển thị menu khi nhấn giữ tin nhắn
-export function handleLongPressMessage(messageId, messages, setMessages, chatId, token, setReplyMessage, setModalReplyVisible) {
-    const message = messages.find((msg) => msg.id === messageId);
-
-    if (!message) return;
-
-    let options = [];
-
-    if (message.destroy) {
-        // Nếu tin nhắn bị thu hồi, chỉ hiển thị tùy chọn "Delete"
-        options.push({
-            text: "🗑️ Delete",
-            onPress: async () => {
-                try {
-                    if (!messageId || !token) {
-                        console.warn("Invalid messageId or token:", { messageId, token });
-                        return;
-                    }
-                    const response = await deleteMessage(messageId, token);
-                    socket.emit('del_message', {
-                        chatId: chatId,
-                    });
-                    Alert.alert("Success", response.message);
-                } catch (error) {
-                    console.warn("Error deleting message:", error);
-                    Alert.alert("Error", "Failed to delete the message.");
-                }
-            },
-        });
-    } else {
-        // Nếu tin nhắn chưa bị thu hồi, hiển thị các tùy chọn khác
-        options = [
-            {
-                text: "📌 Pin",
-                onPress: async () => {
-                    try {
-                        if (!messageId || !token) {
-                            console.error("Invalid messageId or token:", { messageId, token });
-                            return;
-                        }
-                        await pinMessage(messageId, token);
-                        Alert.alert("Success", "Pinned!");
-                    } catch (error) {
-                        console.warn("Error pinning message:", error);
-                        Alert.alert("Error", "Failed to pin the message.");
-                    }
-                },
-            },
-            {
-                text: "↩️ Answer",
-                onPress: () => {
-                    setReplyMessage(message);
-                    setModalReplyVisible(true); // Chỉ bật modal khi chọn Answer
-                }
-            },
-            {
-                text: "🗑️ Delete",
-                onPress: async () => {
-                    try {
-                        if (!messageId || !token) {
-                            console.warn("Invalid messageId or token:", { messageId, token });
-                            return;
-                        }
-                        const response = await deleteMessage(messageId, token);
-                        socket.emit('del_message', {
-                            chatId: chatId,
-                        });
-                        Alert.alert("Success", response.message);
-                    } catch (error) {
-                        console.warn("Error deleting message:", error);
-                        Alert.alert("Error", "Failed to delete the message.");
-                    }
-                },
-            },
-        ];
-
-        if (message.sender.id === getUserIdFromToken(token)) {
-            options.splice(4, 0, {
-                text: "Recall",
-                onPress: async () => {
-                    try {
-                        if (!messageId || !token) {
-                            console.warn("Invalid messageId or token:", { messageId, token });
-                            return;
-                        }
-                        const response = await destroyMessage(messageId, token);
-                        socket.emit('del_message', {
-                            chatId: chatId,
-                        });
-                        Alert.alert("Success", "Recall message success!");
-                    } catch (error) {
-                        console.warn("Error recalling message:", error);
-                        Alert.alert("Error", "Failed to recall the message.");
-                    }
-                },
-            });
-        }
-    }
-
-    Alert.alert("Select an action", "What do you want to do with this message?", options, { cancelable: true });
-}
-
 export const fetchMessages = async (chatId, token) => {
     try {
         const response = await axios.get(`${API_URL}/messages/${chatId}`, {
@@ -130,7 +28,7 @@ export const fetchMessages = async (chatId, token) => {
     }
 };
 
-const pinMessage = async (messageId, token) => {
+export const pinMessage = async (messageId, token) => {
     try {
         const response = await axios.put(`${API_URL}/groups/message/${messageId}/pin`, {}, {
             headers: {
@@ -144,7 +42,7 @@ const pinMessage = async (messageId, token) => {
     }
 }
 
-const deleteMessage = async (messageId, token) => {
+export const deleteMessage = async (messageId, token) => {
     if (!token) {
         console.error("Token is missing!");
         throw new Error("Token is required to delete the message.");
@@ -163,7 +61,7 @@ const deleteMessage = async (messageId, token) => {
     }
 };
 
-const destroyMessage = async (messageId, token) => {
+export const destroyMessage = async (messageId, token) => {
     if (!token) {
         console.error("Token is missing!");
         throw new Error("Token is required to delete the message.");
