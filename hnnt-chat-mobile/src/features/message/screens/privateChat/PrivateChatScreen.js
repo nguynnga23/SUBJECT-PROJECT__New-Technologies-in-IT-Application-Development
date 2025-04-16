@@ -21,6 +21,7 @@ import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import Header from '../../../../common/components/Header';
 import { useRoute } from '@react-navigation/native';
 import ChatInputContainer from '../../components/ChatInputContainer';
+import { Video } from 'expo-av';
 
 import {
     fetchMessages,
@@ -43,6 +44,17 @@ import { formatDateTime } from '../../../../utils/formatDateTime';
 import { socket } from '../../../../configs/socket';
 import { set } from 'date-fns';
 import { Audio } from 'expo-av';
+
+const groupMessagesByDate = (messages) => {
+    return messages.reduce((acc, message) => {
+        const date = formatDateTime(message.time).split(' ')[0]; // Extract date part
+        if (!acc[date]) {
+            acc[date] = [];
+        }
+        acc[date].push(message);
+        return acc;
+    }, {});
+};
 
 export default function PrivateChatScreen() {
     const flatListRef = useRef(null);
@@ -76,6 +88,8 @@ export default function PrivateChatScreen() {
 
     const [selectedReaction, setSelectedReaction] = useState(null);
     const [reactionDetailsVisible, setReactionDetailsVisible] = useState(false);
+    const [selectedVideo, setSelectedVideo] = useState(null);
+    const [modalVideoVisible, setModalVideoVisible] = useState(false);
 
     useEffect(() => {
         const parentNav = navigation.getParent();
@@ -283,149 +297,176 @@ export default function PrivateChatScreen() {
                 <SafeAreaProvider>
                     <FlatList
                         ref={flatListRef}
-                        data={messages}
-                        keyExtractor={(item) => item.id.toString()}
-                        renderItem={({ item }) => {
-                            const hasReactions = item.reactions && item.reactions.length > 0;
-                            const groupedReactions = hasReactions ? groupReactions(item.reactions) : [];
-                            return (
-                                <TouchableOpacity
-                                    onLongPress={() =>
-                                        handleLongPressMessage(
-                                            item.id,
-                                            messages,
-                                            setMessages,
-                                            chatId,
-                                            token,
-                                            setReplyMessage,
-                                            setModalReplyVisible,
-                                        )
-                                    }
-                                >
-                                    <View
-                                        style={[
-                                            styles.messageContainer,
-                                            item.senderId === currentUserId ? styles.myMessage : styles.otherMessage,
-                                        ]}
+                        data={Object.entries(groupMessagesByDate(messages))} // Group messages by date
+                        keyExtractor={([date]) => date}
+                        renderItem={({ item: [date, messagesForDate] }) => (
+                            <>
+                                <View style={{ alignItems: 'center' }}>
+                                    <Text style={styles.dateHeader}>{date}</Text>
+                                </View>
+                                {messagesForDate.map((item) => (
+                                    <TouchableOpacity
+                                        key={item.id}
+                                        onLongPress={() =>
+                                            handleLongPressMessage(
+                                                item.id,
+                                                messages,
+                                                setMessages,
+                                                chatId,
+                                                token,
+                                                setReplyMessage,
+                                                setModalReplyVisible,
+                                            )
+                                        }
                                     >
-                                        <Text style={styles.sender}>{item.sender.name}</Text>
+                                        <View
+                                            style={[
+                                                styles.messageContainer,
+                                                item.senderId === currentUserId
+                                                    ? styles.myMessage
+                                                    : styles.otherMessage,
+                                            ]}
+                                        >
+                                            {/* Only show sender name if the message is not from the current user */}
+                                            {item.senderId !== currentUserId && (
+                                                <Text style={styles.sender}>{item.sender.name}</Text>
+                                            )}
+                                            {item.destroy ? (
+                                                <Text style={styles.recalledMessage}>Message recalled</Text>
+                                            ) : (
+                                                <>
+                                                    {item.replyToId !== null && (
+                                                        <View style={styles.replyBox}>
+                                                            <Text style={styles.replyUser}>
+                                                                Replying to {item.replyTo.sender.name}
+                                                            </Text>
+                                                            <Text style={styles.replyMessage}>
+                                                                {item.replyTo.content}
+                                                            </Text>
+                                                        </View>
+                                                    )}
 
-                                        {/* Kiểm tra nếu tin nhắn bị thu hồi */}
-                                        {item.destroy ? (
-                                            <Text style={styles.recalledMessage}>message had recall</Text>
-                                        ) : (
-                                            <>
-                                                {item.replyToId !== null && (
-                                                    <View style={styles.replyBox}>
-                                                        <Text style={styles.replyUser}>
-                                                            Replying to {item.replyTo.sender.name}
-                                                        </Text>
-                                                        <Text style={styles.replyMessage}>{item.replyTo.content}</Text>
-                                                    </View>
-                                                )}
+                                                    {/* Hiển thị nội dung tin nhắn */}
+                                                    {item.type === 'text' && (
+                                                        <Text style={styles.message}>{item.content}</Text>
+                                                    )}
 
-                                                {/* Hiển thị nội dung tin nhắn */}
-                                                {item.type === 'text' && (
-                                                    <Text style={styles.message}>{item.content}</Text>
-                                                )}
+                                                    {/* Hiển thị file, hình ảnh, hoặc audio nếu có */}
+                                                    {item.audioUri && (
+                                                        <TouchableOpacity
+                                                            onPress={() => playAudio(item.audioUri)}
+                                                            style={styles.playButton}
+                                                        >
+                                                            <Ionicons name="play-circle" size={30} color="blue" />
+                                                        </TouchableOpacity>
+                                                    )}
 
-                                                {/* Hiển thị file, hình ảnh, hoặc audio nếu có */}
-                                                {item.audioUri && (
-                                                    <TouchableOpacity
-                                                        onPress={() => playAudio(item.audioUri)}
-                                                        style={styles.playButton}
-                                                    >
-                                                        <Ionicons name="play-circle" size={30} color="blue" />
-                                                    </TouchableOpacity>
-                                                )}
+                                                    {item.type === 'image' && (
+                                                        <TouchableOpacity
+                                                            onPress={() => {
+                                                                setSelectedImage(item.fileName);
+                                                                setModalZoomVisible(true);
+                                                            }}
+                                                            onLongPress={() => {
+                                                                setSelectedImage(item.fileName);
+                                                                setModalDownVisible(true);
+                                                            }}
+                                                        >
+                                                            <Image
+                                                                source={{ uri: item.fileName }}
+                                                                style={{ width: 200, height: 200, borderRadius: 10 }}
+                                                            />
+                                                        </TouchableOpacity>
+                                                    )}
 
-                                                {item.type === 'image' && (
-                                                    <TouchableOpacity
-                                                        onPress={() => {
-                                                            setSelectedImage(item.fileName);
-                                                            setModalZoomVisible(true);
-                                                        }}
-                                                        onLongPress={() => {
-                                                            setSelectedImage(item.fileName);
-                                                            setModalDownVisible(true);
-                                                        }}
-                                                    >
-                                                        <Image
-                                                            source={{ uri: item.fileName }}
-                                                            style={{ width: 200, height: 200, borderRadius: 10 }}
-                                                        />
-                                                    </TouchableOpacity>
-                                                )}
+                                                    {item.type === 'file' && (
+                                                        <TouchableOpacity
+                                                            onLongPress={() => {
+                                                                setSelectedFile(item.fileName);
+                                                                setModalDownFileVisible(true);
+                                                            }}
+                                                            style={styles.fileContainer}
+                                                        >
+                                                            <Ionicons
+                                                                name="document-text-outline"
+                                                                size={24}
+                                                                color="blue"
+                                                            />
+                                                            <Text style={styles.fileName}>
+                                                                {item.content} {item.fileSize}
+                                                            </Text>
+                                                        </TouchableOpacity>
+                                                    )}
 
-                                                {item.type === 'file' && (
-                                                    <TouchableOpacity
-                                                        onLongPress={() => {
-                                                            setSelectedFile(item.fileName);
-                                                            setModalDownFileVisible(true);
-                                                        }}
-                                                        style={styles.fileContainer}
-                                                    >
-                                                        <Ionicons name="document-text-outline" size={24} color="blue" />
-                                                        <Text style={styles.fileName}>
-                                                            {item.content} {item.fileSize}
-                                                        </Text>
-                                                    </TouchableOpacity>
-                                                )}
+                                                    {item.type === 'audio' && (
+                                                        <TouchableOpacity
+                                                            onPress={() => playAudio(item.fileName)}
+                                                            style={styles.audioMessageContainer}
+                                                        >
+                                                            <Ionicons name="play-circle" size={30} color="blue" />
+                                                            <Text style={styles.audioMessageText}>Voice Message</Text>
+                                                        </TouchableOpacity>
+                                                    )}
 
-                                                {item.type === 'audio' && (
-                                                    <TouchableOpacity
-                                                        onPress={() => playAudio(item.fileName)}
-                                                        style={styles.audioMessageContainer}
-                                                    >
-                                                        <Ionicons name="play-circle" size={30} color="blue" />
-                                                        <Text style={styles.audioMessageText}>Voice Message</Text>
-                                                    </TouchableOpacity>
-                                                )}
-                                            </>
-                                        )}
+                                                    {item.type === 'video' && (
+                                                        <View style={styles.inlineVideoContainer}>
+                                                            <Video
+                                                                source={{ uri: item.fileName }}
+                                                                style={styles.inlineVideo}
+                                                                useNativeControls
+                                                                resizeMode="contain"
+                                                                shouldPlay={false}
+                                                            />
+                                                        </View>
+                                                    )}
+                                                </>
+                                            )}
 
-                                        {/* Hiển thị reaction và thời gian */}
-                                        <View style={styles.timeReactionContainer}>
-                                            <Text style={styles.time}>{formatDateTime(item.time)}</Text>
-                                        </View>
-
-                                        {hasReactions && (
-                                            <View style={styles.reactionContainer}>
-                                                {groupedReactions.map((reaction, index) => (
-                                                    <TouchableOpacity
-                                                        key={index}
-                                                        style={styles.reactionItem}
-                                                        onPress={() =>
-                                                            handleShowReactionDetails(
-                                                                reaction.reaction,
-                                                                item.reactions,
-                                                                item.id,
-                                                            )
-                                                        }
-                                                    >
-                                                        <Text style={styles.reactionText}>
-                                                            {reaction.reaction} {reaction.sum}
-                                                        </Text>
-                                                    </TouchableOpacity>
-                                                ))}
+                                            {/* Hiển thị reaction và thời gian */}
+                                            <View style={styles.timeReactionContainer}>
+                                                <Text style={styles.time}>
+                                                    {formatDateTime(item.time).split(' ')[1].slice(0, 5)}
+                                                </Text>
                                             </View>
-                                        )}
 
-                                        {!item.destroy && (
-                                            <TouchableOpacity
-                                                onPress={() => {
-                                                    showReactionOptions(item.id);
-                                                    setMessageId(item.id);
-                                                }}
-                                                style={{ position: 'absolute', right: 2, bottom: 12 }}
-                                            >
-                                                <FontAwesome name="smile-o" size={20} color="gray" />
-                                            </TouchableOpacity>
-                                        )}
-                                    </View>
-                                </TouchableOpacity>
-                            );
-                        }}
+                                            {item.reactions && item.reactions.length > 0 && (
+                                                <View style={styles.reactionContainer}>
+                                                    {groupReactions(item.reactions).map((reaction, index) => (
+                                                        <TouchableOpacity
+                                                            key={index}
+                                                            style={styles.reactionItem}
+                                                            onPress={() =>
+                                                                handleShowReactionDetails(
+                                                                    reaction.reaction,
+                                                                    item.reactions,
+                                                                    item.id,
+                                                                )
+                                                            }
+                                                        >
+                                                            <Text style={styles.reactionText}>
+                                                                {reaction.reaction} {reaction.sum}
+                                                            </Text>
+                                                        </TouchableOpacity>
+                                                    ))}
+                                                </View>
+                                            )}
+
+                                            {!item.destroy && (
+                                                <TouchableOpacity
+                                                    onPress={() => {
+                                                        showReactionOptions(item.id);
+                                                        setMessageId(item.id);
+                                                    }}
+                                                    style={{ position: 'absolute', right: 2, bottom: 12 }}
+                                                >
+                                                    <FontAwesome name="smile-o" size={20} color="gray" />
+                                                </TouchableOpacity>
+                                            )}
+                                        </View>
+                                    </TouchableOpacity>
+                                ))}
+                            </>
+                        )}
                         keyboardShouldPersistTaps="handled" // Đảm bảo sự kiện nhấn không chặn cuộn
                         onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })} // Cuộn xuống cuối khi nội dung thay đổi
                     />
@@ -649,6 +690,20 @@ export default function PrivateChatScreen() {
                             </View>
                         </TouchableWithoutFeedback>
                     </Modal>
+
+                    <Modal visible={modalVideoVisible} transparent={true} animationType="fade">
+                        <TouchableWithoutFeedback onPress={() => setModalVideoVisible(false)}>
+                            <View style={styles.modalContainer}>
+                                <Video
+                                    source={{ uri: selectedVideo }}
+                                    style={styles.fullVideo}
+                                    useNativeControls
+                                    resizeMode="contain"
+                                    shouldPlay
+                                />
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </Modal>
                 </SafeAreaProvider>
             </View>
         </KeyboardAvoidingView>
@@ -708,7 +763,6 @@ const styles = StyleSheet.create({
     },
 
     recalledMessage: {
-        fontStyle: 'italic',
         color: '#999', // Màu xám nhạt
         fontSize: 16,
     },
@@ -960,5 +1014,43 @@ const styles = StyleSheet.create({
         marginLeft: 10,
         fontSize: 14,
         color: '#007AFF',
+    },
+    videoContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f0f0f0',
+        padding: 10,
+        borderRadius: 10,
+        marginVertical: 5,
+    },
+    videoMessageText: {
+        marginLeft: 10,
+        fontSize: 14,
+        color: '#007AFF',
+    },
+    fullVideo: {
+        width: '95%',
+        height: '95%',
+    },
+    inlineVideoContainer: {
+        width: 200,
+        height: 200,
+        borderRadius: 10,
+        overflow: 'hidden',
+        marginVertical: 5,
+    },
+    inlineVideo: {
+        width: '100%',
+        height: '100%',
+    },
+    dateHeader: {
+        fontSize: 14,
+        color: '#fff',
+        backgroundColor: '#c0c0c0',
+        width: 150,
+        padding: 4,
+        borderRadius: 20,
+        textAlign: 'center',
+        marginVertical: 10,
     },
 });
