@@ -6,6 +6,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import FriendService from '../../services/FriendService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
+import ContactService from '../../services/ContactService';
 
 const recentlyOnlineFriends = [
     // { id: '1', name: 'Nguyễn Lê Nhật Huy', group: 'Close Friends', avatar: 'https://i.pravatar.cc/150?img=13' },
@@ -162,9 +163,27 @@ export default function ListFriendsScreen() {
         }
     };
 
-    const handleMessage = () => {
-        alert(`Messaging ${selectedFriend.name}`);
-        navigation.navigate('MessageStackNavigator', { screen: 'PrivateChatScreen' });
+    const handleMessage = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                alert('Authentication token is missing. Please log in again.');
+                return;
+            }
+            const chatData = await ContactService.getChatByFriendId(selectedFriend.id, token);
+            const chatId = chatData?.id;
+            if (chatId) {
+                navigation.navigate('MessageStackNavigator', {
+                    screen: 'PrivateChatScreen',
+                    params: { chatId: chatId, chatName: selectedFriend.name },
+                });
+            } else {
+                alert('Failed to retrieve chat information.');
+            }
+        } catch (error) {
+            console.error('Error navigating to chat:', error);
+            alert('An unexpected error occurred. Please try again.');
+        }
         setModalVisible(false);
     };
 

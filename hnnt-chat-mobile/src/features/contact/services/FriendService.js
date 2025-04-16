@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { localhost } from '../../../utils/localhosts';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 const BASE_URL = `http://${localhost}/api/friends`; // Ensure the correct port is used
 
 const friendService = {
