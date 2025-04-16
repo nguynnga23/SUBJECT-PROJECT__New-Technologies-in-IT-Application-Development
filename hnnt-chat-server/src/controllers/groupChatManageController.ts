@@ -208,6 +208,7 @@ export const muteGroup = async (req: AuthRequest, res: Response): Promise<void> 
         res.status(200).json({
             message: `Thông báo đã ${newNotify ? 'bật' : 'tắt'}!`,
             notify: newNotify,
+            notify: newNotify,
         });
     } catch (error) {
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });

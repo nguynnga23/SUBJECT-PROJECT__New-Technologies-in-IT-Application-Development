@@ -584,6 +584,82 @@ export const checkFriend = async (req: AuthRequest, res: Response): Promise<void
 };
 
 //📌 Get list friend user1 -> user2
+// export const getSentFriendRequests = async (req: AuthRequest, res: Response): Promise<void> => {
+//     try {
+//         const userId = req.user?.id; // Lấy ID của user từ token, không cần từ params
+
+//         // Kiểm tra userId từ token
+//         if (!userId) {
+//             res.status(401).json({ message: 'Không thể xác thực người dùng!' });
+//             return;
+//         }
+
+//         // Lấy danh sách lời mời kết bạn mà user này nhận được
+//         const friendRequests = await prisma.friendRequest.findMany({
+//             where: {
+//                 senderId: userId, // Lời mời gửi đến user hiện tại
+//             },
+//             include: {
+//                 receiver: true, // Lấy thông tin của người gửi lời mời
+//             },
+//         });
+
+//         // Map dữ liệu để trả về thông tin của sender
+//         const receivedList = friendRequests.map((request) => ({
+//             requestId: request.id, // ID của friendRequest để dùng cho accept/cancel
+//             senderId: request.receiver.id,
+//             name: request.receiver.name,
+//             number: request.receiver.number,
+//             avatar: request.receiver.avatar,
+//             status: request.receiver.status,
+//             birthDate: request.receiver.birthDate,
+//             location: request.receiver.location,
+//             gender: request.receiver.gender,
+//             createdAt: request.createdAt, // Thời gian tạo lời mời
+//         }));
+
+//         res.status(200).json(receivedList);
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+//     }
+// };
+
+// Check if a friend request exists and determine the role of the logged-in user
+export const checkFriendRequest = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.id; // ID of the logged-in user
+        const friendId = req.params.friendId; // ID of the friend
+
+        if (!userId) {
+            res.status(401).json({ message: 'Không thể xác thực người dùng!' });
+            return;
+        }
+
+        const friendRequest = await prisma.friendRequest.findFirst({
+            where: {
+                OR: [
+                    { senderId: userId, receiverId: friendId },
+                    { senderId: friendId, receiverId: userId },
+                ],
+            },
+        });
+
+        if (friendRequest) {
+            res.status(200).json({
+                exists: true,
+                isSender: friendRequest.senderId === userId, // Check if the logged-in user is the sender
+                isReceiver: friendRequest.receiverId === userId, // Check if the logged-in user is the receiver
+            });
+        } else {
+            res.status(200).json({ exists: false });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+    }
+};
+
+//📌 Get list friend user1 -> user2
 export const getSentFriendRequests = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const userId = req.user?.id; // Lấy ID của user từ token, không cần từ params
@@ -621,40 +697,6 @@ export const getSentFriendRequests = async (req: AuthRequest, res: Response): Pr
         res.status(200).json(receivedList);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
-    }
-};
-
-// Check if a friend request exists and determine the role of the logged-in user
-export const checkFriendRequest = async (req: AuthRequest, res: Response): Promise<void> => {
-    try {
-        const userId = req.user?.id; // ID of the logged-in user
-        const friendId = req.params.friendId; // ID of the friend
-
-        if (!userId) {
-            res.status(401).json({ message: 'Không thể xác thực người dùng!' });
-            return;
-        }
-
-        const friendRequest = await prisma.friendRequest.findFirst({
-            where: {
-                OR: [
-                    { senderId: userId, receiverId: friendId },
-                    { senderId: friendId, receiverId: userId },
-                ],
-            },
-        });
-
-        if (friendRequest) {
-            res.status(200).json({
-                exists: true,
-                isSender: friendRequest.senderId === userId, // Check if the logged-in user is the sender
-                isReceiver: friendRequest.receiverId === userId, // Check if the logged-in user is the receiver
-            });
-        } else {
-            res.status(200).json({ exists: false });
-        }
-    } catch (error) {
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
     }
 };

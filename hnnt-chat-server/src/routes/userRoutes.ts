@@ -6,6 +6,7 @@ import {
     changePasswordByToken,
     getUserByNumberAndEmail,
     getUserByNumberOrEmail,
+    searchByPhone,
     searchUsers,
 } from '../controllers/userController';
 import { authenticate } from '../middleware/auth';
@@ -20,6 +21,9 @@ userRoute.post('/change-password-with-token', authenticate, changePasswordByToke
 userRoute.get('/:id', getUserById);
 userRoute.post('/get-user-by-number-and-email', getUserByNumberAndEmail);
 userRoute.post('/get-user-by-number-or-email', getUserByNumberOrEmail);
+userRoute.post('/search-by-phone', authenticate, searchByPhone);
+userRoute.post('/get-user-by-number-or-email', getUserByNumberOrEmail);
 userRoute.post('/search', searchUsers); // Tìm kiếm người dùng
+userRoute.post('/search-by-phone', authenticate, searchByPhone);
 
 export default userRoute;
