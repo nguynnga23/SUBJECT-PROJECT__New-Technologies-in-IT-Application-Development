@@ -2,9 +2,10 @@ import { View, Text, StyleSheet, TouchableOpacity, SectionList, Image, Modal } f
 import React, { useState, useEffect } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Feather from '@expo/vector-icons/Feather';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import FriendService from '../../services/FriendService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from 'react-native';
 
 const recentlyOnlineFriends = [
     // { id: '1', name: 'Nguyễn Lê Nhật Huy', group: 'Close Friends', avatar: 'https://i.pravatar.cc/150?img=13' },
@@ -102,19 +103,21 @@ export default function ListFriendsScreen() {
 
     const friendsToShow = selectedTab === 'all' ? allFriends : recentlyOnlineFriends;
 
-    useEffect(() => {
-        const fetchFriends = async () => {
-            try {
-                const token = await AsyncStorage.getItem('token');
-                const data = await FriendService.getFriends(token);
-                setAllFriends(data);
-            } catch (error) {
-                console.error('Failed to fetch friends:', error);
-            }
-        };
+    useFocusEffect(
+        React.useCallback(() => {
+            const fetchFriends = async () => {
+                try {
+                    const token = await AsyncStorage.getItem('token');
+                    const data = await FriendService.getFriends(token);
+                    setAllFriends(data);
+                } catch (error) {
+                    console.error('Failed to fetch friends:', error);
+                }
+            };
 
-        fetchFriends();
-    }, []);
+            fetchFriends();
+        }, []),
+    );
 
     const handleLongPress = (friend) => {
         setSelectedFriend(friend);
@@ -122,18 +125,28 @@ export default function ListFriendsScreen() {
     };
 
     const handleUnfriend = async () => {
-        if (window.confirm(`Are you sure you want to unfriend ${selectedFriend.name}?`)) {
-            try {
-                const token = await AsyncStorage.getItem('token');
-                await FriendService.deleteFriend(selectedFriend.id, token); // Pass correct friendId
-                alert(`Unfriended ${selectedFriend.name}`);
-                setModalVisible(false);
-                setAllFriends((prevFriends) => prevFriends.filter((friend) => friend.id !== selectedFriend.id));
-            } catch (error) {
-                console.error('Error unfriending:', error);
-                alert(error.message || 'Failed to unfriend.');
-            }
-        }
+        Alert.alert('Confirm Unfriend', `Are you sure you want to unfriend ${selectedFriend.name}?`, [
+            { text: 'Cancel', style: 'cancel' },
+            {
+                text: 'Unfriend',
+                onPress: async () => {
+                    try {
+                        const token = await AsyncStorage.getItem('token');
+                        if (!token) {
+                            alert('Authentication token is missing. Please log in again.');
+                            return;
+                        }
+                        await FriendService.deleteFriend(selectedFriend.id, token);
+                        alert(`Unfriended ${selectedFriend.name}`);
+                        setAllFriends((prevFriends) => prevFriends.filter((friend) => friend.id !== selectedFriend.id));
+                        setModalVisible(false);
+                    } catch (error) {
+                        console.error('Error unfriending:', error);
+                        alert('An unexpected error occurred. Please try again.');
+                    }
+                },
+            },
+        ]);
     };
 
     const handleBlock = async () => {

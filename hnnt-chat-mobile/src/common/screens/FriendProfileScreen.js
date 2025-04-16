@@ -54,6 +54,7 @@ const FriendProfileScreen = () => {
                         isSender: requestResponse.isSender || false,
                         isReceiver: requestResponse.isReceiver || false,
                     });
+                    console.log(friendStatus);
                 }
             } catch (error) {
                 setFriendStatus({

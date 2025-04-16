@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SectionList, Image } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import friendService from '../../../services/FriendService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -139,23 +139,25 @@ export default function FriendRequestScreen() {
     const [sentRequests, setSentRequests] = useState([]);
     const navigation = useNavigation();
 
-    useEffect(() => {
-        const fetchFriendRequests = async () => {
-            try {
-                const token = await AsyncStorage.getItem('token'); // Retrieve token
-                const userId = await AsyncStorage.getItem('userId'); // Retrieve userId
-                const receivedRequestList = await friendService.getFriendRequests(token, userId); // Pass userId
-                const sentRequestList = await friendService.getSentFriendRequests(token, userId); // Pass userId
+    useFocusEffect(
+        React.useCallback(() => {
+            const fetchFriendRequests = async () => {
+                try {
+                    const token = await AsyncStorage.getItem('token'); // Retrieve token
+                    const userId = await AsyncStorage.getItem('userId'); // Retrieve userId
+                    const receivedRequestList = await friendService.getFriendRequests(token, userId); // Pass userId
+                    const sentRequestList = await friendService.getSentFriendRequests(token, userId); // Pass userId
 
-                setReceivedRequests(receivedRequestList); // Update received requests
-                setSentRequests(sentRequestList); // Update sent requests
-            } catch (error) {
-                console.error('Error fetching friend requests:', error);
-            }
-        };
+                    setReceivedRequests(receivedRequestList); // Update received requests
+                    setSentRequests(sentRequestList); // Update sent requests
+                } catch (error) {
+                    console.error('Error fetching friend requests:', error);
+                }
+            };
 
-        fetchFriendRequests();
-    }, []);
+            fetchFriendRequests();
+        }, []),
+    );
 
     const requestsToShow = selectedTab === 'received' ? receivedRequests : sentRequests;
 
