@@ -237,49 +237,111 @@ export const sendMessage = async (chatId, content, type, replyToId, fileName, fi
 //Gửi ảnh
 export async function prepareImage(chatId, token) {
     try {
-        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        const permission = await ImagePicker.requestCameraPermissionsAsync();
         if (permission.status !== 'granted') {
-            Alert.alert('Permission Denied', 'Permission to access media library is required!');
+            Alert.alert('Permission Denied', 'Permission to access camera is required!');
             return;
         }
 
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.All, // Allow both images and videos
-            allowsMultipleSelection: true, // Enable multiple selection
-            allowsEditing: false,
-            quality: 1,
-        });
+        Alert.alert(
+            'Choose an option',
+            'Would you like to select from the gallery or use the camera?',
+            [
+                {
+                    text: 'Gallery',
+                    onPress: async () => {
+                        const result = await ImagePicker.launchImageLibraryAsync({
+                            mediaTypes: ImagePicker.MediaTypeOptions.All,
+                            allowsMultipleSelection: true,
+                            allowsEditing: false,
+                            quality: 1,
+                        });
 
-        if (result.canceled || !result.assets || result.assets.length === 0) {
-            console.log('Selection canceled.');
-            return;
-        }
+                        if (result.canceled || !result.assets || result.assets.length === 0) {
+                            console.log('Selection canceled.');
+                            return;
+                        }
 
-        for (const asset of result.assets) {
-            const fileUri = asset.uri;
-            const originalName = fileUri.split('/').pop() || 'file';
-            const extension = originalName.includes('.') ? originalName.split('.').pop() : '';
-            const timeStamp = getCurrentTimeString();
-            const fileName = `${originalName.replace(`.${extension}`, '')}_${timeStamp}.${extension}`;
-            const fileType = asset.type || (extension === 'mp4' ? 'video/mp4' : 'image/jpeg');
-            const fileSize = asset.fileSize || 0;
-            const fileSizeString = fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : 'Unknown size';
+                        for (const asset of result.assets) {
+                            const fileUri = asset.uri;
+                            const originalName = fileUri.split('/').pop() || 'file';
+                            const extension = originalName.includes('.') ? originalName.split('.').pop() : '';
+                            const timeStamp = getCurrentTimeString();
+                            const fileName = `${originalName.replace(`.${extension}`, '')}_${timeStamp}.${extension}`;
+                            const fileType = asset.type || (extension === 'mp4' ? 'video/mp4' : 'image/jpeg');
+                            const fileSize = asset.fileSize || 0;
+                            const fileSizeString = fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : 'Unknown size';
 
-            await sendMessage(
-                chatId,
-                `sent ${fileType.startsWith('video') ? 'video' : 'image'}`,
-                fileType.startsWith('video') ? 'video' : 'image',
-                null,
-                fileUri,
-                fileType,
-                fileSizeString,
-                token,
-            );
-        }
+                            await sendMessage(
+                                chatId,
+                                `sent ${fileType.startsWith('video') ? 'video' : 'image'}`,
+                                fileType.startsWith('video') ? 'video' : 'image',
+                                null,
+                                fileUri,
+                                fileType,
+                                fileSizeString,
+                                token,
+                            );
+                        }
 
-        socket.emit('del_message', { chatId });
+                        socket.emit('del_message', { chatId });
+                        Alert.alert('Success', 'Files sent successfully!');
+                    },
+                },
+                {
+                    text: 'Camera',
+                    onPress: async () => {
+                        const result = await ImagePicker.launchCameraAsync({
+                            mediaTypes: ImagePicker.MediaTypeOptions.All,
+                            allowsEditing: false,
+                            quality: 1,
+                        });
 
-        Alert.alert('Success', 'Files sent successfully!');
+                        if (result.canceled) {
+                            console.log('Camera action canceled.');
+                            Alert.alert('Action Canceled', 'You canceled the camera action.');
+                            return;
+                        }
+
+                        if (!result.assets || result.assets.length === 0) {
+                            console.log('No image captured.');
+                            Alert.alert('Error', 'No image was captured.');
+                            return;
+                        }
+
+                        const fileUri = result.assets[0].uri; // Correctly access the URI
+                        const originalName = fileUri.split('/').pop() || 'file';
+                        const extension = originalName.includes('.') ? originalName.split('.').pop() : '';
+                        const timeStamp = getCurrentTimeString();
+                        const fileName = `${originalName.replace(`.${extension}`, '')}_${timeStamp}.${extension}`;
+                        const fileType = result.assets[0].type || (extension === 'mp4' ? 'video/mp4' : 'image/jpeg');
+                        const fileSize = result.assets[0].fileSize || 0;
+                        const fileSizeString = fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : 'Unknown size';
+
+                        console.log('Captured image details:', { fileUri, fileName, fileType, fileSizeString });
+
+                        try {
+                            await sendMessage(
+                                chatId,
+                                `sent ${fileType.startsWith('video') ? 'video' : 'image'}`,
+                                fileType.startsWith('video') ? 'video' : 'image',
+                                null,
+                                fileUri,
+                                fileType,
+                                fileSizeString,
+                                token,
+                            );
+                            socket.emit('del_message', { chatId });
+                            Alert.alert('Success', 'File sent successfully!');
+                        } catch (error) {
+                            console.error('Error sending captured image:', error);
+                            Alert.alert('Error', 'Failed to send the captured image.');
+                        }
+                    },
+                },
+            ],
+            { cancelable: true },
+        );
     } catch (error) {
         console.error('Error preparing files:', error);
         Alert.alert('Error', 'Failed to send the files.');
