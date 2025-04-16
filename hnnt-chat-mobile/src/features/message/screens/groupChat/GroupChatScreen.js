@@ -592,7 +592,21 @@ const styles = StyleSheet.create({
     },
 
     fullImage: {
-        width: '90%',
-        height: '80%',
+        width: '95%',
+        height: '95%',
+    },
+
+    inputRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '100%',
+    },
+    inputAnswer: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 10,
+        padding: 10,
+        marginRight: 10,
     },
 });

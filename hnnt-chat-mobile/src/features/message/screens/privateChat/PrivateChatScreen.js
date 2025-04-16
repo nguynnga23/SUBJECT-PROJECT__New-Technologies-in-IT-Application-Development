@@ -28,9 +28,10 @@ import {
     sendMessage,
     sendReaction,
     removeReaction,
-    sendImage,
-    sendFile,
-    downloadFile,
+    prepareImage,
+    downloadImage,
+    prepareFile,
+    downloadAnyFile,
     startRecording,
     stopRecording,
     sendVoiceMessage,
@@ -41,6 +42,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUserIdFromToken } from '../../../../utils/auth';
 import { formatDateTime } from '../../../../utils/formatDateTime';
 import { socket } from '../../../../configs/socket';
+import { set } from 'date-fns';
 
 export default function PrivateChatScreen() {
     const flatListRef = useRef(null);
@@ -53,14 +55,21 @@ export default function PrivateChatScreen() {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const [messageId, setMessageId] = useState(null);
+    const [replyMessage, setReplyMessage] = useState(null);
+    const [replyVisible, setReplyVisible] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    const [modalVisible, setModalVisible] = useState(false);
+    const [modalZoomVisible, setModalZoomVisible] = useState(false);
+    const [modalDownVisible, setModalDownVisible] = useState(false);
+    const [modalDownFileVisible, setModalDownFileVisible] = useState(false);
     const [modalRecordVisible, setModalRecordVisible] = useState(false);
+    const [modalReplyVisible, setModalReplyVisible] = useState(false);
+
     const [isRecording, setIsRecording] = useState(false);
     const [recordingUri, setRecordingUri] = useState(null);
     const [recordingSaved, setRecordingSaved] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
     const [selectedMessage, setSelectedMessage] = useState(null);
     const reactionsList = ['👍', '❤️', '😂', '😮', '😢', '😡'];
     const [reactVisible, setReactVisible] = useState(false);
@@ -173,11 +182,18 @@ export default function PrivateChatScreen() {
     const handleSendMessage = async (content) => {
         Keyboard.dismiss();
         try {
-            const response = await sendMessage(chatId, content, 'text', null, null, null, null, token);
-            socket.emit('send_message', {
-                chatId: chatId,
-                newMessage: response,
-            });
+            const response = await sendMessage(chatId, content, 'text', replyMessage?.id, null, null, null, token);
+            if (replyMessage === null) {
+                socket.emit('send_message', {
+                    chatId: chatId,
+                    newMessage: response,
+                });
+            } else {
+                socket.emit('del_message', {
+                    chatId: chatId,
+                });
+            }
+            setReplyMessage(null);
             // loadMessages();
         } catch (error) {
             console.warn('Error sending message:', error);
@@ -215,10 +231,6 @@ export default function PrivateChatScreen() {
                 Alert.alert('Error', 'Failed to remove reaction.');
             }
         }
-    };
-
-    const sendVoice = async () => {
-        await sendVoiceMessage(recordingUri, setIsRecording, setRecordingUri, setRecordingSaved, messages, setMessages);
     };
 
     function showReactionOptions(messageId) {
@@ -263,7 +275,9 @@ export default function PrivateChatScreen() {
                                             messages,
                                             setMessages,
                                             chatId,
-                                            token
+                                            token,
+                                            setReplyMessage,
+                                            setModalReplyVisible,
                                         )
                                     }
                                 >
@@ -280,8 +294,17 @@ export default function PrivateChatScreen() {
                                             <Text style={styles.recalledMessage}>message had recall</Text>
                                         ) : (
                                             <>
+                                                {item.replyToId !== null && (
+                                                    <View style={styles.replyBox}>
+                                                        <Text style={styles.replyUser}>Replying to {item.replyTo.sender.name}</Text>
+                                                        <Text style={styles.replyMessage}>{item.replyTo.content}</Text>
+                                                    </View>
+                                                )}
+
                                                 {/* Hiển thị nội dung tin nhắn */}
-                                                <Text style={styles.message}>{item.content}</Text>
+                                                {item.type === 'text' && (
+                                                    <Text style={styles.message}>{item.content}</Text>
+                                                )}
 
                                                 {/* Hiển thị file, hình ảnh, hoặc audio nếu có */}
                                                 {item.audioUri && (
@@ -293,23 +316,35 @@ export default function PrivateChatScreen() {
                                                     </TouchableOpacity>
                                                 )}
 
-                                                {item.image && (
-                                                    <TouchableOpacity onPress={() => setSelectedImage(item.image)}>
+                                                {item.type === 'image' && (
+                                                    <TouchableOpacity
+                                                        onPress={() => {
+                                                            setSelectedImage(item.fileName);
+                                                            setModalZoomVisible(true);
+                                                        }}
+                                                        onLongPress={() => {
+                                                            setSelectedImage(item.fileName);
+                                                            setModalDownVisible(true);
+                                                        }}
+                                                    >
                                                         <Image
-                                                            source={{ uri: item.image }}
+                                                            source={{ uri: item.fileName }}
                                                             style={{ width: 200, height: 200, borderRadius: 10 }}
                                                         />
                                                     </TouchableOpacity>
                                                 )}
 
-                                                {item.fileUri && (
+                                                {item.type === 'file' && (
                                                     <TouchableOpacity
-                                                        onPress={() => downloadFile(item.fileUri, item.fileName)}
+                                                        onLongPress={() => {
+                                                            setSelectedFile(item.fileName);
+                                                            setModalDownFileVisible(true);
+                                                        }}
                                                         style={styles.fileContainer}
                                                     >
                                                         <Ionicons name="document-text-outline" size={24} color="blue" />
                                                         <Text style={styles.fileName}>
-                                                            {item.fileName} ({(item.fileSize / 1024).toFixed(2)} KB)
+                                                            {item.content} {item.fileSize}
                                                         </Text>
                                                     </TouchableOpacity>
                                                 )}
@@ -319,18 +354,6 @@ export default function PrivateChatScreen() {
                                         {/* Hiển thị reaction và thời gian */}
                                         <View style={styles.timeReactionContainer}>
                                             <Text style={styles.time}>{formatDateTime(item.time)}</Text>
-
-                                            {/* {hasReactions && (
-                                                <View style={styles.reactionContainer}>
-                                                    {groupedReactions.map((reaction, index) => (
-                                                        <View key={index} style={styles.reactionItem}>
-                                                            <Text style={styles.reactionText}>
-                                                                {reaction.reaction} {reaction.sum}
-                                                            </Text>
-                                                        </View>
-                                                    ))}
-                                                </View>
-                                            )} */}
                                         </View>
 
                                         {hasReactions && (
@@ -364,41 +387,17 @@ export default function PrivateChatScreen() {
                                 </TouchableOpacity>
                             );
                         }}
+                        keyboardShouldPersistTaps="handled" // Đảm bảo sự kiện nhấn không chặn cuộn
+                        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })} // Cuộn xuống cuối khi nội dung thay đổi
                     />
                     <ChatInputContainer
                         message={message}
                         setMessage={setMessage}
                         onSendMessage={() => handleSendMessage(message)}
-                        onSendFile={() => sendFile(messages, setMessages)}
-                        onSendImage={() => sendImage(messages, setMessages)}
-                        onOpenVoiceRecorder={() => setModalRecordVisible(true)}
+                        onSendFile={() => prepareFile(chatId, token)}
+                        onSendImage={() => prepareImage(chatId, token)}
+                        onOpenVoiceRecorder={() => setModalRecordVisible(false)}
                     />
-
-                    {/* Modal reaction detail */}
-                    <Modal visible={reactionDetailsVisible} transparent={true} animationType="fade">
-                        <TouchableWithoutFeedback onPress={() => setReactionDetailsVisible(false)}>
-                            <View style={styles.modalContainer}>
-                                <View style={styles.reactionDetailsModal}>
-                                    <Text style={styles.modalTitle}>Reaction Details</Text>
-                                    {selectedReaction?.map((reaction, index) => (
-                                        <View key={index} style={styles.reactionDetailItem}>
-                                            <Image
-                                                source={{ uri: reaction.user.avatar }}
-                                                style={styles.userAvatar}
-                                            />
-                                            <Text style={styles.userName}>{reaction.user.name}</Text>
-                                            <TouchableOpacity
-                                                style={styles.removeButton}
-                                                onPress={() => handleRemoveReaction()}
-                                            >
-                                                <Text style={styles.removeButtonText}>Remove</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    ))}
-                                </View>
-                            </View>
-                        </TouchableWithoutFeedback>
-                    </Modal>
 
                     {/* Modal ghi âm */}
                     <Modal animationType="slide" transparent={true} visible={modalRecordVisible}>
@@ -451,13 +450,69 @@ export default function PrivateChatScreen() {
                     </Modal>
 
                     {/* Modal hiển thị ảnh lớn */}
-                    <Modal visible={!!selectedImage} transparent={true} animationType="fade">
+                    <Modal visible={modalZoomVisible} transparent={true} animationType="fade">
                         <TouchableOpacity
                             style={styles.modalContainer}
-                            onPress={() => setSelectedImage(null)} // Đóng modal khi nhấn ra ngoài
+                            onPress={() => setModalZoomVisible(false)} // Đóng modal khi nhấn ra ngoài
                         >
                             <Image source={{ uri: selectedImage }} style={styles.fullImage} resizeMode="contain" />
                         </TouchableOpacity>
+                    </Modal>
+
+                    {/* Modal tải ảnh */}
+                    <Modal visible={modalDownVisible} transparent={true} animationType="fade">
+                        <TouchableWithoutFeedback onPress={() => setModalDownVisible(false)}>
+                            <View style={styles.modalContainer}>
+                                <View style={styles.optionModal}>
+                                    <Text style={styles.modalTitle}>Download this image?</Text>
+                                    <View style={styles.modalButtonContainer}>
+                                        <TouchableOpacity
+                                            style={styles.modalButton}
+                                            onPress={() => {
+                                                downloadImage(selectedImage); // Gọi hàm tải ảnh
+                                                setModalDownVisible(false); // Đóng modal
+                                            }}
+                                        >
+                                            <Text style={styles.modalButtonText}>Download</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            style={[styles.modalButton, styles.cancelButton]}
+                                            onPress={() => setModalDownVisible(false)} // Đóng modal
+                                        >
+                                            <Text style={styles.modalButtonText}>Cancel</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </Modal>
+
+                    {/* Modal tải file */}
+                    <Modal visible={modalDownFileVisible} transparent={true} animationType="fade">
+                        <TouchableWithoutFeedback onPress={() => setModalDownFileVisible(false)}>
+                            <View style={styles.modalContainer}>
+                                <View style={styles.optionModal}>
+                                    <Text style={styles.modalTitle}>Download this file?</Text>
+                                    <View style={styles.modalButtonContainer}>
+                                        <TouchableOpacity
+                                            style={styles.modalButton}
+                                            onPress={() => {
+                                                downloadAnyFile(selectedFile);
+                                                setModalDownFileVisible(false);
+                                            }}
+                                        >
+                                            <Text style={styles.modalButtonText}>Download</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            style={[styles.modalButton, styles.cancelButton]}
+                                            onPress={() => setModalDownFileVisible(false)}
+                                        >
+                                            <Text style={styles.modalButtonText}>Cancel</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </View>
+                        </TouchableWithoutFeedback>
                     </Modal>
 
                     {/* Modal hiển thị reaction */}
@@ -495,6 +550,69 @@ export default function PrivateChatScreen() {
                             </View>
                         </TouchableWithoutFeedback>
                     </Modal>
+
+                    {/* Modal reaction detail */}
+                    <Modal visible={reactionDetailsVisible} transparent={true} animationType="fade">
+                        <TouchableWithoutFeedback onPress={() => setReactionDetailsVisible(false)}>
+                            <View style={styles.modalContainer}>
+                                <View style={styles.reactionDetailsModal}>
+                                    <Text style={styles.modalTitle}>Reaction Details</Text>
+                                    {selectedReaction?.map((reaction, index) => (
+                                        <View key={index} style={styles.reactionDetailItem}>
+                                            <Image
+                                                source={{ uri: reaction.user.avatar }}
+                                                style={styles.userAvatar}
+                                            />
+                                            <Text style={styles.userName}>{reaction.user.name}</Text>
+
+                                            {reaction.user.id === currentUserId && (
+                                                <TouchableOpacity
+                                                    style={styles.removeButton}
+                                                    onPress={() => handleRemoveReaction()}
+                                                >
+                                                    <Text style={styles.removeButtonText}>Remove</Text>
+                                                </TouchableOpacity>
+                                            )}
+                                        </View>
+                                    ))}
+                                </View>
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </Modal>
+
+                    <Modal visible={modalReplyVisible} animationType="slide" transparent={true}>
+                        <TouchableWithoutFeedback onPress={() => setModalReplyVisible(false)}>
+                            <View style={styles.modalContainer}>
+                                <View style={styles.modalReplyContent}>
+                                    {replyMessage && (
+                                        <View style={styles.replyBox}>
+                                            <Text>{console.log(replyMessage)}</Text>
+                                            <Text style={styles.replyUser}>Replying to {replyMessage.sender.name}</Text>
+                                            <Text style={styles.replyMessage}>{replyMessage.content}</Text>
+                                        </View>
+                                    )}
+                                    <View style={styles.inputRow}>
+                                        <TextInput
+                                            style={styles.inputAnswer}
+                                            placeholder="Enter message..."
+                                            value={message}
+                                            onChangeText={setMessage}
+                                        />
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                handleSendMessage(message);
+                                                setMessage('');
+                                                setModalReplyVisible(false);
+                                            }}
+                                        >
+                                            <Icon name="send" size={30} color="#007AFF" />
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </Modal>
+
                 </SafeAreaProvider>
             </View>
         </KeyboardAvoidingView>
@@ -630,6 +748,11 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
 
+    fullImage: {
+        width: '95%',
+        height: '95%',
+    },
+
     reactionDetailItem: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -677,7 +800,7 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 10,
         marginVertical: 5,
-        maxWidth: '80%',
+        maxWidth: 'auto',
     },
 
     fileName: {
@@ -690,5 +813,75 @@ const styles = StyleSheet.create({
         padding: 8,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+
+    optionModal: {
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+        width: '80%',
+    },
+
+    modalButtonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 20,
+    },
+
+    modalButton: {
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        backgroundColor: '#007AFF',
+        borderRadius: 5,
+        marginHorizontal: 10,
+    },
+
+    cancelButton: {
+        backgroundColor: '#FF3B30',
+    },
+
+    modalButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+
+    //reply
+    modalReplyContent: {
+        width: '90%',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+        alignItems: 'center',
+        elevation: 5,
+    },
+    replyBox: {
+        width: '100%',
+        padding: 10,
+        backgroundColor: '#e0e0e0',
+        borderRadius: 8,
+        marginBottom: 10,
+    },
+    replyUser: {
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    replyMessage: {
+        color: '#555',
+        fontStyle: 'italic',
+    },
+    inputRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '100%',
+    },
+    inputAnswer: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 10,
+        padding: 10,
+        marginRight: 10,
     },
 });
