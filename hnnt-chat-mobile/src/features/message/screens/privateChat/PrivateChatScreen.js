@@ -36,7 +36,10 @@ import {
     sendVoiceMessage,
     playAudio,
 } from '../../services/privateChat/PrivateChatService';
+import { getPinMess } from '../../services/privateChat/PrivateChatInfoService';
+
 import { handleLongPressMessage, MessageOptionsModal } from '../../components/MessageOptions';
+import PinnedMessages from '../../components/PinnedMessages';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUserIdFromToken } from '../../../../utils/auth';
@@ -77,6 +80,8 @@ export default function PrivateChatScreen() {
     const [selectedReaction, setSelectedReaction] = useState(null);
     const [reactionDetailsVisible, setReactionDetailsVisible] = useState(false);
 
+    const [pinMess, setPinMess] = useState([]);
+
     useEffect(() => {
         const parentNav = navigation.getParent();
         parentNav?.setOptions({ tabBarStyle: { display: 'none' }, headerShown: false });
@@ -104,6 +109,13 @@ export default function PrivateChatScreen() {
 
             const data = await fetchMessages(chatId, token); // Gọi API để lấy danh sách tin nhắn
             setMessages(data);
+
+            try {
+                const pin_Mess = await getPinMess(chatId, token);
+                setPinMess(pin_Mess);
+            } catch (error) {
+                setPinMess([]);
+            }
 
             // Cuộn đến tin nhắn cuối cùng
             setTimeout(() => {
@@ -165,6 +177,20 @@ export default function PrivateChatScreen() {
         };
     }, [chatId]);
 
+    //pin message
+    useEffect(() => {
+        const handleRender = ({ chatId: receivedChatId }) => {
+            if (chatId !== receivedChatId) {
+                return;
+            }
+            loadMessages();
+        };
+        socket.on('receive_pin_message', handleRender);
+        return () => {
+            socket.off('receive_pin_message', handleRender);
+        };
+    }, [chatId]);
+
     useFocusEffect(
         useCallback(() => {
             loadMessages();
@@ -222,7 +248,7 @@ export default function PrivateChatScreen() {
             try {
                 const userId = getUserIdFromToken(token);
                 await removeReaction(selectedMessage, userId, token);
-                socket.emit('reaction_message', {
+                socket.emit('del_message', {
                     chatId: chatId,
                 });
                 setReactionDetailsVisible(false); // Đóng modal sau khi xóa
@@ -261,6 +287,8 @@ export default function PrivateChatScreen() {
             <View style={styles.container}>
                 <SafeAreaProvider>
                     <>
+                        {/* Thanh pinned messages */}
+                        <PinnedMessages pinMess={pinMess} setPinMess={setPinMess} token={token} chatId={chatId} />
                         <FlatList
                             ref={flatListRef}
                             data={messages}

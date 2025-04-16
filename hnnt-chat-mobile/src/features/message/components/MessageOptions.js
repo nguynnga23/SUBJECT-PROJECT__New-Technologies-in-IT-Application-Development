@@ -71,6 +71,7 @@ export async function handleLongPressMessage(messageId, messages, setMessages, c
                     try {
                         if (!messageId || !token) return;
                         await pinMessage(messageId, token);
+                        socket.emit("pin_message", { chatId });
                         showMessage("Success", "Pinned!");
                     } catch {
                         showMessage("Error", "Failed to pin the message.");
