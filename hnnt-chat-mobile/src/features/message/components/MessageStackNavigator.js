@@ -53,13 +53,14 @@ export default function MessageStackNavigator() {
                             navigation={navigation}
                             chatName={route.params?.chatName}
                             chatId={route.params?.chatId}
+                            avatarUri={route.params?.avatar}
                             actions={[
                                 { icon: 'phone', onPress: () => navigation.navigate('PrivateVoiceCallScreen') },
                                 { icon: 'video', onPress: () => navigation.navigate('PrivateCallScreen') },
                                 {
                                     icon: 'info',
                                     onPress: () =>
-                                        navigation.navigate('PrivateChatInfoScreen', { chatId: route.params?.chatId }),
+                                        navigation.navigate('PrivateChatInfoScreen', { chatId: route.params?.chatId, chatName: route.params?.chatName, avatar: route.params?.avatarUri }),
                                 },
                             ]}
                         />

@@ -2,14 +2,18 @@ import React, { useEffect, useState, useCallback } from "react";
 import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, Alert, RefreshControl } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getUserIdFromToken } from "../../../utils/auth";
 import { formatDateTime } from "../../../utils/formatDateTime";
 import { fetchChats } from "../services/MessageChanelService"; // Import hàm fetchChats
 
 const ChatListScreen = () => {
   const navigation = useNavigation();
   const [chats, setChats] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [stateAvatar, setStateAvatar] = useState(null);
+
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false); // State cho tính năng làm mới
+  const [refreshing, setRefreshing] = useState(false);
 
   const loadChats = async () => {
     try {
@@ -20,6 +24,7 @@ const ChatListScreen = () => {
       }
       const data = await fetchChats(token); // Gọi API để lấy danh sách chat
       setChats(data);
+      setCurrentUser(await getUserIdFromToken(token));
     } catch (error) {
       Alert.alert('Error', 'Failed to fetch chats.');
     } finally {
@@ -30,7 +35,7 @@ const ChatListScreen = () => {
 
   useEffect(() => {
     loadChats();
-  }, []);
+  }, [chats]);
 
   useFocusEffect(
     useCallback(() => {
@@ -41,33 +46,89 @@ const ChatListScreen = () => {
   const handleRefresh = useCallback(() => {
     setRefreshing(true); // Bắt đầu trạng thái làm mới
     loadChats(); // Gọi lại API để làm mới dữ liệu
-  }, []);
+  }, [chats]);
 
-  const handlePress = (item) => {
+  const handlePress = (item, name) => {
     if (item.isGroup) {
       navigation.navigate("GroupChatScreen", { chatId: item.id, chatName: item.name });
     } else {
-      navigation.navigate("PrivateChatScreen", { chatId: item.id, chatName: item.name });
+      navigation.navigate("PrivateChatScreen", { chatId: item.id, chatName: name, avatarUri: stateAvatar });
     }
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.item} onPress={() => handlePress(item)}>
-      <Image
-        source={{ uri: item.avatar || "https://img.freepik.com/premium-vector/chat-vector-icon_676179-133.jpg" }}
-        style={styles.avatar}
-      />
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.time}>{item.messages.length > 0 ? formatDateTime(item.messages[0].time) : ""}</Text>
+  const sortedData = chats.slice().sort((a, b) => {
+    const timeA = a.messages?.[0]?.time ? new Date(a.messages[0].time).getTime() : 0;
+    const timeB = b.messages?.[0]?.time ? new Date(b.messages[0].time).getTime() : 0;
+    return timeB - timeA; // giảm dần
+  });
+
+  const renderItem = ({ item }) => {
+    let avatar = item.avatar;
+    let name = item.name;
+
+    if (!item.isGroup) {
+      const otherParticipant = item.participants.find(
+        (p) => p.account.id !== currentUser
+      );
+      if (otherParticipant) {
+        avatar = otherParticipant.account.avatar;
+        setStateAvatar(avatar);
+        name = otherParticipant.account.name;
+      }
+    }
+
+    const lastMessage = item.messages?.[0];
+
+    let content = "No messages yet";
+
+    if (lastMessage) {
+      const isMine = lastMessage.senderId === currentUser;
+
+      const isDestroyed = lastMessage.destroy === true;
+      const isDeleted =
+        Array.isArray(lastMessage.deletedBy) &&
+        lastMessage.deletedBy.includes(currentUser);
+
+      if (isDestroyed || isDeleted) {
+        content = "This message has been deleted or recalled";
+      } else {
+        let rawContent = "";
+
+        if (lastMessage.type === "file" || lastMessage.type === "image") {
+          rawContent = lastMessage.fileName || "[File]";
+        } else {
+          rawContent = lastMessage.content || "";
+          if (rawContent.length > 30) {
+            rawContent = rawContent.slice(0, 30) + "...";
+          }
+        }
+
+        content = isMine ? `Me: ${rawContent}` : rawContent;
+      }
+    }
+
+    return (
+      <TouchableOpacity style={styles.item} onPress={() => handlePress(item, name)}>
+        <Image
+          source={{
+            uri:
+              avatar ||
+              "https://img.freepik.com/premium-vector/chat-vector-icon_676179-133.jpg",
+          }}
+          style={styles.avatar}
+        />
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Text style={styles.name}>{name}</Text>
+            <Text style={styles.time}>
+              {lastMessage?.time ? formatDateTime(lastMessage.time) : ""}
+            </Text>
+          </View>
+          <Text style={styles.message}>{content}</Text>
         </View>
-        <Text style={styles.message}>
-          {item.messages.length > 0 ? item.messages[0].content : "No messages yet"}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   if (loading) {
     return (
@@ -80,7 +141,7 @@ const ChatListScreen = () => {
   return (
     <View style={styles.container}>
       <FlatList
-        data={chats}
+        data={sortedData}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
         refreshControl={

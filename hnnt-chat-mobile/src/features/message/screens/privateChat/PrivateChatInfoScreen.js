@@ -28,9 +28,7 @@ import { getUserIdFromToken } from '../../../../utils/auth';
 export default function PrivateChatInfoScreen() {
     const navigation = useNavigation();
     const route = useRoute();
-    const chatId = route.params?.chatId || 'null';
-    const [newGroupName, setNewGroupName] = useState('');
-    const [avatar, setAvatar] = useState(null);
+    const { chatId, chatName, avatar } = route.params;
     // const [userRole, setUserRole] = useState('');
     const [pinMess, setPinMess] = useState([]);
     const [isMuted, setIsMuted] = useState(false);
@@ -41,13 +39,12 @@ export default function PrivateChatInfoScreen() {
 
     const [userId, setUserId] = useState('');
     const [receiverId, setReceiverId] = useState('');
+    const [data, setData] = useState();
 
     const fetchChatInfo = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
             const chatInfo = await fetchChat(chatId, token); // Replace with actual token
-            setNewGroupName(chatInfo.name);
-            setAvatar(chatInfo.avatar);
 
             const uid = getUserIdFromToken(token);
             setUserId(uid);
@@ -74,6 +71,7 @@ export default function PrivateChatInfoScreen() {
                     setPinMess(null); // Đặt giá trị mặc định nếu xảy ra lỗi khác
                 }
             }
+            setData(chatInfo);
         } catch (error) {
             console.error('Error fetching chat info:', error);
         }
@@ -133,7 +131,7 @@ export default function PrivateChatInfoScreen() {
             <SafeAreaProvider>
                 <View style={styles.chatInfo}>
                     <Image source={{ uri: avatar }} style={styles.avatar} />
-                    <Text style={styles.recipientName}>{newGroupName}</Text>
+                    <Text style={styles.recipientName}>{chatName}</Text>
                 </View>
 
                 {/* Actions */}
