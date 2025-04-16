@@ -35,7 +35,6 @@ import {
     startRecording,
     stopRecording,
     sendVoiceMessage,
-    playAudio,
 } from '../../services/privateChat/PrivateChatService';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -43,6 +42,7 @@ import { getUserIdFromToken } from '../../../../utils/auth';
 import { formatDateTime } from '../../../../utils/formatDateTime';
 import { socket } from '../../../../configs/socket';
 import { set } from 'date-fns';
+import { Audio } from 'expo-av';
 
 export default function PrivateChatScreen() {
     const flatListRef = useRef(null);
@@ -256,6 +256,45 @@ export default function PrivateChatScreen() {
         return Object.entries(grouped).map(([reaction, sum]) => ({ reaction, sum }));
     };
 
+    const playAudio = async (audioUri) => {
+        try {
+            const { sound } = await Audio.Sound.createAsync({ uri: audioUri });
+            await sound.playAsync();
+        } catch (error) {
+            console.warn('Error playing audio:', error);
+            Alert.alert('Error', 'Failed to play audio.');
+        }
+    };
+
+    const handleSendVoiceMessage = async () => {
+        try {
+            if (recordingUri) {
+                const response = await sendMessage(
+                    chatId,
+                    '[Voice Message]',
+                    'audio',
+                    null,
+                    recordingUri,
+                    null,
+                    null,
+                    token,
+                );
+                // Ensure the audioUri is included in the message object
+                response.audioUri = recordingUri;
+
+                socket.emit('send_message', {
+                    chatId: chatId,
+                    newMessage: response,
+                });
+                setRecordingUri(null); // Clear the recording URI after sending
+                setModalRecordVisible(false); // Close the modal
+            }
+        } catch (error) {
+            console.warn('Error sending voice message:', error);
+            Alert.alert('Error', 'Failed to send voice message.');
+        }
+    };
+
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <View style={styles.container}>
@@ -350,6 +389,16 @@ export default function PrivateChatScreen() {
                                                         </Text>
                                                     </TouchableOpacity>
                                                 )}
+
+                                                {item.type === 'audio' && (
+                                                    <TouchableOpacity
+                                                        onPress={() => playAudio(item.fileName)}
+                                                        style={styles.audioMessageContainer}
+                                                    >
+                                                        <Ionicons name="play-circle" size={30} color="blue" />
+                                                        <Text style={styles.audioMessageText}>Voice Message</Text>
+                                                    </TouchableOpacity>
+                                                )}
                                             </>
                                         )}
 
@@ -404,55 +453,56 @@ export default function PrivateChatScreen() {
                         onSendMessage={() => handleSendMessage(message)}
                         onSendFile={() => prepareFile(chatId, token)}
                         onSendImage={() => prepareImage(chatId, token)}
-                        onOpenVoiceRecorder={() => setModalRecordVisible(false)}
+                        onOpenVoiceRecorder={() => setModalRecordVisible(true)}
                     />
 
                     {/* Modal ghi âm */}
                     <Modal animationType="slide" transparent={true} visible={modalRecordVisible}>
-                        <View style={styles.modalRecordContainer}>
-                            <Text style={styles.modalRecordTitle}>Voice Recorder</Text>
+                        <View style={styles.modalContainer}>
+                            <View style={styles.modalRecordContent}>
+                                <Text style={styles.modalRecordTitle}>Voice Recorder</Text>
 
-                            {/* Trạng thái ghi âm */}
-                            {isRecording ? <Text style={styles.recordingText}>Recording...</Text> : null}
+                                {/* Recording status */}
+                                {isRecording ? <Text style={styles.recordingText}>Recording...</Text> : null}
 
-                            <View style={styles.buttonContainer}>
-                                {/* Bắt đầu ghi âm */}
-                                <TouchableOpacity
-                                    style={styles.button}
-                                    onPress={() => startRecording(setIsRecording)}
-                                    disabled={isRecording}
-                                >
-                                    <Text style={styles.buttonText}>Start</Text>
-                                </TouchableOpacity>
+                                <View style={styles.buttonContainer}>
+                                    {/* Start recording */}
+                                    <TouchableOpacity
+                                        style={[styles.button, isRecording && styles.disabledButton]}
+                                        onPress={() => startRecording(setIsRecording)}
+                                        disabled={isRecording}
+                                    >
+                                        <Text style={styles.buttonText}>Start</Text>
+                                    </TouchableOpacity>
 
-                                {/* Dừng ghi âm */}
-                                <TouchableOpacity
-                                    style={styles.button}
-                                    onPress={() => stopRecording(setIsRecording, setRecordingUri, setRecordingSaved)}
-                                    disabled={!isRecording}
-                                >
-                                    <Text style={styles.buttonText}>Stop</Text>
-                                </TouchableOpacity>
+                                    {/* Stop recording */}
+                                    <TouchableOpacity
+                                        style={[styles.button, !isRecording && styles.disabledButton]}
+                                        onPress={() =>
+                                            stopRecording(setIsRecording, setRecordingUri, setRecordingSaved)
+                                        }
+                                        disabled={!isRecording}
+                                    >
+                                        <Text style={styles.buttonText}>Stop</Text>
+                                    </TouchableOpacity>
 
-                                {/* Gửi tin nhắn ghi âm */}
-                                <TouchableOpacity
-                                    style={styles.button}
-                                    onPress={() => {
-                                        sendVoice();
-                                        setModalRecordVisible(false);
-                                    }}
-                                    disabled={!recordingUri}
-                                >
-                                    <Text style={styles.buttonText}>Send</Text>
-                                </TouchableOpacity>
+                                    {/* Send voice message */}
+                                    <TouchableOpacity
+                                        style={[styles.button, !recordingUri && styles.disabledButton]}
+                                        onPress={handleSendVoiceMessage}
+                                        disabled={!recordingUri}
+                                    >
+                                        <Text style={styles.buttonText}>Send</Text>
+                                    </TouchableOpacity>
 
-                                {/* Hủy ghi âm */}
-                                <TouchableOpacity
-                                    style={styles.cancelButton}
-                                    onPress={() => setModalRecordVisible(false)}
-                                >
-                                    <Text style={styles.buttonText}>Cancel</Text>
-                                </TouchableOpacity>
+                                    {/* Cancel recording */}
+                                    <TouchableOpacity
+                                        style={styles.cancelButton}
+                                        onPress={() => setModalRecordVisible(false)}
+                                    >
+                                        <Text style={styles.buttonText}>Cancel</Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
                         </View>
                     </Modal>
@@ -887,5 +937,46 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 10,
         marginRight: 10,
+    },
+    modalRecordContent: {
+        width: '90%',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+        alignItems: 'center',
+        elevation: 5,
+    },
+    recordingText: {
+        fontSize: 16,
+        color: 'red',
+        marginVertical: 10,
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 20,
+    },
+    button: {
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        backgroundColor: '#007AFF',
+        borderRadius: 5,
+        marginHorizontal: 5,
+    },
+    disabledButton: {
+        backgroundColor: '#ccc',
+    },
+    audioMessageContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f0f0f0',
+        padding: 10,
+        borderRadius: 10,
+        marginVertical: 5,
+    },
+    audioMessageText: {
+        marginLeft: 10,
+        fontSize: 14,
+        color: '#007AFF',
     },
 });
