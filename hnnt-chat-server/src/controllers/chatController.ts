@@ -1,7 +1,6 @@
 import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthRequest } from '../types/authRequest';
-// import { io } from '../utils/socket';
 
 const prisma = new PrismaClient();
 

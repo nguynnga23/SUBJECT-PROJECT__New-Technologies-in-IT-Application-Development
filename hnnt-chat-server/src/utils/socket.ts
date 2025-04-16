@@ -34,6 +34,20 @@ export const initSocket = (server: HttpServer) => {
             io.emit('render_message', { chatId });
         });
 
+        socket.on('friend_request_accepted', ({ userId, friendId }) => {
+            console.log(userId, friendId);
+            io.emit('update_friend_list', { userId, friendId });
+        });
+
+        socket.on('friend_request_sent', ({ receiverId }) => {
+            console.log(receiverId);
+            io.emit('notify_friend_request', { receiverId });
+        });
+
+        socket.on('friend_request_accepted', ({ requestId }) => {
+            io.emit('notify_friend_request_accepted', { requestId });
+        });
+
         socket.on('disconnect', () => {
             console.log(`❌ Client disconnected: ${socket.id}`);
         });

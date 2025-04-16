@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { localhost } from '../../../utils/localhosts';
+import { socket } from '../../../configs/socket';
 const BASE_URL = `http://${localhost}/api/friends`; // Ensure the correct port is used
 
 const friendService = {
@@ -48,6 +49,7 @@ const friendService = {
                     },
                 },
             );
+            socket.emit('friend_request_sent', { receiverId }); // Notify via socket
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -82,6 +84,7 @@ const friendService = {
                     },
                 },
             );
+            socket.emit('friend_request_accepted', { requestId }); // Notify via socket
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
