@@ -29,7 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Tạo HTTP server từ Express
 const server = createServer(app);
-// initSocket(server);
+initSocket(server);
 
 // Routes
 
@@ -50,6 +50,6 @@ app.use('/api/groups', groupChatManageRouter);
 app.use('/api/loggedin-devices', loggedInDeviceRouter);
 app.use('/api/contacts', contactRouter);
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server đang chạy trên cổng ${PORT}`);
 });
