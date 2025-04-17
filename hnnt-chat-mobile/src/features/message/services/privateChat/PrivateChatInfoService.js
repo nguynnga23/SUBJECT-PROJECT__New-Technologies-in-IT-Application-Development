@@ -1,6 +1,7 @@
 import { Alert } from 'react-native';
 import axios from 'axios';
 import { localhost } from '../../../../utils/localhosts'
+import { socket } from '../../../../configs/socket';
 
 const API_URL = `http://${localhost}/api`;
 
@@ -46,9 +47,10 @@ export const unPinMess = async (messageId, token) => {
     }
 };
 
+//const { chatId } = req.params;
 export const deleteAllMessage = async (chatId, token) => {
     try {
-        const response = await axios.put(`${API_URL}/chats/${chatId}/all-delete`, {
+        const response = await axios.put(`${API_URL}/chats/${chatId}/all-delete`, {}, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },

@@ -25,7 +25,6 @@ import { Video } from 'expo-av';
 
 import {
     fetchMessages,
-    handleLongPressMessage,
     sendMessage,
     sendReaction,
     removeReaction,
@@ -37,6 +36,10 @@ import {
     stopRecording,
     sendVoiceMessage,
 } from '../../services/privateChat/PrivateChatService';
+import { getPinMess } from '../../services/privateChat/PrivateChatInfoService';
+
+import { handleLongPressMessage, MessageOptionsModal } from '../../components/MessageOptions';
+import PinnedMessages from '../../components/PinnedMessages';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUserIdFromToken } from '../../../../utils/auth';
@@ -88,6 +91,8 @@ export default function PrivateChatScreen() {
 
     const [selectedReaction, setSelectedReaction] = useState(null);
     const [reactionDetailsVisible, setReactionDetailsVisible] = useState(false);
+
+    const [pinMess, setPinMess] = useState([]);
     const [selectedVideo, setSelectedVideo] = useState(null);
     const [modalVideoVisible, setModalVideoVisible] = useState(false);
 
@@ -118,6 +123,13 @@ export default function PrivateChatScreen() {
 
             const data = await fetchMessages(chatId, token); // Gọi API để lấy danh sách tin nhắn
             setMessages(data);
+
+            try {
+                const pin_Mess = await getPinMess(chatId, token);
+                setPinMess(pin_Mess);
+            } catch (error) {
+                setPinMess([]);
+            }
 
             // Cuộn đến tin nhắn cuối cùng
             setTimeout(() => {
@@ -179,6 +191,20 @@ export default function PrivateChatScreen() {
         };
     }, [chatId]);
 
+    //pin message
+    useEffect(() => {
+        const handleRender = ({ chatId: receivedChatId }) => {
+            if (chatId !== receivedChatId) {
+                return;
+            }
+            loadMessages();
+        };
+        socket.on('receive_pin_message', handleRender);
+        return () => {
+            socket.off('receive_pin_message', handleRender);
+        };
+    }, [chatId]);
+
     useFocusEffect(
         useCallback(() => {
             loadMessages();
@@ -236,7 +262,7 @@ export default function PrivateChatScreen() {
             try {
                 const userId = getUserIdFromToken(token);
                 await removeReaction(selectedMessage, userId, token);
-                socket.emit('reaction_message', {
+                socket.emit('del_message', {
                     chatId: chatId,
                 });
                 setReactionDetailsVisible(false); // Đóng modal sau khi xóa
@@ -303,18 +329,24 @@ export default function PrivateChatScreen() {
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <View style={styles.container}>
                 <SafeAreaProvider>
-                    <FlatList
-                        ref={flatListRef}
-                        data={Object.entries(groupMessagesByDate(messages))} // Group messages by date
-                        keyExtractor={([date]) => date}
-                        renderItem={({ item: [date, messagesForDate] }) => (
-                            <>
-                                <View style={{ alignItems: 'center' }}>
-                                    <Text style={styles.dateHeader}>{date}</Text>
-                                </View>
-                                {messagesForDate.map((item) => (
+                    <>
+                        {/* Thanh pinned messages */}
+                        <PinnedMessages
+                            pinMess={pinMess}
+                            setPinMess={setPinMess}
+                            token={token}
+                            chatId={chatId}
+                            flatListRef={flatListRef}
+                        />
+                        <FlatList
+                            ref={flatListRef}
+                            data={messages}
+                            keyExtractor={(item) => item.id.toString()}
+                            renderItem={({ item }) => {
+                                const hasReactions = item.reactions && item.reactions.length > 0;
+                                const groupedReactions = hasReactions ? groupReactions(item.reactions) : [];
+                                return (
                                     <TouchableOpacity
-                                        key={item.id}
                                         onLongPress={() =>
                                             handleLongPressMessage(
                                                 item.id,
@@ -335,12 +367,11 @@ export default function PrivateChatScreen() {
                                                     : styles.otherMessage,
                                             ]}
                                         >
-                                            {/* Only show sender name if the message is not from the current user */}
-                                            {item.senderId !== currentUserId && (
-                                                <Text style={styles.sender}>{item.sender.name}</Text>
-                                            )}
+                                            <Text style={styles.sender}>{item.sender.name}</Text>
+
+                                            {/* Kiểm tra nếu tin nhắn bị thu hồi */}
                                             {item.destroy ? (
-                                                <Text style={styles.recalledMessage}>Message recalled</Text>
+                                                <Text style={styles.recalledMessage}>message had recall</Text>
                                             ) : (
                                                 <>
                                                     {item.replyToId !== null && (
@@ -432,15 +463,29 @@ export default function PrivateChatScreen() {
                                             )}
 
                                             {/* Hiển thị reaction và thời gian */}
-                                            <View style={styles.timeReactionContainer}>
-                                                <Text style={styles.time}>
-                                                    {formatDateTime(item.time).split(' ')[1].slice(0, 5)}
-                                                </Text>
+                                            <View style={{ flexDirection: 'row' }}>
+                                                <View style={styles.timeReactionContainer}>
+                                                    <Text style={styles.time}>
+                                                        {formatDateTime(item.time).split(' ')[1].slice(0, 5)}
+                                                    </Text>
+                                                </View>
+
+                                                {!item.destroy && (
+                                                    <TouchableOpacity
+                                                        onPress={() => {
+                                                            showReactionOptions(item.id);
+                                                            setMessageId(item.id);
+                                                        }}
+                                                        style={{ justifyContent: 'flex-end', marginLeft: '10' }}
+                                                    >
+                                                        <FontAwesome name="smile-o" size={20} color="gray" />
+                                                    </TouchableOpacity>
+                                                )}
                                             </View>
 
-                                            {item.reactions && item.reactions.length > 0 && (
+                                            {hasReactions && !item.destroy && (
                                                 <View style={styles.reactionContainer}>
-                                                    {groupReactions(item.reactions).map((reaction, index) => (
+                                                    {groupedReactions.map((reaction, index) => (
                                                         <TouchableOpacity
                                                             key={index}
                                                             style={styles.reactionItem}
@@ -459,247 +504,241 @@ export default function PrivateChatScreen() {
                                                     ))}
                                                 </View>
                                             )}
-
-                                            {!item.destroy && (
-                                                <TouchableOpacity
-                                                    onPress={() => {
-                                                        showReactionOptions(item.id);
-                                                        setMessageId(item.id);
-                                                    }}
-                                                    style={{ position: 'absolute', right: 2, bottom: 12 }}
-                                                >
-                                                    <FontAwesome name="smile-o" size={20} color="gray" />
-                                                </TouchableOpacity>
-                                            )}
                                         </View>
                                     </TouchableOpacity>
-                                ))}
-                            </>
-                        )}
-                        keyboardShouldPersistTaps="handled" // Đảm bảo sự kiện nhấn không chặn cuộn
-                        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })} // Cuộn xuống cuối khi nội dung thay đổi
-                    />
-                    <ChatInputContainer
-                        message={message}
-                        setMessage={setMessage}
-                        onSendMessage={() => handleSendMessage(message)}
-                        onSendFile={() => prepareFile(chatId, token)}
-                        onSendImage={() => prepareImage(chatId, token)}
-                        onSendVoiceMessage={handleSendVoiceMessage}
-                    />
+                                );
+                            }}
+                            initialNumToRender={20}
+                            keyboardShouldPersistTaps="handled" // Đảm bảo sự kiện nhấn không chặn cuộn
+                            onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })} // Cuộn xuống cuối khi nội dung thay đổi
+                        />
+                        <ChatInputContainer
+                            message={message}
+                            setMessage={setMessage}
+                            onSendMessage={() => handleSendMessage(message)}
+                            onSendFile={() => prepareFile(chatId, token, replyMessage?.id)}
+                            onSendImage={() => prepareImage(chatId, token, replyMessage?.id)}
+                            onOpenVoiceRecorder={() => setModalRecordVisible(false)}
+                        />
 
-                    {/* Modal ghi âm */}
-                    <Modal animationType="slide" transparent={true} visible={modalRecordVisible}>
-                        <View style={styles.modalContainer}>
-                            <View style={styles.modalRecordContent}>
-                                <Text style={styles.modalRecordTitle}>Voice Recorder</Text>
-
-                                {/* Recording status */}
-                                {isRecording ? <Text style={styles.recordingText}>Recording...</Text> : null}
-
-                                <View style={styles.buttonContainer}>
-                                    {/* Start recording */}
-                                    <TouchableOpacity
-                                        style={[styles.button, isRecording && styles.disabledButton]}
-                                        onPress={() => startRecording(setIsRecording)}
-                                        disabled={isRecording}
-                                    >
-                                        <Text style={styles.buttonText}>Start</Text>
-                                    </TouchableOpacity>
-
-                                    {/* Stop recording */}
-                                    <TouchableOpacity
-                                        style={[styles.button, !isRecording && styles.disabledButton]}
-                                        onPress={() =>
-                                            stopRecording(setIsRecording, setRecordingUri, setRecordingSaved)
-                                        }
-                                        disabled={!isRecording}
-                                    >
-                                        <Text style={styles.buttonText}>Stop</Text>
-                                    </TouchableOpacity>
-
-                                    {/* Send voice message */}
-                                    <TouchableOpacity
-                                        style={[styles.button, !recordingUri && styles.disabledButton]}
-                                        onPress={handleSendVoiceMessage}
-                                        disabled={!recordingUri}
-                                    >
-                                        <Text style={styles.buttonText}>Send</Text>
-                                    </TouchableOpacity>
-
-                                    {/* Cancel recording */}
-                                    <TouchableOpacity
-                                        style={styles.cancelButton}
-                                        onPress={() => setModalRecordVisible(false)}
-                                    >
-                                        <Text style={styles.buttonText}>Cancel</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                        </View>
-                    </Modal>
-
-                    {/* Modal hiển thị ảnh lớn */}
-                    <Modal visible={modalZoomVisible} transparent={true} animationType="fade">
-                        <TouchableOpacity
-                            style={styles.modalContainer}
-                            onPress={() => setModalZoomVisible(false)} // Đóng modal khi nhấn ra ngoài
-                        >
-                            <Image source={{ uri: selectedImage }} style={styles.fullImage} resizeMode="contain" />
-                        </TouchableOpacity>
-                    </Modal>
-
-                    {/* Modal tải ảnh */}
-                    <Modal visible={modalDownVisible} transparent={true} animationType="fade">
-                        <TouchableWithoutFeedback onPress={() => setModalDownVisible(false)}>
+                        {/* Modal ghi âm */}
+                        <Modal animationType="slide" transparent={true} visible={modalRecordVisible}>
                             <View style={styles.modalContainer}>
-                                <View style={styles.optionModal}>
-                                    <Text style={styles.modalTitle}>Download this image?</Text>
-                                    <View style={styles.modalButtonContainer}>
+                                <View style={styles.modalRecordContent}>
+                                    <Text style={styles.modalRecordTitle}>Voice Recorder</Text>
+
+                                    {/* Recording status */}
+                                    {isRecording ? <Text style={styles.recordingText}>Recording...</Text> : null}
+
+                                    <View style={styles.buttonContainer}>
+                                        {/* Start recording */}
                                         <TouchableOpacity
-                                            style={styles.modalButton}
-                                            onPress={() => {
-                                                downloadImage(selectedImage); // Gọi hàm tải ảnh
-                                                setModalDownVisible(false); // Đóng modal
-                                            }}
+                                            style={[styles.button, isRecording && styles.disabledButton]}
+                                            onPress={() => startRecording(setIsRecording)}
+                                            disabled={isRecording}
                                         >
-                                            <Text style={styles.modalButtonText}>Download</Text>
+                                            <Text style={styles.buttonText}>Start</Text>
                                         </TouchableOpacity>
+
+                                        {/* Stop recording */}
                                         <TouchableOpacity
-                                            style={[styles.modalButton, styles.cancelButton]}
-                                            onPress={() => setModalDownVisible(false)} // Đóng modal
+                                            style={[styles.button, !isRecording && styles.disabledButton]}
+                                            onPress={() =>
+                                                stopRecording(setIsRecording, setRecordingUri, setRecordingSaved)
+                                            }
+                                            disabled={!isRecording}
                                         >
-                                            <Text style={styles.modalButtonText}>Cancel</Text>
+                                            <Text style={styles.buttonText}>Stop</Text>
+                                        </TouchableOpacity>
+
+                                        {/* Send voice message */}
+                                        <TouchableOpacity
+                                            style={[styles.button, !recordingUri && styles.disabledButton]}
+                                            onPress={handleSendVoiceMessage}
+                                            disabled={!recordingUri}
+                                        >
+                                            <Text style={styles.buttonText}>Send</Text>
+                                        </TouchableOpacity>
+
+                                        {/* Cancel recording */}
+                                        <TouchableOpacity
+                                            style={styles.cancelButton}
+                                            onPress={() => setModalRecordVisible(false)}
+                                        >
+                                            <Text style={styles.buttonText}>Cancel</Text>
                                         </TouchableOpacity>
                                     </View>
                                 </View>
                             </View>
-                        </TouchableWithoutFeedback>
-                    </Modal>
+                        </Modal>
 
-                    {/* Modal tải file */}
-                    <Modal visible={modalDownFileVisible} transparent={true} animationType="fade">
-                        <TouchableWithoutFeedback onPress={() => setModalDownFileVisible(false)}>
-                            <View style={styles.modalContainer}>
-                                <View style={styles.optionModal}>
-                                    <Text style={styles.modalTitle}>Download this file?</Text>
-                                    <View style={styles.modalButtonContainer}>
-                                        <TouchableOpacity
-                                            style={styles.modalButton}
-                                            onPress={() => {
-                                                downloadAnyFile(selectedFile);
-                                                setModalDownFileVisible(false);
-                                            }}
-                                        >
-                                            <Text style={styles.modalButtonText}>Download</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity
-                                            style={[styles.modalButton, styles.cancelButton]}
-                                            onPress={() => setModalDownFileVisible(false)}
-                                        >
-                                            <Text style={styles.modalButtonText}>Cancel</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                            </View>
-                        </TouchableWithoutFeedback>
-                    </Modal>
-
-                    {/* Modal hiển thị reaction */}
-                    <Modal visible={reactVisible} transparent={true} animationType="fade">
-                        <TouchableWithoutFeedback onPress={() => setReactVisible(false)}>
-                            <View
-                                style={{
-                                    flex: 1,
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    backgroundColor: 'rgba(0,0,0,0.5)',
-                                }}
+                        {/* Modal hiển thị ảnh lớn */}
+                        <Modal visible={modalZoomVisible} transparent={true} animationType="fade">
+                            <TouchableOpacity
+                                style={styles.modalContainer}
+                                onPress={() => setModalZoomVisible(false)} // Đóng modal khi nhấn ra ngoài
                             >
-                                <View
-                                    style={{
-                                        backgroundColor: 'white',
-                                        padding: 20,
-                                        borderRadius: 10,
-                                        flexDirection: 'row',
-                                    }}
-                                >
-                                    {reactionsList.map((emoji) => (
-                                        <TouchableOpacity key={emoji} onPress={() => handleSelectReaction(emoji)}>
-                                            <Text
-                                                style={{
-                                                    fontSize: 20,
-                                                    marginHorizontal: 10,
+                                <Image source={{ uri: selectedImage }} style={styles.fullImage} resizeMode="contain" />
+                            </TouchableOpacity>
+                        </Modal>
+
+                        {/* Modal tải ảnh */}
+                        <Modal visible={modalDownVisible} transparent={true} animationType="fade">
+                            <TouchableWithoutFeedback onPress={() => setModalDownVisible(false)}>
+                                <View style={styles.modalContainer}>
+                                    <View style={styles.optionModal}>
+                                        <Text style={styles.modalTitle}>Download this image?</Text>
+                                        <View style={styles.modalButtonContainer}>
+                                            <TouchableOpacity
+                                                style={styles.modalButton}
+                                                onPress={() => {
+                                                    downloadImage(selectedImage); // Gọi hàm tải ảnh
+                                                    setModalDownVisible(false); // Đóng modal
                                                 }}
                                             >
-                                                {emoji}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
-                            </View>
-                        </TouchableWithoutFeedback>
-                    </Modal>
-
-                    {/* Modal reaction detail */}
-                    <Modal visible={reactionDetailsVisible} transparent={true} animationType="fade">
-                        <TouchableWithoutFeedback onPress={() => setReactionDetailsVisible(false)}>
-                            <View style={styles.modalContainer}>
-                                <View style={styles.reactionDetailsModal}>
-                                    <Text style={styles.modalTitle}>Reaction Details</Text>
-                                    {selectedReaction?.map((reaction, index) => (
-                                        <View key={index} style={styles.reactionDetailItem}>
-                                            <Image source={{ uri: reaction.user.avatar }} style={styles.userAvatar} />
-                                            <Text style={styles.userName}>{reaction.user.name}</Text>
-
-                                            {reaction.user.id === currentUserId && (
-                                                <TouchableOpacity
-                                                    style={styles.removeButton}
-                                                    onPress={() => handleRemoveReaction()}
-                                                >
-                                                    <Text style={styles.removeButtonText}>Remove</Text>
-                                                </TouchableOpacity>
-                                            )}
+                                                <Text style={styles.modalButtonText}>Download</Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity
+                                                style={[styles.modalButton, styles.cancelButton]}
+                                                onPress={() => setModalDownVisible(false)} // Đóng modal
+                                            >
+                                                <Text style={styles.modalButtonText}>Cancel</Text>
+                                            </TouchableOpacity>
                                         </View>
-                                    ))}
-                                </View>
-                            </View>
-                        </TouchableWithoutFeedback>
-                    </Modal>
-
-                    <Modal visible={modalReplyVisible} animationType="slide" transparent={true}>
-                        <TouchableWithoutFeedback onPress={() => setModalReplyVisible(false)}>
-                            <View style={styles.modalContainer}>
-                                <View style={styles.modalReplyContent}>
-                                    {replyMessage && (
-                                        <View style={styles.replyBox}>
-                                            <Text>{console.log(replyMessage)}</Text>
-                                            <Text style={styles.replyUser}>Replying to {replyMessage.sender.name}</Text>
-                                            <Text style={styles.replyMessage}>{replyMessage.content}</Text>
-                                        </View>
-                                    )}
-                                    <View style={styles.inputRow}>
-                                        <TextInput
-                                            style={styles.inputAnswer}
-                                            placeholder="Enter message..."
-                                            value={message}
-                                            onChangeText={setMessage}
-                                        />
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                handleSendMessage(message);
-                                                setMessage('');
-                                                setModalReplyVisible(false);
-                                            }}
-                                        >
-                                            <Icon name="send" size={30} color="#007AFF" />
-                                        </TouchableOpacity>
                                     </View>
                                 </View>
-                            </View>
-                        </TouchableWithoutFeedback>
-                    </Modal>
+                            </TouchableWithoutFeedback>
+                        </Modal>
 
+                        {/* Modal tải file */}
+                        <Modal visible={modalDownFileVisible} transparent={true} animationType="fade">
+                            <TouchableWithoutFeedback onPress={() => setModalDownFileVisible(false)}>
+                                <View style={styles.modalContainer}>
+                                    <View style={styles.optionModal}>
+                                        <Text style={styles.modalTitle}>Download this file?</Text>
+                                        <View style={styles.modalButtonContainer}>
+                                            <TouchableOpacity
+                                                style={styles.modalButton}
+                                                onPress={() => {
+                                                    downloadAnyFile(selectedFile);
+                                                    setModalDownFileVisible(false);
+                                                }}
+                                            >
+                                                <Text style={styles.modalButtonText}>Download</Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity
+                                                style={[styles.modalButton, styles.cancelButton]}
+                                                onPress={() => setModalDownFileVisible(false)}
+                                            >
+                                                <Text style={styles.modalButtonText}>Cancel</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                </View>
+                            </TouchableWithoutFeedback>
+                        </Modal>
+
+                        {/* Modal hiển thị reaction */}
+                        <Modal visible={reactVisible} transparent={true} animationType="fade">
+                            <TouchableWithoutFeedback onPress={() => setReactVisible(false)}>
+                                <View
+                                    style={{
+                                        flex: 1,
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        backgroundColor: 'rgba(0,0,0,0.5)',
+                                    }}
+                                >
+                                    <View
+                                        style={{
+                                            backgroundColor: 'white',
+                                            padding: 20,
+                                            borderRadius: 10,
+                                            flexDirection: 'row',
+                                        }}
+                                    >
+                                        {reactionsList.map((emoji) => (
+                                            <TouchableOpacity key={emoji} onPress={() => handleSelectReaction(emoji)}>
+                                                <Text
+                                                    style={{
+                                                        fontSize: 20,
+                                                        marginHorizontal: 10,
+                                                    }}
+                                                >
+                                                    {emoji}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </View>
+                                </View>
+                            </TouchableWithoutFeedback>
+                        </Modal>
+
+                        {/* Modal reaction detail */}
+                        <Modal visible={reactionDetailsVisible} transparent={true} animationType="fade">
+                            <TouchableWithoutFeedback onPress={() => setReactionDetailsVisible(false)}>
+                                <View style={styles.modalContainer}>
+                                    <View style={styles.reactionDetailsModal}>
+                                        <Text style={styles.modalTitle}>Reaction Details</Text>
+                                        {selectedReaction?.map((reaction, index) => (
+                                            <View key={index} style={styles.reactionDetailItem}>
+                                                <Image
+                                                    source={{ uri: reaction.user.avatar }}
+                                                    style={styles.userAvatar}
+                                                />
+                                                <Text style={styles.userName}>{reaction.user.name}</Text>
+
+                                                {reaction.user.id === currentUserId && (
+                                                    <TouchableOpacity
+                                                        style={styles.removeButton}
+                                                        onPress={() => handleRemoveReaction()}
+                                                    >
+                                                        <Text style={styles.removeButtonText}>Remove</Text>
+                                                    </TouchableOpacity>
+                                                )}
+                                            </View>
+                                        ))}
+                                    </View>
+                                </View>
+                            </TouchableWithoutFeedback>
+                        </Modal>
+
+                        {/* Modal trả lời tin nhắn */}
+                        <Modal visible={modalReplyVisible} animationType="slide" transparent={true}>
+                            <TouchableWithoutFeedback onPress={() => setModalReplyVisible(false)}>
+                                <View style={styles.modalContainer}>
+                                    <View style={styles.modalReplyContent}>
+                                        {replyMessage && (
+                                            <View style={styles.replyBox}>
+                                                <Text style={styles.replyUser}>
+                                                    Replying to {replyMessage.sender.name}
+                                                </Text>
+                                                <Text style={styles.replyMessage}>{replyMessage.content}</Text>
+                                            </View>
+                                        )}
+                                        <View style={styles.inputRow}>
+                                            <TextInput
+                                                style={styles.inputAnswer}
+                                                placeholder="Enter message..."
+                                                value={message}
+                                                onChangeText={setMessage}
+                                            />
+                                            <TouchableOpacity
+                                                onPress={() => {
+                                                    handleSendMessage(message);
+                                                    setMessage('');
+                                                    setModalReplyVisible(false);
+                                                }}
+                                            >
+                                                <Icon name="send" size={30} color="#007AFF" />
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                </View>
+                            </TouchableWithoutFeedback>
+                        </Modal>
+                        <MessageOptionsModal />
+                    </>
                     <Modal visible={modalVideoVisible} transparent={true} animationType="fade">
                         <TouchableWithoutFeedback onPress={() => setModalVideoVisible(false)}>
                             <View style={styles.modalContainer}>
@@ -739,6 +778,7 @@ const styles = StyleSheet.create({
     },
 
     messageContainer: {
+        flex: 1,
         padding: 12,
         marginVertical: 6,
         borderRadius: 15,

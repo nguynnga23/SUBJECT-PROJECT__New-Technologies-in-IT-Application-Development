@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthRequest } from '../types/authRequest';
 import { s3 } from '../utils/s3Uploader';
+import { s3 } from '../utils/s3Uploader';
 
 const prisma = new PrismaClient();
 
