@@ -273,6 +273,14 @@ export default function PrivateChatScreen() {
     const playAudio = async (audioUri) => {
         try {
             const { sound } = await Audio.Sound.createAsync({ uri: audioUri });
+            await Audio.setAudioModeAsync({
+                allowsRecordingIOS: false,
+                staysActiveInBackground: false,
+                playsInSilentModeIOS: true, // Cho phép phát âm thanh ngay cả khi thiết bị iOS đang ở chế độ im lặng
+                shouldDuckAndroid: false, // Không hạ âm lượng các ứng dụng khác
+                playThroughEarpieceAndroid: false, // Phát qua loa ngoài thay vì tai nghe
+            });
+            await sound.setVolumeAsync(1.0);
             await sound.playAsync();
         } catch (error) {
             console.warn('Error playing audio:', error);
