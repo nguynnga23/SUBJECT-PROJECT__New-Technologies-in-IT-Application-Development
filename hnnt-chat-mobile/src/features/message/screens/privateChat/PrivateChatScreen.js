@@ -21,6 +21,7 @@ import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import Header from '../../../../common/components/Header';
 import { useRoute } from '@react-navigation/native';
 import ChatInputContainer from '../../components/ChatInputContainer';
+import { Video } from 'expo-av';
 
 import {
     fetchMessages,
@@ -35,7 +36,6 @@ import {
     startRecording,
     stopRecording,
     sendVoiceMessage,
-    playAudio,
 } from '../../services/privateChat/PrivateChatService';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -43,6 +43,18 @@ import { getUserIdFromToken } from '../../../../utils/auth';
 import { formatDateTime } from '../../../../utils/formatDateTime';
 import { socket } from '../../../../configs/socket';
 import { set } from 'date-fns';
+import { Audio } from 'expo-av';
+
+const groupMessagesByDate = (messages) => {
+    return messages.reduce((acc, message) => {
+        const date = formatDateTime(message.time).split(' ')[0]; // Extract date part
+        if (!acc[date]) {
+            acc[date] = [];
+        }
+        acc[date].push(message);
+        return acc;
+    }, {});
+};
 
 export default function PrivateChatScreen() {
     const flatListRef = useRef(null);
@@ -76,6 +88,8 @@ export default function PrivateChatScreen() {
 
     const [selectedReaction, setSelectedReaction] = useState(null);
     const [reactionDetailsVisible, setReactionDetailsVisible] = useState(false);
+    const [selectedVideo, setSelectedVideo] = useState(null);
+    const [modalVideoVisible, setModalVideoVisible] = useState(false);
 
     useEffect(() => {
         const parentNav = navigation.getParent();
@@ -256,145 +270,204 @@ export default function PrivateChatScreen() {
         return Object.entries(grouped).map(([reaction, sum]) => ({ reaction, sum }));
     };
 
+    const playAudio = async (audioUri) => {
+        try {
+            const { sound } = await Audio.Sound.createAsync({ uri: audioUri });
+            await sound.playAsync();
+        } catch (error) {
+            console.warn('Error playing audio:', error);
+            Alert.alert('Error', 'Failed to play audio.');
+        }
+    };
+
+    const handleSendVoiceMessage = async (uri) => {
+        try {
+            const response = await sendMessage(chatId, '[Voice Message]', 'audio', null, uri, null, null, token);
+            response.audioUri = uri;
+            socket.emit('send_message', { chatId: chatId, newMessage: response });
+        } catch (error) {
+            console.warn('Error sending voice message:', error);
+            Alert.alert('Error', 'Failed to send voice message.');
+        }
+    };
+
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <View style={styles.container}>
                 <SafeAreaProvider>
                     <FlatList
                         ref={flatListRef}
-                        data={messages}
-                        keyExtractor={(item) => item.id.toString()}
-                        renderItem={({ item }) => {
-                            const hasReactions = item.reactions && item.reactions.length > 0;
-                            const groupedReactions = hasReactions ? groupReactions(item.reactions) : [];
-                            return (
-                                <TouchableOpacity
-                                    onLongPress={() =>
-                                        handleLongPressMessage(
-                                            item.id,
-                                            messages,
-                                            setMessages,
-                                            chatId,
-                                            token,
-                                            setReplyMessage,
-                                            setModalReplyVisible,
-                                        )
-                                    }
-                                >
-                                    <View
-                                        style={[
-                                            styles.messageContainer,
-                                            item.senderId === currentUserId ? styles.myMessage : styles.otherMessage,
-                                        ]}
+                        data={Object.entries(groupMessagesByDate(messages))} // Group messages by date
+                        keyExtractor={([date]) => date}
+                        renderItem={({ item: [date, messagesForDate] }) => (
+                            <>
+                                <View style={{ alignItems: 'center' }}>
+                                    <Text style={styles.dateHeader}>{date}</Text>
+                                </View>
+                                {messagesForDate.map((item) => (
+                                    <TouchableOpacity
+                                        key={item.id}
+                                        onLongPress={() =>
+                                            handleLongPressMessage(
+                                                item.id,
+                                                messages,
+                                                setMessages,
+                                                chatId,
+                                                token,
+                                                setReplyMessage,
+                                                setModalReplyVisible,
+                                            )
+                                        }
                                     >
-                                        <Text style={styles.sender}>{item.sender.name}</Text>
+                                        <View
+                                            style={[
+                                                styles.messageContainer,
+                                                item.senderId === currentUserId
+                                                    ? styles.myMessage
+                                                    : styles.otherMessage,
+                                            ]}
+                                        >
+                                            {/* Only show sender name if the message is not from the current user */}
+                                            {item.senderId !== currentUserId && (
+                                                <Text style={styles.sender}>{item.sender.name}</Text>
+                                            )}
+                                            {item.destroy ? (
+                                                <Text style={styles.recalledMessage}>Message recalled</Text>
+                                            ) : (
+                                                <>
+                                                    {item.replyToId !== null && (
+                                                        <View style={styles.replyBox}>
+                                                            <Text style={styles.replyUser}>
+                                                                Replying to {item.replyTo.sender.name}
+                                                            </Text>
+                                                            <Text style={styles.replyMessage}>
+                                                                {item.replyTo.content}
+                                                            </Text>
+                                                        </View>
+                                                    )}
 
-                                        {/* Kiểm tra nếu tin nhắn bị thu hồi */}
-                                        {item.destroy ? (
-                                            <Text style={styles.recalledMessage}>message had recall</Text>
-                                        ) : (
-                                            <>
-                                                {item.replyToId !== null && (
-                                                    <View style={styles.replyBox}>
-                                                        <Text style={styles.replyUser}>
-                                                            Replying to {item.replyTo.sender.name}
-                                                        </Text>
-                                                        <Text style={styles.replyMessage}>{item.replyTo.content}</Text>
-                                                    </View>
-                                                )}
+                                                    {/* Hiển thị nội dung tin nhắn */}
+                                                    {item.type === 'text' && (
+                                                        <Text style={styles.message}>{item.content}</Text>
+                                                    )}
 
-                                                {/* Hiển thị nội dung tin nhắn */}
-                                                {item.type === 'text' && (
-                                                    <Text style={styles.message}>{item.content}</Text>
-                                                )}
+                                                    {/* Hiển thị file, hình ảnh, hoặc audio nếu có */}
+                                                    {item.audioUri && (
+                                                        <TouchableOpacity
+                                                            onPress={() => playAudio(item.audioUri)}
+                                                            style={styles.playButton}
+                                                        >
+                                                            <Ionicons name="play-circle" size={30} color="blue" />
+                                                        </TouchableOpacity>
+                                                    )}
 
-                                                {/* Hiển thị file, hình ảnh, hoặc audio nếu có */}
-                                                {item.audioUri && (
-                                                    <TouchableOpacity
-                                                        onPress={() => playAudio(item.audioUri)}
-                                                        style={styles.playButton}
-                                                    >
-                                                        <Ionicons name="play-circle" size={30} color="blue" />
-                                                    </TouchableOpacity>
-                                                )}
+                                                    {item.type === 'image' && (
+                                                        <TouchableOpacity
+                                                            onPress={() => {
+                                                                setSelectedImage(item.fileName);
+                                                                setModalZoomVisible(true);
+                                                            }}
+                                                            onLongPress={() => {
+                                                                setSelectedImage(item.fileName);
+                                                                setModalDownVisible(true);
+                                                            }}
+                                                        >
+                                                            <Image
+                                                                source={{ uri: item.fileName }}
+                                                                style={{ width: 200, height: 200, borderRadius: 10 }}
+                                                            />
+                                                        </TouchableOpacity>
+                                                    )}
 
-                                                {item.type === 'image' && (
-                                                    <TouchableOpacity
-                                                        onPress={() => {
-                                                            setSelectedImage(item.fileName);
-                                                            setModalZoomVisible(true);
-                                                        }}
-                                                        onLongPress={() => {
-                                                            setSelectedImage(item.fileName);
-                                                            setModalDownVisible(true);
-                                                        }}
-                                                    >
-                                                        <Image
-                                                            source={{ uri: item.fileName }}
-                                                            style={{ width: 200, height: 200, borderRadius: 10 }}
-                                                        />
-                                                    </TouchableOpacity>
-                                                )}
+                                                    {item.type === 'file' && (
+                                                        <TouchableOpacity
+                                                            onLongPress={() => {
+                                                                setSelectedFile(item.fileName);
+                                                                setModalDownFileVisible(true);
+                                                            }}
+                                                            style={styles.fileContainer}
+                                                        >
+                                                            <Ionicons
+                                                                name="document-text-outline"
+                                                                size={24}
+                                                                color="blue"
+                                                            />
+                                                            <Text style={styles.fileName}>
+                                                                {item.content} {item.fileSize}
+                                                            </Text>
+                                                        </TouchableOpacity>
+                                                    )}
 
-                                                {item.type === 'file' && (
-                                                    <TouchableOpacity
-                                                        onLongPress={() => {
-                                                            setSelectedFile(item.fileName);
-                                                            setModalDownFileVisible(true);
-                                                        }}
-                                                        style={styles.fileContainer}
-                                                    >
-                                                        <Ionicons name="document-text-outline" size={24} color="blue" />
-                                                        <Text style={styles.fileName}>
-                                                            {item.content} {item.fileSize}
-                                                        </Text>
-                                                    </TouchableOpacity>
-                                                )}
-                                            </>
-                                        )}
+                                                    {item.type === 'audio' && (
+                                                        <TouchableOpacity
+                                                            onPress={() => playAudio(item.fileName)}
+                                                            style={styles.audioMessageContainer}
+                                                        >
+                                                            <Ionicons name="play-circle" size={30} color="blue" />
+                                                            <Text style={styles.audioMessageText}>Voice Message</Text>
+                                                        </TouchableOpacity>
+                                                    )}
 
-                                        {/* Hiển thị reaction và thời gian */}
-                                        <View style={styles.timeReactionContainer}>
-                                            <Text style={styles.time}>{formatDateTime(item.time)}</Text>
-                                        </View>
+                                                    {item.type === 'video' && (
+                                                        <View style={styles.inlineVideoContainer}>
+                                                            <Video
+                                                                source={{ uri: item.fileName }}
+                                                                style={styles.inlineVideo}
+                                                                useNativeControls
+                                                                resizeMode="contain"
+                                                                shouldPlay={false}
+                                                                isLooping={true}
+                                                            />
+                                                        </View>
+                                                    )}
+                                                </>
+                                            )}
 
-                                        {hasReactions && (
-                                            <View style={styles.reactionContainer}>
-                                                {groupedReactions.map((reaction, index) => (
-                                                    <TouchableOpacity
-                                                        key={index}
-                                                        style={styles.reactionItem}
-                                                        onPress={() =>
-                                                            handleShowReactionDetails(
-                                                                reaction.reaction,
-                                                                item.reactions,
-                                                                item.id,
-                                                            )
-                                                        }
-                                                    >
-                                                        <Text style={styles.reactionText}>
-                                                            {reaction.reaction} {reaction.sum}
-                                                        </Text>
-                                                    </TouchableOpacity>
-                                                ))}
+                                            {/* Hiển thị reaction và thời gian */}
+                                            <View style={styles.timeReactionContainer}>
+                                                <Text style={styles.time}>
+                                                    {formatDateTime(item.time).split(' ')[1].slice(0, 5)}
+                                                </Text>
                                             </View>
-                                        )}
 
-                                        {!item.destroy && (
-                                            <TouchableOpacity
-                                                onPress={() => {
-                                                    showReactionOptions(item.id);
-                                                    setMessageId(item.id);
-                                                }}
-                                                style={{ position: 'absolute', right: 2, bottom: 12 }}
-                                            >
-                                                <FontAwesome name="smile-o" size={20} color="gray" />
-                                            </TouchableOpacity>
-                                        )}
-                                    </View>
-                                </TouchableOpacity>
-                            );
-                        }}
+                                            {item.reactions && item.reactions.length > 0 && (
+                                                <View style={styles.reactionContainer}>
+                                                    {groupReactions(item.reactions).map((reaction, index) => (
+                                                        <TouchableOpacity
+                                                            key={index}
+                                                            style={styles.reactionItem}
+                                                            onPress={() =>
+                                                                handleShowReactionDetails(
+                                                                    reaction.reaction,
+                                                                    item.reactions,
+                                                                    item.id,
+                                                                )
+                                                            }
+                                                        >
+                                                            <Text style={styles.reactionText}>
+                                                                {reaction.reaction} {reaction.sum}
+                                                            </Text>
+                                                        </TouchableOpacity>
+                                                    ))}
+                                                </View>
+                                            )}
+
+                                            {!item.destroy && (
+                                                <TouchableOpacity
+                                                    onPress={() => {
+                                                        showReactionOptions(item.id);
+                                                        setMessageId(item.id);
+                                                    }}
+                                                    style={{ position: 'absolute', right: 2, bottom: 12 }}
+                                                >
+                                                    <FontAwesome name="smile-o" size={20} color="gray" />
+                                                </TouchableOpacity>
+                                            )}
+                                        </View>
+                                    </TouchableOpacity>
+                                ))}
+                            </>
+                        )}
                         keyboardShouldPersistTaps="handled" // Đảm bảo sự kiện nhấn không chặn cuộn
                         onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })} // Cuộn xuống cuối khi nội dung thay đổi
                     />
@@ -404,55 +477,56 @@ export default function PrivateChatScreen() {
                         onSendMessage={() => handleSendMessage(message)}
                         onSendFile={() => prepareFile(chatId, token)}
                         onSendImage={() => prepareImage(chatId, token)}
-                        onOpenVoiceRecorder={() => setModalRecordVisible(false)}
+                        onSendVoiceMessage={handleSendVoiceMessage}
                     />
 
                     {/* Modal ghi âm */}
                     <Modal animationType="slide" transparent={true} visible={modalRecordVisible}>
-                        <View style={styles.modalRecordContainer}>
-                            <Text style={styles.modalRecordTitle}>Voice Recorder</Text>
+                        <View style={styles.modalContainer}>
+                            <View style={styles.modalRecordContent}>
+                                <Text style={styles.modalRecordTitle}>Voice Recorder</Text>
 
-                            {/* Trạng thái ghi âm */}
-                            {isRecording ? <Text style={styles.recordingText}>Recording...</Text> : null}
+                                {/* Recording status */}
+                                {isRecording ? <Text style={styles.recordingText}>Recording...</Text> : null}
 
-                            <View style={styles.buttonContainer}>
-                                {/* Bắt đầu ghi âm */}
-                                <TouchableOpacity
-                                    style={styles.button}
-                                    onPress={() => startRecording(setIsRecording)}
-                                    disabled={isRecording}
-                                >
-                                    <Text style={styles.buttonText}>Start</Text>
-                                </TouchableOpacity>
+                                <View style={styles.buttonContainer}>
+                                    {/* Start recording */}
+                                    <TouchableOpacity
+                                        style={[styles.button, isRecording && styles.disabledButton]}
+                                        onPress={() => startRecording(setIsRecording)}
+                                        disabled={isRecording}
+                                    >
+                                        <Text style={styles.buttonText}>Start</Text>
+                                    </TouchableOpacity>
 
-                                {/* Dừng ghi âm */}
-                                <TouchableOpacity
-                                    style={styles.button}
-                                    onPress={() => stopRecording(setIsRecording, setRecordingUri, setRecordingSaved)}
-                                    disabled={!isRecording}
-                                >
-                                    <Text style={styles.buttonText}>Stop</Text>
-                                </TouchableOpacity>
+                                    {/* Stop recording */}
+                                    <TouchableOpacity
+                                        style={[styles.button, !isRecording && styles.disabledButton]}
+                                        onPress={() =>
+                                            stopRecording(setIsRecording, setRecordingUri, setRecordingSaved)
+                                        }
+                                        disabled={!isRecording}
+                                    >
+                                        <Text style={styles.buttonText}>Stop</Text>
+                                    </TouchableOpacity>
 
-                                {/* Gửi tin nhắn ghi âm */}
-                                <TouchableOpacity
-                                    style={styles.button}
-                                    onPress={() => {
-                                        sendVoice();
-                                        setModalRecordVisible(false);
-                                    }}
-                                    disabled={!recordingUri}
-                                >
-                                    <Text style={styles.buttonText}>Send</Text>
-                                </TouchableOpacity>
+                                    {/* Send voice message */}
+                                    <TouchableOpacity
+                                        style={[styles.button, !recordingUri && styles.disabledButton]}
+                                        onPress={handleSendVoiceMessage}
+                                        disabled={!recordingUri}
+                                    >
+                                        <Text style={styles.buttonText}>Send</Text>
+                                    </TouchableOpacity>
 
-                                {/* Hủy ghi âm */}
-                                <TouchableOpacity
-                                    style={styles.cancelButton}
-                                    onPress={() => setModalRecordVisible(false)}
-                                >
-                                    <Text style={styles.buttonText}>Cancel</Text>
-                                </TouchableOpacity>
+                                    {/* Cancel recording */}
+                                    <TouchableOpacity
+                                        style={styles.cancelButton}
+                                        onPress={() => setModalRecordVisible(false)}
+                                    >
+                                        <Text style={styles.buttonText}>Cancel</Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
                         </View>
                     </Modal>
@@ -617,6 +691,20 @@ export default function PrivateChatScreen() {
                             </View>
                         </TouchableWithoutFeedback>
                     </Modal>
+
+                    <Modal visible={modalVideoVisible} transparent={true} animationType="fade">
+                        <TouchableWithoutFeedback onPress={() => setModalVideoVisible(false)}>
+                            <View style={styles.modalContainer}>
+                                <Video
+                                    source={{ uri: selectedVideo }}
+                                    style={styles.fullVideo}
+                                    useNativeControls
+                                    resizeMode="contain"
+                                    shouldPlay
+                                />
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </Modal>
                 </SafeAreaProvider>
             </View>
         </KeyboardAvoidingView>
@@ -676,7 +764,6 @@ const styles = StyleSheet.create({
     },
 
     recalledMessage: {
-        fontStyle: 'italic',
         color: '#999', // Màu xám nhạt
         fontSize: 16,
     },
@@ -887,5 +974,84 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 10,
         marginRight: 10,
+    },
+    modalRecordContent: {
+        width: '90%',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+        alignItems: 'center',
+        elevation: 5,
+    },
+    recordingText: {
+        fontSize: 16,
+        color: 'red',
+        marginVertical: 10,
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 20,
+    },
+    button: {
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        backgroundColor: '#007AFF',
+        borderRadius: 5,
+        marginHorizontal: 5,
+    },
+    disabledButton: {
+        backgroundColor: '#ccc',
+    },
+    audioMessageContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f0f0f0',
+        padding: 10,
+        borderRadius: 10,
+        marginVertical: 5,
+    },
+    audioMessageText: {
+        marginLeft: 10,
+        fontSize: 14,
+        color: '#007AFF',
+    },
+    videoContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f0f0f0',
+        padding: 10,
+        borderRadius: 10,
+        marginVertical: 5,
+    },
+    videoMessageText: {
+        marginLeft: 10,
+        fontSize: 14,
+        color: '#007AFF',
+    },
+    fullVideo: {
+        width: '95%',
+        height: '95%',
+    },
+    inlineVideoContainer: {
+        width: 200,
+        height: 200,
+        borderRadius: 10,
+        overflow: 'hidden',
+        marginVertical: 5,
+    },
+    inlineVideo: {
+        width: '100%',
+        height: '100%',
+    },
+    dateHeader: {
+        fontSize: 14,
+        color: '#fff',
+        backgroundColor: '#c0c0c0',
+        width: 150,
+        padding: 4,
+        borderRadius: 20,
+        textAlign: 'center',
+        marginVertical: 10,
     },
 });

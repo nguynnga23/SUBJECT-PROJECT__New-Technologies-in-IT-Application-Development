@@ -25,6 +25,7 @@ model Account {
   location  String?
   gender    String   @db.VarChar(10) // "Nam", "Nữ", "Khác"
   currentAvatars String[] @default([])
+  pushToken String? @db.VarChar(255) // Token for push notifications
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

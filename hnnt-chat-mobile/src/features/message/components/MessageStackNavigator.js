@@ -11,7 +11,7 @@ import PrivateChatInfoScreen from '../screens/privateChat/PrivateChatInfoScreen'
 import FindPrMessagesScreen from '../screens/privateChat/FindPrMessageScreen';
 import AddMembersScreen from '../screens/groupChat/AddMembersScreen';
 import SharedChatHeader from './SharedChatHeader';
-
+import FileStorage from './FileStorage';
 const MessageStack = createNativeStackNavigator();
 
 export default function MessageStackNavigator() {
@@ -97,6 +97,16 @@ export default function MessageStackNavigator() {
             />
 
             <MessageStack.Screen name="PrivateCallScreen" component={PrivateCallScreen} />
+            <MessageStack.Screen
+                name="FileStorage"
+                component={FileStorage}
+                options={({ navigation, route }) => ({
+                    headerShown: true,
+                    header: () => (
+                        <SharedChatHeader navigation={navigation} chatName="Media, files, links" actions={[]} />
+                    ),
+                })}
+            />
             <MessageStack.Screen
                 name="PrivateChatInfoScreen"
                 component={PrivateChatInfoScreen}

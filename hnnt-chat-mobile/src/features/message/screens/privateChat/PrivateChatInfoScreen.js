@@ -11,15 +11,19 @@ import {
     TextInput,
     Button,
     TouchableWithoutFeedback,
-    Alert
+    Alert,
 } from 'react-native';
 import { Ionicons, AntDesign } from '@expo/vector-icons';
 import { useRoute, useFocusEffect } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {
-    fetchChat, getPinMess, unPinMess,
-    blockUser, deleteAllMessage, toggleMute
+    fetchChat,
+    getPinMess,
+    unPinMess,
+    blockUser,
+    deleteAllMessage,
+    toggleMute,
 } from '../../services/privateChat/PrivateChatInfoService';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -77,7 +81,7 @@ export default function PrivateChatInfoScreen() {
         } catch (error) {
             console.error('Error fetching chat info:', error);
         }
-    }
+    };
 
     useEffect(() => {
         fetchChatInfo();
@@ -89,7 +93,7 @@ export default function PrivateChatInfoScreen() {
                 fetchChatInfo();
             });
             return unsubscribe;
-        }, [navigation])
+        }, [navigation]),
     );
 
     const handleToggleMute = async () => {
@@ -126,7 +130,7 @@ export default function PrivateChatInfoScreen() {
         } catch (error) {
             console.warn('Error blocking user:', error);
         }
-    }
+    };
 
     return (
         <View style={styles.container}>
@@ -149,7 +153,7 @@ export default function PrivateChatInfoScreen() {
                 </View>
 
                 {/* Other Options */}
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('FileStorage')}>
                     <OptionItem label="Image, file, link" icon="folder" />
                 </TouchableOpacity>
 
@@ -201,11 +205,7 @@ export default function PrivateChatInfoScreen() {
                             <Text>Are you sure you want to block this user?</Text>
                             <View style={styles.modalActions}>
                                 <Button title="Cancel" onPress={() => setBlockVisible(false)} />
-                                <Button
-                                    title="Yes"
-                                    color="red"
-                                    onPress={() => handleBlockUser()}
-                                />
+                                <Button title="Yes" color="red" onPress={() => handleBlockUser()} />
                             </View>
                         </View>
                     </View>

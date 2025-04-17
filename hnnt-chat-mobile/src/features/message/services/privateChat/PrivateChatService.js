@@ -1,13 +1,13 @@
-import { Alert } from "react-native";
-import * as ImagePicker from "expo-image-picker";
-import { Audio } from "expo-av";
-import * as DocumentPicker from "expo-document-picker";
-import * as FileSystem from "expo-file-system";
+import { Alert } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { Audio } from 'expo-av';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
-import { getUserIdFromToken } from "../../../../utils/auth";
-import { getCurrentTimeString } from "../../../../utils/dateNow";
+import { getUserIdFromToken } from '../../../../utils/auth';
+import { getCurrentTimeString } from '../../../../utils/dateNow';
 import axios from 'axios';
-import { localhost } from '../../../../utils/localhosts'
+import { localhost } from '../../../../utils/localhosts';
 import { socket } from '../../../../configs/socket';
 
 const API_URL = `http://${localhost}/api`;
@@ -15,7 +15,15 @@ const API_URL = `http://${localhost}/api`;
 let recording = null;
 
 //Hiển thị menu khi nhấn giữ tin nhắn
-export function handleLongPressMessage(messageId, messages, setMessages, chatId, token, setReplyMessage, setModalReplyVisible) {
+export function handleLongPressMessage(
+    messageId,
+    messages,
+    setMessages,
+    chatId,
+    token,
+    setReplyMessage,
+    setModalReplyVisible,
+) {
     const message = messages.find((msg) => msg.id === messageId);
 
     if (!message) return;
@@ -25,21 +33,21 @@ export function handleLongPressMessage(messageId, messages, setMessages, chatId,
     if (message.destroy) {
         // Nếu tin nhắn bị thu hồi, chỉ hiển thị tùy chọn "Delete"
         options.push({
-            text: "🗑️ Delete",
+            text: '🗑️ Delete',
             onPress: async () => {
                 try {
                     if (!messageId || !token) {
-                        console.warn("Invalid messageId or token:", { messageId, token });
+                        console.warn('Invalid messageId or token:', { messageId, token });
                         return;
                     }
                     const response = await deleteMessage(messageId, token);
                     socket.emit('del_message', {
                         chatId: chatId,
                     });
-                    Alert.alert("Success", response.message);
+                    Alert.alert('Success', response.message);
                 } catch (error) {
-                    console.warn("Error deleting message:", error);
-                    Alert.alert("Error", "Failed to delete the message.");
+                    console.warn('Error deleting message:', error);
+                    Alert.alert('Error', 'Failed to delete the message.');
                 }
             },
         });
@@ -47,44 +55,44 @@ export function handleLongPressMessage(messageId, messages, setMessages, chatId,
         // Nếu tin nhắn chưa bị thu hồi, hiển thị các tùy chọn khác
         options = [
             {
-                text: "📌 Pin",
+                text: '📌 Pin',
                 onPress: async () => {
                     try {
                         if (!messageId || !token) {
-                            console.error("Invalid messageId or token:", { messageId, token });
+                            console.error('Invalid messageId or token:', { messageId, token });
                             return;
                         }
                         await pinMessage(messageId, token);
-                        Alert.alert("Success", "Pinned!");
+                        Alert.alert('Success', 'Pinned!');
                     } catch (error) {
-                        console.warn("Error pinning message:", error);
-                        Alert.alert("Error", "Failed to pin the message.");
+                        console.warn('Error pinning message:', error);
+                        Alert.alert('Error', 'Failed to pin the message.');
                     }
                 },
             },
             {
-                text: "↩️ Answer",
+                text: '↩️ Answer',
                 onPress: () => {
                     setReplyMessage(message);
                     setModalReplyVisible(true); // Chỉ bật modal khi chọn Answer
-                }
+                },
             },
             {
-                text: "🗑️ Delete",
+                text: '🗑️ Delete',
                 onPress: async () => {
                     try {
                         if (!messageId || !token) {
-                            console.warn("Invalid messageId or token:", { messageId, token });
+                            console.warn('Invalid messageId or token:', { messageId, token });
                             return;
                         }
                         const response = await deleteMessage(messageId, token);
                         socket.emit('del_message', {
                             chatId: chatId,
                         });
-                        Alert.alert("Success", response.message);
+                        Alert.alert('Success', response.message);
                     } catch (error) {
-                        console.warn("Error deleting message:", error);
-                        Alert.alert("Error", "Failed to delete the message.");
+                        console.warn('Error deleting message:', error);
+                        Alert.alert('Error', 'Failed to delete the message.');
                     }
                 },
             },
@@ -92,28 +100,28 @@ export function handleLongPressMessage(messageId, messages, setMessages, chatId,
 
         if (message.sender.id === getUserIdFromToken(token)) {
             options.splice(4, 0, {
-                text: "Recall",
+                text: 'Recall',
                 onPress: async () => {
                     try {
                         if (!messageId || !token) {
-                            console.warn("Invalid messageId or token:", { messageId, token });
+                            console.warn('Invalid messageId or token:', { messageId, token });
                             return;
                         }
                         const response = await destroyMessage(messageId, token);
                         socket.emit('del_message', {
                             chatId: chatId,
                         });
-                        Alert.alert("Success", "Recall message success!");
+                        Alert.alert('Success', 'Recall message success!');
                     } catch (error) {
-                        console.warn("Error recalling message:", error);
-                        Alert.alert("Error", "Failed to recall the message.");
+                        console.warn('Error recalling message:', error);
+                        Alert.alert('Error', 'Failed to recall the message.');
                     }
                 },
             });
         }
     }
 
-    Alert.alert("Select an action", "What do you want to do with this message?", options, { cancelable: true });
+    Alert.alert('Select an action', 'What do you want to do with this message?', options, { cancelable: true });
 }
 
 export const fetchMessages = async (chatId, token) => {
@@ -132,29 +140,37 @@ export const fetchMessages = async (chatId, token) => {
 
 const pinMessage = async (messageId, token) => {
     try {
-        const response = await axios.put(`${API_URL}/groups/message/${messageId}/pin`, {}, {
-            headers: {
-                Authorization: `Bearer ${token}`, // Gửi token trong header
+        const response = await axios.put(
+            `${API_URL}/groups/message/${messageId}/pin`,
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Gửi token trong header
+                },
             },
-        });
+        );
         return response.data;
     } catch (error) {
         console.error('Error fetching messages:', error.response?.data || error.message);
         throw error;
     }
-}
+};
 
 const deleteMessage = async (messageId, token) => {
     if (!token) {
-        console.error("Token is missing!");
-        throw new Error("Token is required to delete the message.");
+        console.error('Token is missing!');
+        throw new Error('Token is required to delete the message.');
     }
     try {
-        const response = await axios.put(`${API_URL}/messages/${messageId}`, {}, {
-            headers: {
-                Authorization: `Bearer ${token}`, // Đảm bảo định dạng đúng
+        const response = await axios.put(
+            `${API_URL}/messages/${messageId}`,
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Đảm bảo định dạng đúng
+                },
             },
-        });
+        );
 
         return response.data;
     } catch (error) {
@@ -165,15 +181,19 @@ const deleteMessage = async (messageId, token) => {
 
 const destroyMessage = async (messageId, token) => {
     if (!token) {
-        console.error("Token is missing!");
-        throw new Error("Token is required to delete the message.");
+        console.error('Token is missing!');
+        throw new Error('Token is required to delete the message.');
     }
     try {
-        const response = await axios.put(`${API_URL}/messages/${messageId}/destroy`, {}, {
-            headers: {
-                Authorization: `Bearer ${token}`, // Đảm bảo định dạng đúng
+        const response = await axios.put(
+            `${API_URL}/messages/${messageId}/destroy`,
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Đảm bảo định dạng đúng
+                },
             },
-        });
+        );
         return response.data;
     } catch (error) {
         console.error('Error deleting message:', error.response?.data || error.message);
@@ -183,24 +203,32 @@ const destroyMessage = async (messageId, token) => {
 
 //Gửi tin nhắn
 export const sendMessage = async (chatId, content, type, replyToId, fileName, fileType, fileSize, token) => {
-    if (!content.trim()) throw new Error("Content is empty");
-    if (!chatId) throw new Error("Chat ID is required");
-    if (!token) throw new Error("Token is required");
+    if (!content.trim()) throw new Error('Content is empty');
+    if (!chatId) throw new Error('Chat ID is required');
+    if (!token) throw new Error('Token is required');
     try {
         // const formData = new FormData();
         //     formData.append('image', {
         //         fileName
         //     });
-        const response = await axios.post(`${API_URL}/messages/${chatId}`, {
-            content, type, replyToId, fileName, fileType, fileSize
-        }, {
-            headers: {
-                Authorization: `Bearer ${token}`, // Gửi token trong header
+        const response = await axios.post(
+            `${API_URL}/messages/${chatId}`,
+            {
+                content,
+                type,
+                replyToId,
+                fileName,
+                fileType,
+                fileSize,
             },
-        });
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Gửi token trong header
+                },
+            },
+        );
         return response.data;
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error sending message:', error.response?.data || error.message);
         throw error;
     }
@@ -209,45 +237,114 @@ export const sendMessage = async (chatId, content, type, replyToId, fileName, fi
 //Gửi ảnh
 export async function prepareImage(chatId, token) {
     try {
-        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (permission.status !== "granted") {
-            Alert.alert("Permission Denied", "Permission to access media library is required!");
+        const permission = await ImagePicker.requestCameraPermissionsAsync();
+        if (permission.status !== 'granted') {
+            Alert.alert('Permission Denied', 'Permission to access camera is required!');
             return;
         }
 
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: false,
-            quality: 1,
-        });
+        Alert.alert(
+            'Choose an option',
+            'Would you like to select from the gallery or use the camera?',
+            [
+                {
+                    text: 'Gallery',
+                    onPress: async () => {
+                        const result = await ImagePicker.launchImageLibraryAsync({
+                            mediaTypes: ImagePicker.MediaTypeOptions.All,
+                            allowsMultipleSelection: true,
+                            allowsEditing: false,
+                            quality: 1,
+                        });
 
-        if (result.canceled || !result.assets || result.assets.length === 0) {
-            console.log("Image selection canceled.");
-            return;
-        }
+                        if (result.canceled || !result.assets || result.assets.length === 0) {
+                            console.log('Selection canceled.');
+                            return;
+                        }
 
-        const image = result.assets[0];
-        const fileUri = image.uri;
-        const originalName = fileUri.split('/').pop() || "image.jpg";
+                        for (const asset of result.assets) {
+                            const fileUri = asset.uri;
+                            const originalName = fileUri.split('/').pop() || 'file';
+                            const extension = originalName.includes('.') ? originalName.split('.').pop() : '';
+                            const timeStamp = getCurrentTimeString();
+                            const fileName = `${originalName.replace(`.${extension}`, '')}_${timeStamp}.${extension}`;
+                            const fileType = asset.type || (extension === 'mp4' ? 'video/mp4' : 'image/jpeg');
+                            const fileSize = asset.fileSize || 0;
+                            const fileSizeString = fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : 'Unknown size';
 
-        // Lấy phần mở rộng file (jpg, png,...)
-        const extension = originalName.includes('.') ? originalName.split('.').pop() : 'jpg';
+                            await sendMessage(
+                                chatId,
+                                `sent ${fileType.startsWith('video') ? 'video' : 'image'}`,
+                                fileType.startsWith('video') ? 'video' : 'image',
+                                null,
+                                fileUri,
+                                fileType,
+                                fileSizeString,
+                                token,
+                            );
+                        }
 
-        // Tạo tên file mới có chứa giờ hiện tại
-        const timeStamp = getCurrentTimeString();
-        // const fileName = `image_${timeStamp}.${extension}`;
+                        socket.emit('del_message', { chatId });
+                        Alert.alert('Success', 'Files sent successfully!');
+                    },
+                },
+                {
+                    text: 'Camera',
+                    onPress: async () => {
+                        const result = await ImagePicker.launchCameraAsync({
+                            mediaTypes: ImagePicker.MediaTypeOptions.All,
+                            allowsEditing: false,
+                            quality: 1,
+                        });
 
-        const fileType = image.type || "image/jpeg";
-        const fileSize = image.fileSize || 0;
-        const fileSize_String = fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : "Unknown size";
-        await sendMessage(chatId, 'sent image', 'image', null, fileUri, fileType, fileSize_String, token);
+                        if (result.canceled) {
+                            console.log('Camera action canceled.');
+                            Alert.alert('Action Canceled', 'You canceled the camera action.');
+                            return;
+                        }
 
-        socket.emit('del_message', { chatId });
+                        if (!result.assets || result.assets.length === 0) {
+                            console.log('No image captured.');
+                            Alert.alert('Error', 'No image was captured.');
+                            return;
+                        }
 
-        Alert.alert("Success", "Image sent successfully!");
+                        const fileUri = result.assets[0].uri; // Correctly access the URI
+                        const originalName = fileUri.split('/').pop() || 'file';
+                        const extension = originalName.includes('.') ? originalName.split('.').pop() : '';
+                        const timeStamp = getCurrentTimeString();
+                        const fileName = `${originalName.replace(`.${extension}`, '')}_${timeStamp}.${extension}`;
+                        const fileType = result.assets[0].type || (extension === 'mp4' ? 'video/mp4' : 'image/jpeg');
+                        const fileSize = result.assets[0].fileSize || 0;
+                        const fileSizeString = fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : 'Unknown size';
+
+                        console.log('Captured image details:', { fileUri, fileName, fileType, fileSizeString });
+
+                        try {
+                            await sendMessage(
+                                chatId,
+                                `sent ${fileType.startsWith('video') ? 'video' : 'image'}`,
+                                fileType.startsWith('video') ? 'video' : 'image',
+                                null,
+                                fileUri,
+                                fileType,
+                                fileSizeString,
+                                token,
+                            );
+                            socket.emit('del_message', { chatId });
+                            Alert.alert('Success', 'File sent successfully!');
+                        } catch (error) {
+                            console.error('Error sending captured image:', error);
+                            Alert.alert('Error', 'Failed to send the captured image.');
+                        }
+                    },
+                },
+            ],
+            { cancelable: true },
+        );
     } catch (error) {
-        console.error("Error preparing image:", error);
-        Alert.alert("Error", "Failed to send the image.");
+        console.error('Error preparing files:', error);
+        Alert.alert('Error', 'Failed to send the files.');
     }
 }
 
@@ -256,32 +353,32 @@ export async function prepareFile(chatId, token) {
     try {
         const result = await DocumentPicker.getDocumentAsync({
             copyToCacheDirectory: true,
-            type: "*/*"
+            type: '*/*',
         });
 
         if (result.canceled || !result.assets || result.assets.length === 0) {
-            console.log("File selection canceled.");
+            console.log('File selection canceled.');
             return;
         }
 
         const file = result.assets ? result.assets[0] : result;
         const fileUri = file.uri;
-        const originalName = file.name || "file";
+        const originalName = file.name || 'file';
         const extension = originalName.includes('.') ? originalName.split('.').pop() : '';
         const timeStamp = getCurrentTimeString();
         const fileName = `${originalName.replace(`.${extension}`, '')}_${timeStamp}.${extension}`;
-        const fileType = file.mimeType || "application/octet-stream";
+        const fileType = file.mimeType || 'application/octet-stream';
         const fileSize = file.size || 0;
-        const fileSizeString = fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : "Unknown size";
+        const fileSizeString = fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : 'Unknown size';
 
         await sendMessage(chatId, fileName, 'file', null, fileUri, fileType, fileSizeString, token);
 
         socket.emit('del_message', { chatId });
 
-        Alert.alert("Success", "File sent successfully!");
+        Alert.alert('Success', 'File sent successfully!');
     } catch (error) {
-        console.error("Error preparing file:", error);
-        Alert.alert("Error", "Failed to send the file.");
+        console.error('Error preparing file:', error);
+        Alert.alert('Error', 'Failed to send the file.');
     }
 }
 
@@ -290,7 +387,7 @@ export async function startRecording(setRecording) {
     try {
         const { granted } = await Audio.requestPermissionsAsync();
         if (!granted) {
-            Alert.alert("Permission denied", "Please allow microphone access.");
+            Alert.alert('Permission denied', 'Please allow microphone access.');
             return;
         }
 
@@ -301,9 +398,9 @@ export async function startRecording(setRecording) {
         await recording.startAsync();
 
         setRecording(true);
-        console.log("Bắt đầu ghi âm...");
+        console.log('Bắt đầu ghi âm...');
     } catch (error) {
-        console.error("Lỗi khi ghi âm:", error);
+        console.error('Lỗi khi ghi âm:', error);
     }
 }
 
@@ -314,23 +411,30 @@ export async function stopRecording(setRecording, setRecordingUri, setRecordingS
 
         await recording.stopAndUnloadAsync();
         const uri = recording.getURI();
-        console.log("Tệp ghi âm đã lưu tại:", uri);
+        console.log('Tệp ghi âm đã lưu tại:', uri);
 
         setRecording(false);
         setRecordingUri(uri);
-        setRecordingSaved(true);  // Cập nhật trạng thái đã lưu
-        Alert.alert("Recording is saved", "Saving recording suscessful.");
+        setRecordingSaved(true); // Cập nhật trạng thái đã lưu
+        Alert.alert('Recording is saved', 'Saving recording suscessful.');
 
         recording = null;
     } catch (error) {
-        console.error("Lỗi khi dừng ghi âm:", error);
+        console.error('Lỗi khi dừng ghi âm:', error);
     }
 }
 
 // Gửi tin nhắn âm thanh
-export async function sendVoiceMessage(recordingUri, setRecording, setRecordingUri, setRecordingSaved, messages, setMessages) {
+export async function sendVoiceMessage(
+    recordingUri,
+    setRecording,
+    setRecordingUri,
+    setRecordingSaved,
+    messages,
+    setMessages,
+) {
     if (!recordingUri) {
-        Alert.alert("No recording file available", "Please press start and stop then before sending.");
+        Alert.alert('No recording file available', 'Please press start and stop then before sending.');
         return;
     }
 
@@ -340,9 +444,9 @@ export async function sendVoiceMessage(recordingUri, setRecording, setRecordingU
 
     const newMessage = {
         id: Date.now(),
-        sender: "@nhietpham",
-        name: "Nhiệt Phạm",
-        message: "🎤 Voice message",
+        sender: '@nhietpham',
+        name: 'Nhiệt Phạm',
+        message: '🎤 Voice message',
         time: new Date().toLocaleTimeString().slice(0, 5),
         isMe: true,
         audioUri: recordingUri,
@@ -353,28 +457,31 @@ export async function sendVoiceMessage(recordingUri, setRecording, setRecordingU
     setRecordingSaved(false); // Reset trạng thái sau khi gửi
 }
 
-
 // Phát lại tin nhắn âm thanh
 export async function playAudio(uri) {
     try {
         const { sound } = await Audio.Sound.createAsync({ uri });
         await sound.playAsync();
     } catch (error) {
-        console.error("Lỗi khi phát âm thanh:", error);
+        console.error('Lỗi khi phát âm thanh:', error);
     }
 }
 
 //reaction
 export const sendReaction = async (messageId, userId, reaction, token) => {
     try {
-        const response = await axios.put(`${API_URL}/messages/${messageId}/reaction`, {
-            userId,
-            reaction,
-        }, {
-            headers: {
-                Authorization: `Bearer ${token}`,
+        const response = await axios.put(
+            `${API_URL}/messages/${messageId}/reaction`,
+            {
+                userId,
+                reaction,
             },
-        });
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            },
+        );
         return response.data;
     } catch (error) {
         console.error('Error sending reaction:', error.response?.data || error.message);
