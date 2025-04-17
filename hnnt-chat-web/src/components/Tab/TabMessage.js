@@ -35,7 +35,6 @@ import {
     openEmojiTab,
     sendEmoji,
     setReadedChatWhenSendNewMessage,
-    addReaction,
 } from '../../redux/slices/chatSlice';
 import ChatText from '../Chat/ChatText';
 import ChatGif from '../Chat/ChatGif';
@@ -49,7 +48,13 @@ import { FiMoreHorizontal } from 'react-icons/fi';
 import PopupReacttion from '../Popup/PopupReaction';
 import PopupReactionChat from '../Popup/PopupReactionChat';
 import PopupMenuForChat from '../Popup/PopupMenuForChat';
-import { deletePinOfMessage, getMessage, readedChatOfUser, sendMessage } from '../../screens/Messaging/api';
+import {
+    deletePinOfMessage,
+    getMessage,
+    readedChatOfUser,
+    sendMessage,
+    uploadFileToS3,
+} from '../../screens/Messaging/api';
 import PopupAllPinnedOfMessage from '../Popup/PopupAllPinnedOfMessage';
 
 function TabMessage() {
@@ -123,7 +128,7 @@ function TabMessage() {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
         }
-    }, [data]);
+    }, [activeChat?.id]);
 
     const MessageComponent = {
         text: ChatText,
@@ -183,10 +188,18 @@ function TabMessage() {
 
     const handleFileChange = async (event, type) => {
         const file = event.target.files[0];
-        if (file) {
+        if (!file) return;
+
+        let fileUpload = null;
+        try {
+            fileUpload = await uploadFileToS3(file);
+        } catch (error) {
+            console.error(error);
+        }
+        if (fileUpload?.fileUrl) {
             const sendFile = await sendMessage(
                 chatId,
-                URL.createObjectURL(file),
+                fileUpload?.fileUrl,
                 type,
                 null,
                 file.name,
@@ -647,7 +660,7 @@ function TabMessage() {
                         {/* Input chọn file (ẩn đi) */}
                         <input
                             type="file"
-                            accept=".doc,.docx,.xls,.xlsx,.pdf,.txt,.ppt,.pptx,.csv"
+                            accept=".doc,.docx,.xls,.xlsx,.pdf,.txt,.ppt,.pptx,.csv,.mp4,.mov,.avi,.webm,.mkv"
                             ref={inputFileRef}
                             onChange={(event) => handleFileChange(event, 'file')}
                             className="hidden"

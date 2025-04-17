@@ -221,7 +221,7 @@ function TabChat() {
                                             {chat?.messages[0]?.senderId === userId ? (
                                                 <span className="mr-1">Bạn: </span>
                                             ) : (
-                                                <span className="mr-1">{`${
+                                                <span className="mr-1 max-w-[100px] truncate">{`${
                                                     chat?.messages[0]?.sender?.name || ''
                                                 }:`}</span>
                                             )}
@@ -245,7 +245,7 @@ function TabChat() {
                                                             [Hình ảnh]
                                                         </span>
                                                     ) : chat?.messages[0]?.type === 'file' ? (
-                                                        <span className="flex items-center">
+                                                        <span className="flex items-center max-w-[160px] truncate">
                                                             <MdFilePresent size={15} className="mr-[4px]" />{' '}
                                                             {chat?.messages[0]?.fileName}
                                                         </span>
