@@ -49,6 +49,7 @@ import PopupReacttion from '../Popup/PopupReaction';
 import PopupReactionChat from '../Popup/PopupReactionChat';
 import PopupMenuForChat from '../Popup/PopupMenuForChat';
 import ChatAudio from '../Chat/ChatAudio';
+import ChatImageGroup from '../Chat/ChatImageGroup';
 import {
     deletePinOfMessage,
     getMessage,
@@ -139,6 +140,7 @@ function TabMessage() {
         file: ChatFile,
         sticker: ChatSticker,
         audio: ChatAudio,
+        imageGroup: ChatImageGroup,
     };
 
     const getFileIcon = (fileType) => {
@@ -310,77 +312,137 @@ function TabMessage() {
     const [audioBlob, setAudioBlob] = useState(null); // Lưu blob ghi âm
     const [mediaRecorder, setMediaRecorder] = useState(null); // MediaRecorder instance
 
-    // Hàm bắt đầu ghi âm
     const startRecording = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             const recorder = new MediaRecorder(stream);
-
-            // Lưu mediaRecorder
-            setMediaRecorder(recorder);
-
-            // Mảng lưu trữ các đoạn ghi âm
             const chunks = [];
+
             recorder.ondataavailable = (event) => {
                 chunks.push(event.data);
             };
 
-            recorder.onstop = () => {
-                // Khi ghi âm kết thúc, tạo blob từ các chunks
-                const audioBlob = new Blob(chunks, { type: 'audio/wav' });
-                setAudioBlob(audioBlob);
-            };
+            recorder.onstop = async () => {
+                const blob = new Blob(chunks, { type: 'audio/wav' });
+                setAudioBlob(blob);
 
-            recorder.start();
-            setIsRecording(true);
-        } catch (error) {
-            console.error('Error starting recording:', error);
-        }
-    };
-
-    // Hàm dừng ghi âm và gửi bản ghi âm
-    const stopRecording = async () => {
-        if (mediaRecorder) {
-            mediaRecorder.stop(); // Dừng ghi âm
-
-            // Gửi bản ghi âm nếu có
-            if (audioBlob) {
                 try {
-                    // Tải bản ghi âm lên S3 (hoặc nơi bạn muốn lưu trữ)
-                    const fileUpload = await uploadFileToS3(audioBlob);
+                    const fileUpload = await uploadFileToS3(blob);
                     if (fileUpload?.fileUrl) {
-                        // Gửi tin nhắn với URL bản ghi âm
                         const sendFile = await sendMessage(
                             chatId,
                             fileUpload.fileUrl,
-                            'audio', // Loại tệp là audio
+                            'audio',
                             null,
-                            'audio recording', // Tên tệp (có thể thay đổi)
-                            'audio/wav', // Loại MIME của tệp
-                            (audioBlob.size / 1024).toFixed(2) + ' KB', // Kích thước tệp
+                            'audio recording',
+                            'audio/wav',
+                            (blob.size / 1024).toFixed(2) + ' KB',
                         );
+
                         socket.emit('send_message', {
                             chatId: activeChat.id,
                             newMessage: sendFile,
                         });
+                    } else {
+                        alert('❌ Tải tệp lên thất bại!');
                     }
                 } catch (error) {
-                    console.error('Error uploading or sending audio:', error);
+                    console.error('Lỗi khi gửi bản ghi âm:', error);
+                    alert('❌ Gửi bản ghi âm thất bại!');
+                } finally {
+                    // Dọn dẹp sau khi gửi
+                    setAudioBlob(null);
+                    if (recorder.stream) {
+                        recorder.stream.getTracks().forEach((track) => track.stop());
+                    }
+                    setMediaRecorder(null);
                 }
+            };
+
+            recorder.start();
+            setMediaRecorder(recorder);
+            setIsRecording(true);
+        } catch (error) {
+            console.error('Không thể bắt đầu ghi âm:', error);
+            alert('❌ Không thể truy cập micro!');
+        }
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorder) {
+            mediaRecorder.stop();
+            setIsRecording(false);
+        }
+    };
+
+    // Nút bật/tắt ghi âm
+    const toggleRecording = () => {
+        if (isRecording) {
+            console.log('⏹️ Dừng ghi âm');
+            stopRecording();
+        } else {
+            console.log('🔴 Bắt đầu ghi âm');
+            startRecording();
+        }
+    };
+
+    // handle change multiple file
+    const handleChangeTypeFile = (event, type) => {
+        const files = event.target.files;
+        if (!files || files.length === 0) return;
+
+        if (files.length === 1) {
+            handleFileChange(event, type);
+        } else {
+            handleMultipleFiles(event, type);
+        }
+
+        event.target.value = '';
+    };
+
+    const handleMultipleFiles = async (event, type) => {
+        const files = Array.from(event.target.files); // Lấy nhiều file
+        if (!files.length) return;
+
+        const uploadedFiles = [];
+
+        for (const file of files) {
+            try {
+                const fileUpload = await uploadFileToS3(file);
+                if (fileUpload?.fileUrl) {
+                    uploadedFiles.push({
+                        url: fileUpload.fileUrl,
+                        fileName: file.name,
+                        fileSize: (file.size / 1024).toFixed(2) + ' KB',
+                        fileType: file.type,
+                    });
+                }
+            } catch (error) {
+                console.error('Upload failed for:', file.name, error);
             }
         }
 
-        setIsRecording(false);
-    };
+        if (uploadedFiles.length > 0) {
+            // Lưu toàn bộ thông tin file vào content dạng JSON string
+            const sendFile = await sendMessage(
+                chatId,
+                JSON.stringify(uploadedFiles), // Lưu mảng vào content
+                (type = 'imageGroup'),
+                null,
+            );
 
-    // Hàm xử lý nút bấm
-    const toggleRecording = () => {
-        if (isRecording) {
-            console.log('Đã dừng ghi âm');
-            stopRecording(); // Dừng ghi âm
-        } else {
-            startRecording(); // Bắt đầu ghi âm
+            socket.emit('send_message', {
+                chatId: activeChat.id,
+                newMessage: sendFile,
+            });
         }
+
+        event.target.value = '';
+        setTimeout(() => {
+            if (chatContainerRef.current) {
+                chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+            }
+        }, 100);
     };
 
     return (
@@ -846,8 +908,9 @@ function TabMessage() {
                         <input
                             type="file"
                             accept="image/*"
+                            multiple
                             ref={inputImageRef}
-                            onChange={(event) => handleFileChange(event, 'image')}
+                            onChange={(event) => handleChangeTypeFile(event, 'image')}
                             className="hidden"
                         />
 
