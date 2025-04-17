@@ -415,7 +415,8 @@ export default function PrivateChatScreen() {
                                                                 style={styles.inlineVideo}
                                                                 useNativeControls
                                                                 resizeMode="contain"
-                                                                shouldPlay={true}
+                                                                shouldPlay={false}
+                                                                isLooping={true}
                                                             />
                                                         </View>
                                                     )}
