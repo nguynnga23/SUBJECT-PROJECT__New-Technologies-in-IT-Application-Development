@@ -10,12 +10,13 @@ import { UAParser } from 'ua-parser-js';
 
 import '../../index.css';
 
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '../../redux/slices/authSlice';
 import { addDevice, changePassword, forgotPassword, login, loginQR, register, sendOTPEmail, verifyOTP } from './api';
 
 import QRLogin from '../../components/QR/QRLogin';
 import { getUserById, getUserByNumberAndEmail } from '../Profile/api';
+import { socket } from '../../configs/socket';
 
 function Authentication() {
     const [number, setNumber] = useState('');
