@@ -14,6 +14,7 @@ CREATE TABLE "Account" (
     "location" TEXT,
     "gender" VARCHAR(10) NOT NULL,
     "currentAvatars" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "pushToken" VARCHAR(255),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -123,6 +124,16 @@ CREATE TABLE "LoggedInDevice" (
     CONSTRAINT "LoggedInDevice_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "BlockedUser" (
+    "id" TEXT NOT NULL,
+    "blockerAccountId" TEXT NOT NULL,
+    "blockedAccountId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "BlockedUser_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Account_number_key" ON "Account"("number");
 
@@ -140,6 +151,9 @@ CREATE UNIQUE INDEX "ChatParticipant_chatId_accountId_key" ON "ChatParticipant"(
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Message_replyToId_key" ON "Message"("replyToId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "BlockedUser_blockerAccountId_blockedAccountId_key" ON "BlockedUser"("blockerAccountId", "blockedAccountId");
 
 -- AddForeignKey
 ALTER TABLE "FriendRequest" ADD CONSTRAINT "FriendRequest_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -182,3 +196,9 @@ ALTER TABLE "Reaction" ADD CONSTRAINT "Reaction_userId_fkey" FOREIGN KEY ("userI
 
 -- AddForeignKey
 ALTER TABLE "LoggedInDevice" ADD CONSTRAINT "LoggedInDevice_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Account"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BlockedUser" ADD CONSTRAINT "BlockedUser_blockerAccountId_fkey" FOREIGN KEY ("blockerAccountId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BlockedUser" ADD CONSTRAINT "BlockedUser_blockedAccountId_fkey" FOREIGN KEY ("blockedAccountId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;

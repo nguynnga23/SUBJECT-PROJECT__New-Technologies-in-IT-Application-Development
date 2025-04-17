@@ -4,12 +4,14 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { MenuProvider } from 'react-native-popup-menu';
 import { Provider } from 'react-redux';
 import { store } from './src/redux/store';
+import PushNotificationHandler from './src/common/components/PushNotificationHandler';
+
 export default function App() {
+    const handleNotification = (notification) => {
+        console.log('Notification received or user interacted:', notification);
+        // Bạn có thể xử lý thông báo theo yêu cầu, ví dụ như điều hướng đến một màn hình khác
+    };
     return (
-        // <View style={styles.container}>
-        //   <Text>Open up App.tsx to start working on your app!</Text>
-        //   <StatusBar style="auto" />
-        // </View>
         <Provider store={store}>
             <MenuProvider>
                 <GestureHandlerRootView style={{ flex: 1 }}>
