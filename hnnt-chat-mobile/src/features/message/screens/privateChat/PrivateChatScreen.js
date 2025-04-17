@@ -432,8 +432,8 @@ export default function PrivateChatScreen() {
                             message={message}
                             setMessage={setMessage}
                             onSendMessage={() => handleSendMessage(message)}
-                            onSendFile={() => prepareFile(chatId, token)}
-                            onSendImage={() => prepareImage(chatId, token)}
+                            onSendFile={() => prepareFile(chatId, token, replyMessage?.id)}
+                            onSendImage={() => prepareImage(chatId, token, replyMessage?.id)}
                             onOpenVoiceRecorder={() => setModalRecordVisible(false)}
                         />
 

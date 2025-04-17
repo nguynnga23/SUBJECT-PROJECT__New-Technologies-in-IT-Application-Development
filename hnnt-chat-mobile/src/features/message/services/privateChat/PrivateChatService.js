@@ -1,4 +1,4 @@
-import { Alert } from "react-native";
+import { Alert, Platform } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Audio } from "expo-av";
 import * as DocumentPicker from "expo-document-picker";
@@ -85,10 +85,6 @@ export const sendMessage = async (chatId, content, type, replyToId, fileName, fi
     if (!chatId) throw new Error("Chat ID is required");
     if (!token) throw new Error("Token is required");
     try {
-        // const formData = new FormData();
-        //     formData.append('image', {
-        //         fileName
-        //     });
         const response = await axios.post(`${API_URL}/messages/${chatId}`, {
             content, type, replyToId, fileName, fileType, fileSize
         }, {
@@ -104,8 +100,35 @@ export const sendMessage = async (chatId, content, type, replyToId, fileName, fi
     }
 };
 
+//upload file to s3
+export const uploadFileToS3 = async (file, token) => {
+    if (!file) throw new Error("File is required");
+    if (!token) throw new Error("Token is required");
+
+    try {
+        const formData = new FormData();
+        formData.append('file', {
+            uri: Platform.OS === 'ios' ? file.uri.replace('file://', '') : file.uri,
+            name: file.name,
+            type: file.type,
+        });
+
+        const response = await axios.post(`${API_URL}/messages/upload`, formData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data', // BẮT BUỘC cho React Native
+            },
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Error uploading file:', error?.response?.data || error.message);
+        throw error;
+    }
+};
+
 //Gửi ảnh
-export async function prepareImage(chatId, token) {
+export async function prepareImage(chatId, token, replyId) {
     try {
         const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (permission.status !== "granted") {
@@ -125,20 +148,39 @@ export async function prepareImage(chatId, token) {
         }
 
         const image = result.assets[0];
-        const fileUri = image.uri;
-        const originalName = fileUri.split('/').pop() || "image.jpg";
-
-        // Lấy phần mở rộng file (jpg, png,...)
-        const extension = originalName.includes('.') ? originalName.split('.').pop() : 'jpg';
-
-        // Tạo tên file mới có chứa giờ hiện tại
+        const uri = image.uri;
+        const originalName = uri.split('/').pop() || `image_${Date.now()}.jpg`;
+        const extension = originalName.split('.').pop();
         const timeStamp = getCurrentTimeString();
-        // const fileName = `image_${timeStamp}.${extension}`;
-
-        const fileType = image.type || "image/jpeg";
+        const fileName = `image_${timeStamp}.${extension}`;
+        const fileType = image.type ? `image/${extension}` : 'image/jpeg';
         const fileSize = image.fileSize || 0;
         const fileSize_String = fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : "Unknown size";
-        await sendMessage(chatId, 'sent image', 'image', null, fileUri, fileType, fileSize_String, token);
+
+        const file = {
+            uri,
+            name: fileName,
+            type: fileType,
+        };
+
+        const uploadResponse = await uploadFileToS3(file, token);
+        const uploadUrl = uploadResponse?.fileUrl || uploadResponse?.url || null;
+
+        if (!uploadUrl) {
+            Alert.alert("Upload Failed", "No URL returned from server.");
+            return;
+        }
+
+        await sendMessage(
+            chatId,
+            fileName,
+            'image',
+            replyId || null,
+            uploadUrl,
+            fileType,
+            fileSize_String,
+            token
+        );
 
         socket.emit('del_message', { chatId });
 
@@ -149,8 +191,9 @@ export async function prepareImage(chatId, token) {
     }
 }
 
+
 //Gửi tài liệu
-export async function prepareFile(chatId, token) {
+export async function prepareFile(chatId, token, replyId) {
     try {
         const result = await DocumentPicker.getDocumentAsync({
             copyToCacheDirectory: true,
@@ -162,17 +205,41 @@ export async function prepareFile(chatId, token) {
             return;
         }
 
-        const file = result.assets ? result.assets[0] : result;
-        const fileUri = file.uri;
-        const originalName = file.name || "file";
-        const extension = originalName.includes('.') ? originalName.split('.').pop() : '';
+        const fileAsset = result.assets[0];
+        const uri = fileAsset.uri;
+        const originalName = fileAsset.name || uri.split('/').pop() || `file_${Date.now()}`;
+        const extension = originalName.split('.').pop() || '';
         const timeStamp = getCurrentTimeString();
-        const fileName = `${originalName.replace(`.${extension}`, '')}_${timeStamp}.${extension}`;
-        const fileType = file.mimeType || "application/octet-stream";
-        const fileSize = file.size || 0;
-        const fileSizeString = fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : "Unknown size";
+        const fileName = `file_${timeStamp}.${extension}`;
+        const fileType = fileAsset.mimeType || 'application/octet-stream';
+        const fileSize = fileAsset.size || 0;
+        const fileSize_String = fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : "Unknown size";
 
-        await sendMessage(chatId, fileName, 'file', null, fileUri, fileType, fileSizeString, token);
+        const file = {
+            uri: Platform.OS === 'ios' ? uri.replace('file://', '') : uri,
+            name: fileName,
+            type: fileType,
+        };
+
+        console.log("File to upload:", file);
+        const uploadResponse = await uploadFileToS3(file, token);
+        const uploadUrl = uploadResponse?.fileUrl || uploadResponse?.url || null;
+
+        if (!uploadUrl) {
+            Alert.alert("Upload Failed", "No URL returned from server.");
+            return;
+        }
+
+        await sendMessage(
+            chatId,
+            fileName,
+            'file',
+            replyId || null,
+            uploadUrl,
+            fileType,
+            fileSize_String,
+            token
+        );
 
         socket.emit('del_message', { chatId });
 
@@ -333,29 +400,25 @@ export const downloadAnyFile = async (fileUrl) => {
     try {
         console.log('Downloading file from URL:', fileUrl);
 
-        // Xin quyền truy cập media
         const { status } = await MediaLibrary.requestPermissionsAsync();
         if (status !== 'granted') {
             Alert.alert('Permission Denied', 'Bạn cần cấp quyền lưu trữ để tải file.');
             return;
         }
 
-        // Tạo tên file an toàn
-        let fileName = fileUrl.split('?')[0].split('/').pop(); // loại bỏ query string
+        let fileName = fileUrl.split('?')[0].split('/').pop();
         if (!fileName || !fileName.includes('.')) {
-            // fallback nếu không có đuôi
-            const extension = '.bin';
-            fileName = `file_${Date.now()}${extension}`;
+            fileName = `file_${Date.now()}.bin`;
         }
 
         const fileUri = `${FileSystem.documentDirectory}${fileName}`;
 
-        // Tạo tiến trình tải
         const downloadResumable = FileSystem.createDownloadResumable(fileUrl, fileUri);
         const { uri } = await downloadResumable.downloadAsync();
 
         console.log('Tải xong, lưu file:', uri);
 
+        // Tạo asset từ file URI
         const asset = await MediaLibrary.createAssetAsync(uri);
         await MediaLibrary.createAlbumAsync('Download', asset, false);
 

@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthRequest } from '../types/authRequest';
+import { s3 } from '../utils/s3Uploader';
 
 const prisma = new PrismaClient();
 
@@ -57,7 +58,6 @@ export const sendMessage = async (req: AuthRequest, res: Response): Promise<void
             res.status(403).json({ message: 'Bạn không có quyền gửi tin nhắn trong chat này.' });
             return;
         }
-
         // Tạo tin nhắn mới
         const message = await prisma.message.create({
             data: {
@@ -439,5 +439,35 @@ export const searchForKeyWordByChat = async (req: AuthRequest, res: Response): P
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
+
+export const uploadFileToS3 = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const file = req.file;
+
+        if (!file) {
+            res.status(400).json({ message: 'No file uploaded' });
+            return;
+        }
+
+        const fileName = `${Date.now()}-${file.originalname}`;
+        const params = {
+            Bucket: process.env.AWS_S3_BUCKET_NAME || '',
+            Key: `message/${fileName}`,
+            Body: file.buffer,
+            ContentType: file.mimetype,
+        };
+
+        const result = await s3.upload(params).promise();
+
+        res.status(200).json({
+            message: 'File uploaded successfully',
+            fileUrl: result.Location,
+            key: result.Key,
+        });
+    } catch (error) {
+        console.error('Upload error:', error);
+        res.status(500).json({ message: 'Upload failed', error });
     }
 };
