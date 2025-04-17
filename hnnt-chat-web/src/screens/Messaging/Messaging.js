@@ -73,7 +73,7 @@ function Messaging() {
                 {showRightBar && <TabChatRightBar />}
                 {showRightBarSearch && <TabChatRightBarSearch />}
                 {notification && (
-                    <div className="fixed bottom-6 right-6 bg-white shadow-lg rounded-lg p-4 border w-80 z-50 animate-slide-in">
+                    <div className="fixed bottom-6 right-6 bg-white shadow-lg rounded-lg p-4 border border-blue-500 w-80 z-50 animate-slide-in">
                         <div className="font-semibold">{notification.sender}</div>
                         <div className="text-gray-700 mt-1">{notification.content}</div>
                     </div>
