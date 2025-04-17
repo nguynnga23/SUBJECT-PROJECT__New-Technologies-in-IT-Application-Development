@@ -144,7 +144,7 @@ export default function PrivateChatScreen() {
 
     useEffect(() => {
         loadMessages();
-    }, []);
+    }, [messages]);
 
     //send message
     useEffect(() => {
@@ -339,7 +339,6 @@ export default function PrivateChatScreen() {
                             flatListRef={flatListRef}
                         />
                         <FlatList
-                            ref={flatListRef}
                             data={messages}
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={({ item }) => {

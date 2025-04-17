@@ -310,75 +310,77 @@ function TabMessage() {
     const [audioBlob, setAudioBlob] = useState(null); // Lưu blob ghi âm
     const [mediaRecorder, setMediaRecorder] = useState(null); // MediaRecorder instance
 
-    // Hàm bắt đầu ghi âm
     const startRecording = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             const recorder = new MediaRecorder(stream);
-
-            // Lưu mediaRecorder
-            setMediaRecorder(recorder);
-
-            // Mảng lưu trữ các đoạn ghi âm
             const chunks = [];
+
             recorder.ondataavailable = (event) => {
                 chunks.push(event.data);
             };
 
-            recorder.onstop = () => {
-                // Khi ghi âm kết thúc, tạo blob từ các chunks
-                const audioBlob = new Blob(chunks, { type: 'audio/wav' });
-                setAudioBlob(audioBlob);
-            };
+            recorder.onstop = async () => {
+                const blob = new Blob(chunks, { type: 'audio/wav' });
+                setAudioBlob(blob);
 
-            recorder.start();
-            setIsRecording(true);
-        } catch (error) {
-            console.error('Error starting recording:', error);
-        }
-    };
-
-    // Hàm dừng ghi âm và gửi bản ghi âm
-    const stopRecording = async () => {
-        if (mediaRecorder) {
-            mediaRecorder.stop(); // Dừng ghi âm
-
-            // Gửi bản ghi âm nếu có
-            if (audioBlob) {
                 try {
-                    // Tải bản ghi âm lên S3 (hoặc nơi bạn muốn lưu trữ)
-                    const fileUpload = await uploadFileToS3(audioBlob);
+                    const fileUpload = await uploadFileToS3(blob);
                     if (fileUpload?.fileUrl) {
-                        // Gửi tin nhắn với URL bản ghi âm
                         const sendFile = await sendMessage(
                             chatId,
                             fileUpload.fileUrl,
-                            'audio', // Loại tệp là audio
+                            'audio',
                             null,
-                            'audio recording', // Tên tệp (có thể thay đổi)
-                            'audio/wav', // Loại MIME của tệp
-                            (audioBlob.size / 1024).toFixed(2) + ' KB', // Kích thước tệp
+                            'audio recording',
+                            'audio/wav',
+                            (blob.size / 1024).toFixed(2) + ' KB',
                         );
+
                         socket.emit('send_message', {
                             chatId: activeChat.id,
                             newMessage: sendFile,
                         });
+                    } else {
+                        alert('❌ Tải tệp lên thất bại!');
                     }
                 } catch (error) {
-                    console.error('Error uploading or sending audio:', error);
+                    console.error('Lỗi khi gửi bản ghi âm:', error);
+                    alert('❌ Gửi bản ghi âm thất bại!');
+                } finally {
+                    // Dọn dẹp sau khi gửi
+                    setAudioBlob(null);
+                    if (recorder.stream) {
+                        recorder.stream.getTracks().forEach((track) => track.stop());
+                    }
+                    setMediaRecorder(null);
                 }
-            }
-        }
+            };
 
-        setIsRecording(false);
+            recorder.start();
+            setMediaRecorder(recorder);
+            setIsRecording(true);
+        } catch (error) {
+            console.error('Không thể bắt đầu ghi âm:', error);
+            alert('❌ Không thể truy cập micro!');
+        }
     };
 
-    // Hàm xử lý nút bấm
+    const stopRecording = () => {
+        if (mediaRecorder) {
+            mediaRecorder.stop();
+            setIsRecording(false);
+        }
+    };
+
+    // Nút bật/tắt ghi âm
     const toggleRecording = () => {
         if (isRecording) {
-            stopRecording(); // Dừng ghi âm
+            console.log('⏹️ Dừng ghi âm');
+            stopRecording();
         } else {
-            startRecording(); // Bắt đầu ghi âm
+            console.log('🔴 Bắt đầu ghi âm');
+            startRecording();
         }
     };
 
