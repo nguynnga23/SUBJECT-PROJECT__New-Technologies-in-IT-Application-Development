@@ -156,31 +156,31 @@ export const acceptFriendRequest = async (req: AuthRequest, res: Response): Prom
         });
 
         // Kiểm tra xem đoạn chat giữa hai người đã tồn tại chưa
-        const existingChat = await prisma.chat.findFirst({
-            where: {
-                isGroup: false,
-                participants: {
-                    every: {
-                        accountId: { in: [request.senderId, request.receiverId] },
-                    },
-                },
-            },
-        });
+        // const existingChat = await prisma.chat.findFirst({
+        //     where: {
+        //         isGroup: false,
+        //         participants: {
+        //             every: {
+        //                 accountId: { in: [request.senderId, request.receiverId] },
+        //             },
+        //         },
+        //     },
+        // });
 
-        let chatId;
-        if (!existingChat) {
-            const newChat = await prisma.chat.create({
-                data: {
-                    isGroup: false,
-                    participants: {
-                        create: [{ accountId: request.senderId }, { accountId: request.receiverId }],
-                    },
-                },
-            });
-            chatId = newChat.id;
-        } else {
-            chatId = existingChat.id;
-        }
+        // let chatId;
+        // if (!existingChat) {
+        //     const newChat = await prisma.chat.create({
+        //         data: {
+        //             isGroup: false,
+        //             participants: {
+        //                 create: [{ accountId: request.senderId }, { accountId: request.receiverId }],
+        //             },
+        //         },
+        //     });
+        //     chatId = newChat.id;
+        // } else {
+        //     chatId = existingChat.id;
+        // }
 
         // Kiểm tra xem đoạn chat giữa hai người đã tồn tại chưa
         const existingChat = await prisma.chat.findFirst({
