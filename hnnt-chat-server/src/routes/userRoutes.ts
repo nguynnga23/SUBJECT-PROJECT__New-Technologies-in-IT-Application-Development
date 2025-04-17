@@ -7,6 +7,7 @@ import {
     getUserByNumberAndEmail,
     getUserByNumberOrEmail,
     searchByPhone,
+    searchUsers,
 } from '../controllers/userController';
 import { authenticate } from '../middleware/auth';
 import multer from 'multer';
@@ -21,5 +22,7 @@ userRoute.get('/:id', getUserById);
 userRoute.post('/get-user-by-number-and-email', getUserByNumberAndEmail);
 userRoute.post('/get-user-by-number-or-email', getUserByNumberOrEmail);
 userRoute.post('/search-by-phone', authenticate, searchByPhone);
+userRoute.post('/get-user-by-number-or-email', getUserByNumberOrEmail);
+userRoute.post('/search', searchUsers); // Tìm kiếm người dùng
 
 export default userRoute;

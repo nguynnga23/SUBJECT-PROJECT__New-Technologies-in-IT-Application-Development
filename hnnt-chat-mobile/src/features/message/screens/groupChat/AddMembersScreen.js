@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet, TextInput, Alert } from "react-native";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet, TextInput, Alert } from 'react-native';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { addMember2Group, getListFriend, fetchChat } from "../../services/GroupChat/AddMembersService";
+import { addMember2Group, getListFriend, fetchChat } from '../../services/GroupChat/AddMembersService';
 
 export default function AddMembersScreen() {
     const navigation = useNavigation();
@@ -14,13 +14,13 @@ export default function AddMembersScreen() {
     const [selectedFriends, setSelectedFriends] = useState([]);
     const [searchText, setSearchText] = useState('');
     const route = useRoute();
-    const chatId = route.params?.chatId || "null";
+    const chatId = route.params?.chatId || 'null';
 
     // Lấy danh sách bạn bè và thành viên nhóm
     useEffect(() => {
         const fetchFriendsAndMembers = async () => {
             try {
-                const token = await AsyncStorage.getItem("token");
+                const token = await AsyncStorage.getItem('token');
 
                 // Lấy danh sách bạn bè
                 const friendsData = await getListFriend(token);
@@ -37,7 +37,7 @@ export default function AddMembersScreen() {
                 setFriends(updatedFriends);
                 setFilteredFriends(updatedFriends); // Khởi tạo danh sách bạn bè được filter
             } catch (error) {
-                console.error("Error fetching friends or group members:", error);
+                console.error('Error fetching friends or group members:', error);
             }
         };
 
@@ -47,34 +47,32 @@ export default function AddMembersScreen() {
     // Xử lý tìm kiếm
     const handleSearch = (text) => {
         setSearchText(text);
-        const filtered = friends.filter((friend) =>
-            friend.name.toLowerCase().includes(text.toLowerCase())
-        );
+        const filtered = friends.filter((friend) => friend.name.toLowerCase().includes(text.toLowerCase()));
         setFilteredFriends(filtered);
     };
 
     // Xử lý chọn/bỏ chọn bạn bè
     const toggleSelection = (id) => {
         setSelectedFriends((prevSelected) =>
-            prevSelected.includes(id) ? prevSelected.filter((friendId) => friendId !== id) : [...prevSelected, id]
+            prevSelected.includes(id) ? prevSelected.filter((friendId) => friendId !== id) : [...prevSelected, id],
         );
     };
 
     // Xử lý thêm thành viên vào nhóm
     const handleAddMembers = async () => {
         try {
-            const token = await AsyncStorage.getItem("token");
+            const token = await AsyncStorage.getItem('token');
             const selectedMembers = selectedFriends.map((id) => friends.find((friend) => friend.id === id));
 
             for (const member of selectedMembers) {
                 await addMember2Group(chatId, member.id, token);
             }
 
-            Alert.alert("Success", "Selected members have been added to the group.");
+            Alert.alert('Success', 'Selected members have been added to the group.');
             navigation.goBack();
         } catch (error) {
-            console.error("Error adding members to group:", error);
-            Alert.alert("Error", "Failed to add members to the group.");
+            console.error('Error adding members to group:', error);
+            Alert.alert('Error', 'Failed to add members to the group.');
         }
     };
 
@@ -85,9 +83,9 @@ export default function AddMembersScreen() {
         return (
             <TouchableOpacity style={styles.friendItem} onPress={() => toggleSelection(item.id)}>
                 <Ionicons
-                    name={isSelected ? "radio-button-on" : "radio-button-off"}
+                    name={isSelected ? 'radio-button-on' : 'radio-button-off'}
                     size={24}
-                    color={isSelected ? "#4a90e2" : "gray"}
+                    color={isSelected ? '#4a90e2' : 'gray'}
                 />
                 <Image source={{ uri: item.avatar }} style={styles.avatar} />
                 <Text style={styles.friendName}>{item.name}</Text>
@@ -96,16 +94,8 @@ export default function AddMembersScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <SafeAreaProvider>
-                {/* Header */}
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <Ionicons name="arrow-back" size={24} color="white" />
-                    </TouchableOpacity>
-                    <Text style={styles.headerText}>Add Members</Text>
-                </View>
-
                 {/* Tìm kiếm */}
                 <View style={styles.searchWrapper}>
                     <View style={styles.searchContainer}>
@@ -134,25 +124,25 @@ export default function AddMembersScreen() {
                     </TouchableOpacity>
                 )}
             </SafeAreaProvider>
-        </SafeAreaView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff",
+        backgroundColor: '#fff',
     },
     header: {
-        flexDirection: "row",
-        alignItems: "center",
+        flexDirection: 'row',
+        alignItems: 'center',
         padding: 15,
-        backgroundColor: "#4a90e2",
+        backgroundColor: '#4a90e2',
     },
     headerText: {
         fontSize: 20,
-        fontWeight: "bold",
-        color: "white",
+        fontWeight: 'bold',
+        color: 'white',
         marginLeft: 10,
     },
     searchWrapper: {
@@ -160,9 +150,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
     },
     searchContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "#F2F2F2",
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F2F2F2',
         borderRadius: 10,
         paddingHorizontal: 10,
         height: 40,
@@ -177,9 +167,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
     },
     friendItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "white",
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'white',
         padding: 10,
         borderRadius: 10,
         marginBottom: 10,
@@ -194,22 +184,22 @@ const styles = StyleSheet.create({
     friendName: {
         flex: 1,
         fontSize: 16,
-        fontWeight: "bold",
+        fontWeight: 'bold',
     },
     addButton: {
-        position: "absolute",
+        position: 'absolute',
         bottom: 20,
         right: 20,
-        backgroundColor: "#4a90e2",
+        backgroundColor: '#4a90e2',
         padding: 15,
         borderRadius: 50,
-        alignItems: "center",
-        justifyContent: "center",
+        alignItems: 'center',
+        justifyContent: 'center',
         elevation: 5,
     },
     addButtonText: {
-        color: "white",
+        color: 'white',
         fontSize: 16,
-        fontWeight: "bold",
+        fontWeight: 'bold',
     },
 });

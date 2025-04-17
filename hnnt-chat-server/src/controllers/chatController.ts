@@ -1,7 +1,6 @@
 import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthRequest } from '../types/authRequest';
-// import { io } from '../utils/socket';
 
 const prisma = new PrismaClient();
 
@@ -341,8 +340,6 @@ export const ReadedChatOfUser = async (req: AuthRequest, res: Response): Promise
                 readed: true,
             },
         });
-
-        // io.to(chatId).emit('read_message', { chatId, userId });
 
         res.status(200).json({ message: 'Đã cập nhật trạng thái readed' });
         return;

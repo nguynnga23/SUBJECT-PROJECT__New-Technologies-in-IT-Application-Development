@@ -47,7 +47,13 @@ import { FiMoreHorizontal } from 'react-icons/fi';
 import PopupReacttion from '../Popup/PopupReaction';
 import PopupReactionChat from '../Popup/PopupReactionChat';
 import PopupMenuForChat from '../Popup/PopupMenuForChat';
-import { deletePinOfMessage, getMessage, readedChatOfUser, sendMessage } from '../../screens/Messaging/api';
+import {
+    deletePinOfMessage,
+    getMessage,
+    readedChatOfUser,
+    sendMessage,
+    uploadFileToS3,
+} from '../../screens/Messaging/api';
 import PopupAllPinnedOfMessage from '../Popup/PopupAllPinnedOfMessage';
 
 import { socket } from '../../configs/socket';
@@ -64,6 +70,7 @@ function TabMessage() {
     const userId = userActive?.id;
 
     const activeChat = useSelector((state) => state.chat.activeChat);
+
     const chatId = activeChat?.id;
 
     const dispatch = useDispatch();
@@ -100,7 +107,28 @@ function TabMessage() {
         };
 
         fetchMessages();
-    }, [setData, chatId, data]);
+    }, [chatId, data]);
+
+    useEffect(() => {
+        // Lắng nghe tin nhắn đến từ server
+        const handleReceiveMessage = ({ chatId: receivedChatId, newMessage }) => {
+            if (activeChat?.id !== receivedChatId) {
+                return;
+            }
+            setData((prev) => [...prev, newMessage]);
+            setTimeout(() => {
+                if (chatContainerRef.current) {
+                    chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+                }
+            }, 100);
+        };
+
+        socket.on('receive_message', handleReceiveMessage);
+
+        return () => {
+            socket.off('receive_message', handleReceiveMessage);
+        };
+    }, [activeChat?.id]);
 
     const MessageComponent = {
         text: ChatText,
@@ -132,11 +160,17 @@ function TabMessage() {
 
     const handleSendMessage = async () => {
         if (message.trim() !== '') {
-            await sendMessage(chatId, message, 'text', replyMessage?.id, null, null, null);
+            const sendMess = await sendMessage(chatId, message, 'text', replyMessage?.id, null, null, null);
+            if (!sendMess) return;
+
             await readedChatOfUser(chatId);
             dispatch(setReadedChatWhenSendNewMessage({ chatId: chatId, userId: userId }));
             setMessage('');
             setReplyMessage(null);
+            socket.emit('send_message', {
+                chatId: activeChat.id,
+                newMessage: sendMess,
+            });
         }
         setTimeout(() => {
             if (chatContainerRef.current) {
@@ -154,16 +188,28 @@ function TabMessage() {
 
     const handleFileChange = async (event, type) => {
         const file = event.target.files[0];
-        if (file) {
-            await sendMessage(
+        if (!file) return;
+
+        let fileUpload = null;
+        try {
+            fileUpload = await uploadFileToS3(file);
+        } catch (error) {
+            console.error(error);
+        }
+        if (fileUpload?.fileUrl) {
+            const sendFile = await sendMessage(
                 chatId,
-                URL.createObjectURL(file),
+                fileUpload?.fileUrl,
                 type,
                 null,
                 file.name,
                 file.type,
                 (file.size / 1024).toFixed(2) + ' KB',
             );
+            socket.emit('send_message', {
+                chatId: activeChat.id,
+                newMessage: sendFile,
+            });
         }
         event.target.value = '';
         setTimeout(() => {
@@ -560,7 +606,7 @@ function TabMessage() {
                                                     alt="avatar"
                                                     className="w-full h-full rounded-full border object-cover"
                                                 />
-                                                {leader && (
+                                                {leader?.id === message.sender.id && (
                                                     <RiKey2Line
                                                         size={15}
                                                         color="yellow"
@@ -734,7 +780,7 @@ function TabMessage() {
                         {/* Input chọn file (ẩn đi) */}
                         <input
                             type="file"
-                            accept=".doc,.docx,.xls,.xlsx,.pdf,.txt,.ppt,.pptx,.csv"
+                            accept=".doc,.docx,.xls,.xlsx,.pdf,.txt,.ppt,.pptx,.csv,.mp4,.mov,.avi,.webm,.mkv"
                             ref={inputFileRef}
                             onChange={(event) => handleFileChange(event, 'file')}
                             className="hidden"

@@ -16,6 +16,7 @@ export const createGroupChat = async (req: AuthRequest, res: Response): Promise<
         }
 
         const { name, avatar, chatParticipant } = req.body;
+
         if (!name) {
             res.status(400).json({ message: 'Tên nhóm không thể để trống!' });
             return;
@@ -77,11 +78,8 @@ export const addMemberToGroup = async (req: AuthRequest, res: Response): Promise
         const members = req.body;
 
         const membersWithChatId = members.map((member: any) => ({
-            ...member,
-            chatId: chatId,
-            pin: false,
-            notify: true,
-            role: 'MEMBER',
+            accountId: member.id,
+            chatId,
         }));
 
         await prisma.chatParticipant.createMany({ data: membersWithChatId });

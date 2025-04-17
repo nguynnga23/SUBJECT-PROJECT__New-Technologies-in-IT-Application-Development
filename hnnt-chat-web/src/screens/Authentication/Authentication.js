@@ -78,7 +78,7 @@ function Authentication() {
                 await addDevice(deviceId, deviceName, platform, accessToken, ipAddress);
             }
         } catch (err) {
-            alert('Lỗi server!');
+            alert('Sai thông tin đăng nhập !');
         }
     };
 
@@ -197,7 +197,7 @@ function Authentication() {
                 alert('Email của bạn không đúng!');
             }
         } else {
-            // setLoginBy('register');
+            setLoginBy('register');
         }
     };
 
@@ -447,7 +447,14 @@ function Authentication() {
                                             )}
                                         </div>
                                     ) : (
-                                        <img alt="avatar" src={resUser?.avatar} />
+                                        <div className="text-center mt-4 font-bold text-[16px]">
+                                            <img
+                                                alt="avatar"
+                                                src={resUser?.avatar}
+                                                className="rounded-full w-[200px] h-[200px]"
+                                            />
+                                            <p>{resUser?.name}</p>
+                                        </div>
                                     )}
 
                                     {statusMessage !== 'waiting for scan code' && statusMessage !== 'QR expired' ? (
@@ -455,8 +462,7 @@ function Authentication() {
                                             className="flex flex-col px-6 py-3 bg-blue-500 text-white text-base font-medium rounded-lg mt-4 w-[220px] hover:bg-blue-600 transition duration-200"
                                             onClick={handleLoginQR}
                                         >
-                                            <p>Đăng nhập với</p>
-                                            <p>{resUser?.name}</p>
+                                            <p>Đăng nhập</p>
                                         </button>
                                     ) : statusMessage === 'QR expired' ? (
                                         <button

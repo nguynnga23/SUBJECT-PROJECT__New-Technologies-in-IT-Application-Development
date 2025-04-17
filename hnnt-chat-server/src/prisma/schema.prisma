@@ -25,6 +25,7 @@ model Account {
   location  String?
   gender    String   @db.VarChar(10) // "Nam", "Nữ", "Khác"
   currentAvatars String[] @default([])
+  pushToken String? @db.VarChar(255) // Token for push notifications
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -40,6 +41,8 @@ model Account {
   messages        Message[]
   reactions       Reaction[]
   loggedInDevices LoggedInDevice[]
+  blockedUsers BlockedUser[] @relation("Blocker") // Người dùng đã chặn
+  blockedBy    BlockedUser[] @relation("Blocked") // Người dùng bị chặn bởi người khác
 }
 
 model FriendRequest {
@@ -136,9 +139,9 @@ model Message {
   reactions Reaction[]
 
   // Quan hệ tự tham chiếu (reply)
-  replyToId String?  @unique  // ID của tin nhắn gốc, phải là duy nhất
-  replyTo   Message? @relation("Reply", fields: [replyToId], references: [id], onDelete: SetNull)
-  reply     Message? @relation("Reply") 
+  replyToId String?
+  replyTo   Message?   @relation("Reply", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies   Message[]  @relation("Reply")
 }
 
 model Reaction {
@@ -162,6 +165,17 @@ model LoggedInDevice {
   ipAddress   String?
   lastActive  DateTime @default(now())
   createdAt   DateTime @default(now())
+}
+
+model BlockedUser {
+  id          String   @id @default(uuid()) // ID dạng UUID
+  blocker     Account  @relation("Blocker", fields: [blockerAccountId], references: [id], onDelete: Cascade)
+  blocked     Account  @relation("Blocked", fields: [blockedAccountId], references: [id], onDelete: Cascade)
+  blockerAccountId   String
+  blockedAccountId   String
+  createdAt   DateTime @default(now()) // Thời gian chặn
+
+  @@unique([blockerAccountId, blockedAccountId]) // Đảm bảo một người chỉ chặn một người khác một lần
 }
 
 

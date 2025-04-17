@@ -323,3 +323,40 @@ export const searchByPhone = async (req: AuthRequest, res: Response): Promise<vo
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+export const searchUsers = async (req: Request, res: Response) => {
+    const { query, currentUserId } = req.body;
+
+    try {
+        const users = await prisma.account.findMany({
+            where: {
+                AND: [
+                    {
+                        OR: [
+                            { name: { contains: query, mode: 'insensitive' } },
+                            { email: { contains: query, mode: 'insensitive' } },
+                        ],
+                    },
+                    {
+                        NOT: {
+                            OR: [
+                                { blockedUsers: { some: { blockedAccountId: currentUserId } } }, // Người dùng bị chặn bởi currentUserId
+                                { blockedBy: { some: { blockerAccountId: currentUserId } } }, // Người dùng đã chặn currentUserId
+                            ],
+                        },
+                    },
+                ],
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                avatar: true,
+            },
+        });
+
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to search users' });
+    }
+};

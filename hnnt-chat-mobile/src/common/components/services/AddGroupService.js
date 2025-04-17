@@ -17,7 +17,7 @@ export const createGroup = async (name, avatar, chatParticipants, token) => {
                 headers: {
                     Authorization: `Bearer ${token}`, // Gửi token trong header
                 },
-            }
+            },
         );
         return response.data; // Trả về dữ liệu từ API
     } catch (error) {

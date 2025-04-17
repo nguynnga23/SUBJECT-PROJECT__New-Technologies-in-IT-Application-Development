@@ -23,7 +23,7 @@ export default function SignUpScreen() {
 
     const isPhoneValid = phoneRegex.test(phone);
     const isEmailValid = emailRegex.test(email);
-    const isPasswordValid = password.length >= 8 && passwordStrength !== 'weak';
+    const isPasswordValid = password.length >= 8 && passwordStrength === 'strong';
     const isConfirmPasswordValid = confirmPassword === password;
 
     const isButtonEnabled = isPhoneValid && isEmailValid && isPasswordValid && isConfirmPasswordValid;
@@ -114,19 +114,19 @@ export default function SignUpScreen() {
                                 passwordStrength === 'weak'
                                     ? 'red'
                                     : passwordStrength === 'invalid'
-                                    ? 'red'
-                                    : passwordStrength === 'medium'
-                                    ? 'orange'
-                                    : 'green',
+                                        ? 'red'
+                                        : passwordStrength === 'medium'
+                                            ? 'orange'
+                                            : 'green',
                         }}
                     >
                         {passwordStrength === 'weak'
                             ? 'Weak password'
                             : passwordStrength === 'invalid'
-                            ? 'Password must be at least 8 characters'
-                            : passwordStrength === 'medium'
-                            ? 'Medium password'
-                            : 'Strong password'}
+                                ? 'Password must be at least 8 characters'
+                                : passwordStrength === 'medium'
+                                    ? 'Medium password'
+                                    : 'Strong password'}
                     </Text>
                 )}
 
