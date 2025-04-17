@@ -137,6 +137,13 @@ const PopupAddFriend = ({ isOpen, onClose }) => {
                                             </div>
                                         </div>
 
+                                        {/* <button
+                                            onClick={() => handleRequestFriend(user)}
+                                            className="text-blue-500 border border-blue-500 px-3 py-1 rounded-lg text-xs"
+                                        >
+                                            Kết bạn
+                                        </button> */}
+
                                         {user.status === 'none' && (
                                             <button
                                                 onClick={() => handleRequestFriend(user)}
