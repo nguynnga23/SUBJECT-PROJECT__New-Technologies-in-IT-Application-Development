@@ -376,6 +376,7 @@ function TabMessage() {
     // Hàm xử lý nút bấm
     const toggleRecording = () => {
         if (isRecording) {
+            console.log('Đã dừng ghi âm');
             stopRecording(); // Dừng ghi âm
         } else {
             startRecording(); // Bắt đầu ghi âm

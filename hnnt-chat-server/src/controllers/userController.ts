@@ -18,6 +18,7 @@ interface User {
     birthDate: Date | null;
     location: string | null;
     gender: string;
+    pushToken: string | null;
     currentAvatars: string[];
     createdAt: Date;
     updatedAt: Date;
