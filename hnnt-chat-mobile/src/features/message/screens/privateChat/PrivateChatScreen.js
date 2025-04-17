@@ -288,7 +288,13 @@ export default function PrivateChatScreen() {
                 <SafeAreaProvider>
                     <>
                         {/* Thanh pinned messages */}
-                        <PinnedMessages pinMess={pinMess} setPinMess={setPinMess} token={token} chatId={chatId} />
+                        <PinnedMessages
+                            pinMess={pinMess}
+                            setPinMess={setPinMess}
+                            token={token}
+                            chatId={chatId}
+                            flatListRef={flatListRef}
+                        />
                         <FlatList
                             ref={flatListRef}
                             data={messages}
@@ -381,11 +387,25 @@ export default function PrivateChatScreen() {
                                             )}
 
                                             {/* Hiển thị reaction và thời gian */}
-                                            <View style={styles.timeReactionContainer}>
-                                                <Text style={styles.time}>{formatDateTime(item.time)}</Text>
+                                            <View style={{ flexDirection: 'row' }}>
+                                                <View style={styles.timeReactionContainer}>
+                                                    <Text style={styles.time}>{formatDateTime(item.time)}</Text>
+                                                </View>
+
+                                                {!item.destroy && (
+                                                    <TouchableOpacity
+                                                        onPress={() => {
+                                                            showReactionOptions(item.id);
+                                                            setMessageId(item.id);
+                                                        }}
+                                                        style={{ justifyContent: 'flex-end', marginLeft: '10' }}
+                                                    >
+                                                        <FontAwesome name="smile-o" size={20} color="gray" />
+                                                    </TouchableOpacity>
+                                                )}
                                             </View>
 
-                                            {hasReactions && (
+                                            {hasReactions && !item.destroy && (
                                                 <View style={styles.reactionContainer}>
                                                     {groupedReactions.map((reaction, index) => (
                                                         <TouchableOpacity
@@ -400,22 +420,11 @@ export default function PrivateChatScreen() {
                                                     ))}
                                                 </View>
                                             )}
-
-                                            {!item.destroy && (
-                                                <TouchableOpacity
-                                                    onPress={() => {
-                                                        showReactionOptions(item.id);
-                                                        setMessageId(item.id);
-                                                    }}
-                                                    style={{ position: 'absolute', right: 2, bottom: 12 }}
-                                                >
-                                                    <FontAwesome name="smile-o" size={20} color="gray" />
-                                                </TouchableOpacity>
-                                            )}
                                         </View>
                                     </TouchableOpacity>
                                 );
                             }}
+                            initialNumToRender={20}
                             keyboardShouldPersistTaps="handled" // Đảm bảo sự kiện nhấn không chặn cuộn
                             onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })} // Cuộn xuống cuối khi nội dung thay đổi
                         />
@@ -669,6 +678,7 @@ const styles = StyleSheet.create({
     },
 
     messageContainer: {
+        flex: 1,
         padding: 12,
         marginVertical: 6,
         borderRadius: 15,
