@@ -50,6 +50,13 @@ import PopupMenuForChat from '../Popup/PopupMenuForChat';
 import { deletePinOfMessage, getMessage, readedChatOfUser, sendMessage } from '../../screens/Messaging/api';
 import PopupAllPinnedOfMessage from '../Popup/PopupAllPinnedOfMessage';
 
+import { socket } from '../../configs/socket';
+import { getUserById } from '../../screens/Profile/api';
+
+import { createMeeting } from '../../configs/createMeeting';
+import { MeetingProvider } from '@videosdk.live/react-sdk';
+import MeetingView from '../../components/Views/MeetingView';
+
 function TabMessage() {
     const [message, setMessage] = useState('');
     const [isOpenCategory, setIsOpenCategory] = useState(false);
@@ -191,6 +198,64 @@ function TabMessage() {
     const pinnedMessages = data.filter((message) => message.pin);
     const lastPinnedMessage = pinnedMessages[pinnedMessages.length - 1];
 
+    // Hàm video call
+    const [meetingId, setMeetingId] = useState(null);
+    const [fromId, setFromId] = useState('');
+    const [dataUserFrom, setDataUserFrom] = useState('');
+    useEffect(() => {
+        socket.on('incoming_call', async ({ from, meetingId }) => {
+            alert(`📞 Có cuộc gọi đến từ ${from}`);
+            setMeetingId(meetingId);
+            const data = await getUserById(from);
+            setDataUserFrom(data);
+            setFromId(from);
+        });
+
+        console.log('đã vào đây');
+
+        return () => {
+            socket.off('incoming_call');
+        };
+    }, [meetingId]);
+
+    //Getting the meeting id by calling the api we just wrote
+    const authToken =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiI5MzE4YWY4NS1hM2E3LTRlMDQtOGE0YS1mZmM0M2JlZjMyYWIiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTc0NDc5ODg2MiwiZXhwIjoxNzQ1NDAzNjYyfQ.xwle1rtuF3EH6ypjTGz6asnyLT-vfuwwORKEMqVROjg';
+    //This will set Meeting Id to null when meeting is left or ended
+    const onMeetingLeave = () => {
+        setMeetingId(null);
+    };
+
+    const handleVideoCall = async () => {
+        const targetUserId = activeChat?.isGroup
+            ? activeChat?.avatar
+            : activeChat?.participants?.find((user) => user.accountId !== userId)?.account.id;
+
+        const meetingId = await createMeeting();
+        setMeetingId(meetingId);
+
+        socket.emit('call_user', { from: userId, to: targetUserId, meetingId: meetingId });
+        setVideoCall(true);
+    };
+
+    const handleAnswerCall = () => {
+        // Xử lý khi người dùng nhận cuộc gọi
+        // Mở video call với người gọi
+        socket.emit('accept_call', { from: userId, to: fromId, meetingId });
+
+        socket.on('call_accepted', ({ to, meetingId }) => {
+            alert(`Cuộc gọi đã được chấp nhận từ ${to}`);
+            setMeetingId(meetingId);
+        });
+        setVideoCall(true); // Tắt popup gọi video
+    };
+
+    const handleRejectCall = () => {
+        // Xử lý khi người dùng từ chối cuộc gọi
+        socket.emit('reject_call', { from: userId, to: fromId });
+        setVideoCall(true); // Tắt popup gọi video
+    };
+
     return (
         <>
             <div className="p-2 border-b dark:border-b-black flex justify-between items-center h-[62px] min-w-[600px] dark:bg-gray-800">
@@ -277,7 +342,7 @@ function TabMessage() {
                     <GoDeviceCameraVideo
                         size={26}
                         className="ml-1.5 p-1 hover:text-gray-500 hover:bg-gray-200  hover:rounded-[5px] cursor-pointer"
-                        onClick={() => setVideoCall(true)}
+                        onClick={handleVideoCall}
                     />
                     <IoSearchOutline
                         size={26}
@@ -302,7 +367,69 @@ function TabMessage() {
                     )}
 
                     {videoCall && (
-                        <PopupVideoCall setVideoCall={setVideoCall} activeChat={activeChat} userActive={userActive} />
+                        <MeetingProvider
+                            config={{
+                                meetingId,
+                                micEnabled: true,
+                                webcamEnabled: true,
+                                name: 'C.V. Raman',
+                            }}
+                            token={authToken}
+                        >
+                            <MeetingView
+                                meetingId={meetingId}
+                                onMeetingLeave={onMeetingLeave}
+                                setVideoCall={setVideoCall}
+                                activeChat={activeChat}
+                                userActive={userActive}
+                            />
+                            {/* <PopupVideoCall
+                                setVideoCall={setVideoCall}
+                                activeChat={activeChat}
+                                userActive={userActive}
+                            /> */}
+                        </MeetingProvider>
+                    )}
+                    {fromId !== '' && (
+                        <div className="w-full h-full">
+                            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50">
+                                <div className="relative">
+                                    <div className="relative bg-white w-[50vw] h-[40vh] flex flex-col items-center justify-center rounded-xl shadow-lg p-6 space-y-6">
+                                        {/* Avatar */}
+                                        <img
+                                            src={dataUserFrom?.avatar} // Đổi thành avatar thật nếu có
+                                            alt="Avatar"
+                                            className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
+                                        />
+
+                                        {/* Tên người dùng */}
+                                        <h2 className="text-xl font-semibold text-gray-800">{dataUserFrom?.name}</h2>
+
+                                        {/* Các nút điều khiển */}
+                                        <div className="flex space-x-6">
+                                            <button
+                                                onClick={() => {
+                                                    handleRejectCall();
+                                                    setFromId('');
+                                                }}
+                                                className="bg-red-500 text-white px-6 py-2 rounded-full hover:bg-red-600 transition"
+                                            >
+                                                Tắt máy
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    handleAnswerCall();
+                                                    setFromId('');
+                                                }}
+                                                className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition"
+                                            >
+                                                Bắt máy
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     )}
                 </div>
             </div>

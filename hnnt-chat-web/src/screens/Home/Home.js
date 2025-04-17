@@ -20,6 +20,7 @@ import { logout } from '../Authentication/api';
 import { logoutOfSlice, setUser } from '../../redux/slices/authSlice';
 import { setActiveChat, setShowOrOffRightBar, setShowOrOffRightBarSearch } from '../../redux/slices/chatSlice';
 import { getUserById } from '../Profile/api';
+import { socket } from '../../configs/socket';
 
 export default function Home() {
     const navigate = useNavigate();
@@ -78,6 +79,15 @@ export default function Home() {
 
         setIsOpenModel(true);
     };
+
+    useEffect(() => {
+        console.log('userActive', userActive);
+        const userId = userActive?.id;
+        socket.on('connect', () => {
+            console.log('✅ Đã kết nối đến server, ID:', socket.id);
+            socket.emit('register', userId);
+        });
+    }, [userActive?.id]);
 
     return (
         <div className="flex h-screen bg-gray-100 dark:bg-[#16191d]">
