@@ -221,7 +221,7 @@ function TabChat() {
                                             {chat?.messages[0]?.senderId === userId ? (
                                                 <span className="mr-1">Bạn: </span>
                                             ) : (
-                                                <span className="mr-1 max-w-[100px] truncate">{`${
+                                                <span className="mr-1 max-w-[200px] truncate">{`${
                                                     chat?.messages[0]?.sender?.name || ''
                                                 }:`}</span>
                                             )}
