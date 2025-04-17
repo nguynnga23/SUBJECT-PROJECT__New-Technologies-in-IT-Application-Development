@@ -16,3 +16,17 @@ export const fetchChats = async (token) => {
         throw error;
     }
 };
+
+export const readChatOfUser = async (token, chatId) => {
+    try {
+        const response = await axios.put(`${API_URL}/${chatId}/readed`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching chats:', error.response?.data || error.message);
+        throw error;
+    }
+};

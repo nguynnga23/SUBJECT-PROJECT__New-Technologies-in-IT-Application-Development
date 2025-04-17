@@ -4,7 +4,7 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUserIdFromToken } from "../../../utils/auth";
 import { formatDateTime } from "../../../utils/formatDateTime";
-import { fetchChats } from "../services/MessageChanelService"; // Import hàm fetchChats
+import { fetchChats, readChatOfUser } from "../services/MessageChanelService"; // Import hàm fetchChats
 
 const ChatListScreen = () => {
   const navigation = useNavigation();
@@ -35,6 +35,17 @@ const ChatListScreen = () => {
 
   useEffect(() => {
     loadChats();
+    if (chats.length > 0) {
+      const firstChat = chats.find((chat) => !chat.isGroup);
+      if (firstChat) {
+        const otherParticipant = firstChat.participants.find(
+          (p) => p.account.id !== currentUser
+        );
+        if (otherParticipant) {
+          setStateAvatar(otherParticipant.account.avatar);
+        }
+      }
+    }
   }, [chats]);
 
   useFocusEffect(
@@ -47,6 +58,19 @@ const ChatListScreen = () => {
     setRefreshing(true); // Bắt đầu trạng thái làm mới
     loadChats(); // Gọi lại API để làm mới dữ liệu
   }, [chats]);
+
+  const handleReadChat = async (chatId) => {
+    try {
+      const token = await AsyncStorage.getItem('token'); // Lấy token từ AsyncStorage
+      if (!token) {
+        Alert.alert('Error', 'You are not logged in!');
+        return;
+      }
+      await readChatOfUser(token, chatId); // Gọi API để đánh dấu chat là đã đọc
+    } catch (error) {
+      Alert.alert('Error', 'Failed to mark chat as read.');
+    }
+  }
 
   const handlePress = (item, name) => {
     if (item.isGroup) {
@@ -72,7 +96,6 @@ const ChatListScreen = () => {
       );
       if (otherParticipant) {
         avatar = otherParticipant.account.avatar;
-        setStateAvatar(avatar);
         name = otherParticipant.account.name;
       }
     }
@@ -103,12 +126,24 @@ const ChatListScreen = () => {
           }
         }
 
-        content = isMine ? `Me: ${rawContent}` : rawContent;
+        // Kiểm tra điều kiện để tô đậm rawContent
+        const shouldHighlight = item.participants.some(
+          (p) => p.account.id === currentUser && !p.readed
+        );
+
+        content = isMine
+          ? `Me: ${rawContent}`
+          : shouldHighlight
+            ? <Text style={{ fontWeight: "bold" }}>{rawContent}</Text>
+            : rawContent;
       }
     }
 
     return (
-      <TouchableOpacity style={styles.item} onPress={() => handlePress(item, name)}>
+      <TouchableOpacity style={styles.item} onPress={() => {
+        handlePress(item, name);
+        handleReadChat(item.id);
+      }}>
         <Image
           source={{
             uri:
