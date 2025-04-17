@@ -208,6 +208,52 @@ export const searchByPhone = async (req: AuthRequest, res: Response): Promise<vo
     }
 
     try {
+        // const users = await prisma.account.findMany({
+        //     where: {
+        //         id: { not: userId },
+        //         number: {
+        //             contains: number,
+        //             mode: 'insensitive',
+        //         },
+        //     },
+        //     select: {
+        //         id: true,
+        //         name: true,
+        //         number: true,
+        //         avatar: true,
+        //         sentFriendRequests: {
+        //             where: { receiverId: userId },
+        //             select: { id: true },
+        //         },
+        //         receivedFriendRequests: {
+        //             where: { senderId: userId },
+        //             select: { id: true },
+        //         },
+        //     },
+        // });
+
+        // const result = users.map((user) => {
+        //     let status = 'none';
+        //     let friendRequestId = null;
+
+        //     if (user.sentFriendRequests.length > 0) {
+        //         status = 'received';
+        //         friendRequestId = user.sentFriendRequests[0].id;
+        //     } else if (user.receivedFriendRequests.length > 0) {
+        //         status = 'sent';
+        //         friendRequestId = user.receivedFriendRequests[0].id;
+        //     }
+
+        //     return {
+        //         id: user.id,
+        //         name: user.name,
+        //         number: user.number,
+        //         avatar: user.avatar,
+        //         status,
+        //         friendRequestId, // ✅ đính kèm nếu có
+        //     };
+        // });
+
         const users = await prisma.account.findMany({
             where: {
                 id: { not: userId },
@@ -215,6 +261,24 @@ export const searchByPhone = async (req: AuthRequest, res: Response): Promise<vo
                     contains: number,
                     mode: 'insensitive',
                 },
+                AND: [
+                    {
+                        NOT: {
+                            OR: [
+                                {
+                                    friends1: {
+                                        some: { user2Id: userId },
+                                    },
+                                },
+                                {
+                                    friends2: {
+                                        some: { user1Id: userId },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
             },
             select: {
                 id: true,
