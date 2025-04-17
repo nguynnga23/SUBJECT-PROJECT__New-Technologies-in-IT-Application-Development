@@ -104,7 +104,7 @@ function TabChat() {
                 </div>
                 <PopupCategoryAndState />
             </div>
-            <div className="overflow-y-auto min-h-[500px] z-0">
+            <div className="overflow-y-auto max-h-[calc(100vh-105px)] z-0">
                 {data
                     .filter((chat) => {
                         const me = chat.participants.find((user) => user.accountId === userId);
@@ -177,7 +177,7 @@ function TabChat() {
                                             </div>
                                         )}
                                     </div>
-                                    <div className="absolute bottom-[5px] right-[10px] flex  text-[10px]">
+                                    <div className="absolute bottom-[2px] right-[10px] flex text-[10px]">
                                         {chat?.messages[0]?.time && formatTime(chat?.messages[0]?.time)}
                                     </div>
                                 </div>
