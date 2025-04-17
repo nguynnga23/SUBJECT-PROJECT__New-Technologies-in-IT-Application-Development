@@ -149,15 +149,9 @@ CREATE UNIQUE INDEX "Friend_user1Id_user2Id_key" ON "Friend"("user1Id", "user2Id
 -- CreateIndex
 CREATE UNIQUE INDEX "ChatParticipant_chatId_accountId_key" ON "ChatParticipant"("chatId", "accountId");
 
-<<<<<<< HEAD:hnnt-chat-server/src/prisma/migrations/20250415092416_init/migration.sql
-=======
--- CreateIndex
-CREATE UNIQUE INDEX "Message_replyToId_key" ON "Message"("replyToId");
-
 -- CreateIndex
 CREATE UNIQUE INDEX "BlockedUser_blockerAccountId_blockedAccountId_key" ON "BlockedUser"("blockerAccountId", "blockedAccountId");
 
->>>>>>> 61-fe-be-intergration-implement-friend-contact:hnnt-chat-server/src/prisma/migrations/20250417082055_init/migration.sql
 -- AddForeignKey
 ALTER TABLE "FriendRequest" ADD CONSTRAINT "FriendRequest_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
