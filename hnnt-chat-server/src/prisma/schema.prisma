@@ -138,9 +138,9 @@ model Message {
   reactions Reaction[]
 
   // Quan hệ tự tham chiếu (reply)
-  replyToId String?  @unique  // ID của tin nhắn gốc, phải là duy nhất
-  replyTo   Message? @relation("Reply", fields: [replyToId], references: [id], onDelete: SetNull)
-  reply     Message? @relation("Reply") 
+  replyToId String?
+  replyTo   Message?   @relation("Reply", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies   Message[]  @relation("Reply")
 }
 
 model Reaction {

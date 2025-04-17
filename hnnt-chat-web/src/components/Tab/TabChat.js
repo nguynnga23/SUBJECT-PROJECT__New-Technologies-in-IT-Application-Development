@@ -104,7 +104,7 @@ function TabChat() {
                 </div>
                 <PopupCategoryAndState />
             </div>
-            <div className="overflow-y-auto min-h-[500px] z-0">
+            <div className="overflow-y-auto max-h-[calc(100vh-105px)] z-0">
                 {data
                     .filter((chat) => {
                         const me = chat.participants.find((user) => user.accountId === userId);
@@ -177,7 +177,7 @@ function TabChat() {
                                             </div>
                                         )}
                                     </div>
-                                    <div className="absolute bottom-[5px] right-[10px] flex  text-[10px]">
+                                    <div className="absolute bottom-[2px] right-[10px] flex text-[10px]">
                                         {chat?.messages[0]?.time && formatTime(chat?.messages[0]?.time)}
                                     </div>
                                 </div>
@@ -221,7 +221,7 @@ function TabChat() {
                                             {chat?.messages[0]?.senderId === userId ? (
                                                 <span className="mr-1">Bạn: </span>
                                             ) : (
-                                                <span className="mr-1">{`${
+                                                <span className="mr-1 max-w-[200px] truncate">{`${
                                                     chat?.messages[0]?.sender?.name || ''
                                                 }:`}</span>
                                             )}
@@ -245,7 +245,7 @@ function TabChat() {
                                                             [Hình ảnh]
                                                         </span>
                                                     ) : chat?.messages[0]?.type === 'file' ? (
-                                                        <span className="flex items-center">
+                                                        <span className="flex items-center max-w-[160px] truncate">
                                                             <MdFilePresent size={15} className="mr-[4px]" />{' '}
                                                             {chat?.messages[0]?.fileName}
                                                         </span>

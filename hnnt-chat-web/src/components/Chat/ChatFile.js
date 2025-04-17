@@ -3,6 +3,7 @@ import { VscFilePdf } from 'react-icons/vsc';
 import { FaRegFileWord } from 'react-icons/fa';
 import { FaRegFileExcel } from 'react-icons/fa';
 import { FaRegFilePowerpoint } from 'react-icons/fa';
+import { FiDownload } from 'react-icons/fi';
 
 const getFileIcon = (fileType) => {
     if (fileType.includes('pdf')) return <VscFilePdf className="text-3xl text-red-500 mr-2" />;
@@ -12,6 +13,7 @@ const getFileIcon = (fileType) => {
         return <FaRegFilePowerpoint className="text-3xl text-orange-500 mr-2" />;
     if (fileType.includes('word') || fileType.includes('msword') || fileType.includes('document'))
         return <FaRegFileWord className="text-3xl text-blue-600 mr-2" />;
+
     return <MdFilePresent className="text-3xl text-gray-500 mr-2" />; // Mặc định
 };
 
@@ -43,19 +45,40 @@ function ChatFile({ userId, message, showName, replyMessage }) {
 
             <div className="flex items-center space-x-3 mb-4">
                 {/* Nút tải file */}
-                <a
-                    href={message.content}
-                    download={message.fileName}
-                    className="hover:underline text-blue-500 text-sm flex"
-                >
-                    {/* Icon file */}
-                    {getFileIcon(message.fileType)}
-                    {/* Thông tin file */}
-                    <div className="flex flex-col">
-                        <p className="text-[12px] font-bold">{message.fileName}</p>
-                        <p className="text-[12px] text-gray-500 pt-1">{message.fileSize}</p>
+                {message.fileType.toLowerCase().includes('video') ? (
+                    <div className="p-2">
+                        <video controls width="500" className="rounded shadow">
+                            <source muted={false} src={message.content} type={message.fileType} />
+                            Trình duyệt của bạn không hỗ trợ video.
+                        </video>
+
+                        <a
+                            href={message.content}
+                            download={message.fileName}
+                            className="hover:underline text-blue-500 text-sm flex mt-1"
+                        >
+                            <FiDownload size={20} className="m-2" />
+                            <div className="flex flex-col">
+                                <p className="text-[12px] font-bold max-w-[350px] truncate">{message.fileName}</p>
+                                <p className="text-[12px] text-gray-500 pt-1">{message.fileSize}</p>
+                            </div>
+                        </a>
                     </div>
-                </a>
+                ) : (
+                    <a
+                        href={message.content}
+                        download={message.fileName}
+                        className="hover:underline text-blue-500 text-sm flex"
+                    >
+                        {/* Icon file */}
+                        {getFileIcon(message.fileType, message.content)}
+                        {/* Thông tin file */}
+                        <div className="flex flex-col">
+                            <p className="text-[12px] font-bold">{message.fileName}</p>
+                            <p className="text-[12px] text-gray-500 pt-1">{message.fileSize}</p>
+                        </div>
+                    </a>
+                )}
             </div>
 
             {/* Thời gian gửi */}
