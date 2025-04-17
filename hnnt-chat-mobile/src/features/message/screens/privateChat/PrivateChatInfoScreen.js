@@ -57,20 +57,20 @@ export default function PrivateChatInfoScreen() {
 
             setReceiverId(chatInfo.participants.find((member) => member.accountId !== uid).accountId);
 
-            try {
-                const pin_Mess = await getPinMess(chatId, token);
-                setPinMess(pin_Mess);
-            } catch (error) {
-                if (error.response?.status === 404) {
-                    // Xử lý lỗi 404 một cách yên lặng
-                    console.warn('No pinned message found.'); // Log cảnh báo nếu cần
-                    setPinMess('No pinned message'); // Đặt giá trị mặc định
-                } else {
-                    // Xử lý các lỗi khác
-                    console.warn('Error fetching pinned message:', error); // Log lỗi nếu cần
-                    setPinMess(null); // Đặt giá trị mặc định nếu xảy ra lỗi khác
-                }
-            }
+            // try {
+            //     const pin_Mess = await getPinMess(chatId, token);
+            //     setPinMess(pin_Mess);
+            // } catch (error) {
+            //     if (error.response?.status === 404) {
+            //         // Xử lý lỗi 404 một cách yên lặng
+            //         console.warn('No pinned message found.'); // Log cảnh báo nếu cần
+            //         setPinMess('No pinned message'); // Đặt giá trị mặc định
+            //     } else {
+            //         // Xử lý các lỗi khác
+            //         console.warn('Error fetching pinned message:', error); // Log lỗi nếu cần
+            //         setPinMess(null); // Đặt giá trị mặc định nếu xảy ra lỗi khác
+            //     }
+            // }
             setData(chatInfo);
         } catch (error) {
             console.error('Error fetching chat info:', error);
@@ -79,7 +79,7 @@ export default function PrivateChatInfoScreen() {
 
     useEffect(() => {
         fetchChatInfo();
-    }, []);
+    }, [data]);
 
     useFocusEffect(
         useCallback(() => {
@@ -101,18 +101,18 @@ export default function PrivateChatInfoScreen() {
         }
     };
 
-    const handleUnPinMessage = async (messageId) => {
-        try {
-            const token = await AsyncStorage.getItem('token');
-            const response = await unPinMess(messageId, token);
-            Alert.alert('Success', response.message);
+    // const handleUnPinMessage = async (messageId) => {
+    //     try {
+    //         const token = await AsyncStorage.getItem('token');
+    //         const response = await unPinMess(messageId, token);
+    //         Alert.alert('Success', response.message);
 
-            const updatedPinMess = pinMess.filter((message) => message.id !== messageId);
-            setPinMess(updatedPinMess);
-        } catch (error) {
-            console.warn('Error unpinning message:', error);
-        }
-    };
+    //         const updatedPinMess = pinMess.filter((message) => message.id !== messageId);
+    //         setPinMess(updatedPinMess);
+    //     } catch (error) {
+    //         console.warn('Error unpinning message:', error);
+    //     }
+    // };
 
     const handleBlockUser = async () => {
         try {
@@ -125,6 +125,34 @@ export default function PrivateChatInfoScreen() {
             console.warn('Error blocking user:', error);
         }
     }
+
+    const showAlertDeleteMessages = (chatId, navigation) => {
+        Alert.alert(
+            "Delete all messages",
+            "Are you sure you want to delete all messages?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel",
+                },
+                {
+                    text: "YES",
+                    onPress: async () => {
+                        try {
+                            const token = await AsyncStorage.getItem('token');
+                            const response = await deleteAllMessage(chatId, token);
+                            Alert.alert('Success', response.message);
+                            navigation.goBack();
+                        } catch (error) {
+                            console.error(error);
+                            Alert.alert('Error', 'Something went wrong.');
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
 
     return (
         <View style={styles.container}>
@@ -151,45 +179,18 @@ export default function PrivateChatInfoScreen() {
                     <OptionItem label="Image, file, link" icon="folder" />
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => setPinVisible(true)}>
+                {/* <TouchableOpacity onPress={() => setPinVisible(true)}>
                     <OptionItem label="Pinned message" icon="pin" />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
 
                 {/* Danger Zone */}
+                <TouchableOpacity onPress={() => showAlertDeleteMessages(chatId, navigation)}>
+                    <OptionItem label="Delete all messages" icon="trash" textColor="red" />
+                </TouchableOpacity>
+
                 <TouchableOpacity onPress={() => setBlockVisible(true)}>
                     <OptionItem label="Block user" icon="ban" textColor="red" />
                 </TouchableOpacity>
-
-                {/* Report Modal */}
-                <Modal visible={reportVisible} transparent animationType="fade">
-                    <View style={styles.modalContainer}>
-                        <View style={styles.modalContent}>
-                            <Text style={styles.modalTitle}>Report</Text>
-                            <TouchableOpacity onPress={() => setReportReason('Sensitive content')}>
-                                <Text style={styles.option}>Sensitive content</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setReportReason('Scam')}>
-                                <Text style={styles.option}>Scam</Text>
-                            </TouchableOpacity>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Other reason..."
-                                value={reportReason}
-                                onChangeText={setReportReason}
-                            />
-                            <View style={styles.modalActions}>
-                                <Button title="Cancel" onPress={() => setReportVisible(false)} />
-                                <Button
-                                    title="Submit"
-                                    onPress={() => {
-                                        handleReport(reportReason, setReportReason);
-                                        setReportVisible(false);
-                                    }}
-                                />
-                            </View>
-                        </View>
-                    </View>
-                </Modal>
 
                 {/* Block modal */}
                 <Modal visible={blockVisible} transparent animationType="fade">
@@ -198,7 +199,7 @@ export default function PrivateChatInfoScreen() {
                             <Text style={styles.modalTitle}>Block user</Text>
                             <Text>Are you sure you want to block this user?</Text>
                             <View style={styles.modalActions}>
-                                <Button title="Cancel" onPress={() => setBlockVisible(false)} />
+                                <Button title="No" onPress={() => setBlockVisible(false)} />
                                 <Button
                                     title="Yes"
                                     color="red"
@@ -384,7 +385,7 @@ const styles = StyleSheet.create({
     },
     modalActions: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'space-around',
         marginTop: 20,
         width: '100%',
     },

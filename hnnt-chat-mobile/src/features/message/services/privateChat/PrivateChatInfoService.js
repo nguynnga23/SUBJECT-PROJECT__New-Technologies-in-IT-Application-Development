@@ -47,9 +47,10 @@ export const unPinMess = async (messageId, token) => {
     }
 };
 
+//const { chatId } = req.params;
 export const deleteAllMessage = async (chatId, token) => {
     try {
-        const response = await axios.put(`${API_URL}/chats/${chatId}/all-delete`, {
+        const response = await axios.put(`${API_URL}/chats/${chatId}/all-delete`, {}, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
