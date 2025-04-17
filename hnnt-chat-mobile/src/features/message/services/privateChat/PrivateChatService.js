@@ -264,148 +264,55 @@ export const uploadFileToS3 = async (file, token) => {
 //Gửi ảnh
 export async function prepareImage(chatId, token, replyId) {
     try {
-        const permission = await ImagePicker.requestCameraPermissionsAsync();
+        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (permission.status !== 'granted') {
-            Alert.alert('Permission Denied', 'Permission to access camera is required!');
+            Alert.alert('Permission Denied', 'Permission to access media library is required!');
             return;
         }
 
-        Alert.alert(
-            'Choose an option',
-            'Would you like to select from the gallery or use the camera?',
-            [
-                {
-                    text: 'Gallery',
-                    onPress: async () => {
-                        const result = await ImagePicker.launchImageLibraryAsync({
-                            mediaTypes: ImagePicker.MediaTypeOptions.All,
-                            allowsMultipleSelection: true,
-                            allowsEditing: false,
-                            quality: 1,
-                        });
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: false,
+            quality: 1,
+        });
 
-                        if (result.canceled || !result.assets || result.assets.length === 0) {
-                            console.log('Selection canceled.');
-                            return;
-                        }
+        if (result.canceled || !result.assets || result.assets.length === 0) {
+            console.log('Image selection canceled.');
+            return;
+        }
 
-                        const image = result.assets[0];
-                        const uri = image.uri;
-                        const originalName = uri.split('/').pop() || `image_${Date.now()}.jpg`;
-                        const extension = originalName.split('.').pop();
-                        const timeStamp = getCurrentTimeString();
-                        const fileName = `image_${timeStamp}.${extension}`;
-                        const fileType = image.type ? `image/${extension}` : 'image/jpeg';
-                        const fileSize = image.fileSize || 0;
-                        const fileSize_String = fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : 'Unknown size';
+        const image = result.assets[0];
+        const uri = image.uri;
+        const originalName = uri.split('/').pop() || `image_${Date.now()}.jpg`;
+        const extension = originalName.split('.').pop();
+        const timeStamp = getCurrentTimeString();
+        const fileName = `image_${timeStamp}.${extension}`;
+        const fileType = image.type ? `image/${extension}` : 'image/jpeg';
+        const fileSize = image.fileSize || 0;
+        const fileSize_String = fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : 'Unknown size';
 
-                        const file = {
-                            uri,
-                            name: fileName,
-                            type: fileType,
-                        };
+        const file = {
+            uri,
+            name: fileName,
+            type: fileType,
+        };
 
-                        const uploadResponse = await uploadFileToS3(file, token);
-                        const uploadUrl = uploadResponse?.fileUrl || uploadResponse?.url || null;
+        const uploadResponse = await uploadFileToS3(file, token);
+        const uploadUrl = uploadResponse?.fileUrl || uploadResponse?.url || null;
 
-                        if (!uploadUrl) {
-                            Alert.alert('Upload Failed', 'No URL returned from server.');
-                            return;
-                        }
+        if (!uploadUrl) {
+            Alert.alert('Upload Failed', 'No URL returned from server.');
+            return;
+        }
 
-                        await sendMessage(
-                            chatId,
-                            fileName,
-                            'image',
-                            replyId || null,
-                            uploadUrl,
-                            fileType,
-                            fileSize_String,
-                            token,
-                        );
-                        for (const asset of result.assets) {
-                            const fileUri = asset.uri;
-                            const originalName = fileUri.split('/').pop() || 'file';
-                            const extension = originalName.includes('.') ? originalName.split('.').pop() : '';
-                            const timeStamp = getCurrentTimeString();
-                            const fileName = `${originalName.replace(`.${extension}`, '')}_${timeStamp}.${extension}`;
-                            const fileType = asset.type || (extension === 'mp4' ? 'video/mp4' : 'image/jpeg');
-                            const fileSize = asset.fileSize || 0;
-                            const fileSizeString = fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : 'Unknown size';
+        await sendMessage(chatId, uploadUrl, 'image', replyId || null, fileName, fileType, fileSize_String, token);
 
-                            await sendMessage(
-                                chatId,
-                                `sent ${fileType.startsWith('video') ? 'video' : 'image'}`,
-                                fileType.startsWith('video') ? 'video' : 'image',
-                                null,
-                                fileUri,
-                                fileType,
-                                fileSizeString,
-                                token,
-                            );
-                        }
+        socket.emit('del_message', { chatId });
 
-                        socket.emit('del_message', { chatId });
-                        Alert.alert('Success', 'Files sent successfully!');
-                    },
-                },
-                {
-                    text: 'Camera',
-                    onPress: async () => {
-                        const result = await ImagePicker.launchCameraAsync({
-                            mediaTypes: ImagePicker.MediaTypeOptions.All,
-                            allowsEditing: false,
-                            quality: 1,
-                        });
-
-                        if (result.canceled) {
-                            console.log('Camera action canceled.');
-                            Alert.alert('Action Canceled', 'You canceled the camera action.');
-                            return;
-                        }
-
-                        if (!result.assets || result.assets.length === 0) {
-                            console.log('No image captured.');
-                            Alert.alert('Error', 'No image was captured.');
-                            return;
-                        }
-
-                        const fileUri = result.assets[0].uri; // Correctly access the URI
-                        const originalName = fileUri.split('/').pop() || 'file';
-                        const extension = originalName.includes('.') ? originalName.split('.').pop() : '';
-                        const timeStamp = getCurrentTimeString();
-                        const fileName = `${originalName.replace(`.${extension}`, '')}_${timeStamp}.${extension}`;
-                        const fileType = result.assets[0].type || (extension === 'mp4' ? 'video/mp4' : 'image/jpeg');
-                        const fileSize = result.assets[0].fileSize || 0;
-                        const fileSizeString = fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : 'Unknown size';
-
-                        console.log('Captured image details:', { fileUri, fileName, fileType, fileSizeString });
-
-                        try {
-                            await sendMessage(
-                                chatId,
-                                `sent ${fileType.startsWith('video') ? 'video' : 'image'}`,
-                                fileType.startsWith('video') ? 'video' : 'image',
-                                null,
-                                fileUri,
-                                fileType,
-                                fileSizeString,
-                                token,
-                            );
-                            socket.emit('del_message', { chatId });
-                            Alert.alert('Success', 'File sent successfully!');
-                        } catch (error) {
-                            console.error('Error sending captured image:', error);
-                            Alert.alert('Error', 'Failed to send the captured image.');
-                        }
-                    },
-                },
-            ],
-            { cancelable: true },
-        );
+        Alert.alert('Success', 'Image sent successfully!');
     } catch (error) {
-        console.error('Error preparing files:', error);
-        Alert.alert('Error', 'Failed to send the files.');
+        console.error('Error preparing image:', error);
+        Alert.alert('Error', 'Failed to send the image.');
     }
 }
 
@@ -543,7 +450,7 @@ export async function playAudio(uri) {
     }
 }
 
-//reaction
+//Reaction
 export const sendReaction = async (messageId, userId, reaction, token) => {
     try {
         const response = await axios.put(

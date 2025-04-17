@@ -122,6 +122,7 @@ export default function PrivateChatScreen() {
             setCurrentUserId(userId);
 
             const data = await fetchMessages(chatId, token); // Gọi API để lấy danh sách tin nhắn
+            console.log(data);
             setMessages(data);
 
             try {
@@ -144,7 +145,7 @@ export default function PrivateChatScreen() {
 
     useEffect(() => {
         loadMessages();
-    }, [messages]);
+    }, []);
 
     //send message
     useEffect(() => {
@@ -161,7 +162,7 @@ export default function PrivateChatScreen() {
         return () => {
             socket.off('receive_message', handleReceiveMessage);
         };
-    }, [chatId]);
+    }, []);
 
     //del and destroy
     useEffect(() => {
@@ -175,7 +176,7 @@ export default function PrivateChatScreen() {
         return () => {
             socket.off('render_message', handleRender);
         };
-    }, [chatId]);
+    }, []);
 
     //reaction
     useEffect(() => {
@@ -189,7 +190,7 @@ export default function PrivateChatScreen() {
         return () => {
             socket.off('receive_reaction_message', handleRender);
         };
-    }, [chatId]);
+    }, []);
 
     //pin message
     useEffect(() => {
@@ -203,7 +204,7 @@ export default function PrivateChatScreen() {
         return () => {
             socket.off('receive_pin_message', handleRender);
         };
-    }, [chatId]);
+    }, []);
 
     useFocusEffect(
         useCallback(() => {
@@ -402,16 +403,16 @@ export default function PrivateChatScreen() {
                                                     {item.type === 'image' && (
                                                         <TouchableOpacity
                                                             onPress={() => {
-                                                                setSelectedImage(item.fileName);
+                                                                setSelectedImage(item.content);
                                                                 setModalZoomVisible(true);
                                                             }}
                                                             onLongPress={() => {
-                                                                setSelectedImage(item.fileName);
+                                                                setSelectedImage(item.content);
                                                                 setModalDownVisible(true);
                                                             }}
                                                         >
                                                             <Image
-                                                                source={{ uri: item.fileName }}
+                                                                source={{ uri: encodeURI(item.content) }}
                                                                 style={{ width: 200, height: 200, borderRadius: 10 }}
                                                             />
                                                         </TouchableOpacity>
@@ -517,7 +518,7 @@ export default function PrivateChatScreen() {
                             onSendMessage={() => handleSendMessage(message)}
                             onSendFile={() => prepareFile(chatId, token, replyMessage?.id)}
                             onSendImage={() => prepareImage(chatId, token, replyMessage?.id)}
-                            onOpenVoiceRecorder={() => setModalRecordVisible(false)}
+                            onSendVoiceMessage={handleSendVoiceMessage}
                         />
 
                         {/* Modal ghi âm */}
@@ -577,7 +578,11 @@ export default function PrivateChatScreen() {
                                 style={styles.modalContainer}
                                 onPress={() => setModalZoomVisible(false)} // Đóng modal khi nhấn ra ngoài
                             >
-                                <Image source={{ uri: selectedImage }} style={styles.fullImage} resizeMode="contain" />
+                                <Image
+                                    source={{ uri: encodeURI(selectedImage) }}
+                                    style={styles.fullImage}
+                                    resizeMode="contain"
+                                />
                             </TouchableOpacity>
                         </Modal>
 
