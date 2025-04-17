@@ -24,7 +24,6 @@ import { FaRegFileExcel } from 'react-icons/fa';
 import { FaRegFilePowerpoint } from 'react-icons/fa';
 import { BsChatText } from 'react-icons/bs';
 import { RiKey2Line } from 'react-icons/ri';
-import { socket } from '../../configs/socket';
 
 import PopupCategory from '../Popup/PopupCategory';
 
