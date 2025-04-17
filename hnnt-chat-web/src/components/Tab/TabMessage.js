@@ -24,6 +24,7 @@ import { FaRegFileExcel } from 'react-icons/fa';
 import { FaRegFilePowerpoint } from 'react-icons/fa';
 import { BsChatText } from 'react-icons/bs';
 import { RiKey2Line } from 'react-icons/ri';
+import { CiMicrophoneOn } from 'react-icons/ci';
 
 import PopupCategory from '../Popup/PopupCategory';
 
@@ -47,6 +48,7 @@ import { FiMoreHorizontal } from 'react-icons/fi';
 import PopupReacttion from '../Popup/PopupReaction';
 import PopupReactionChat from '../Popup/PopupReactionChat';
 import PopupMenuForChat from '../Popup/PopupMenuForChat';
+import ChatAudio from '../Chat/ChatAudio';
 import {
     deletePinOfMessage,
     getMessage,
@@ -136,6 +138,7 @@ function TabMessage() {
         image: ChatImage,
         file: ChatFile,
         sticker: ChatSticker,
+        audio: ChatAudio,
     };
 
     const getFileIcon = (fileType) => {
@@ -300,6 +303,83 @@ function TabMessage() {
         // Xử lý khi người dùng từ chối cuộc gọi
         socket.emit('reject_call', { from: userId, to: fromId });
         setVideoCall(true); // Tắt popup gọi video
+    };
+
+    // handle Recorder
+    const [isRecording, setIsRecording] = useState(false); // Trạng thái ghi âm
+    const [audioBlob, setAudioBlob] = useState(null); // Lưu blob ghi âm
+    const [mediaRecorder, setMediaRecorder] = useState(null); // MediaRecorder instance
+
+    // Hàm bắt đầu ghi âm
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const recorder = new MediaRecorder(stream);
+
+            // Lưu mediaRecorder
+            setMediaRecorder(recorder);
+
+            // Mảng lưu trữ các đoạn ghi âm
+            const chunks = [];
+            recorder.ondataavailable = (event) => {
+                chunks.push(event.data);
+            };
+
+            recorder.onstop = () => {
+                // Khi ghi âm kết thúc, tạo blob từ các chunks
+                const audioBlob = new Blob(chunks, { type: 'audio/wav' });
+                setAudioBlob(audioBlob);
+            };
+
+            recorder.start();
+            setIsRecording(true);
+        } catch (error) {
+            console.error('Error starting recording:', error);
+        }
+    };
+
+    // Hàm dừng ghi âm và gửi bản ghi âm
+    const stopRecording = async () => {
+        if (mediaRecorder) {
+            mediaRecorder.stop(); // Dừng ghi âm
+
+            // Gửi bản ghi âm nếu có
+            if (audioBlob) {
+                try {
+                    // Tải bản ghi âm lên S3 (hoặc nơi bạn muốn lưu trữ)
+                    const fileUpload = await uploadFileToS3(audioBlob);
+                    if (fileUpload?.fileUrl) {
+                        // Gửi tin nhắn với URL bản ghi âm
+                        const sendFile = await sendMessage(
+                            chatId,
+                            fileUpload.fileUrl,
+                            'audio', // Loại tệp là audio
+                            null,
+                            'audio recording', // Tên tệp (có thể thay đổi)
+                            'audio/wav', // Loại MIME của tệp
+                            (audioBlob.size / 1024).toFixed(2) + ' KB', // Kích thước tệp
+                        );
+                        socket.emit('send_message', {
+                            chatId: activeChat.id,
+                            newMessage: sendFile,
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error uploading or sending audio:', error);
+                }
+            }
+        }
+
+        setIsRecording(false);
+    };
+
+    // Hàm xử lý nút bấm
+    const toggleRecording = () => {
+        if (isRecording) {
+            stopRecording(); // Dừng ghi âm
+        } else {
+            startRecording(); // Bắt đầu ghi âm
+        }
     };
 
     return (
@@ -794,6 +874,16 @@ function TabMessage() {
                     </div>
 
                     <FaRegAddressCard className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600 dark:text-gray-300" />
+                    <div>
+                        <CiMicrophoneOn
+                            onClick={toggleRecording}
+                            className={`text-2xl cursor-pointer ml-5 ${
+                                isRecording
+                                    ? 'text-red-500 animate-pulse'
+                                    : 'hover:text-blue-500 text-gray-600 dark:text-gray-300'
+                            }`}
+                        />
+                    </div>
                 </div>
                 <div className=" border-t dark:border-t-black p-2 dark:bg-gray-800">
                     <div>

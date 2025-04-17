@@ -5,6 +5,9 @@ import { MdCancel } from 'react-icons/md';
 import { FaAngleRight } from 'react-icons/fa';
 import searchzalo from '../../public/searchzalo.png';
 import PopupCategoryContact from '../Popup/PopupCategoryContact';
+import { HiOutlineDotsHorizontal } from 'react-icons/hi';
+import { useEffect, useRef, useState } from 'react';
+import { deleteFriend } from '../../screens/Contacts/api';
 
 function TabFriendsList(props) {
     const {
@@ -19,6 +22,28 @@ function TabFriendsList(props) {
         isDropdownOpen,
         sortedGroupedData,
     } = props;
+
+    const [openUserId, setOpenUserId] = useState(null);
+
+    const popupRef = useRef(null);
+
+    // Ẩn popup khi click ra ngoài
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (popupRef.current && !popupRef.current.contains(event.target)) {
+                setOpenUserId(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    const handleDeleteFriend = async (userId) => {
+        await deleteFriend(userId);
+    };
 
     return (
         <div className="bg-white dark:bg-gray-800 w-full rounded-lg relative">
@@ -140,18 +165,55 @@ function TabFriendsList(props) {
                 <div key={key} className="mt-4">
                     <h4 className="text-lg font-medium px-4">{key}</h4>
                     {users.map((user, index) => (
-                        <>
-                            <div
-                                key={user.id}
-                                className="flex items-center space-x-2 mt-3 px-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 py-2"
-                            >
-                                <img src={user.avatar} alt="avatar" className="w-12 h-12 rounded-full" />
-                                <h4 className="text-sm font-medium">{user.name}</h4>
+                        <div key={user.id}>
+                            <div className="flex items-center justify-between mt-3 px-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 py-2 relative">
+                                <div className="flex items-center space-x-2">
+                                    <img src={user.avatar} alt="avatar" className="w-12 h-12 rounded-full" />
+                                    <h4 className="text-sm font-medium">{user.name}</h4>
+                                </div>
+
+                                {/* Icon click mở popup */}
+                                <div
+                                    onClick={() => setOpenUserId(openUserId === user.id ? null : user.id)}
+                                    className="text-gray-500 hover:text-blue-600 cursor-pointer"
+                                >
+                                    <HiOutlineDotsHorizontal size={20} />
+                                </div>
+
+                                {/* Popup */}
+                                {openUserId === user.id && (
+                                    <div
+                                        ref={popupRef}
+                                        className="absolute top-full right-4 mt-2 w-48 bg-white dark:bg-gray-700 border rounded-lg shadow-lg z-10"
+                                    >
+                                        <ul className="text-sm">
+                                            <li className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+                                                Xem thông tin
+                                            </li>
+                                            <li className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+                                                Phân loại ▸
+                                            </li>
+                                            <li className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+                                                Đặt tên gợi nhớ
+                                            </li>
+                                            <li className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+                                                Chặn người này
+                                            </li>
+                                            <li
+                                                className="px-4 py-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900 cursor-pointer"
+                                                onClick={() => handleDeleteFriend(user.id)}
+                                            >
+                                                Xóa bạn
+                                            </li>
+                                        </ul>
+                                    </div>
+                                )}
                             </div>
+
                             {index !== users.length - 1 && (
                                 <div className="w-full bg-gray-200 dark:hover:bg-gray-700 h-[1px] mt-2 pl-4"></div>
                             )}
-                        </>
+                        </div>
                     ))}
                 </div>
             ))}
