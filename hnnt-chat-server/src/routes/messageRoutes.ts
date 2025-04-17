@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import multer from 'multer';
 import {
     getMessageOfChat,
     sendMessage,
@@ -10,10 +11,14 @@ import {
     deletePinOfMessage,
     searchForKeyWord,
     searchForKeyWordByChat,
+    uploadFileToS3,
 } from '../controllers/messageController';
 import { authenticate } from '../middleware/auth';
-
 const messageRouter = Router();
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+messageRouter.post('/upload', authenticate, upload.single('file'), uploadFileToS3);
 messageRouter.get('/search/', authenticate, searchForKeyWord);
 messageRouter.get('/search/:chatId/', authenticate, searchForKeyWordByChat);
 messageRouter.get('/:chatId', authenticate, getMessageOfChat);

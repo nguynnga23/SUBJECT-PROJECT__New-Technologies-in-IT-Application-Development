@@ -627,3 +627,32 @@ export const addMemberToGroup = async (groupId, members) => {
         throw error; // Để hàm gọi nó có thể xử lý
     }
 };
+
+export const uploadFileToS3 = async (file) => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token is required');
+
+        const formData = new FormData();
+        formData.append('file', file); // tên 'file' phải giống với multer .single('file')
+
+        const response = await fetch(`http://localhost:4000/api/messages/upload`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                // KHÔNG set Content-Type nếu dùng FormData!
+            },
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.message || `Lỗi ${response.status}: ${response.statusText}`);
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error('Lỗi khi upload file:', error);
+        throw error;
+    }
+};

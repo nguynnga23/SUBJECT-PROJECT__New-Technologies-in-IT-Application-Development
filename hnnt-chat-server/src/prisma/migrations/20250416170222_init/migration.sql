@@ -138,9 +138,6 @@ CREATE UNIQUE INDEX "Friend_user1Id_user2Id_key" ON "Friend"("user1Id", "user2Id
 -- CreateIndex
 CREATE UNIQUE INDEX "ChatParticipant_chatId_accountId_key" ON "ChatParticipant"("chatId", "accountId");
 
--- CreateIndex
-CREATE UNIQUE INDEX "Message_replyToId_key" ON "Message"("replyToId");
-
 -- AddForeignKey
 ALTER TABLE "FriendRequest" ADD CONSTRAINT "FriendRequest_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
