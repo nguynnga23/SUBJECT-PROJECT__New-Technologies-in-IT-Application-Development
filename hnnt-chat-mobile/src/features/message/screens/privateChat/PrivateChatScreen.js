@@ -35,7 +35,7 @@ import {
     downloadAnyFile,
     startRecording,
     stopRecording,
-    sendVoiceMessage,
+    uploadFileToS3,
 } from '../../services/privateChat/PrivateChatService';
 import { getPinMess } from '../../services/privateChat/PrivateChatInfoService';
 
@@ -123,6 +123,7 @@ export default function PrivateChatScreen() {
             setCurrentUserId(userId);
 
             const data = await fetchMessages(chatId, token); // Gọi API để lấy danh sách tin nhắn
+            console.log(data);
             setMessages(data);
 
             try {
@@ -162,7 +163,7 @@ export default function PrivateChatScreen() {
         return () => {
             socket.off('receive_message', handleReceiveMessage);
         };
-    }, [chatId]);
+    }, []);
 
     //del and destroy
     useEffect(() => {
@@ -176,7 +177,7 @@ export default function PrivateChatScreen() {
         return () => {
             socket.off('render_message', handleRender);
         };
-    }, [chatId]);
+    }, []);
 
     //reaction
     useEffect(() => {
@@ -190,7 +191,7 @@ export default function PrivateChatScreen() {
         return () => {
             socket.off('receive_reaction_message', handleRender);
         };
-    }, [chatId]);
+    }, []);
 
     //pin message
     useEffect(() => {
@@ -204,7 +205,7 @@ export default function PrivateChatScreen() {
         return () => {
             socket.off('receive_pin_message', handleRender);
         };
-    }, [chatId]);
+    }, []);
 
     useFocusEffect(
         useCallback(() => {
@@ -317,8 +318,28 @@ export default function PrivateChatScreen() {
 
     const handleSendVoiceMessage = async (uri) => {
         try {
-            const response = await sendMessage(chatId, '[Voice Message]', 'audio', null, uri, null, null, token);
-            response.audioUri = uri;
+            const fileName = `voice_${Date.now()}.m4a`;
+            const fileType = 'audio/m4a';
+            const file = { uri, name: fileName, type: fileType };
+
+            const uploadResponse = await uploadFileToS3(file, token);
+            const uploadUrl = uploadResponse?.fileUrl || uploadResponse?.url || null;
+
+            if (!uploadUrl) {
+                Alert.alert('Upload Failed', 'No URL returned from server.');
+                return;
+            }
+
+            const response = await sendMessage(
+                chatId,
+                uploadUrl,
+                'audio',
+                null,
+                '[Voice Message]',
+                fileType,
+                null, // Include file size in the message
+                token,
+            );
             socket.emit('send_message', { chatId: chatId, newMessage: response });
         } catch (error) {
             console.warn('Error sending voice message:', error);
@@ -340,7 +361,6 @@ export default function PrivateChatScreen() {
                             flatListRef={flatListRef}
                         />
                         <FlatList
-                            ref={flatListRef}
                             data={messages}
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={({ item }) => {
@@ -392,28 +412,28 @@ export default function PrivateChatScreen() {
                                                     )}
 
                                                     {/* Hiển thị file, hình ảnh, hoặc audio nếu có */}
-                                                    {item.audioUri && (
+                                                    {/* {item.audioUri && (
                                                         <TouchableOpacity
                                                             onPress={() => playAudio(item.audioUri)}
                                                             style={styles.playButton}
                                                         >
                                                             <Ionicons name="play-circle" size={30} color="blue" />
                                                         </TouchableOpacity>
-                                                    )}
+                                                    )} */}
 
                                                     {item.type === 'image' && (
                                                         <TouchableOpacity
                                                             onPress={() => {
-                                                                setSelectedImage(item.fileName);
+                                                                setSelectedImage(item.content);
                                                                 setModalZoomVisible(true);
                                                             }}
                                                             onLongPress={() => {
-                                                                setSelectedImage(item.fileName);
+                                                                setSelectedImage(item.content);
                                                                 setModalDownVisible(true);
                                                             }}
                                                         >
                                                             <Image
-                                                                source={{ uri: item.fileName }}
+                                                                source={{ uri: encodeURI(item.content) }}
                                                                 style={{ width: 200, height: 200, borderRadius: 10 }}
                                                             />
                                                         </TouchableOpacity>
@@ -449,28 +469,30 @@ export default function PrivateChatScreen() {
                                                         </View>
                                                     )}
 
-                                                    {item.type === 'file' && (
-                                                        <TouchableOpacity
-                                                            onLongPress={() => {
-                                                                setSelectedFile(item.fileName);
-                                                                setModalDownFileVisible(true);
-                                                            }}
-                                                            style={styles.fileContainer}
-                                                        >
-                                                            <Ionicons
-                                                                name="document-text-outline"
-                                                                size={24}
-                                                                color="blue"
-                                                            />
-                                                            <Text style={styles.fileName}>
-                                                                {item.content} {item.fileSize}
-                                                            </Text>
-                                                        </TouchableOpacity>
-                                                    )}
+                                                    {item.type === 'file' &&
+                                                        !item.fileType?.includes('video') &&
+                                                        !item.fileType?.includes('image') && (
+                                                            <TouchableOpacity
+                                                                onLongPress={() => {
+                                                                    setSelectedFile(item.fileName);
+                                                                    setModalDownFileVisible(true);
+                                                                }}
+                                                                style={styles.fileContainer}
+                                                            >
+                                                                <Ionicons
+                                                                    name="document-text-outline"
+                                                                    size={24}
+                                                                    color="blue"
+                                                                />
+                                                                <Text style={styles.fileName}>
+                                                                    {item.content} {item.fileSize}
+                                                                </Text>
+                                                            </TouchableOpacity>
+                                                        )}
 
                                                     {item.type === 'audio' && (
                                                         <TouchableOpacity
-                                                            onPress={() => playAudio(item.fileName)}
+                                                            onPress={() => playAudio(item.content)}
                                                             style={styles.audioMessageContainer}
                                                         >
                                                             <Ionicons name="play-circle" size={30} color="blue" />
@@ -478,10 +500,10 @@ export default function PrivateChatScreen() {
                                                         </TouchableOpacity>
                                                     )}
 
-                                                    {item.type === 'video' && (
+                                                    {item.fileType?.includes('video') && (
                                                         <View style={styles.inlineVideoContainer}>
                                                             <Video
-                                                                source={{ uri: item.fileName }}
+                                                                source={{ uri: item.content }}
                                                                 style={styles.inlineVideo}
                                                                 useNativeControls
                                                                 resizeMode="contain"
@@ -549,7 +571,7 @@ export default function PrivateChatScreen() {
                             onSendMessage={() => handleSendMessage(message)}
                             onSendFile={() => prepareFile(chatId, token, replyMessage?.id)}
                             onSendImage={() => prepareImage(chatId, token, replyMessage?.id)}
-                            onOpenVoiceRecorder={() => setModalRecordVisible(false)}
+                            onSendVoiceMessage={handleSendVoiceMessage}
                         />
 
                         {/* Modal ghi âm */}
@@ -609,7 +631,11 @@ export default function PrivateChatScreen() {
                                 style={styles.modalContainer}
                                 onPress={() => setModalZoomVisible(false)} // Đóng modal khi nhấn ra ngoài
                             >
-                                <Image source={{ uri: selectedImage }} style={styles.fullImage} resizeMode="contain" />
+                                <Image
+                                    source={{ uri: encodeURI(selectedImage) }}
+                                    style={styles.fullImage}
+                                    resizeMode="contain"
+                                />
                             </TouchableOpacity>
                         </Modal>
 
