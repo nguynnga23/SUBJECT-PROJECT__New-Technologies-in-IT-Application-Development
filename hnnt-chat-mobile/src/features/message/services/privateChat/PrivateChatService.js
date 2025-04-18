@@ -614,6 +614,16 @@ export const downloadAnyFile = async (fileUrl) => {
     }
 };
 
+//Preview file
+export const previewFile = async (fileUrl) => {
+    try {
+        await WebBrowser.openBrowserAsync(fileUrl);
+    } catch (error) {
+        console.error('Error open browser to preview file:', error);
+        Alert.alert('Error', 'Error open browser to preview file.');
+    }
+};
+
 // Lấy danh sách bạn bè đã chặn
 export const getBlockedUsers = async (userId, token) => {
     try {

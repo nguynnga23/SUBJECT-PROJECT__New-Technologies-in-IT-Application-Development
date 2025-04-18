@@ -35,7 +35,8 @@ import {
     startRecording,
     stopRecording,
     uploadFileToS3,
-    getBlockedUsers
+    getBlockedUsers,
+    previewFile
 } from '../../services/privateChat/PrivateChatService';
 import { getPinMess, fetchChat } from '../../services/privateChat/PrivateChatInfoService';
 
@@ -671,7 +672,7 @@ export default function PrivateChatScreen() {
                             <TouchableWithoutFeedback onPress={() => setModalDownFileVisible(false)}>
                                 <View style={styles.modalContainer}>
                                     <View style={styles.optionModal}>
-                                        <Text style={styles.modalTitle}>Download this file?
+                                        <Text style={styles.modalTitle}>Download or preview this file?
                                             It's will direct you to browser.</Text>
                                         <View style={styles.modalButtonContainer}>
                                             <TouchableOpacity
@@ -1025,7 +1026,7 @@ const styles = StyleSheet.create({
         padding: 20,
         borderRadius: 10,
         alignItems: 'center',
-        width: '80%',
+        width: '90%',
     },
 
     modalButtonContainer: {
