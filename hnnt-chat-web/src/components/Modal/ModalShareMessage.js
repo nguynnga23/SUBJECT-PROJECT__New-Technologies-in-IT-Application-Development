@@ -60,7 +60,7 @@ const ModalShareMessage = ({ setShowModalShareMes, message }) => {
 
     return (
         // Overlay
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-10">
             {/* Modal box */}
             <div className="w-[500px] max-w-full border rounded-xl p-4 bg-white shadow-lg">
                 <h2 className="text-xl font-semibold mb-3">Chia sẻ</h2>
@@ -92,11 +92,12 @@ const ModalShareMessage = ({ setShowModalShareMes, message }) => {
 
                 <div className="border-t pt-3">
                     <div className="bg-gray-100 p-3 rounded mb-2">{message?.content}</div>
-                    <input
+                    {/* <input
                         type="text"
                         placeholder="Nhập tin nhắn..."
                         className="w-full border px-3 py-2 mb-3 rounded"
-                    />
+                        disabled={true}
+                    /> */}
                     <div className="flex justify-end space-x-2">
                         <button className="px-4 py-2 bg-gray-300 rounded" onClick={() => setShowModalShareMes(false)}>
                             Hủy
