@@ -625,6 +625,9 @@ function TabMessage() {
                                     className="absolute text-red-500 text-[7px] right-[5px] top-[10px] p-1 cursor-pointer hover:bg-red-500 hover:text-white border rounded-lg"
                                     onClick={() => {
                                         deletePinOfMessage(pinnedMessages[0].id);
+                                        socket.emit('reaction_message', {
+                                            chatId: activeChat.id,
+                                        });
                                     }}
                                 >
                                     Bỏ ghim

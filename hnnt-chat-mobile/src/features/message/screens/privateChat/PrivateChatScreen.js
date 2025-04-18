@@ -131,11 +131,6 @@ export default function PrivateChatScreen() {
             } catch (error) {
                 setPinMess([]);
             }
-
-            // Cuộn đến tin nhắn cuối cùng
-            setTimeout(() => {
-                flatListRef.current?.scrollToEnd({ animated: true });
-            }, 100);
         } catch (error) {
             Alert.alert('Error', 'Failed to fetch messages.');
         } finally {
@@ -145,7 +140,8 @@ export default function PrivateChatScreen() {
 
     useEffect(() => {
         loadMessages();
-    }, [messages]);
+        flatListRef.current?.scrollToEnd({ animated: true });
+    }, []);
 
     useEffect(() => {
         if (messages.length > prevMessageLength.current) {
@@ -370,7 +366,7 @@ export default function PrivateChatScreen() {
                             flatListRef={flatListRef}
                         />
                         <FlatList
-                            // ref={flatListRef}
+                            ref={flatListRef}
                             data={messages}
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={({ item }) => {
@@ -413,12 +409,12 @@ export default function PrivateChatScreen() {
                                                             <Text style={styles.replyMessage}>
                                                                 {item.replyTo.content}
                                                             </Text>
-                                                            {/* {item.replyTo.type === 'text' ? (<Text style={styles.replyMessage}>
+                                                            {/* {!item.replyTo.destroy &&({item.replyTo.type === 'text' ? (<Text style={styles.replyMessage}>
                                                                 {item.replyTo.content}
                                                             </Text>
                                                             ) : (<Text style={styles.replyMessage}>
                                                                 {item.replyTo.fileName}
-                                                            </Text>)}; */}
+                                                            </Text>)};)}; */}
                                                         </View>
                                                     )}
 
@@ -554,7 +550,6 @@ export default function PrivateChatScreen() {
                                     </TouchableOpacity>
                                 );
                             }}
-                            initialNumToRender={20}
                             keyboardShouldPersistTaps="handled" // Đảm bảo sự kiện nhấn không chặn cuộn
                             onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })} // Cuộn xuống cuối khi nội dung thay đổi
                         />
