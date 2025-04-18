@@ -365,24 +365,31 @@ export default function PrivateChatScreen() {
         }
     };
 
-    const handleForwardMessage = async (message, targetChatId) => {
-        // console.log(message);
-        // console.log(targetChatId);
-        if (!message || !token) return;
+    const handleForwardMessage = async (message, targetChatIds) => {
+        if (!message || !token || !Array.isArray(targetChatIds)) return;
 
-        await sendMessage(
-            targetChatId,
-            message.content,
-            message.type,
-            null,
-            message.fileName || '',
-            message.fileType || '',
-            message.fileSize || '',
-            token,
-        );
+        try {
+            await Promise.all(
+                targetChatIds.map((chatId) =>
+                    sendMessage(
+                        chatId,
+                        message.content,
+                        message.type,
+                        null,
+                        message.fileName || '',
+                        message.fileType || '',
+                        message.fileSize || '',
+                        token,
+                    ),
+                ),
+            );
 
-        setModalForwardVisible(false);
-        Alert.alert('Success', 'Message forwarded!');
+            setModalForwardVisible(false);
+            Alert.alert('Success', 'Message forwarded to selected chats!');
+        } catch (error) {
+            console.error('Error forwarding message:', error);
+            Alert.alert('Error', 'Failed to forward message.');
+        }
     };
 
     return (
