@@ -4058,6 +4058,11 @@ expo-updates@^0.27.4:
     ignore "^5.3.1"
     resolve-from "^5.0.0"
 
+expo-web-browser@^14.0.2:
+  version "14.0.2"
+  resolved "https://registry.npmjs.org/expo-web-browser/-/expo-web-browser-14.0.2.tgz"
+  integrity sha512-Hncv2yojhTpHbP6SGWARBFdl7P6wBHc1O8IKaNsH0a/IEakq887o1eRhLxZ5IwztPQyRDhpqHdgJ+BjWolOnwA==
+
 expo@*, expo@>=50.0.0, expo@~52.0.30:
   version "52.0.30"
   resolved "https://registry.npmjs.org/expo/-/expo-52.0.30.tgz"

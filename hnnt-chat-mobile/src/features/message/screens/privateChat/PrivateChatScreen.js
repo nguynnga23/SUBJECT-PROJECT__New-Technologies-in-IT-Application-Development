@@ -73,6 +73,7 @@ export default function PrivateChatScreen() {
     const [replyMessage, setReplyMessage] = useState(null);
     const [replyVisible, setReplyVisible] = useState(false);
     const [loading, setLoading] = useState(true);
+    const prevMessageLength = useRef(0);
 
     const [modalZoomVisible, setModalZoomVisible] = useState(false);
     const [modalDownVisible, setModalDownVisible] = useState(false);
@@ -122,7 +123,6 @@ export default function PrivateChatScreen() {
             setCurrentUserId(userId);
 
             const data = await fetchMessages(chatId, token); // Gọi API để lấy danh sách tin nhắn
-            console.log(data);
             setMessages(data);
 
             try {
@@ -145,7 +145,14 @@ export default function PrivateChatScreen() {
 
     useEffect(() => {
         loadMessages();
-    }, []);
+    }, [messages]);
+
+    useEffect(() => {
+        if (messages.length > prevMessageLength.current) {
+            flatListRef.current?.scrollToEnd({ animated: true });
+            prevMessageLength.current = messages.length;
+        }
+    }, [messages]);
 
     //send message
     useEffect(() => {
@@ -236,6 +243,9 @@ export default function PrivateChatScreen() {
             }
             setReplyMessage(null);
             // loadMessages();
+            setTimeout(() => {
+                flatListRef.current?.scrollToEnd({ animated: true });
+            }, 100);
         } catch (error) {
             console.warn('Error sending message:', error);
             Alert.alert('Error', 'Failed to send message.');
@@ -360,6 +370,7 @@ export default function PrivateChatScreen() {
                             flatListRef={flatListRef}
                         />
                         <FlatList
+                            // ref={flatListRef}
                             data={messages}
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={({ item }) => {
@@ -402,6 +413,12 @@ export default function PrivateChatScreen() {
                                                             <Text style={styles.replyMessage}>
                                                                 {item.replyTo.content}
                                                             </Text>
+                                                            {/* {item.replyTo.type === 'text' ? (<Text style={styles.replyMessage}>
+                                                                {item.replyTo.content}
+                                                            </Text>
+                                                            ) : (<Text style={styles.replyMessage}>
+                                                                {item.replyTo.fileName}
+                                                            </Text>)}; */}
                                                         </View>
                                                     )}
 
@@ -441,7 +458,7 @@ export default function PrivateChatScreen() {
                                                     {item.type === 'file' && !item.fileType?.includes('video') && (
                                                         <TouchableOpacity
                                                             onLongPress={() => {
-                                                                setSelectedFile(item.fileName);
+                                                                setSelectedFile(item.content);
                                                                 setModalDownFileVisible(true);
                                                             }}
                                                             style={styles.fileContainer}
@@ -452,7 +469,7 @@ export default function PrivateChatScreen() {
                                                                 color="blue"
                                                             />
                                                             <Text style={styles.fileName}>
-                                                                {item.content} {item.fileSize}
+                                                                {item.fileName} {item.fileSize}
                                                             </Text>
                                                         </TouchableOpacity>
                                                     )}
@@ -461,6 +478,10 @@ export default function PrivateChatScreen() {
                                                         <TouchableOpacity
                                                             onPress={() => playAudio(item.content)}
                                                             style={styles.audioMessageContainer}
+                                                            onLongPress={() => {
+                                                                setSelectedFile(item.content);
+                                                                setModalDownFileVisible(true);
+                                                            }}
                                                         >
                                                             <Ionicons name="play-circle" size={30} color="blue" />
                                                             <Text style={styles.audioMessageText}>Voice Message</Text>
@@ -468,7 +489,12 @@ export default function PrivateChatScreen() {
                                                     )}
 
                                                     {item.fileType?.includes('video') && (
-                                                        <View style={styles.inlineVideoContainer}>
+                                                        <TouchableOpacity style={styles.inlineVideoContainer}
+                                                            onLongPress={() => {
+                                                                setSelectedFile(item.content);
+                                                                setModalDownFileVisible(true);
+                                                            }}
+                                                        >
                                                             <Video
                                                                 source={{ uri: item.content }}
                                                                 style={styles.inlineVideo}
@@ -477,7 +503,7 @@ export default function PrivateChatScreen() {
                                                                 shouldPlay={false}
                                                                 isLooping={true}
                                                             />
-                                                        </View>
+                                                        </TouchableOpacity>
                                                     )}
                                                 </>
                                             )}
@@ -639,8 +665,18 @@ export default function PrivateChatScreen() {
                             <TouchableWithoutFeedback onPress={() => setModalDownFileVisible(false)}>
                                 <View style={styles.modalContainer}>
                                     <View style={styles.optionModal}>
-                                        <Text style={styles.modalTitle}>Download this file?</Text>
+                                        <Text style={styles.modalTitle}>Download this file?
+                                            It's will direct you to browser.</Text>
                                         <View style={styles.modalButtonContainer}>
+                                            <TouchableOpacity
+                                                style={styles.modalButton}
+                                                onPress={() => {
+                                                    previewFile(selectedFile);
+                                                    setModalDownFileVisible(false);
+                                                }}
+                                            >
+                                                <Text style={styles.modalButtonText}>Preview</Text>
+                                            </TouchableOpacity>
                                             <TouchableOpacity
                                                 style={styles.modalButton}
                                                 onPress={() => {

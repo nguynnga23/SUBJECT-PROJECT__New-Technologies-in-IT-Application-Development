@@ -7,6 +7,7 @@ import * as MediaLibrary from 'expo-media-library';
 import { getUserIdFromToken } from '../../../../utils/auth';
 import { getCurrentTimeString } from '../../../../utils/dateNow';
 import axios from 'axios';
+import * as WebBrowser from 'expo-web-browser';
 import { localhost } from '../../../../utils/localhosts';
 import { socket } from '../../../../configs/socket';
 
@@ -431,7 +432,7 @@ export async function prepareFile(chatId, token, replyId) {
             return;
         }
 
-        await sendMessage(chatId, fileName, 'file', replyId || null, uploadUrl, fileType, fileSize_String, token);
+        await sendMessage(chatId, uploadUrl, 'file', replyId || null, fileName, fileType, fileSize_String, token);
 
         socket.emit('del_message', { chatId });
 
@@ -600,33 +601,15 @@ export const downloadImage = async (imageUrl) => {
 
 export const downloadAnyFile = async (fileUrl) => {
     try {
-        console.log('Downloading file from URL:', fileUrl);
+        // Tạo link tới server trung gian (đã cấu hình Content-Disposition: attachment)
+        const encodedUrl = encodeURIComponent(fileUrl);
+        const fileName = fileUrl.split('/').pop()?.split('?')[0] || `file_${Date.now()}`;
+        const serverDownloadUrl = `${API_URL}/public-download/?url=${encodedUrl}&name=${fileName}`;
 
-        const { status } = await MediaLibrary.requestPermissionsAsync();
-        if (status !== 'granted') {
-            Alert.alert('Permission Denied', 'Bạn cần cấp quyền lưu trữ để tải file.');
-            return;
-        }
-
-        let fileName = fileUrl.split('?')[0].split('/').pop();
-        if (!fileName || !fileName.includes('.')) {
-            fileName = `file_${Date.now()}.bin`;
-        }
-
-        const fileUri = `${FileSystem.documentDirectory}${fileName}`;
-
-        const downloadResumable = FileSystem.createDownloadResumable(fileUrl, fileUri);
-        const { uri } = await downloadResumable.downloadAsync();
-
-        console.log('Tải xong, lưu file:', uri);
-
-        // Tạo asset từ file URI
-        const asset = await MediaLibrary.createAssetAsync(uri);
-        await MediaLibrary.createAlbumAsync('Download', asset, false);
-
-        Alert.alert('Tải thành công', `Đã lưu file: ${fileName}`);
+        // Mở link để tải bằng trình duyệt mặc định
+        await WebBrowser.openBrowserAsync(serverDownloadUrl);
     } catch (error) {
-        console.error('Lỗi khi tải file:', error);
-        Alert.alert('Lỗi', 'Không thể tải file.');
+        console.error('Error open browser to download file:', error);
+        Alert.alert('Error', 'Error open browser to download file.');
     }
 };

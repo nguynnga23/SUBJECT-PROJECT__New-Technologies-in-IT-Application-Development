@@ -15,6 +15,10 @@ import categoryRouter from './src/routes/categoryRoutes';
 import { initSocket } from './src/utils/socket';
 import loggedInDeviceRouter from './src/routes/loggedInDeviceRoutes';
 
+import http from 'http';
+import https from 'https';
+import { URL } from 'url';
+
 // Load environment variables
 dotenv.config();
 
@@ -48,6 +52,41 @@ app.use('/api/contacts', contactRouter);
 app.use('/api/groups', groupChatManageRouter);
 app.use('/api/loggedin-devices', loggedInDeviceRouter);
 app.use('/api/contacts', contactRouter);
+
+app.get('/api/public-download', async (req, res) => {
+    const fileUrl = req.query.url as string;
+    const filename = req.query.name || 'downloaded_file';
+
+    if (!fileUrl) {
+        res.status(400).send('Missing url parameter');
+        return;
+    }
+
+    try {
+        const parsedUrl = new URL(fileUrl);
+        const protocol = parsedUrl.protocol === 'https:' ? https : http;
+
+        protocol.get(fileUrl, (fileRes) => {
+            if (fileRes.statusCode !== 200) {
+                res.status(fileRes.statusCode || 500).send('Failed to fetch file from S3');
+                return;
+            }
+
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            res.setHeader('Content-Type', fileRes.headers['content-type'] || 'application/octet-stream');
+
+            fileRes.pipe(res);
+        }).on('error', (err) => {
+            console.error('Stream error:', err);
+            res.status(500).send('Failed to download file');
+        });
+
+    } catch (error) {
+        console.error('Download error:', error);
+        res.status(500).send('Download failed');
+    }
+});
+
 
 server.listen(PORT, () => {
     console.log(`Server đang chạy trên cổng ${PORT}`);

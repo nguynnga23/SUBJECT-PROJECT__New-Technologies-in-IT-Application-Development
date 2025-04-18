@@ -28,7 +28,7 @@ export const getPinMess = async (chatId, token) => {
         });
         return response.data;
     } catch (error) {
-        console.warn('Error fetching:', error.response?.data || error.message);
+        // console.warn('Error fetching:', error.response?.data || error.message);
         throw error;
     }
 };
