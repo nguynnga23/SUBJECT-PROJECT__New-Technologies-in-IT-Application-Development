@@ -49,7 +49,7 @@ export default function PinnedMessages({ pinMess, setPinMess, token, chatId, fla
         } catch (error) {
             console.warn('Error unpinning message:', error);
         }
-    }
+    };
 
     return (
         <>
@@ -68,10 +68,7 @@ export default function PinnedMessages({ pinMess, setPinMess, token, chatId, fla
                         <View style={styles.modalContent}>
                             <Text style={styles.modalTitle}>Pinned Messages</Text>
                             {Array.isArray(pinMess) && pinMess.length > 0 ? (
-                                <ScrollView
-                                    style={{ width: '100%' }}
-                                    keyboardShouldPersistTaps="handled"
-                                >
+                                <ScrollView style={{ width: '100%' }} keyboardShouldPersistTaps="handled">
                                     {pinMess.map((message, index) => (
                                         <TouchableOpacity
                                             key={index}
@@ -81,16 +78,24 @@ export default function PinnedMessages({ pinMess, setPinMess, token, chatId, fla
                                             <View style={styles.messageInfo}>
                                                 {message && !message.deletedBy.length && !message.destroy ? (
                                                     <>
-                                                        <Text style={styles.messageTime}>{formatDateTime(message.time)}</Text>
+                                                        <Text style={styles.messageTime}>
+                                                            {formatDateTime(message.time)}
+                                                        </Text>
                                                         <Text style={styles.messageSender}>{message.sender.name}</Text>
                                                         {message.type !== 'text' ? (
-                                                            <Text style={styles.pinnedMessageText}>{message.fileName}</Text>
+                                                            <Text style={styles.pinnedMessageText}>
+                                                                {message.fileName}
+                                                            </Text>
                                                         ) : (
-                                                            <Text style={styles.pinnedMessageText}>{message.content}</Text>
+                                                            <Text style={styles.pinnedMessageText}>
+                                                                {message.content}
+                                                            </Text>
                                                         )}
                                                     </>
                                                 ) : (
-                                                    <Text style={styles.noPinnedMessageText}>This message has been deleted or destroyed.</Text>
+                                                    <Text style={styles.noPinnedMessageText}>
+                                                        This message has been deleted or destroyed.
+                                                    </Text>
                                                 )}
                                             </View>
                                             <View style={styles.buttonContainer}>

@@ -289,6 +289,12 @@ export async function prepareImage(chatId, token, replyId) {
                             return;
                         }
 
+                        // if (result.assets.length > 1) {
+                        //     // Nếu chọn nhiều ảnh, chuyển sang hàm prepareImageGroup
+                        //     await prepareImageGroup(result.assets, chatId, token, replyId);
+                        //     return; // Ngừng thực hiện hàm prepareImage
+                        // }
+
                         const image = result.assets[0];
                         const uri = image.uri;
                         const originalName = uri.split('/').pop() || `image_${Date.now()}.jpg`;
@@ -406,6 +412,72 @@ export async function prepareImage(chatId, token, replyId) {
     } catch (error) {
         console.error('Error preparing files:', error);
         Alert.alert('Error', 'Failed to send the files.');
+    }
+}
+
+// hàm chọn nhiều ảnh và gửi
+export async function prepareImageGroup(assets, chatId, token, replyId) {
+    try {
+        const uploadedFiles = []; // Mảng lưu thông tin các file đã upload
+        for (const asset of assets) {
+            const uri = asset.uri;
+            const originalName = fileUri.split('/').pop() || 'file';
+            const extension = originalName.includes('.') ? originalName.split('.').pop() : '';
+            const timeStamp = getCurrentTimeString();
+            const fileName = `${originalName.replace(`.${extension}`, '')}_${timeStamp}.${extension}`;
+
+            // Xác định kiểu tệp (image hoặc video)
+            let fileType = asset.type || (extension === 'mp4' ? 'video/mp4' : 'image/jpeg');
+            const fileSize = asset.fileSize || 0;
+            const fileSizeString = fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : 'Unknown size';
+
+            // Tải file lên S3
+            const file = {
+                uri,
+                name: fileName,
+                type: fileType,
+            };
+
+            const uploadResponse = await uploadFileToS3(file, token);
+            const uploadUrl = uploadResponse?.fileUrl || uploadResponse?.url || null;
+
+            if (!uploadUrl) {
+                console.warn('Failed to upload to S3');
+                continue; // Bỏ qua nếu không tải lên S3 thành công
+            }
+
+            // Lưu thông tin vào mảng
+            uploadedFiles.push({
+                url: uploadUrl,
+                fileName: fileName,
+                fileSize: fileSizeString,
+                fileType: fileType,
+            });
+        }
+
+        if (uploadedFiles.length > 0) {
+            // Lưu toàn bộ thông tin file vào content dạng JSON string
+            const sendFile = await sendMessage(
+                chatId,
+                JSON.stringify(uploadedFiles), // Chuyển mảng thông tin tệp thành chuỗi JSON
+                'imageGroup', // Loại tệp là imageGroup
+                replyId || null,
+                token,
+            );
+
+            socket.emit('send_message', {
+                chatId: chatId,
+                newMessage: sendFile,
+            });
+
+            Alert.alert('Success', 'Multiple files sent successfully!');
+        }
+
+        return uploadedFiles; // Trả về mảng chứa thông tin của các file đã upload
+    } catch (error) {
+        console.warn('Error sending files in group:', error);
+        Alert.alert('Error', 'Failed to send multiple files.');
+        return []; // Trả về mảng rỗng trong trường hợp có lỗi
     }
 }
 

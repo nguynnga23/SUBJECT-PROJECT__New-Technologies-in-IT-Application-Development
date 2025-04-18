@@ -13,6 +13,7 @@ import {
     KeyboardAvoidingView,
     Platform,
     Alert,
+    Dimensions,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -416,6 +417,36 @@ export default function PrivateChatScreen() {
                                                                 style={{ width: 200, height: 200, borderRadius: 10 }}
                                                             />
                                                         </TouchableOpacity>
+                                                    )}
+
+                                                    {item.type === 'imageGroup' && (
+                                                        <View
+                                                            style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}
+                                                        >
+                                                            {JSON.parse(item.content || '[]').map((img, index) => (
+                                                                <TouchableOpacity
+                                                                    key={index}
+                                                                    onPress={() => {
+                                                                        setSelectedImage(img.url);
+                                                                        setModalZoomVisible(true);
+                                                                    }}
+                                                                    onLongPress={() => {
+                                                                        setSelectedImage(img.url);
+                                                                        setModalDownVisible(true);
+                                                                    }}
+                                                                >
+                                                                    <Image
+                                                                        source={{ uri: img.url }}
+                                                                        style={{
+                                                                            width: 100,
+                                                                            height: 100,
+                                                                            borderRadius: 10,
+                                                                            marginBottom: 8,
+                                                                        }}
+                                                                    />
+                                                                </TouchableOpacity>
+                                                            ))}
+                                                        </View>
                                                     )}
 
                                                     {item.type === 'file' && (
