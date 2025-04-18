@@ -308,11 +308,11 @@ export async function prepareImage(chatId, token, replyId) {
                                 Alert.alert('Upload Failed', 'No URL returned from server.');
                                 return;
                             }
-
+                            const messageType = fileType.startsWith('video') ? 'file' : 'image';
                             await sendMessage(
                                 chatId,
                                 uploadUrl,
-                                'file',
+                                messageType,
                                 replyId || null,
                                 fileName,
                                 fileType,
@@ -368,11 +368,12 @@ export async function prepareImage(chatId, token, replyId) {
                             Alert.alert('Upload Failed', 'No URL returned from server.');
                             return;
                         }
+                        const messageType = fileType.startsWith('video') ? 'file' : 'image';
 
                         await sendMessage(
                             chatId,
                             uploadUrl,
-                            'file',
+                            messageType,
                             replyId || null,
                             fileName,
                             fileType,

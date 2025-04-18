@@ -438,24 +438,26 @@ export default function PrivateChatScreen() {
                                                         </TouchableOpacity>
                                                     )}
 
-                                                    {item.type === 'file' && !item.fileType?.includes('video') && (
-                                                        <TouchableOpacity
-                                                            onLongPress={() => {
-                                                                setSelectedFile(item.fileName);
-                                                                setModalDownFileVisible(true);
-                                                            }}
-                                                            style={styles.fileContainer}
-                                                        >
-                                                            <Ionicons
-                                                                name="document-text-outline"
-                                                                size={24}
-                                                                color="blue"
-                                                            />
-                                                            <Text style={styles.fileName}>
-                                                                {item.content} {item.fileSize}
-                                                            </Text>
-                                                        </TouchableOpacity>
-                                                    )}
+                                                    {item.type === 'file' &&
+                                                        !item.fileType?.includes('video') &&
+                                                        !item.fileType?.includes('image') && (
+                                                            <TouchableOpacity
+                                                                onLongPress={() => {
+                                                                    setSelectedFile(item.fileName);
+                                                                    setModalDownFileVisible(true);
+                                                                }}
+                                                                style={styles.fileContainer}
+                                                            >
+                                                                <Ionicons
+                                                                    name="document-text-outline"
+                                                                    size={24}
+                                                                    color="blue"
+                                                                />
+                                                                <Text style={styles.fileName}>
+                                                                    {item.content} {item.fileSize}
+                                                                </Text>
+                                                            </TouchableOpacity>
+                                                        )}
 
                                                     {item.type === 'audio' && (
                                                         <TouchableOpacity
