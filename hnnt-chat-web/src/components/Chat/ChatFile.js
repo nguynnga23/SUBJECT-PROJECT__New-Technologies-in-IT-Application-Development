@@ -20,10 +20,10 @@ const getFileIcon = (fileType) => {
 function ChatFile({ userId, message, showName, replyMessage }) {
     return (
         <div
-            className={`relative pb-2 p-3 border rounded-lg max-w-[500px] cursor-pointer ${
+            className={`relative pb-2 border rounded-lg max-w-[500px] cursor-pointer ${
                 message.sender.id === userId
                     ? 'bg-blue-100 dark:bg-[#20344c] border-blue-200 dark:border-blue-100'
-                    : 'bg-white dark:bg-[#20344c] border-gray-200 dark:border-gray-800'
+                    : ' dark:bg-[#20344c] border-gray-200 dark:border-gray-800'
             }`}
         >
             {showName && (
@@ -46,23 +46,23 @@ function ChatFile({ userId, message, showName, replyMessage }) {
             <div className="flex">
                 {/* Nút tải file */}
                 {message.fileType.toLowerCase().includes('video') ? (
-                    <div className="p-2 justify-center items-center">
+                    <div className="justify-center items-center">
                         <video controls className="rounded shadow h-auto">
                             <source muted={false} src={message.content} />
                             Trình duyệt của bạn không hỗ trợ video.
                         </video>
 
-                        <a
+                        {/* <a
                             href={message.content}
                             download={message.fileName}
                             className="hover:underline text-blue-500 text-sm flex mt-1"
-                        >
-                            <FiDownload size={20} className="m-2" />
+                        > */}
+                        {/* <FiDownload size={20} className="m-2" />
                             <div className="flex flex-col">
                                 <p className="text-[12px] font-bold max-w-[350px] truncate">{message.fileName}</p>
                                 <p className="text-[12px] text-gray-500 pt-1">{message.fileSize}</p>
                             </div>
-                        </a>
+                        </a> */}
                     </div>
                 ) : (
                     <a
@@ -82,7 +82,7 @@ function ChatFile({ userId, message, showName, replyMessage }) {
             </div>
 
             {/* Thời gian gửi */}
-            <p className="absolute left-[8px] bottom-[10px] text-gray-500 text-[10px] mb-2">
+            <p className="absolute left-[8px] bottom-[-20px] text-gray-500 text-[10px] mb-2">
                 {new Date(message.time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
             </p>
         </div>

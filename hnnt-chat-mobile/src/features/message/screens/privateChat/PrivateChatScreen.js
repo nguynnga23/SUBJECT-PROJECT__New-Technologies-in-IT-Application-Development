@@ -366,8 +366,8 @@ export default function PrivateChatScreen() {
     };
 
     const handleForwardMessage = async (message, targetChatId) => {
-        console.log(message);
-        console.log(targetChatId);
+        // console.log(message);
+        // console.log(targetChatId);
         if (!message || !token) return;
 
         await sendMessage(
@@ -906,6 +906,7 @@ export default function PrivateChatScreen() {
                         visible={modalForwardVisible}
                         chats={chats}
                         selectedMessage={selectedForwardMessage}
+                        currentUserId={currentUserId}
                         onClose={() => setModalForwardVisible(false)}
                         onForward={handleForwardMessage}
                     />

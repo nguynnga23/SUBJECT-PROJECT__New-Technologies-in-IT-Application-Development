@@ -104,7 +104,7 @@ function TabChat() {
                 </div>
                 <PopupCategoryAndState />
             </div>
-            <div className="overflow-y-auto max-h-[calc(100vh-105px)] z-0">
+            <div className="overflow-y-auto min-h-[500px] max-h-[calc(100vh-105px)] z-0">
                 {data
                     .filter((chat) => {
                         const me = chat.participants.find((user) => user.accountId === userId);
