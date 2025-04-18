@@ -39,14 +39,16 @@ export default function Groups() {
         try {
             const token = await AsyncStorage.getItem('token');
             if (!token) {
-                Alert.alert('Error', 'You are not logged in!');
+                // Alert.alert('Error', 'You are not logged in!');
                 return;
             }
             const data = await fetchChats(token);
             const groups = data.filter((chat) => chat.isGroup); // Filter only group chats
             setGroupChats(groups);
         } catch (error) {
-            Alert.alert('Error', 'Failed to fetch group chats.');
+            // Alert.alert('Error', 'Failed to fetch group chats.');
+            console.warn('Failed to fetch group chats:', error);
+            return;
         } finally {
             setLoading(false);
             setRefreshing(false);

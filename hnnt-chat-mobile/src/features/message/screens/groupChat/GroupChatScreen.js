@@ -79,7 +79,7 @@ export default function GroupChatScreen() {
             setToken(token); // Lưu token vào state
 
             if (!token) {
-                Alert.alert('Error', 'You are not logged in!');
+                // Alert.alert('Error', 'You are not logged in!');
                 return;
             }
 
@@ -89,7 +89,8 @@ export default function GroupChatScreen() {
             const data = await fetchMessages(chatId, token); // Gọi API để lấy danh sách tin nhắn
             setMessages(data);
         } catch (error) {
-            Alert.alert('Error', 'Failed to fetch messages.');
+            // Alert.alert('Error', 'Failed to fetch messages.');
+            console.warn('Failed to fetch messages:', error);
         } finally {
             setLoading(false);
         }

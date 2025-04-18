@@ -54,7 +54,6 @@ const FriendProfileScreen = () => {
                         isSender: requestResponse.isSender || false,
                         isReceiver: requestResponse.isReceiver || false,
                     });
-                    console.log(friendStatus);
                 }
             } catch (error) {
                 setFriendStatus({
@@ -74,10 +73,8 @@ const FriendProfileScreen = () => {
         const fetchUserById = async () => {
             try {
                 const token = await AsyncStorage.getItem('token');
-                console.log('Token:', token);
 
                 const userId = route.params?.userId;
-                console.log('UserID from params:', route.params?.userId);
                 if (userId && token) {
                     const fetchedUser = await ProfileService.getUserById(token, userId);
                     setUser(fetchedUser);

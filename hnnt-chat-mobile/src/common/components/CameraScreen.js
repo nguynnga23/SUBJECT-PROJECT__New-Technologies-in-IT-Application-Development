@@ -52,7 +52,6 @@ export default function CameraScreen() {
 
             if (data.startsWith('hnnt-chat://user/')) {
                 const userId = data.split('/').pop(); // Extract user ID
-                console.log('Scanned User ID:', userId); // Log the scanned user ID
                 navigation.navigate('FriendProfileScreen', { userId });
             } else if (data.startsWith('qr-login://')) {
                 const token = data.replace('qr-login://', '');

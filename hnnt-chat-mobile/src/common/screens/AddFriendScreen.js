@@ -44,7 +44,6 @@ export default function AddFriendScreen() {
             try {
                 const currentUserData = await AsyncStorage.getItem('user');
                 if (currentUserData) {
-                    console.log(currentUserData);
                     const currentUser = JSON.parse(currentUserData);
                     setUserProfileLink(`hnnt-chat://user/${currentUser.id}`); // Use a deep link format
                     setUserName(currentUser.name); // Set the user name
@@ -113,7 +112,6 @@ export default function AddFriendScreen() {
                 number: phoneNumber,
                 email: '',
             });
-            console.log('User found:', user);
             navigation.navigate('FriendProfileScreen', { user }); // Navigate to FriendProfileScreen with user data
         } catch (error) {
             if (error.message === 'User not found') {

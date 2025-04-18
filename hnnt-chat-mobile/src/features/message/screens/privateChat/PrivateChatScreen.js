@@ -145,7 +145,8 @@ export default function PrivateChatScreen() {
                 setPinMess([]);
             }
         } catch (error) {
-            Alert.alert('Error', 'Failed to fetch messages.');
+            // Alert.alert('Error', 'Failed to fetch messages.');
+            console.warn('Failed to fetch messages:', error);
         } finally {
             setLoading(false);
         }
@@ -387,8 +388,7 @@ export default function PrivateChatScreen() {
             setModalForwardVisible(false);
             Alert.alert('Success', 'Message forwarded to selected chats!');
         } catch (error) {
-            console.error('Error forwarding message:', error);
-            Alert.alert('Error', 'Failed to forward message.');
+            console.warn('Error forwarding message:', error);
         }
     };
 

@@ -38,9 +38,9 @@ const ModalShareMessage = ({ setShowModalShareMes, message }) => {
                 message?.content,
                 message.type,
                 message.replyToId,
-                null,
-                null,
-                null,
+                message.fileName,
+                message.fileType,
+                message?.file,
             );
 
             socket.emit('send_message', {

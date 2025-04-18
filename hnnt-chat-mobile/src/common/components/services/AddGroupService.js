@@ -21,7 +21,7 @@ export const createGroup = async (name, avatar, chatParticipants, token) => {
         );
         return response.data; // Trả về dữ liệu từ API
     } catch (error) {
-        console.error('Error creating group:', error.response?.data || error.message);
+        console.warn('Error creating group:', error.response?.data || error.message);
         throw error; // Ném lỗi để xử lý ở nơi gọi hàm
     }
 };

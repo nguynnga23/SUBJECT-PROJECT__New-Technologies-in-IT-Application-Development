@@ -19,14 +19,15 @@ const ChatListScreen = () => {
         try {
             const token = await AsyncStorage.getItem('token'); // Lấy token từ AsyncStorage
             if (!token) {
-                Alert.alert('Error', 'You are not logged in!');
+                // Alert.alert('Error', 'You are not logged in!');
                 return;
             }
             const data = await fetchChats(token); // Gọi API để lấy danh sách chat
             setChats(data);
             setCurrentUser(await getUserIdFromToken(token));
         } catch (error) {
-            Alert.alert('Error', 'Failed to fetch chats.');
+            // Alert.alert('Error', 'Failed to fetch chats.');
+            console.warn('Failed to fetch chats:', error);
         } finally {
             setLoading(false);
             setRefreshing(false); // Dừng trạng thái làm mới

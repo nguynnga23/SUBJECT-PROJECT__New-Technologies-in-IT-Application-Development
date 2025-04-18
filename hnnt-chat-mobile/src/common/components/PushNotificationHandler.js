@@ -2,11 +2,10 @@ import { useEffect } from 'react';
 import * as Notifications from 'expo-notifications';
 
 const handleFriendRequestNotification = (notification, navigation) => {
-    console.log('Friend request notification received');
     if (navigation) {
         navigation.navigate('FriendRequest');
     } else {
-        console.error('Navigation is undefined');
+        console.warn('Navigation is undefined');
     }
 };
 
@@ -14,7 +13,6 @@ export default function PushNotificationHandler({ navigation }) {
     useEffect(() => {
         // Khi nhận noti khi app đang mở
         const subscription = Notifications.addNotificationReceivedListener((notification) => {
-            console.log('Notification received:', notification);
             if (notification?.request?.content?.data?.type === 'friend_request') {
                 handleFriendRequestNotification(notification, navigation);
             }

@@ -50,7 +50,7 @@ const TabButton = ({ title, isActive, onPress }) => (
     </TouchableOpacity>
 );
 
-const ListContent = ({ friends, onLongPress, onPress }) => {
+const ListContent = ({ friends, onLongPress }) => {
     // Group friends by first letter
     const sections = groupFriendsByLetter(friends);
 
@@ -59,7 +59,7 @@ const ListContent = ({ friends, onLongPress, onPress }) => {
         <TouchableOpacity
             style={styles.friendItem}
             onLongPress={() => onLongPress(item)} // Add long press handler
-            onPress={() => onPress(item)}
+            // onPress={() => onPress(item)}
         >
             <Image source={{ uri: item.avatar }} style={styles.avatar} />
             <View style={styles.friendInfo}>
@@ -113,7 +113,7 @@ export default function ListFriendsScreen() {
                     const data = await FriendService.getFriends(token);
                     setAllFriends(data);
                 } catch (error) {
-                    console.error('Failed to fetch friends:', error);
+                    console.warn('Failed to fetch friends:', error);
                 }
             };
 
@@ -216,7 +216,7 @@ export default function ListFriendsScreen() {
 
             {/* Tab Content */}
             <View style={styles.content}>
-                <ListContent friends={friendsToShow} onLongPress={handleLongPress} onPress={handleMessage} />
+                <ListContent friends={friendsToShow} onLongPress={handleLongPress} />
             </View>
 
             {/* Friend Details Modal */}
