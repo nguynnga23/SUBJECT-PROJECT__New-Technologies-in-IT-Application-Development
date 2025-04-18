@@ -413,7 +413,16 @@ export default function PrivateChatScreen() {
                                             ) : (
                                                 <>
                                                     {item.replyToId !== null && (
-                                                        <View style={styles.replyBox}>
+                                                        <TouchableOpacity style={styles.replyBox}
+                                                            onPress={() => {
+                                                                const replyToMessageIndex = messages.findIndex((msg) => msg.id === item.replyToId);
+                                                                if (replyToMessageIndex !== -1 && flatListRef?.current) {
+                                                                    flatListRef.current.scrollToIndex({ index: replyToMessageIndex, animated: true });
+                                                                } else {
+                                                                    Alert.alert('Error', 'The replied message could not be found.');
+                                                                }
+                                                            }}
+                                                        >
                                                             <Text style={styles.replyUser}>
                                                                 Replying to {item.replyTo.sender.name}
                                                             </Text>
@@ -426,7 +435,7 @@ export default function PrivateChatScreen() {
                                                             ) : (<Text style={styles.replyMessage}>
                                                                 {item.replyTo.fileName}
                                                             </Text>)};)}; */}
-                                                        </View>
+                                                        </TouchableOpacity>
                                                     )}
 
                                                     {/* Hiển thị nội dung tin nhắn */}
