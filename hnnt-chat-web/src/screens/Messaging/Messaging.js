@@ -6,6 +6,7 @@ import TabMessage from '../../components/Tab/TabMessage';
 import { socket } from '../../configs/socket';
 import { useEffect, useState } from 'react';
 import { getChat } from './api';
+import ModalShareMessage from '../../components/Modal/ModalShareMessage';
 
 function Messaging() {
     const userActive = useSelector((state) => state.auth.userActive);
@@ -14,6 +15,8 @@ function Messaging() {
     const showRightBarSearch = useSelector((state) => state.chat.showRightBarSearch);
     const [notification, setNotification] = useState(null);
     const [chats, setChats] = useState([]);
+    const [showModalShareMes, setShowModalShareMes] = useState(false);
+    const [message, setMessage] = useState();
 
     useEffect(() => {
         const fetchMessages = async () => {
@@ -58,12 +61,17 @@ function Messaging() {
             <div className="flex-1 flex min-h-0 ">
                 <TabChatLeftBar />
                 <div
-                    className={`flex flex-col bg-white dark:bg-[#16191d] ${
+                    className={`relative flex flex-col bg-white dark:bg-[#16191d] ${
                         showRightBar || showRightBarSearch ? 'w-2/4' : 'w-3/4'
                     }`}
                 >
                     {activeChat ? (
-                        <TabMessage />
+                        <>
+                            {showModalShareMes && (
+                                <ModalShareMessage setShowModalShareMes={setShowModalShareMes} message={message} />
+                            )}
+                            <TabMessage setShowModalShareMes={setShowModalShareMes} setMessageShare={setMessage} />
+                        </>
                     ) : (
                         <div className="flex-1 flex items-center justify-center text-gray-500 dark:text-white">
                             Chọn một cuộc trò chuyện để bắt đầu
