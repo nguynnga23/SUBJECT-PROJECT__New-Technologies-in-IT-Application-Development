@@ -10,7 +10,6 @@ import axios from 'axios';
 import * as WebBrowser from 'expo-web-browser';
 import { localhost } from '../../../../utils/localhosts';
 import { socket } from '../../../../configs/socket';
-
 const API_URL = `http://${localhost}/api`;
 
 let recording = null;
@@ -238,15 +237,38 @@ export const sendMessage = async (chatId, content, type, replyToId, fileName, fi
     }
 };
 
+export const getFileUri = async (uri) => {
+    // Xử lý URI content:// trên Android
+    if (Platform.OS === 'android' && uri.startsWith('content://')) {
+        const filename = `${Date.now()}.jpg`; // Có thể sửa tùy định dạng
+        const fileUri = `${FileSystem.cacheDirectory}${filename}`;
+        try {
+            await FileSystem.copyAsync({
+                from: uri,
+                to: fileUri,
+            });
+            return fileUri;
+        } catch (error) {
+            console.error('Error converting content:// URI', error);
+            throw error;
+        }
+    }
+
+    // iOS hoặc Android đã là file:// thì trả lại nguyên xi
+    return uri;
+};
+
 //upload file to s3
 export const uploadFileToS3 = async (file, token) => {
     if (!file) throw new Error('File is required');
     if (!token) throw new Error('Token is required');
 
     try {
+        const fixedUri = await getFileUri(file.uri);
+
         const formData = new FormData();
         formData.append('file', {
-            uri: Platform.OS === 'ios' ? file.uri.replace('file://', '') : file.uri,
+            uri: Platform.OS === 'ios' ? fixedUri.replace('file://', '') : fixedUri,
             name: file.name,
             type: file.type,
         });
@@ -578,47 +600,69 @@ export const removeReaction = async (messageId, userId, token) => {
 
 export const downloadImage = async (imageUrl) => {
     try {
+        // 1. Yêu cầu quyền truy cập thư viện
         const { status } = await MediaLibrary.requestPermissionsAsync();
         if (status !== 'granted') {
             Alert.alert('Permission Denied', 'You need to grant storage permissions to download the image.');
             return;
         }
 
-        // Tạo tên file an toàn
-        let fileName = imageUrl.split('/').pop();
+        // 2. Tạo tên file an toàn
+        let fileName = imageUrl.split('/').pop()?.split('?')[0];
         if (!fileName || !fileName.includes('.')) {
             fileName = `image_${Date.now()}.jpg`; // fallback tên và định dạng
         }
 
-        const fileUri = `${FileSystem.documentDirectory}${fileName}`;
+        const fileUri = FileSystem.documentDirectory + fileName;
 
+        // 3. Tải file
         const downloadResumable = FileSystem.createDownloadResumable(imageUrl, fileUri);
 
         const { uri } = await downloadResumable.downloadAsync();
-        console.log('Download finished. File saved to:', uri);
+        console.log('✅ Download finished. File saved to:', uri);
 
+        // 4. Lưu vào thư viện
         const asset = await MediaLibrary.createAssetAsync(uri);
-        await MediaLibrary.createAlbumAsync('Download', asset, false);
+        await MediaLibrary.createAlbumAsync('Download', asset, false); // album `Download`
 
-        Alert.alert('Download Complete', 'The image has been saved to your gallery.');
+        Alert.alert('✅ Download Complete', 'The image has been saved to your gallery.');
     } catch (error) {
-        console.error('Error downloading image:', error);
-        Alert.alert('Error', 'Failed to download the image.');
+        console.error('❌ Error downloading image:', error);
+
+        if (error.message?.includes('Network')) {
+            Alert.alert('Network Error', 'Please check your internet connection.');
+        } else if (error.message?.includes('MEDIA_LIBRARY')) {
+            Alert.alert('Permission Error', 'Media Library permission is required.');
+        } else {
+            Alert.alert('Error', 'Failed to download the image.');
+        }
     }
 };
 
+import * as Sharing from 'expo-sharing';
+
 export const downloadAnyFile = async (fileUrl) => {
     try {
-        // Tạo link tới server trung gian (đã cấu hình Content-Disposition: attachment)
-        const encodedUrl = encodeURIComponent(fileUrl);
         const fileName = fileUrl.split('/').pop()?.split('?')[0] || `file_${Date.now()}`;
-        const serverDownloadUrl = `${API_URL}/public-download/?url=${encodedUrl}&name=${fileName}`;
+        const downloadUri = `${FileSystem.documentDirectory}${fileName}`;
 
-        // Mở link để tải bằng trình duyệt mặc định
-        await WebBrowser.openBrowserAsync(serverDownloadUrl);
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert('Permission required', 'You need to grant storage permission.');
+            return;
+        }
+
+        const downloadRes = await FileSystem.downloadAsync(fileUrl, downloadUri);
+
+        if (!(await Sharing.isAvailableAsync())) {
+            Alert.alert('Not supported', 'Sharing is not available on this device');
+            return;
+        }
+
+        await Sharing.shareAsync(downloadRes.uri);
     } catch (error) {
-        console.error('Error open browser to download file:', error);
-        Alert.alert('Error', 'Error open browser to download file.');
+        console.error('Error downloading file:', error);
+        Alert.alert('Error', 'Failed to download or share file.');
     }
 };
 

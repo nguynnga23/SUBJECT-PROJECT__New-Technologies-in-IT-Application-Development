@@ -47,7 +47,7 @@ function ChatFile({ userId, message, showName, replyMessage }) {
                 {/* Nút tải file */}
                 {message.fileType.toLowerCase().includes('video') ? (
                     <div className="p-2 justify-center items-center">
-                        <video controls className="rounded shadow w-40 h-auto">
+                        <video controls className="rounded shadow h-auto">
                             <source muted={false} src={message.content} />
                             Trình duyệt của bạn không hỗ trợ video.
                         </video>
