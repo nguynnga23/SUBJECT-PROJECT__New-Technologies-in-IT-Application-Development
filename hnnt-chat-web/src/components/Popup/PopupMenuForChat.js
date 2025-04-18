@@ -1,11 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { MdContentCopy, MdPushPin, MdDelete } from 'react-icons/md';
 import { IoReload } from 'react-icons/io5';
+import { RiArrowGoBackFill } from 'react-icons/ri';
 import { useSelector } from 'react-redux';
 import { deleteMessage, destroyMessage, pinOfMessage } from '../../screens/Messaging/api';
 import { socket } from '../../configs/socket';
 
-function PopupMenuForChat({ setIsPopupOpen, position, message }) {
+function PopupMenuForChat({ setIsPopupOpen, position, message, setShowModalShareMes, setMessageShare }) {
     const popupRef = useRef(null);
     const chat = useSelector((state) => state.chat.activeChat);
 
@@ -79,6 +80,16 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
                         >
                             <MdPushPin className="mr-3" />
                             Ghim tin nhắn
+                        </li>
+                        <li
+                            className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => {
+                                setShowModalShareMes(true);
+                                setMessageShare(message);
+                            }}
+                        >
+                            <RiArrowGoBackFill className="mr-3" />
+                            Chia sẽ tin nhắn
                         </li>
                     </ul>
                 )}

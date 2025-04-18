@@ -66,7 +66,7 @@ import { createMeeting } from '../../configs/createMeeting';
 import { MeetingProvider } from '@videosdk.live/react-sdk';
 import MeetingView from '../../components/Views/MeetingView';
 
-function TabMessage() {
+function TabMessage({ setShowModalShareMes, setMessageShare }) {
     const [message, setMessage] = useState('');
     const [isOpenCategory, setIsOpenCategory] = useState(false);
     const userActive = useSelector((state) => state.auth.userActive);
@@ -820,6 +820,8 @@ function TabMessage() {
                                                     setIsPopupOpen={setIsPopupOpenIndex}
                                                     position={position}
                                                     message={message}
+                                                    setShowModalShareMes={setShowModalShareMes}
+                                                    setMessageShare={setMessageShare}
                                                 />
                                             )}
                                             {sumReaction > 0 && !message.destroy && (
