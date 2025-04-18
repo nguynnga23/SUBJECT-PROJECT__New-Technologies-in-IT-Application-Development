@@ -613,3 +613,18 @@ export const downloadAnyFile = async (fileUrl) => {
         Alert.alert('Error', 'Error open browser to download file.');
     }
 };
+
+// Lấy danh sách bạn bè đã chặn
+export const getBlockedUsers = async (userId, token) => {
+    try {
+        const response = await axios.get(`${API_URL}/friends/user/block/list/${userId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching blocked users:', error.response?.data || error.message);
+        throw error;
+    }
+};

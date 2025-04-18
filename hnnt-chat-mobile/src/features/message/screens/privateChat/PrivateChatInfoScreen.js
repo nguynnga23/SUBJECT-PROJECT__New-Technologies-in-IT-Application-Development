@@ -123,8 +123,8 @@ export default function PrivateChatInfoScreen() {
             const token = await AsyncStorage.getItem('token');
             const response = await blockUser(userId, receiverId, token);
             setBlockVisible(false);
-            Alert.alert('Success', response.message);
-            navigation.navigate('HomeScreen');
+            Alert.alert('Success', 'User blocked successfully!');
+            navigation.goBack();
         } catch (error) {
             console.warn('Error blocking user:', error);
         }

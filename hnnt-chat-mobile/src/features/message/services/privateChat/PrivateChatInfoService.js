@@ -62,12 +62,12 @@ export const deleteAllMessage = async (chatId, token) => {
     }
 }
 
-export const blockUser = async (senderID, receiverID, token) => {
+export const blockUser = async (senderId, receiverId, token) => {
     try {
         const response = await axios.post(`${API_URL}/friends/user/block`,
             {
-                senderId: senderID,
-                receiverId: receiverID
+                senderId,
+                receiverId
             },
             {
                 headers: {

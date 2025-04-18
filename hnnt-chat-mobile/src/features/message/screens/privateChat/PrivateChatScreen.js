@@ -35,8 +35,9 @@ import {
     startRecording,
     stopRecording,
     uploadFileToS3,
+    getBlockedUsers
 } from '../../services/privateChat/PrivateChatService';
-import { getPinMess } from '../../services/privateChat/PrivateChatInfoService';
+import { getPinMess, fetchChat } from '../../services/privateChat/PrivateChatInfoService';
 
 import { handleLongPressMessage, MessageOptionsModal } from '../../components/MessageOptions';
 import PinnedMessages from '../../components/PinnedMessages';
@@ -73,6 +74,7 @@ export default function PrivateChatScreen() {
     const [replyMessage, setReplyMessage] = useState(null);
     const [replyVisible, setReplyVisible] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [blocked, setBlocked] = useState(false);
     const prevMessageLength = useRef(0);
 
     const [modalZoomVisible, setModalZoomVisible] = useState(false);
@@ -124,6 +126,13 @@ export default function PrivateChatScreen() {
 
             const data = await fetchMessages(chatId, token); // Gọi API để lấy danh sách tin nhắn
             setMessages(data);
+
+            //get blocked users
+            const chatInfo = await fetchChat(chatId, token);
+            const otherParticipant = chatInfo.participants.find((member) => member.accountId !== userId).accountId;
+            const blockedUsers = await getBlockedUsers(userId, token);
+            const isParticipantBlocked = blockedUsers.some((blockedUser) => blockedUser.id === otherParticipant);
+            setBlocked(isParticipantBlocked);
 
             try {
                 const pin_Mess = await getPinMess(chatId, token);
@@ -555,6 +564,7 @@ export default function PrivateChatScreen() {
                             onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })} // Cuộn xuống cuối khi nội dung thay đổi
                         />
                         <ChatInputContainer
+                            blocked={blocked}
                             message={message}
                             setMessage={setMessage}
                             onSendMessage={() => handleSendMessage(message)}
