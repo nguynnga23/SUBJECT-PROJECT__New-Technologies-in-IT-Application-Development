@@ -359,6 +359,7 @@ export default function PrivateChatScreen() {
                     <>
                         {/* Thanh pinned messages */}
                         <PinnedMessages
+                            messages={messages}
                             pinMess={pinMess}
                             setPinMess={setPinMess}
                             token={token}

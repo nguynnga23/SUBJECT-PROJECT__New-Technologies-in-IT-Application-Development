@@ -11,26 +11,40 @@ import {
 } from 'react-native';
 import { formatDateTime } from '../../../utils/formatDateTime';
 import { unPinMess } from '../services/privateChat/PrivateChatInfoService';
+import { getUserIdFromToken } from '../../../utils/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { socket } from '../../../configs/socket';
 
-export default function PinnedMessages({ pinMess, setPinMess, token, chatId, flatListRef }) {
+export default function PinnedMessages({ messages, pinMess, setPinMess, token, chatId, flatListRef }) {
     const [pinVisible, setPinVisible] = useState(false);
+
+    const messageDeletedByCurrentUser = (messageId) => {
+        const userId = getUserIdFromToken(token);
+        const message = pinMess.find((msg) => msg.id === messageId);
+        return message?.deletedBy?.includes(userId);
+    };
 
     const handleScrollToMessage = (messageId) => {
         if (!messageId) return;
-
         const message = pinMess.find((msg) => msg.id === messageId);
 
         // Kiểm tra nếu tin nhắn đã bị xóa
-        if (!message || message.deletedBy.length > 0 || message.destroy) {
+        if (!message || messageDeletedByCurrentUser(messageId) || message.destroy) {
             alert('This message has been deleted and cannot be accessed.');
             return;
         }
 
-        // Tìm vị trí của tin nhắn trong danh sách
-        const messageIndex = pinMess.findIndex((msg) => msg.id === messageId);
+        // Tìm vị trí của tin nhắn trong danh sách FlatList
+        const messageIndex = messages.findIndex((msg) => msg.id === messageId);
 
-        if (messageIndex !== -1 && flatListRef?.current) {
+        if (messageIndex === -1) {
+            alert('Message not found in the chat.');
+            return;
+        }
+
+        console.log("Scrolling to message index:", messageIndex);
+
+        if (flatListRef?.current) {
             flatListRef.current.scrollToIndex({ index: messageIndex, animated: true });
             setPinVisible(false); // Đóng modal sau khi cuộn
         }
@@ -79,7 +93,7 @@ export default function PinnedMessages({ pinMess, setPinMess, token, chatId, fla
                                             onPress={() => handleScrollToMessage(message.id)}
                                         >
                                             <View style={styles.messageInfo}>
-                                                {message && !message.deletedBy.length && !message.destroy ? (
+                                                {message && messageDeletedByCurrentUser && !message.destroy ? (
                                                     <>
                                                         <Text style={styles.messageTime}>{formatDateTime(message.time)}</Text>
                                                         <Text style={styles.messageSender}>{message.sender.name}</Text>
