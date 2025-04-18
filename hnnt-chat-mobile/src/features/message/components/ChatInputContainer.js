@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 
 export default function ChatInputContainer({
+    blocked,
     message,
     setMessage,
     onSendMessage,
@@ -76,32 +77,37 @@ export default function ChatInputContainer({
 
     return (
         <View style={styles.inputContainer}>
-            <TouchableOpacity onPress={onSendImage} style={styles.iconButton}>
-                <Ionicons name="image-outline" size={24} color="gray" />
-            </TouchableOpacity>
-            <TextInput style={styles.input} placeholder="Message" value={message} onChangeText={setMessage} />
-            {!message && (
-                <TouchableOpacity onPress={onSendFile} style={styles.iconButton}>
-                    <Ionicons name="document-outline" size={24} color="gray" />
+            {blocked ? (
+                <Text style={styles.blockedText}>Blocked</Text>
+            ) : (<>
+                <TouchableOpacity onPress={onSendImage} style={styles.iconButton}>
+                    <Ionicons name="image-outline" size={24} color="gray" />
                 </TouchableOpacity>
+                <TextInput style={styles.input} placeholder="Message" value={message} onChangeText={setMessage} />
+                {!message && (
+                    <TouchableOpacity onPress={onSendFile} style={styles.iconButton}>
+                        <Ionicons name="document-outline" size={24} color="gray" />
+                    </TouchableOpacity>
+                )}
+                <TouchableOpacity
+                    onPress={() => {
+                        if (message) {
+                            onSendMessage(message);
+                            setMessage('');
+                        } else {
+                            setModalRecordVisible(true);
+                        }
+                    }}
+                    style={styles.iconButton}
+                >
+                    <Ionicons
+                        name={message ? 'send-outline' : 'mic-outline'}
+                        size={24}
+                        color={message ? '#007AFF' : 'gray'}
+                    />
+                </TouchableOpacity>
+            </>
             )}
-            <TouchableOpacity
-                onPress={() => {
-                    if (message) {
-                        onSendMessage(message);
-                        setMessage('');
-                    } else {
-                        setModalRecordVisible(true);
-                    }
-                }}
-                style={styles.iconButton}
-            >
-                <Ionicons
-                    name={message ? 'send-outline' : 'mic-outline'}
-                    size={24}
-                    color={message ? '#007AFF' : 'gray'}
-                />
-            </TouchableOpacity>
 
             {/* Voice Recording Modal */}
             <Modal animationType="slide" transparent={true} visible={modalRecordVisible}>
@@ -238,5 +244,13 @@ const styles = StyleSheet.create({
         width: 3,
         marginHorizontal: 1,
         backgroundColor: '#007AFF',
+    },
+    blockedText: {
+        flex: 1,
+        textAlign: 'center',
+        color: 'red',
+        fontSize: 16,
+        fontWeight: 'bold',
+        alignSelf: 'center',
     },
 });

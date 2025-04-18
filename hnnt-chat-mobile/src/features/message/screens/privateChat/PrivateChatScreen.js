@@ -36,8 +36,10 @@ import {
     startRecording,
     stopRecording,
     uploadFileToS3,
+    getBlockedUsers,
+    previewFile,
 } from '../../services/privateChat/PrivateChatService';
-import { getPinMess } from '../../services/privateChat/PrivateChatInfoService';
+import { getPinMess, fetchChat } from '../../services/privateChat/PrivateChatInfoService';
 
 import { handleLongPressMessage, MessageOptionsModal } from '../../components/MessageOptions';
 import PinnedMessages from '../../components/PinnedMessages';
@@ -75,6 +77,8 @@ export default function PrivateChatScreen() {
     const [replyMessage, setReplyMessage] = useState(null);
     const [replyVisible, setReplyVisible] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [blocked, setBlocked] = useState(false);
+    const prevMessageLength = useRef(0);
 
     const [modalZoomVisible, setModalZoomVisible] = useState(false);
     const [modalDownVisible, setModalDownVisible] = useState(false);
@@ -125,8 +129,14 @@ export default function PrivateChatScreen() {
             setCurrentUserId(userId);
 
             const data = await fetchMessages(chatId, token); // Gọi API để lấy danh sách tin nhắn
-            console.log(data);
             setMessages(data);
+
+            //get blocked users
+            const chatInfo = await fetchChat(chatId, token);
+            const otherParticipant = chatInfo.participants.find((member) => member.accountId !== userId).accountId;
+            const blockedUsers = await getBlockedUsers(userId, token);
+            const isParticipantBlocked = blockedUsers.some((blockedUser) => blockedUser.id === otherParticipant);
+            setBlocked(isParticipantBlocked);
 
             try {
                 const pin_Mess = await getPinMess(chatId, token);
@@ -134,11 +144,6 @@ export default function PrivateChatScreen() {
             } catch (error) {
                 setPinMess([]);
             }
-
-            // Cuộn đến tin nhắn cuối cùng
-            setTimeout(() => {
-                flatListRef.current?.scrollToEnd({ animated: true });
-            }, 100);
         } catch (error) {
             Alert.alert('Error', 'Failed to fetch messages.');
         } finally {
@@ -148,7 +153,15 @@ export default function PrivateChatScreen() {
 
     useEffect(() => {
         loadMessages();
+        flatListRef.current?.scrollToEnd({ animated: true });
     }, []);
+
+    useEffect(() => {
+        if (messages.length > prevMessageLength.current) {
+            flatListRef.current?.scrollToEnd({ animated: true });
+            prevMessageLength.current = messages.length;
+        }
+    }, [messages]);
 
     //send message
     useEffect(() => {
@@ -239,6 +252,9 @@ export default function PrivateChatScreen() {
             }
             setReplyMessage(null);
             // loadMessages();
+            setTimeout(() => {
+                flatListRef.current?.scrollToEnd({ animated: true });
+            }, 100);
         } catch (error) {
             console.warn('Error sending message:', error);
             Alert.alert('Error', 'Failed to send message.');
@@ -376,6 +392,7 @@ export default function PrivateChatScreen() {
                     <>
                         {/* Thanh pinned messages */}
                         <PinnedMessages
+                            messages={messages}
                             pinMess={pinMess}
                             setPinMess={setPinMess}
                             token={token}
@@ -383,6 +400,7 @@ export default function PrivateChatScreen() {
                             flatListRef={flatListRef}
                         />
                         <FlatList
+                            ref={flatListRef}
                             data={messages}
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={({ item }) => {
@@ -420,14 +438,41 @@ export default function PrivateChatScreen() {
                                             ) : (
                                                 <>
                                                     {item.replyToId !== null && (
-                                                        <View style={styles.replyBox}>
+                                                        <TouchableOpacity
+                                                            style={styles.replyBox}
+                                                            onPress={() => {
+                                                                const replyToMessageIndex = messages.findIndex(
+                                                                    (msg) => msg.id === item.replyToId,
+                                                                );
+                                                                if (
+                                                                    replyToMessageIndex !== -1 &&
+                                                                    flatListRef?.current
+                                                                ) {
+                                                                    flatListRef.current.scrollToIndex({
+                                                                        index: replyToMessageIndex,
+                                                                        animated: true,
+                                                                    });
+                                                                } else {
+                                                                    Alert.alert(
+                                                                        'Error',
+                                                                        'The replied message could not be found.',
+                                                                    );
+                                                                }
+                                                            }}
+                                                        >
                                                             <Text style={styles.replyUser}>
                                                                 Replying to {item.replyTo.sender.name}
                                                             </Text>
                                                             <Text style={styles.replyMessage}>
                                                                 {item.replyTo.content}
                                                             </Text>
-                                                        </View>
+                                                            {/* {!item.replyTo.destroy &&({item.replyTo.type === 'text' ? (<Text style={styles.replyMessage}>
+                                                                {item.replyTo.content}
+                                                            </Text>
+                                                            ) : (<Text style={styles.replyMessage}>
+                                                                {item.replyTo.fileName}
+                                                            </Text>)};)}; */}
+                                                        </TouchableOpacity>
                                                     )}
 
                                                     {/* Hiển thị nội dung tin nhắn */}
@@ -498,7 +543,7 @@ export default function PrivateChatScreen() {
                                                         !item.fileType?.includes('image') && (
                                                             <TouchableOpacity
                                                                 onLongPress={() => {
-                                                                    setSelectedFile(item.fileName);
+                                                                    setSelectedFile(item.content);
                                                                     setModalDownFileVisible(true);
                                                                 }}
                                                                 style={styles.fileContainer}
@@ -509,7 +554,7 @@ export default function PrivateChatScreen() {
                                                                     color="blue"
                                                                 />
                                                                 <Text style={styles.fileName}>
-                                                                    {item.content} {item.fileSize}
+                                                                    {item.fileName} {item.fileSize}
                                                                 </Text>
                                                             </TouchableOpacity>
                                                         )}
@@ -518,6 +563,10 @@ export default function PrivateChatScreen() {
                                                         <TouchableOpacity
                                                             onPress={() => playAudio(item.content)}
                                                             style={styles.audioMessageContainer}
+                                                            onLongPress={() => {
+                                                                setSelectedFile(item.content);
+                                                                setModalDownFileVisible(true);
+                                                            }}
                                                         >
                                                             <Ionicons name="play-circle" size={30} color="blue" />
                                                             <Text style={styles.audioMessageText}>Voice Message</Text>
@@ -525,7 +574,13 @@ export default function PrivateChatScreen() {
                                                     )}
 
                                                     {item.fileType?.includes('video') && (
-                                                        <View style={styles.inlineVideoContainer}>
+                                                        <TouchableOpacity
+                                                            style={styles.inlineVideoContainer}
+                                                            onLongPress={() => {
+                                                                setSelectedFile(item.content);
+                                                                setModalDownFileVisible(true);
+                                                            }}
+                                                        >
                                                             <Video
                                                                 source={{ uri: item.content }}
                                                                 style={styles.inlineVideo}
@@ -534,7 +589,7 @@ export default function PrivateChatScreen() {
                                                                 shouldPlay={false}
                                                                 isLooping={true}
                                                             />
-                                                        </View>
+                                                        </TouchableOpacity>
                                                     )}
                                                 </>
                                             )}
@@ -585,11 +640,11 @@ export default function PrivateChatScreen() {
                                     </TouchableOpacity>
                                 );
                             }}
-                            initialNumToRender={20}
                             keyboardShouldPersistTaps="handled" // Đảm bảo sự kiện nhấn không chặn cuộn
                             onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })} // Cuộn xuống cuối khi nội dung thay đổi
                         />
                         <ChatInputContainer
+                            blocked={blocked}
                             message={message}
                             setMessage={setMessage}
                             onSendMessage={() => handleSendMessage(message)}
@@ -696,8 +751,19 @@ export default function PrivateChatScreen() {
                             <TouchableWithoutFeedback onPress={() => setModalDownFileVisible(false)}>
                                 <View style={styles.modalContainer}>
                                     <View style={styles.optionModal}>
-                                        <Text style={styles.modalTitle}>Download this file?</Text>
+                                        <Text style={styles.modalTitle}>
+                                            Download or preview this file? It's will direct you to browser.
+                                        </Text>
                                         <View style={styles.modalButtonContainer}>
+                                            <TouchableOpacity
+                                                style={styles.modalButton}
+                                                onPress={() => {
+                                                    previewFile(selectedFile);
+                                                    setModalDownFileVisible(false);
+                                                }}
+                                            >
+                                                <Text style={styles.modalButtonText}>Preview</Text>
+                                            </TouchableOpacity>
                                             <TouchableOpacity
                                                 style={styles.modalButton}
                                                 onPress={() => {
@@ -1050,7 +1116,7 @@ const styles = StyleSheet.create({
         padding: 20,
         borderRadius: 10,
         alignItems: 'center',
-        width: '80%',
+        width: '90%',
     },
 
     modalButtonContainer: {

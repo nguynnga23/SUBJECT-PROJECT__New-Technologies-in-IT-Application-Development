@@ -12,7 +12,9 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
     const handleDeleteMessage = async (messageId) => {
         if (!chat) return;
         await deleteMessage(messageId);
-
+        socket.emit('del_message', {
+            chatId: chat.id,
+        });
         setIsPopupOpen(null);
     };
 
@@ -20,6 +22,9 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
         if (!chat) return;
         await destroyMessage(messageId);
         setIsPopupOpen(null);
+        socket.emit('del_message', {
+            chatId: chat.id,
+        });
     };
 
     const handleCopy = () => {
@@ -31,9 +36,9 @@ function PopupMenuForChat({ setIsPopupOpen, position, message }) {
     const handlePinMessages = (messageId) => {
         const pinMess = pinOfMessage(messageId);
         if (!pinMess) return;
-        // socket.emit('pin_message', {
-        //     chatId: chat.id,
-        // });
+        socket.emit('pin_message', {
+            chatId: chat.id,
+        });
     };
 
     useEffect(() => {

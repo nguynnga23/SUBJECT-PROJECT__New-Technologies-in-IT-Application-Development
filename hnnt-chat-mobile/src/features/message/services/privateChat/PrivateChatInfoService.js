@@ -28,7 +28,7 @@ export const getPinMess = async (chatId, token) => {
         });
         return response.data;
     } catch (error) {
-        console.warn('Error fetching:', error.response?.data || error.message);
+        // console.warn('Error fetching:', error.response?.data || error.message);
         throw error;
     }
 };
@@ -62,12 +62,12 @@ export const deleteAllMessage = async (chatId, token) => {
     }
 }
 
-export const blockUser = async (senderID, receiverID, token) => {
+export const blockUser = async (senderId, receiverId, token) => {
     try {
         const response = await axios.post(`${API_URL}/friends/user/block`,
             {
-                senderId: senderID,
-                receiverId: receiverID
+                senderId,
+                receiverId
             },
             {
                 headers: {
