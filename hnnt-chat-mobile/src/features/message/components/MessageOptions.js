@@ -1,15 +1,15 @@
-import React, { useState } from "react";
-import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { getUserIdFromToken } from "../../../utils/auth";
-import { socket } from "../../../configs/socket";
-import { deleteMessage, destroyMessage, pinMessage } from "../services/privateChat/PrivateChatService";
+import React, { useState } from 'react';
+import { Modal, View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { getUserIdFromToken } from '../../../utils/auth';
+import { socket } from '../../../configs/socket';
+import { deleteMessage, destroyMessage, pinMessage } from '../services/privateChat/PrivateChatService';
 
 let setModalStateGlobal = null;
 
 export function MessageOptionsModal() {
     const [visible, setVisible] = useState(false);
     const [options, setOptions] = useState([]);
-    const [title, setTitle] = useState("");
+    const [title, setTitle] = useState('');
 
     // Expose setter to be used outside this component
     setModalStateGlobal = ({ visible, title, options }) => {
@@ -42,7 +42,17 @@ export function MessageOptionsModal() {
 }
 
 // Gọi khi nhấn giữ
-export async function handleLongPressMessage(messageId, messages, setMessages, chatId, token, setReplyMessage, setModalReplyVisible) {
+export async function handleLongPressMessage(
+    messageId,
+    messages,
+    setMessages,
+    chatId,
+    token,
+    setReplyMessage,
+    setModalReplyVisible,
+    setModalForwardVisible,
+    setSelectedForwardMessage, // Add this parameter to store the selected message
+) {
     const message = messages.find((msg) => msg.id === messageId);
 
     if (!message || !setModalStateGlobal) return;
@@ -51,50 +61,57 @@ export async function handleLongPressMessage(messageId, messages, setMessages, c
 
     if (message.destroy) {
         options.push({
-            text: "🗑️ Delete",
+            text: '🗑️ Delete',
             onPress: async () => {
                 try {
                     if (!messageId || !token) return;
                     const response = await deleteMessage(messageId, token);
-                    socket.emit("del_message", { chatId });
-                    showMessage("Success", response.message);
+                    socket.emit('del_message', { chatId });
+                    showMessage('Success', response.message);
                 } catch {
-                    showMessage("Error", "Failed to delete the message.");
+                    showMessage('Error', 'Failed to delete the message.');
                 }
             },
         });
     } else {
         options = [
             {
-                text: "📌 Pin",
+                text: '📌 Pin',
                 onPress: async () => {
                     try {
                         if (!messageId || !token) return;
                         await pinMessage(messageId, token);
-                        socket.emit("pin_message", { chatId });
-                        showMessage("Success", "Pinned!");
+                        socket.emit('pin_message', { chatId });
+                        showMessage('Success', 'Pinned!');
                     } catch {
-                        showMessage("Error", "Failed to pin the message.");
+                        showMessage('Error', 'Failed to pin the message.');
                     }
                 },
             },
             {
-                text: "↩️ Answer",
+                text: '↩️ Answer',
                 onPress: () => {
                     setReplyMessage(message);
                     setModalReplyVisible(true);
                 },
             },
             {
-                text: "🗑️ Delete",
+                text: '🔄 Forward',
+                onPress: () => {
+                    setSelectedForwardMessage(message); // Save the selected message
+                    setModalForwardVisible(true); // Open the forward modal
+                },
+            },
+            {
+                text: '🗑️ Delete',
                 onPress: async () => {
                     try {
                         if (!messageId || !token) return;
                         const response = await deleteMessage(messageId, token);
-                        socket.emit("del_message", { chatId });
-                        showMessage("Success", response.message);
+                        socket.emit('del_message', { chatId });
+                        showMessage('Success', response.message);
                     } catch {
-                        showMessage("Error", "Failed to delete the message.");
+                        showMessage('Error', 'Failed to delete the message.');
                     }
                 },
             },
@@ -102,15 +119,15 @@ export async function handleLongPressMessage(messageId, messages, setMessages, c
 
         if (message.sender.id === getUserIdFromToken(token)) {
             options.splice(4, 0, {
-                text: "Recall",
+                text: 'Recall',
                 onPress: async () => {
                     try {
                         if (!messageId || !token) return;
                         await destroyMessage(messageId, token);
-                        socket.emit("del_message", { chatId });
-                        showMessage("Success", "Recall message success!");
+                        socket.emit('del_message', { chatId });
+                        showMessage('Success', 'Recall message success!');
                     } catch {
-                        showMessage("Error", "Failed to recall the message.");
+                        showMessage('Error', 'Failed to recall the message.');
                     }
                 },
             });
@@ -120,7 +137,7 @@ export async function handleLongPressMessage(messageId, messages, setMessages, c
     // Gọi modal
     setModalStateGlobal({
         visible: true,
-        title: "What do you want to do with this message?",
+        title: 'What do you want to do with this message?',
         options,
     });
 }
@@ -132,8 +149,8 @@ function showMessage(title, message) {
         title,
         options: [
             {
-                text: "OK",
-                onPress: () => { },
+                text: 'OK',
+                onPress: () => {},
             },
         ],
     });
@@ -142,27 +159,27 @@ function showMessage(title, message) {
 const styles = StyleSheet.create({
     overlay: {
         flex: 1,
-        backgroundColor: "rgba(0,0,0,0.5)",
-        justifyContent: "center",
-        alignItems: "center",
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     modalContainer: {
-        backgroundColor: "#fff",
+        backgroundColor: '#fff',
         borderRadius: 10,
         padding: 20,
         minWidth: 280,
     },
     title: {
         fontSize: 16,
-        fontWeight: "bold",
+        fontWeight: 'bold',
         marginBottom: 15,
-        textAlign: "center",
+        textAlign: 'center',
     },
     optionButton: {
         paddingVertical: 12,
     },
     optionText: {
         fontSize: 16,
-        textAlign: "center",
+        textAlign: 'center',
     },
 });

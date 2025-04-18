@@ -48,6 +48,7 @@ import { formatDateTime } from '../../../../utils/formatDateTime';
 import { socket } from '../../../../configs/socket';
 import { set } from 'date-fns';
 import { Audio } from 'expo-av';
+import ForwardMessageModal from '../../components/ForwardMessageModal';
 
 const groupMessagesByDate = (messages) => {
     return messages.reduce((acc, message) => {
@@ -64,7 +65,7 @@ export default function PrivateChatScreen() {
     const flatListRef = useRef(null);
     const navigation = useNavigation();
     const route = useRoute();
-    const { chatId, chatName } = route.params;
+    const { chatId, chatName, chats } = route.params;
     const [currentUserId, setCurrentUserId] = useState(null);
     const [token, setToken] = useState(null);
 
@@ -80,7 +81,7 @@ export default function PrivateChatScreen() {
     const [modalDownFileVisible, setModalDownFileVisible] = useState(false);
     const [modalRecordVisible, setModalRecordVisible] = useState(false);
     const [modalReplyVisible, setModalReplyVisible] = useState(false);
-
+    const [modalForwardVisible, setModalForwardVisible] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [recordingUri, setRecordingUri] = useState(null);
     const [recordingSaved, setRecordingSaved] = useState(false);
@@ -96,6 +97,7 @@ export default function PrivateChatScreen() {
     const [pinMess, setPinMess] = useState([]);
     const [selectedVideo, setSelectedVideo] = useState(null);
     const [modalVideoVisible, setModalVideoVisible] = useState(false);
+    const [selectedForwardMessage, setSelectedForwardMessage] = useState(null);
 
     useEffect(() => {
         const parentNav = navigation.getParent();
@@ -347,6 +349,26 @@ export default function PrivateChatScreen() {
         }
     };
 
+    const handleForwardMessage = async (message, targetChatId) => {
+        console.log(message);
+        console.log(targetChatId);
+        if (!message || !token) return;
+
+        await sendMessage(
+            targetChatId,
+            message.content,
+            message.type,
+            null,
+            message.fileName || '',
+            message.fileType || '',
+            message.fileSize || '',
+            token,
+        );
+
+        setModalForwardVisible(false);
+        Alert.alert('Success', 'Message forwarded!');
+    };
+
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <View style={styles.container}>
@@ -377,6 +399,8 @@ export default function PrivateChatScreen() {
                                                 token,
                                                 setReplyMessage,
                                                 setModalReplyVisible,
+                                                setModalForwardVisible,
+                                                setSelectedForwardMessage, // Pass the setter function
                                             )
                                         }
                                     >
@@ -796,6 +820,7 @@ export default function PrivateChatScreen() {
                         </Modal>
                         <MessageOptionsModal />
                     </>
+
                     <Modal visible={modalVideoVisible} transparent={true} animationType="fade">
                         <TouchableWithoutFeedback onPress={() => setModalVideoVisible(false)}>
                             <View style={styles.modalContainer}>
@@ -809,6 +834,15 @@ export default function PrivateChatScreen() {
                             </View>
                         </TouchableWithoutFeedback>
                     </Modal>
+
+                    {/* Modal chuyển tiếp tin nhắn */}
+                    <ForwardMessageModal
+                        visible={modalForwardVisible}
+                        chats={chats}
+                        selectedMessage={selectedForwardMessage}
+                        onClose={() => setModalForwardVisible(false)}
+                        onForward={handleForwardMessage}
+                    />
                 </SafeAreaProvider>
             </View>
         </KeyboardAvoidingView>
@@ -1158,5 +1192,22 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         textAlign: 'center',
         marginVertical: 10,
+    },
+    modalForwardContent: {
+        width: '90%',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+        alignItems: 'center',
+        elevation: 5,
+    },
+    forwardMessageItem: {
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
+    },
+    forwardMessageText: {
+        fontSize: 16,
+        color: '#333',
     },
 });
