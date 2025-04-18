@@ -7,6 +7,7 @@ import { socket } from '../../configs/socket';
 const ModalShareMessage = ({ setShowModalShareMes, message }) => {
     const [selected, setSelected] = useState([]);
     const [contacts, setContacts] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const activeChat = useSelector((state) => state.chat.activeChat);
 
@@ -48,8 +49,14 @@ const ModalShareMessage = ({ setShowModalShareMes, message }) => {
             });
         }
 
+        console.log('Selected:', activeChat);
+
         setShowModalShareMes(false);
     };
+
+    const filteredContacts = contacts.filter((contact) =>
+        contact.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
 
     return (
         // Overlay
@@ -58,11 +65,17 @@ const ModalShareMessage = ({ setShowModalShareMes, message }) => {
             <div className="w-[500px] max-w-full border rounded-xl p-4 bg-white shadow-lg">
                 <h2 className="text-xl font-semibold mb-3">Chia sẻ</h2>
 
-                <input type="text" placeholder="Tìm kiếm..." className="w-full border px-3 py-2 mb-3 rounded" />
+                <input
+                    type="text"
+                    placeholder="Tìm kiếm..."
+                    className="w-full border px-3 py-2 mb-3 rounded"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
 
                 <div className="mb-2 text-sm text-blue-600 font-semibold">Gần đây</div>
                 <div className="max-h-64 overflow-y-auto space-y-2 mb-4">
-                    {contacts.map((items, idx) => (
+                    {filteredContacts.map((items, idx) => (
                         <label key={idx} className="flex items-center space-x-2 cursor-pointer">
                             <div>
                                 <img src={items?.avatar} className="h-[50px] w-[50px] rounded-full" />
