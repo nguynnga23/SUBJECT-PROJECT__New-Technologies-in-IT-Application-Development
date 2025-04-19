@@ -1021,7 +1021,7 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
                                     handleSendMessage(); // Gọi hàm gửi tin nhắn
                                 }
                             }}
-                            placeholder={`Nhập tin nhắn với ${activeChat?.name}`}
+                            placeholder={`Nhập tin nhắn`}
                             className="flex-1 p-1 font-base text-[14px] rounded-lg focus:border-blue-500 focus:outline-none
                             h-[30px] max-h-[200px] overflow-y-auto resize-none dark:bg-gray-800 dark:text-gray-300"
                         />
