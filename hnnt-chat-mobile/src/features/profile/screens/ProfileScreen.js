@@ -58,7 +58,7 @@ export default function ProfileScreen() {
                                 routes: [{ name: 'HomeScreen' }],
                             });
                         } catch (error) {
-                            console.error('Error during logout:', error);
+                            console.warn('Error during logout:', error);
                         }
                     },
                 },

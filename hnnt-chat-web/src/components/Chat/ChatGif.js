@@ -1,6 +1,6 @@
 function ChatGif({ userId, message, showName, replyMessage }) {
     return (
-        <div className={`relative pb-2 ${message.sender === userId ? 'bg-blue-100' : 'bg-white'}`}>
+        <div className={`relative pb-2 ${message.sender === userId ? 'bg-blue-100' : ''}`}>
             {showName && (
                 <p className="text-[10px] text-gray-400 pb-[2px]">{message?.sender !== userId && message?.name}</p>
             )}
@@ -18,7 +18,9 @@ function ChatGif({ userId, message, showName, replyMessage }) {
             </div>
 
             <img src={message.content} alt="GIF" className="max-w-[300px] rounded-lg mb-4 " />
-            <p className="absolute left-[8px] bottom-[2px] text-gray-500 text-[10px]">{message.time}</p>
+            <p className="absolute left-[8px] bottom-[2px] text-gray-500 text-[10px]">
+                {new Date(message.time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+            </p>
         </div>
     );
 }

@@ -76,6 +76,39 @@ const ProfileService = {
             throw error.response?.data || error.message;
         }
     },
+    getUserByNumberAndEmail: async (token, { number, email }) => {
+        try {
+            const response = await axios.post(
+                `${BASE_URL}/check-number-email`,
+                { number, email },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                },
+            );
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+    getUserByNumberOrEmail: async (token, { number, email }) => {
+        try {
+            const response = await axios.post(
+                `${BASE_URL}/get-user-by-number-or-email`,
+                { number, email },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                },
+            );
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
 };
 
 export default ProfileService;

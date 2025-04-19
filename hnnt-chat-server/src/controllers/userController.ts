@@ -18,6 +18,7 @@ interface User {
     birthDate: Date | null;
     location: string | null;
     gender: string;
+    pushToken: string | null;
     currentAvatars: string[];
     createdAt: Date;
     updatedAt: Date;
@@ -170,5 +171,193 @@ export const getUserByNumberAndEmail = async (req: AuthRequest, res: Response): 
         return;
     } catch (error) {
         res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+
+export const getUserByNumberOrEmail = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const { number, email } = req.body;
+        if (!number && !email) {
+            res.status(400).json({ message: 'Số điện thoại hoặc email phải được cung cấp' });
+            return;
+        }
+
+        const user = await prisma.account.findFirst({
+            where: {
+                OR: [{ number: number }, { email: email }],
+            },
+        });
+
+        if (!user) {
+            res.status(404).json({ message: 'Không tìm thấy người dùng' });
+            return;
+        }
+
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error });
+    }
+};
+
+export const searchByPhone = async (req: AuthRequest, res: Response): Promise<void> => {
+    const { number } = req.body;
+    const userId = req.user?.id;
+
+    if (!number) {
+        res.status(400).json({ message: 'Missing phone number' });
+        return;
+    }
+
+    try {
+        // const users = await prisma.account.findMany({
+        //     where: {
+        //         id: { not: userId },
+        //         number: {
+        //             contains: number,
+        //             mode: 'insensitive',
+        //         },
+        //     },
+        //     select: {
+        //         id: true,
+        //         name: true,
+        //         number: true,
+        //         avatar: true,
+        //         sentFriendRequests: {
+        //             where: { receiverId: userId },
+        //             select: { id: true },
+        //         },
+        //         receivedFriendRequests: {
+        //             where: { senderId: userId },
+        //             select: { id: true },
+        //         },
+        //     },
+        // });
+
+        // const result = users.map((user) => {
+        //     let status = 'none';
+        //     let friendRequestId = null;
+
+        //     if (user.sentFriendRequests.length > 0) {
+        //         status = 'received';
+        //         friendRequestId = user.sentFriendRequests[0].id;
+        //     } else if (user.receivedFriendRequests.length > 0) {
+        //         status = 'sent';
+        //         friendRequestId = user.receivedFriendRequests[0].id;
+        //     }
+
+        //     return {
+        //         id: user.id,
+        //         name: user.name,
+        //         number: user.number,
+        //         avatar: user.avatar,
+        //         status,
+        //         friendRequestId, // ✅ đính kèm nếu có
+        //     };
+        // });
+
+        const users = await prisma.account.findMany({
+            where: {
+                id: { not: userId },
+                number: {
+                    contains: number,
+                    mode: 'insensitive',
+                },
+                AND: [
+                    {
+                        NOT: {
+                            OR: [
+                                {
+                                    friends1: {
+                                        some: { user2Id: userId },
+                                    },
+                                },
+                                {
+                                    friends2: {
+                                        some: { user1Id: userId },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+            select: {
+                id: true,
+                name: true,
+                number: true,
+                avatar: true,
+                sentFriendRequests: {
+                    where: { receiverId: userId },
+                    select: { id: true },
+                },
+                receivedFriendRequests: {
+                    where: { senderId: userId },
+                    select: { id: true },
+                },
+            },
+        });
+
+        const result = users.map((user) => {
+            let status = 'none';
+            let friendRequestId = null;
+
+            if (user.sentFriendRequests.length > 0) {
+                status = 'received';
+                friendRequestId = user.sentFriendRequests[0].id;
+            } else if (user.receivedFriendRequests.length > 0) {
+                status = 'sent';
+                friendRequestId = user.receivedFriendRequests[0].id;
+            }
+
+            return {
+                id: user.id,
+                name: user.name,
+                number: user.number,
+                avatar: user.avatar,
+                status,
+                friendRequestId, // ✅ đính kèm nếu có
+            };
+        });
+
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+export const searchUsers = async (req: Request, res: Response) => {
+    const { query, currentUserId } = req.body;
+
+    try {
+        const users = await prisma.account.findMany({
+            where: {
+                AND: [
+                    {
+                        OR: [
+                            { name: { contains: query, mode: 'insensitive' } },
+                            { email: { contains: query, mode: 'insensitive' } },
+                        ],
+                    },
+                    {
+                        NOT: {
+                            OR: [
+                                { blockedUsers: { some: { blockedAccountId: currentUserId } } }, // Người dùng bị chặn bởi currentUserId
+                                { blockedBy: { some: { blockerAccountId: currentUserId } } }, // Người dùng đã chặn currentUserId
+                            ],
+                        },
+                    },
+                ],
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                avatar: true,
+            },
+        });
+
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to search users' });
     }
 };

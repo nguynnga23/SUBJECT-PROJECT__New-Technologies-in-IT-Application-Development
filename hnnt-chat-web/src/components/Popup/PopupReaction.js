@@ -1,13 +1,20 @@
 import { IoHeartDislikeOutline } from 'react-icons/io5';
 import { reactionMessage, removeReactionMessage } from '../../screens/Messaging/api';
+import { socket } from '../../configs/socket';
+import { useSelector } from 'react-redux';
 
 function PopupReacttion({ position, setShowPopupReaction, message, reactions, userId }) {
     const hasUserReacted = Boolean(reactions.length > 0 && reactions.some((reaction) => reaction.user.id === userId));
+    const activeChat = useSelector((state) => state.chat.activeChat);
 
-    const handleReaction = (reaction) => {
+    const handleReaction = async (reaction) => {
         const messageId = message.id;
-        reactionMessage(messageId, userId, reaction);
-
+        const reactionMess = await reactionMessage(messageId, userId, reaction);
+        if (reactionMess) {
+            socket.emit('reaction_message', {
+                chatId: activeChat.id,
+            });
+        }
         setShowPopupReaction(false); // Ẩn popup sau khi chọn
     };
 
@@ -43,6 +50,9 @@ function PopupReacttion({ position, setShowPopupReaction, message, reactions, us
                         setShowPopupReaction(false);
                         const messageId = message.id;
                         removeReactionMessage(messageId, userId);
+                        socket.emit('reaction_message', {
+                            chatId: activeChat.id,
+                    });
                     }}
                 >
                     <IoHeartDislikeOutline />

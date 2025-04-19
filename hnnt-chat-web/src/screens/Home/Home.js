@@ -4,8 +4,6 @@ import { RiContactsBook3Line } from 'react-icons/ri';
 import { IoSettingsOutline } from 'react-icons/io5';
 import { IoMdCloudOutline } from 'react-icons/io';
 import { CiShare1 } from 'react-icons/ci';
-import { getUserById } from '../Profile/api';
-import { setUser } from '../../redux/slices/authSlice';
 // import { setChats } from '../../redux/slices/chatSlice';
 import Messaging from '../Messaging';
 import Contacts from '../Contacts';
@@ -18,8 +16,10 @@ import { useNavigate } from 'react-router-dom';
 import Modal from '../../components/Modal';
 
 import { logout } from '../Authentication/api';
-import { logoutOfSlice } from '../../redux/slices/authSlice';
+import { logoutOfSlice, setUser } from '../../redux/slices/authSlice';
 import { setActiveChat, setShowOrOffRightBar, setShowOrOffRightBarSearch } from '../../redux/slices/chatSlice';
+import { getUserById } from '../Profile/api';
+import { socket } from '../../configs/socket';
 
 export default function Home() {
     const navigate = useNavigate();
@@ -76,6 +76,15 @@ export default function Home() {
             console.error('Lỗi khi đăng xuất:', error);
         }
     };
+
+    useEffect(() => {
+        console.log('userActive', userActive);
+        const userId = userActive?.id;
+        socket.on('connect', () => {
+            console.log('✅ Đã kết nối đến server, ID:', socket.id);
+            socket.emit('register', userId);
+        });
+    }, [userActive?.id]);
 
     return (
         <div className="flex h-screen bg-gray-100 dark:bg-[#16191d]">

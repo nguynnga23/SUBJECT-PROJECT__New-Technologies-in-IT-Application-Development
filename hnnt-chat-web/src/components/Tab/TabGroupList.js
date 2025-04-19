@@ -157,16 +157,24 @@ function TabGroupList(props) {
                 <div className="mt-4">
                     <div className="flex items-center space-x-2 mt-3 px-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 py-2">
                         <AvatarGroup
-                            total={group.members.length}
+                            total={group.participants.length}
                             sx={{ '& .MuiAvatar-root': { width: 20, height: 20, fontSize: 10 } }}
                         >
-                            <Avatar alt="Remy Sharp" src={avatar} sx={{ width: 20, height: 20 }} />
-                            <Avatar alt="Travis Howard" src={avatar} sx={{ width: 20, height: 20 }} />
+                            <Avatar
+                                alt={group.participants[0].account.name}
+                                src={group.participants[0].account.avatar}
+                                sx={{ width: 20, height: 20 }}
+                            />
+                            <Avatar
+                                alt={group.participants[1].account.name}
+                                src={group.participants[1].account.avatar}
+                                sx={{ width: 20, height: 20 }}
+                            />
                         </AvatarGroup>
                         <div>
                             <h4 className="text-sm font-medium">{group.name}</h4>
                             <p className="text-xs text-gray-500 hover:text-blue-500 hover:underline cursor-pointer">
-                                {group.members.length} thành viên
+                                {group.participants.length} thành viên
                             </p>
                         </div>
                     </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, use } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { RiUserAddLine } from 'react-icons/ri';
 import { AiOutlineUsergroupAdd } from 'react-icons/ai';
@@ -18,7 +18,13 @@ import TabFriendRequest from '../../components/Tab/TabFriendRequest';
 import PopupAddFriend from '../../components/Popup/PopupAddFriend';
 import PopupAddGroup from '../../components/Popup/PopupAddGroup';
 import { searchFollowKeyWord } from '../Messaging/api';
-import { getListFriendByKeyword } from './api';
+import {
+    getListFriend,
+    getListFriendByKeyword,
+    getListFriendReponse,
+    getListFriendRequest,
+    getListGroupChatByUserId,
+} from './api';
 import TabSearch from '../../components/Tab/TabSearch';
 
 const TabsContacts = [
@@ -28,14 +34,14 @@ const TabsContacts = [
     { id: 4, icon: <AiOutlineUsergroupAdd size={25} />, title: 'Lời mời vào nhóm cộng đồng' },
 ];
 
-const userdata = [
-    { id: 3, name: 'Nga Nguyễn', avatar: avatar },
-    { id: 4, name: 'Huyền Trang', avatar: avatar },
-    { id: 1, name: 'Anh Huy', avatar: avatar },
-    { id: 2, name: 'Anh Tài', avatar: avatar },
-];
+// const userdata = [
+//     { id: 3, name: 'Nga Nguyễn', avatar: avatar },
+//     { id: 4, name: 'Huyền Trang', avatar: avatar },
+//     { id: 1, name: 'Anh Huy', avatar: avatar },
+//     { id: 2, name: 'Anh Tài', avatar: avatar },
+// ];
 
-const groupData = [
+const groupDataFake = [
     {
         id: 1,
         name: 'Công nghệ mới HK2-4',
@@ -120,6 +126,22 @@ function Contacts() {
 
     // Tab danh sách bạn bè ----------------------------
     // Lọc dữ liệu theo tên
+    const [userdata, setUserdata] = useState([]);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getListFriend();
+                if (response) {
+                    setUserdata(response);
+                } else {
+                    console.warn('Không có dữ liệu bạn bè');
+                }
+            } catch (error) {
+                console.error('Lỗi khi lấy danh sách bạn bè:', error);
+            }
+        };
+        fetchData();
+    }, [userdata]);
     const filteredData = userdata.filter((user) => user.name.toLowerCase().includes(search.toLowerCase()));
 
     // chia đa ta theo chữ cái đầu tiên
@@ -141,6 +163,22 @@ function Contacts() {
 
     // Tab danh sách nhóm và cộng đồng ------------------
     // search group by name
+    const [groupData, setGroupData] = useState([]);
+    useEffect(() => {
+        const fetchGroupData = async () => {
+            try {
+                const response = await getListGroupChatByUserId();
+                if (response) {
+                    setGroupData(response);
+                } else {
+                    console.warn('Không có dữ liệu nhóm và cộng đồng');
+                }
+            } catch (error) {
+                console.error('Lỗi khi lấy danh sách nhóm và cộng đồng:', error);
+            }
+        };
+        fetchGroupData();
+    }, [groupData]);
     const filteredGroups = groupData.filter((group) => group.name.toLowerCase().includes(search.toLowerCase()));
 
     // Sắp xếp theo bảng chữ cái
@@ -187,6 +225,39 @@ function Contacts() {
 
         return () => clearTimeout(delayDebounce);
     }, [subSearch]);
+
+    // lấy danh lời mời đã gửi
+    const [listFriendRequest, setListFriendRequest] = useState([]);
+    const [listFriendReponse, setListFriendResponse] = useState([]);
+    useEffect(() => {
+        const fetchFriendRequest = async () => {
+            try {
+                const response = await getListFriendRequest();
+                if (response) {
+                    setListFriendRequest(response);
+                } else {
+                    console.warn('Không có dữ liệu lời mời kết bạn');
+                }
+            } catch (error) {
+                console.error('Lỗi khi lấy danh sách lời mời kết bạn:', error);
+            }
+        };
+        const fetchFriendResponse = async () => {
+            try {
+                const response = await getListFriendReponse();
+                if (response) {
+                    setListFriendResponse(response);
+                } else {
+                    console.warn('Không có dữ liệu lời mời kết bạn');
+                }
+            } catch (error) {
+                console.error('Lỗi khi lấy danh sách lời mời kết bạn:', error);
+            }
+        };
+
+        fetchFriendResponse();
+        fetchFriendRequest();
+    }, [listFriendRequest, listFriendReponse]);
 
     return (
         <div className="h-screen flex flex-col">
@@ -287,8 +358,8 @@ function Contacts() {
                             />
                         ) : selectTab.id === 3 ? (
                             <TabFriendRequest
-                                friendResponsetData={friendRequestData}
-                                friendRequestData={friendRequestData}
+                                friendResponsetData={listFriendReponse}
+                                friendRequestData={listFriendRequest}
                             />
                         ) : selectTab.id === 4 ? (
                             <div className="w-full h-screen flex flex-col items-center justify-center text-center translate-y-[-20%]">

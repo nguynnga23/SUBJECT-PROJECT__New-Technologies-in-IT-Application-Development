@@ -1,7 +1,7 @@
 const IP_4G = '192.168.170.60';
-const IP_WIFI = '172.28.81.21';
+const IP_WIFI = '172.28.44.95';
 const defaultLocalhost = 'localhost';
-const DHCN_TV = '172.20.69.123';
+const DHCN_TV = '172.20.77.153';
 const BackAndWhite_floor_1 = '192.168.1.81';
 const PORT = '4000';
 

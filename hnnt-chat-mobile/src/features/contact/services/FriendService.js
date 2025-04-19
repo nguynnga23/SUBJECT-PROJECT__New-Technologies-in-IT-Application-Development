@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { localhost } from '../../../utils/localhosts';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { socket } from '../../../configs/socket';
 const BASE_URL = `http://${localhost}/api/friends`; // Ensure the correct port is used
 
 const friendService = {
@@ -20,10 +20,10 @@ const friendService = {
     },
 
     // Lấy danh sách lời mời kết bạn
-    getFriendRequests: async (token, userId) => {
+    getFriendRequests: async (token) => {
         try {
-            const response = await axios.get(`${BASE_URL}/request/${userId}`, {
-                // Corrected endpoint
+            const response = await axios.get(`${BASE_URL}/request`, {
+                // Updated endpoint
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
@@ -49,6 +49,7 @@ const friendService = {
                     },
                 },
             );
+            socket.emit('friend_request_sent', { receiverId }); // Notify via socket
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -83,6 +84,22 @@ const friendService = {
                     },
                 },
             );
+            socket.emit('friend_request_accepted', { requestId }); // Notify via socket
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    // Kiểm tra lời mời kết bạn
+    checkFriendRequest: async (friendId, token) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/request/check/${friendId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -124,6 +141,7 @@ const friendService = {
     getSentFriendRequests: async (token) => {
         try {
             const response = await axios.get(`${BASE_URL}/request/sender`, {
+                // Updated endpoint
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
@@ -139,6 +157,7 @@ const friendService = {
     cancelSentFriendRequest: async (receiverId, token) => {
         try {
             const response = await axios.delete(`${BASE_URL}/request/cancel-by-sender/${receiverId}`, {
+                // Updated endpoint
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
@@ -193,6 +212,25 @@ const friendService = {
                     'Content-Type': 'application/json',
                 },
             });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    // Đồng bộ danh bạ
+    syncContacts: async (phoneNumbers, token) => {
+        try {
+            const response = await axios.post(
+                `${BASE_URL}/sync-contacts`,
+                { phoneNumbers },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                },
+            );
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

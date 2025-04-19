@@ -39,3 +39,36 @@
         transform: rotate(360deg);
     }
 }
+
+/* wave */
+@keyframes wave {
+
+    0%,
+    100% {
+        height: 20%;
+    }
+
+    50% {
+        height: 100%;
+    }
+}
+
+.animate-wave1 {
+    animation: wave 1s ease-in-out infinite;
+}
+
+.animate-wave2 {
+    animation: wave 1.2s ease-in-out infinite;
+}
+
+.animate-wave3 {
+    animation: wave 0.9s ease-in-out infinite;
+}
+
+.animate-wave4 {
+    animation: wave 1.1s ease-in-out infinite;
+}
+
+.animate-wave5 {
+    animation: wave 0.95s ease-in-out infinite;
+}

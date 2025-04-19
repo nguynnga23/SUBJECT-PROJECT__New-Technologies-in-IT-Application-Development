@@ -24,6 +24,7 @@ import { FaRegFileExcel } from 'react-icons/fa';
 import { FaRegFilePowerpoint } from 'react-icons/fa';
 import { BsChatText } from 'react-icons/bs';
 import { RiKey2Line } from 'react-icons/ri';
+import { CiMicrophoneOn } from 'react-icons/ci';
 
 import PopupCategory from '../Popup/PopupCategory';
 
@@ -47,16 +48,32 @@ import { FiMoreHorizontal } from 'react-icons/fi';
 import PopupReacttion from '../Popup/PopupReaction';
 import PopupReactionChat from '../Popup/PopupReactionChat';
 import PopupMenuForChat from '../Popup/PopupMenuForChat';
-import { deletePinOfMessage, getMessage, readedChatOfUser, sendMessage } from '../../screens/Messaging/api';
+import ChatAudio from '../Chat/ChatAudio';
+import ChatImageGroup from '../Chat/ChatImageGroup';
+import {
+    deletePinOfMessage,
+    getMessage,
+    readedChatOfUser,
+    sendMessage,
+    uploadFileToS3,
+} from '../../screens/Messaging/api';
 import PopupAllPinnedOfMessage from '../Popup/PopupAllPinnedOfMessage';
 
-function TabMessage() {
+import { socket } from '../../configs/socket';
+import { getUserById } from '../../screens/Profile/api';
+
+import { createMeeting } from '../../configs/createMeeting';
+import { MeetingProvider } from '@videosdk.live/react-sdk';
+import MeetingView from '../../components/Views/MeetingView';
+
+function TabMessage({ setShowModalShareMes, setMessageShare }) {
     const [message, setMessage] = useState('');
     const [isOpenCategory, setIsOpenCategory] = useState(false);
     const userActive = useSelector((state) => state.auth.userActive);
     const userId = userActive?.id;
 
     const activeChat = useSelector((state) => state.chat.activeChat);
+
     const chatId = activeChat?.id;
 
     const dispatch = useDispatch();
@@ -93,7 +110,28 @@ function TabMessage() {
         };
 
         fetchMessages();
-    }, [setData, chatId, data]);
+    }, [chatId, data]);
+
+    useEffect(() => {
+        // Lắng nghe tin nhắn đến từ server
+        const handleReceiveMessage = ({ chatId: receivedChatId, newMessage }) => {
+            if (activeChat?.id !== receivedChatId) {
+                return;
+            }
+            setData((prev) => [...prev, newMessage]);
+            setTimeout(() => {
+                if (chatContainerRef.current) {
+                    chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+                }
+            }, 100);
+        };
+
+        socket.on('receive_message', handleReceiveMessage);
+
+        return () => {
+            socket.off('receive_message', handleReceiveMessage);
+        };
+    }, [activeChat?.id]);
 
     const MessageComponent = {
         text: ChatText,
@@ -101,6 +139,8 @@ function TabMessage() {
         image: ChatImage,
         file: ChatFile,
         sticker: ChatSticker,
+        audio: ChatAudio,
+        imageGroup: ChatImageGroup,
     };
 
     const getFileIcon = (fileType) => {
@@ -125,11 +165,17 @@ function TabMessage() {
 
     const handleSendMessage = async () => {
         if (message.trim() !== '') {
-            await sendMessage(chatId, message, 'text', replyMessage?.id, null, null, null);
+            const sendMess = await sendMessage(chatId, message, 'text', replyMessage?.id, null, null, null);
+            if (!sendMess) return;
+
             await readedChatOfUser(chatId);
             dispatch(setReadedChatWhenSendNewMessage({ chatId: chatId, userId: userId }));
             setMessage('');
             setReplyMessage(null);
+            socket.emit('send_message', {
+                chatId: activeChat.id,
+                newMessage: sendMess,
+            });
         }
         setTimeout(() => {
             if (chatContainerRef.current) {
@@ -147,16 +193,28 @@ function TabMessage() {
 
     const handleFileChange = async (event, type) => {
         const file = event.target.files[0];
-        if (file) {
-            await sendMessage(
+        if (!file) return;
+
+        let fileUpload = null;
+        try {
+            fileUpload = await uploadFileToS3(file);
+        } catch (error) {
+            console.error(error);
+        }
+        if (fileUpload?.fileUrl) {
+            const sendFile = await sendMessage(
                 chatId,
-                URL.createObjectURL(file),
+                fileUpload?.fileUrl,
                 type,
                 null,
                 file.name,
                 file.type,
                 (file.size / 1024).toFixed(2) + ' KB',
             );
+            socket.emit('send_message', {
+                chatId: activeChat.id,
+                newMessage: sendFile,
+            });
         }
         event.target.value = '';
         setTimeout(() => {
@@ -190,6 +248,202 @@ function TabMessage() {
     };
     const pinnedMessages = data.filter((message) => message.pin);
     const lastPinnedMessage = pinnedMessages[pinnedMessages.length - 1];
+
+    // Hàm video call
+    const [meetingId, setMeetingId] = useState(null);
+    const [fromId, setFromId] = useState('');
+    const [dataUserFrom, setDataUserFrom] = useState('');
+    useEffect(() => {
+        socket.on('incoming_call', async ({ from, meetingId }) => {
+            alert(`📞 Có cuộc gọi đến từ ${from}`);
+            setMeetingId(meetingId);
+            const data = await getUserById(from);
+            setDataUserFrom(data);
+            setFromId(from);
+        });
+
+        console.log('đã vào đây');
+
+        return () => {
+            socket.off('incoming_call');
+        };
+    }, [meetingId]);
+
+    //Getting the meeting id by calling the api we just wrote
+    const authToken =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiI5MzE4YWY4NS1hM2E3LTRlMDQtOGE0YS1mZmM0M2JlZjMyYWIiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTc0NDc5ODg2MiwiZXhwIjoxNzQ1NDAzNjYyfQ.xwle1rtuF3EH6ypjTGz6asnyLT-vfuwwORKEMqVROjg';
+    //This will set Meeting Id to null when meeting is left or ended
+    const onMeetingLeave = () => {
+        setMeetingId(null);
+    };
+
+    const handleVideoCall = async () => {
+        const targetUserId = activeChat?.isGroup
+            ? activeChat?.avatar
+            : activeChat?.participants?.find((user) => user.accountId !== userId)?.account.id;
+
+        const meetingId = await createMeeting();
+        setMeetingId(meetingId);
+
+        socket.emit('call_user', { from: userId, to: targetUserId, meetingId: meetingId });
+        setVideoCall(true);
+    };
+
+    const handleAnswerCall = () => {
+        // Xử lý khi người dùng nhận cuộc gọi
+        // Mở video call với người gọi
+        socket.emit('accept_call', { from: userId, to: fromId, meetingId });
+
+        socket.on('call_accepted', ({ to, meetingId }) => {
+            alert(`Cuộc gọi đã được chấp nhận từ ${to}`);
+            setMeetingId(meetingId);
+        });
+        setVideoCall(true); // Tắt popup gọi video
+    };
+
+    const handleRejectCall = () => {
+        // Xử lý khi người dùng từ chối cuộc gọi
+        socket.emit('reject_call', { from: userId, to: fromId });
+        setVideoCall(true); // Tắt popup gọi video
+    };
+
+    // handle Recorder
+    const [isRecording, setIsRecording] = useState(false); // Trạng thái ghi âm
+    const [audioBlob, setAudioBlob] = useState(null); // Lưu blob ghi âm
+    const [mediaRecorder, setMediaRecorder] = useState(null); // MediaRecorder instance
+
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const recorder = new MediaRecorder(stream);
+            const chunks = [];
+
+            recorder.ondataavailable = (event) => {
+                chunks.push(event.data);
+            };
+
+            recorder.onstop = async () => {
+                const blob = new Blob(chunks, { type: 'audio/wav' });
+                setAudioBlob(blob);
+
+                try {
+                    const fileUpload = await uploadFileToS3(blob);
+                    if (fileUpload?.fileUrl) {
+                        const sendFile = await sendMessage(
+                            chatId,
+                            fileUpload.fileUrl,
+                            'audio',
+                            null,
+                            'audio recording',
+                            'audio/wav',
+                            (blob.size / 1024).toFixed(2) + ' KB',
+                        );
+
+                        socket.emit('send_message', {
+                            chatId: activeChat.id,
+                            newMessage: sendFile,
+                        });
+                    } else {
+                        alert('❌ Tải tệp lên thất bại!');
+                    }
+                } catch (error) {
+                    console.error('Lỗi khi gửi bản ghi âm:', error);
+                    alert('❌ Gửi bản ghi âm thất bại!');
+                } finally {
+                    // Dọn dẹp sau khi gửi
+                    setAudioBlob(null);
+                    if (recorder.stream) {
+                        recorder.stream.getTracks().forEach((track) => track.stop());
+                    }
+                    setMediaRecorder(null);
+                }
+            };
+
+            recorder.start();
+            setMediaRecorder(recorder);
+            setIsRecording(true);
+        } catch (error) {
+            console.error('Không thể bắt đầu ghi âm:', error);
+            alert('❌ Không thể truy cập micro!');
+        }
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorder) {
+            mediaRecorder.stop();
+            setIsRecording(false);
+        }
+    };
+
+    // Nút bật/tắt ghi âm
+    const toggleRecording = () => {
+        if (isRecording) {
+            console.log('⏹️ Dừng ghi âm');
+            stopRecording();
+        } else {
+            console.log('🔴 Bắt đầu ghi âm');
+            startRecording();
+        }
+    };
+
+    // handle change multiple file
+    const handleChangeTypeFile = (event, type) => {
+        const files = event.target.files;
+        if (!files || files.length === 0) return;
+
+        if (files.length === 1) {
+            handleFileChange(event, type);
+        } else {
+            handleMultipleFiles(event, type);
+        }
+
+        event.target.value = '';
+    };
+
+    const handleMultipleFiles = async (event, type) => {
+        const files = Array.from(event.target.files); // Lấy nhiều file
+        if (!files.length) return;
+
+        const uploadedFiles = [];
+
+        for (const file of files) {
+            try {
+                const fileUpload = await uploadFileToS3(file);
+                if (fileUpload?.fileUrl) {
+                    uploadedFiles.push({
+                        url: fileUpload.fileUrl,
+                        fileName: file.name,
+                        fileSize: (file.size / 1024).toFixed(2) + ' KB',
+                        fileType: file.type,
+                    });
+                }
+            } catch (error) {
+                console.error('Upload failed for:', file.name, error);
+            }
+        }
+
+        if (uploadedFiles.length > 0) {
+            // Lưu toàn bộ thông tin file vào content dạng JSON string
+            const sendFile = await sendMessage(
+                chatId,
+                JSON.stringify(uploadedFiles), // Lưu mảng vào content
+                (type = 'imageGroup'),
+                null,
+            );
+
+            socket.emit('send_message', {
+                chatId: activeChat.id,
+                newMessage: sendFile,
+            });
+        }
+
+        event.target.value = '';
+        setTimeout(() => {
+            if (chatContainerRef.current) {
+                chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+            }
+        }, 100);
+    };
 
     return (
         <>
@@ -277,7 +531,7 @@ function TabMessage() {
                     <GoDeviceCameraVideo
                         size={26}
                         className="ml-1.5 p-1 hover:text-gray-500 hover:bg-gray-200  hover:rounded-[5px] cursor-pointer"
-                        onClick={() => setVideoCall(true)}
+                        onClick={handleVideoCall}
                     />
                     <IoSearchOutline
                         size={26}
@@ -302,7 +556,69 @@ function TabMessage() {
                     )}
 
                     {videoCall && (
-                        <PopupVideoCall setVideoCall={setVideoCall} activeChat={activeChat} userActive={userActive} />
+                        <MeetingProvider
+                            config={{
+                                meetingId,
+                                micEnabled: true,
+                                webcamEnabled: true,
+                                name: 'C.V. Raman',
+                            }}
+                            token={authToken}
+                        >
+                            <MeetingView
+                                meetingId={meetingId}
+                                onMeetingLeave={onMeetingLeave}
+                                setVideoCall={setVideoCall}
+                                activeChat={activeChat}
+                                userActive={userActive}
+                            />
+                            {/* <PopupVideoCall
+                                setVideoCall={setVideoCall}
+                                activeChat={activeChat}
+                                userActive={userActive}
+                            /> */}
+                        </MeetingProvider>
+                    )}
+                    {fromId !== '' && (
+                        <div className="w-full h-full">
+                            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50">
+                                <div className="relative">
+                                    <div className="relative bg-white w-[50vw] h-[40vh] flex flex-col items-center justify-center rounded-xl shadow-lg p-6 space-y-6">
+                                        {/* Avatar */}
+                                        <img
+                                            src={dataUserFrom?.avatar} // Đổi thành avatar thật nếu có
+                                            alt="Avatar"
+                                            className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
+                                        />
+
+                                        {/* Tên người dùng */}
+                                        <h2 className="text-xl font-semibold text-gray-800">{dataUserFrom?.name}</h2>
+
+                                        {/* Các nút điều khiển */}
+                                        <div className="flex space-x-6">
+                                            <button
+                                                onClick={() => {
+                                                    handleRejectCall();
+                                                    setFromId('');
+                                                }}
+                                                className="bg-red-500 text-white px-6 py-2 rounded-full hover:bg-red-600 transition"
+                                            >
+                                                Tắt máy
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    handleAnswerCall();
+                                                    setFromId('');
+                                                }}
+                                                className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition"
+                                            >
+                                                Bắt máy
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     )}
                 </div>
             </div>
@@ -370,6 +686,9 @@ function TabMessage() {
                                     className="absolute text-red-500 text-[7px] right-[5px] top-[10px] p-1 cursor-pointer hover:bg-red-500 hover:text-white border rounded-lg"
                                     onClick={() => {
                                         deletePinOfMessage(pinnedMessages[0].id);
+                                        socket.emit('reaction_message', {
+                                            chatId: activeChat.id,
+                                        });
                                     }}
                                 >
                                     Bỏ ghim
@@ -433,7 +752,7 @@ function TabMessage() {
                                                     alt="avatar"
                                                     className="w-full h-full rounded-full border object-cover"
                                                 />
-                                                {leader && (
+                                                {leader?.id === message.sender.id && (
                                                     <RiKey2Line
                                                         size={15}
                                                         color="yellow"
@@ -501,6 +820,8 @@ function TabMessage() {
                                                     setIsPopupOpen={setIsPopupOpenIndex}
                                                     position={position}
                                                     message={message}
+                                                    setShowModalShareMes={setShowModalShareMes}
+                                                    setMessageShare={setMessageShare}
                                                 />
                                             )}
                                             {sumReaction > 0 && !message.destroy && (
@@ -592,8 +913,9 @@ function TabMessage() {
                         <input
                             type="file"
                             accept="image/*"
+                            multiple
                             ref={inputImageRef}
-                            onChange={(event) => handleFileChange(event, 'image')}
+                            onChange={(event) => handleChangeTypeFile(event, 'image')}
                             className="hidden"
                         />
 
@@ -607,7 +929,7 @@ function TabMessage() {
                         {/* Input chọn file (ẩn đi) */}
                         <input
                             type="file"
-                            accept=".doc,.docx,.xls,.xlsx,.pdf,.txt,.ppt,.pptx,.csv"
+                            accept=".doc,.docx,.xls,.xlsx,.pdf,.txt,.ppt,.pptx,.csv,.mp4,.mov,.avi,.webm,.mkv"
                             ref={inputFileRef}
                             onChange={(event) => handleFileChange(event, 'file')}
                             className="hidden"
@@ -621,6 +943,16 @@ function TabMessage() {
                     </div>
 
                     <FaRegAddressCard className="text-2xl cursor-pointer ml-5 hover:text-blue-500 text-gray-600 dark:text-gray-300" />
+                    <div>
+                        <CiMicrophoneOn
+                            onClick={toggleRecording}
+                            className={`text-2xl cursor-pointer ml-5 ${
+                                isRecording
+                                    ? 'text-red-500 animate-pulse'
+                                    : 'hover:text-blue-500 text-gray-600 dark:text-gray-300'
+                            }`}
+                        />
+                    </div>
                 </div>
                 <div className=" border-t dark:border-t-black p-2 dark:bg-gray-800">
                     <div>
@@ -689,7 +1021,7 @@ function TabMessage() {
                                     handleSendMessage(); // Gọi hàm gửi tin nhắn
                                 }
                             }}
-                            placeholder={`Nhập tin nhắn với ${activeChat?.name}`}
+                            placeholder={`Nhập tin nhắn`}
                             className="flex-1 p-1 font-base text-[14px] rounded-lg focus:border-blue-500 focus:outline-none
                             h-[30px] max-h-[200px] overflow-y-auto resize-none dark:bg-gray-800 dark:text-gray-300"
                         />

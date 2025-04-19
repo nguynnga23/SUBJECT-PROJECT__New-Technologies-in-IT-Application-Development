@@ -24,6 +24,9 @@ import Forgot_OTPConfirmScreen from '../../features/auth/screens/forgot/Forgot_O
 import ComfirmLoginQR from '../components/ComfirmLoginQR';
 import LoggedInDevice from '../../features/profile/screens/account-and-security/logged-in-devices/LoggedInDevice';
 import CameraScreen from '../components/CameraScreen';
+import UserProfile from '../../features/profile/screens/profile/UserProfile';
+import FriendProfileScreen from '../screens/FriendProfileScreen';
+import MessageStackNavigator from '../../features/message/components/MessageStackNavigator';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -71,6 +74,12 @@ export default function AppNavigator() {
                 <Stack.Screen name="Privacy" component={Privacy} />
                 <Stack.Screen name="Personal Information" component={PersonalInformation} />
                 <Stack.Screen name="Profile Information" component={EditPersonalInformation} />
+                <Stack.Screen name="UserProfile" component={UserProfile} options={{ headerShown: false }} />
+                <Stack.Screen
+                    name="FriendProfileScreen"
+                    component={FriendProfileScreen}
+                    options={{ headerShown: false }}
+                />
 
                 <Stack.Screen name="Change phone number" component={PhoneNumber} />
                 <Stack.Screen name="Add your email" component={AddEmail} />
@@ -81,6 +90,11 @@ export default function AppNavigator() {
 
                 <Stack.Screen name="CameraScreen" component={CameraScreen} options={{ headerShown: false }} />
                 <Stack.Screen name="ComfirmLoginQR" component={ComfirmLoginQR} options={{ headerShown: false }} />
+                <Stack.Screen
+                    name="MessageStackNavigator"
+                    component={MessageStackNavigator}
+                    options={{ headerShown: false }}
+                />
             </Stack.Navigator>
         </NavigationContainer>
     );

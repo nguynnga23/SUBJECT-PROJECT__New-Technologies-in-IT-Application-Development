@@ -12,7 +12,8 @@ const LoggedInDevice = () => {
                 const fetchedDevices = await LoggedInDeviceService.getDevices();
                 setDevices(fetchedDevices);
             } catch (error) {
-                Alert.alert('Error', 'Failed to fetch devices', error);
+                // Alert.alert('Error', 'Failed to fetch devices', error);
+                console.warn('Failed to fetch devices:', error);
             } finally {
                 setLoading(false);
             }

@@ -3,6 +3,7 @@ import { VscFilePdf } from 'react-icons/vsc';
 import { FaRegFileWord } from 'react-icons/fa';
 import { FaRegFileExcel } from 'react-icons/fa';
 import { FaRegFilePowerpoint } from 'react-icons/fa';
+import { FiDownload } from 'react-icons/fi';
 
 const getFileIcon = (fileType) => {
     if (fileType.includes('pdf')) return <VscFilePdf className="text-3xl text-red-500 mr-2" />;
@@ -12,16 +13,17 @@ const getFileIcon = (fileType) => {
         return <FaRegFilePowerpoint className="text-3xl text-orange-500 mr-2" />;
     if (fileType.includes('word') || fileType.includes('msword') || fileType.includes('document'))
         return <FaRegFileWord className="text-3xl text-blue-600 mr-2" />;
+
     return <MdFilePresent className="text-3xl text-gray-500 mr-2" />; // Mặc định
 };
 
 function ChatFile({ userId, message, showName, replyMessage }) {
     return (
         <div
-            className={`relative pb-2 p-3 border rounded-lg max-w-[500px] cursor-pointer ${
+            className={`relative pb-2 border rounded-lg max-w-[500px] cursor-pointer ${
                 message.sender.id === userId
                     ? 'bg-blue-100 dark:bg-[#20344c] border-blue-200 dark:border-blue-100'
-                    : 'bg-white dark:bg-[#20344c] border-gray-200 dark:border-gray-800'
+                    : ' dark:bg-[#20344c] border-gray-200 dark:border-gray-800'
             }`}
         >
             {showName && (
@@ -41,25 +43,46 @@ function ChatFile({ userId, message, showName, replyMessage }) {
                 )}
             </div>
 
-            <div className="flex items-center space-x-3 mb-4">
+            <div className="flex">
                 {/* Nút tải file */}
-                <a
-                    href={message.content}
-                    download={message.fileName}
-                    className="hover:underline text-blue-500 text-sm flex"
-                >
-                    {/* Icon file */}
-                    {getFileIcon(message.fileType)}
-                    {/* Thông tin file */}
-                    <div className="flex flex-col">
-                        <p className="text-[12px] font-bold">{message.fileName}</p>
-                        <p className="text-[12px] text-gray-500 pt-1">{message.fileSize}</p>
+                {message.fileType.toLowerCase().includes('video') ? (
+                    <div className="justify-center items-center">
+                        <video controls className="rounded shadow h-auto">
+                            <source muted={false} src={message.content} />
+                            Trình duyệt của bạn không hỗ trợ video.
+                        </video>
+
+                        {/* <a
+                            href={message.content}
+                            download={message.fileName}
+                            className="hover:underline text-blue-500 text-sm flex mt-1"
+                        > */}
+                        {/* <FiDownload size={20} className="m-2" />
+                            <div className="flex flex-col">
+                                <p className="text-[12px] font-bold max-w-[350px] truncate">{message.fileName}</p>
+                                <p className="text-[12px] text-gray-500 pt-1">{message.fileSize}</p>
+                            </div>
+                        </a> */}
                     </div>
-                </a>
+                ) : (
+                    <a
+                        href={message.content}
+                        download={message.fileName}
+                        className="hover:underline text-blue-500 text-sm flex"
+                    >
+                        {/* Icon file */}
+                        {getFileIcon(message.fileType, message.content)}
+                        {/* Thông tin file */}
+                        <div className="flex flex-col">
+                            <p className="text-[12px] font-bold">{message.fileName}</p>
+                            <p className="text-[12px] text-gray-500 pt-1">{message.fileSize}</p>
+                        </div>
+                    </a>
+                )}
             </div>
 
             {/* Thời gian gửi */}
-            <p className="absolute left-[8px] bottom-[10px] text-gray-500 text-[10px] mb-2">
+            <p className="absolute left-[8px] bottom-[-20px] text-gray-500 text-[10px] mb-2">
                 {new Date(message.time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
             </p>
         </div>

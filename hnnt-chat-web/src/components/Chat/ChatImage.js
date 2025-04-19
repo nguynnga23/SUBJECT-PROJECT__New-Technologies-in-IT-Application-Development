@@ -25,7 +25,7 @@ function ChatImage({ userId, message, showName, replyMessage }) {
             <img
                 src={message.content}
                 alt="content"
-                className="max-w-[500px] mb-4 rounded-lg"
+                className="max-w-[300px] mb-4 rounded-lg"
                 onClick={() => setSelectedImage(message.content)}
             />
             <p className="absolute left-[8px] bottom-[2px] text-gray-500 text-[10px]">

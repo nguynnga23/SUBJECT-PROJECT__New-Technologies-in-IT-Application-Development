@@ -77,7 +77,7 @@ async function main() {
 
     // Additional Users
     const users = [];
-    for (let i = 5; i <= 50; i++) {
+    for (let i = 5; i <= 10; i++) {
         const hashedPassword = await bcrypt.hash('123456789', 10);
         const birthDate = new Date('2003-04-20'); // Generate valid date
         const user = await prisma.account.create({
@@ -98,92 +98,6 @@ async function main() {
         users.push(user);
     }
 
-    // Categories
-    const category1 = await prisma.category.create({
-        data: {
-            id: uuidv4(),
-            name: 'Work',
-            color: '#FF5733',
-            accountId: user1.id,
-        },
-    });
-    const category2 = await prisma.category.create({
-        data: {
-            id: uuidv4(),
-            name: 'Friends',
-            color: '#33FF57',
-            accountId: user2.id,
-        },
-    });
-
-    // Additional Categories
-    const categories: { id: string; name: string; color: string; accountId: string }[] = [];
-    for (let i = 3; i <= 10; i++) {
-        const category = await prisma.category.create({
-            data: {
-                id: uuidv4(),
-                name: `Category ${i}`,
-                color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
-                accountId: users[i % users.length].id,
-            },
-        });
-        categories.push(category);
-    }
-
-    // Friend Requests
-    await prisma.friendRequest.create({
-        data: {
-            senderId: user1.id,
-            receiverId: user2.id,
-        },
-    });
-    await prisma.friendRequest.create({
-        data: {
-            senderId: user3.id,
-            receiverId: user1.id,
-        },
-    });
-    await prisma.friendRequest.create({
-        data: {
-            senderId: user4.id,
-            receiverId: user2.id,
-        },
-    });
-
-    // Additional Friend Requests
-    for (let i = 0; i < 20; i++) {
-        await prisma.friendRequest.create({
-            data: {
-                senderId: users[i % users.length].id,
-                receiverId: users[(i + 1) % users.length].id,
-            },
-        });
-    }
-
-    // Friends
-    await prisma.friend.create({
-        data: {
-            user1Id: user1.id,
-            user2Id: user2.id,
-        },
-    });
-    await prisma.friend.create({
-        data: {
-            user1Id: user3.id,
-            user2Id: user4.id,
-        },
-    });
-
-    // Additional Friends
-    for (let i = 0; i < 20; i++) {
-        await prisma.friend.create({
-            data: {
-                user1Id: users[i % users.length].id,
-                user2Id: users[(i + 2) % users.length].id,
-            },
-        });
-    }
-
     // Group Chat
     const groupChat1 = await prisma.chat.create({
         data: {
@@ -196,7 +110,6 @@ async function main() {
                     {
                         accountId: user1.id,
                         role: 'LEADER',
-                        categoryId: category1.id,
                     },
                     {
                         accountId: user2.id,
@@ -221,7 +134,6 @@ async function main() {
                     {
                         accountId: user2.id,
                         role: 'LEADER',
-                        categoryId: category2.id,
                     },
                     {
                         accountId: user4.id,
@@ -244,7 +156,6 @@ async function main() {
                     create: users.slice(i, i + 3).map((user, index) => ({
                         accountId: user.id,
                         role: index === 0 ? 'LEADER' : 'MEMBER',
-                        categoryId: categories[index % categories.length]?.id,
                     })),
                 },
             },
@@ -282,197 +193,6 @@ async function main() {
             },
         },
     });
-
-    // Private Chats
-    const privateChat1 = await prisma.chat.create({
-        data: {
-            id: uuidv4(),
-            isGroup: false,
-            participants: {
-                create: [{ accountId: user1.id }, { accountId: user3.id }],
-            },
-        },
-    });
-    const privateChat2 = await prisma.chat.create({
-        data: {
-            id: uuidv4(),
-            isGroup: false,
-            participants: {
-                create: [{ accountId: user2.id }, { accountId: user4.id }],
-            },
-        },
-    });
-
-    // Additional Private Chats
-    for (let i = 0; i < 10; i++) {
-        await prisma.chat.create({
-            data: {
-                id: uuidv4(),
-                isGroup: false,
-                participants: {
-                    create: [
-                        { accountId: users[i % users.length].id },
-                        { accountId: users[(i + 1) % users.length].id },
-                    ],
-                },
-            },
-        });
-    }
-
-    // Messages
-    const message1 = await prisma.message.create({
-        data: {
-            id: uuidv4(),
-            chatId: privateChat1.id,
-            senderId: user1.id,
-            content: 'Hello, how are you?',
-            type: 'text',
-        },
-    });
-    const message2 = await prisma.message.create({
-        data: {
-            id: uuidv4(),
-            chatId: privateChat1.id,
-            senderId: user3.id,
-            content: 'I am good, thank you!',
-            type: 'text',
-        },
-    });
-    const message3 = await prisma.message.create({
-        data: {
-            id: uuidv4(),
-            chatId: groupChat1.id,
-            senderId: user2.id,
-            content: 'Welcome to the Dev Team!',
-            type: 'text',
-        },
-    });
-
-    // Additional Messages
-    for (let i = 0; i < 30; i++) {
-        await prisma.message.create({
-            data: {
-                id: uuidv4(),
-                chatId: i % 2 === 0 ? privateChat1.id : groupChat1.id,
-                senderId: users[i % users.length].id,
-                content: `Message ${i + 1}`,
-                type: 'text',
-            },
-        });
-    }
-
-    // Additional Messages for Nguyễn Thị Nga
-    await prisma.message.create({
-        data: {
-            id: uuidv4(),
-            chatId: ngaGroup1.id,
-            senderId: user2.id,
-            content: 'Hello everyone, welcome to the study group!',
-            type: 'text',
-        },
-    });
-    await prisma.message.create({
-        data: {
-            id: uuidv4(),
-            chatId: ngaGroup2.id,
-            senderId: user2.id,
-            content: "Let's plan our next meetup!",
-            type: 'text',
-        },
-    });
-    await prisma.message.create({
-        data: {
-            id: uuidv4(),
-            chatId: privateChat2.id,
-            senderId: user2.id,
-            content: 'Hi, how are you doing?',
-            type: 'text',
-        },
-    });
-
-    // Additional Messages in Existing Chats
-    for (let i = 0; i < 10; i++) {
-        await prisma.message.create({
-            data: {
-                id: uuidv4(),
-                chatId: ngaGroup1.id,
-                senderId: users[i % users.length].id,
-                content: `Message from user ${i + 1} in Nga's group.`,
-                type: 'text',
-            },
-        });
-    }
-
-    // Reactions
-    await prisma.reaction.create({
-        data: {
-            id: uuidv4(),
-            messageId: message1.id,
-            userId: user3.id,
-            reaction: '👍',
-        },
-    });
-    await prisma.reaction.create({
-        data: {
-            id: uuidv4(),
-            messageId: message3.id,
-            userId: user1.id,
-            reaction: '❤️',
-        },
-    });
-
-    // Additional Reactions
-    for (let i = 0; i < 10; i++) {
-        await prisma.reaction.create({
-            data: {
-                id: uuidv4(),
-                messageId: message1.id,
-                userId: users[i % users.length].id,
-                reaction: i % 2 === 0 ? '👍' : '❤️',
-            },
-        });
-    }
-
-    // Additional Friends for Nguyễn Thị Nga
-    await prisma.friend.create({
-        data: {
-            user1Id: user2.id,
-            user2Id: user3.id,
-        },
-    });
-    await prisma.friend.create({
-        data: {
-            user1Id: user2.id,
-            user2Id: user4.id,
-        },
-    });
-    await prisma.friend.create({
-        data: {
-            user1Id: user2.id,
-            user2Id: users[6].id,
-        },
-    });
-
-    // Additional Friend Requests for Nguyễn Thị Nga
-    await prisma.friendRequest.create({
-        data: {
-            senderId: user2.id,
-            receiverId: user1.id,
-        },
-    });
-    await prisma.friendRequest.create({
-        data: {
-            senderId: users[7].id,
-            receiverId: user2.id,
-        },
-    });
-    await prisma.friendRequest.create({
-        data: {
-            senderId: users[8].id,
-            receiverId: user2.id,
-        },
-    });
-
     console.log('✅ Seeding completed!');
 }
 
