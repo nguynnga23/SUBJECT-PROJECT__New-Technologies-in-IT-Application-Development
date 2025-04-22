@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthRequest } from '../types/authRequest';
+import { s3 } from '../utils/s3Uploader';
 
 const prisma = new PrismaClient();
 
@@ -460,6 +461,79 @@ export const updateGroupName = async (req: AuthRequest, res: Response): Promise<
         });
 
         res.status(200).json({ message: 'Đổi tên nhóm thành công!' });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+    }
+};
+
+//upload image to s3
+// POST /api/groups/upload
+// Body: { file: File }
+export const uploadFileToS3 = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        console.log('Received request for file upload');
+        const file = req.file;
+
+        if (!file) {
+            res.status(400).json({ message: 'No file uploaded' });
+            return;
+        }
+
+        console.log('File received:', file.originalname);
+
+        const fileName = `${Date.now()}-${file.originalname}`;
+        const params = {
+            Bucket: process.env.AWS_S3_BUCKET_NAME || '',
+            Key: `avatar/${fileName}`,
+            Body: file.buffer,
+            ContentType: file.mimetype,
+        };
+
+        const result = await s3.upload(params).promise();
+        console.log('Upload successful:', result);
+
+        res.status(200).json({
+            message: 'File uploaded successfully',
+            fileUrl: result.Location,
+            key: result.Key,
+        });
+    } catch (error) {
+        console.error('Upload error:', error);
+        res.status(500).json({ message: 'Upload failed', error });
+    }
+};
+
+//Update group avatar
+// PUT /api/groups/:groupId/edit-avatar
+// Body: { avatar: string }
+export const updateGroupAvatar = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const requesterId = req.user.id;
+        if (!requesterId) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
+        const chatId = req.params.groupId;
+        const { avatar } = req.body;
+
+        // Kiểm tra xem người yêu cầu có phải là LEADER không
+        const requester = await prisma.chatParticipant.findUnique({
+            where: { chatId_accountId: { chatId, accountId: requesterId } },
+            select: { role: true },
+        });
+
+        if (!requester || requester.role !== 'LEADER') {
+            res.status(403).json({ message: 'Bạn không có quyền đổi ảnh nhóm!' });
+            return;
+        }
+
+        await prisma.chat.update({
+            where: { id: chatId },
+            data: { avatar },
+        });
+
+        res.status(200).json({ message: 'Đổi ảnh nhóm thành công!' });
     } catch (error) {
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
     }

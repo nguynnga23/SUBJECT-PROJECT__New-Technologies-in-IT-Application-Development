@@ -38,7 +38,8 @@ import {
     uploadFileToS3,
     getBlockedUsers,
     previewFile,
-} from '../../services/privateChat/PrivateChatService';
+    ShareAnyFile
+} from '../../services/ChatService';
 import { getPinMess, fetchChat } from '../../services/privateChat/PrivateChatInfoService';
 
 import { handleLongPressMessage, MessageOptionsModal } from '../../components/MessageOptions';
@@ -545,26 +546,24 @@ export default function PrivateChatScreen() {
                                                         </View>
                                                     )}
 
-                                                    {item.type === 'file' &&
-                                                        !item.fileType?.includes('video') &&
-                                                        !item.fileType?.includes('image') && (
-                                                            <TouchableOpacity
-                                                                onLongPress={() => {
-                                                                    setSelectedFile(item.content);
-                                                                    setModalDownFileVisible(true);
-                                                                }}
-                                                                style={styles.fileContainer}
-                                                            >
-                                                                <Ionicons
-                                                                    name="document-text-outline"
-                                                                    size={24}
-                                                                    color="blue"
-                                                                />
-                                                                <Text style={styles.fileName}>
-                                                                    {item.fileName} {item.fileSize}
-                                                                </Text>
-                                                            </TouchableOpacity>
-                                                        )}
+                                                    {item.type === 'file' && (
+                                                        <TouchableOpacity
+                                                            onLongPress={() => {
+                                                                setSelectedFile(item.content);
+                                                                setModalDownFileVisible(true);
+                                                            }}
+                                                            style={styles.fileContainer}
+                                                        >
+                                                            <Ionicons
+                                                                name="document-text-outline"
+                                                                size={24}
+                                                                color="blue"
+                                                            />
+                                                            <Text style={styles.fileName}>
+                                                                {item.fileName} {item.fileSize}
+                                                            </Text>
+                                                        </TouchableOpacity>
+                                                    )}
 
                                                     {item.type === 'audio' && (
                                                         <TouchableOpacity
@@ -742,6 +741,15 @@ export default function PrivateChatScreen() {
                                                 <Text style={styles.modalButtonText}>Download</Text>
                                             </TouchableOpacity>
                                             <TouchableOpacity
+                                                style={styles.modalButton}
+                                                onPress={() => {
+                                                    ShareAnyFile(selectedFile);
+                                                    setModalDownFileVisible(false);
+                                                }}
+                                            >
+                                                <Text style={styles.modalButtonText}>Share</Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity
                                                 style={[styles.modalButton, styles.cancelButton]}
                                                 onPress={() => setModalDownVisible(false)} // Đóng modal
                                             >
@@ -781,10 +789,13 @@ export default function PrivateChatScreen() {
                                                 <Text style={styles.modalButtonText}>Download</Text>
                                             </TouchableOpacity>
                                             <TouchableOpacity
-                                                style={[styles.modalButton, styles.cancelButton]}
-                                                onPress={() => setModalDownFileVisible(false)}
+                                                style={styles.modalButton}
+                                                onPress={() => {
+                                                    ShareAnyFile(selectedFile);
+                                                    setModalDownFileVisible(false);
+                                                }}
                                             >
-                                                <Text style={styles.modalButtonText}>Cancel</Text>
+                                                <Text style={styles.modalButtonText}>Share</Text>
                                             </TouchableOpacity>
                                         </View>
                                     </View>

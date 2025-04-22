@@ -1,57 +1,36 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-
-const mockServerMessages = [
-    { id: "101", sender: "@nganguyen92", name: "Nga Nguyễn", message: "Trello có đủ tài liệu nha!", time: "18:55" },
-    { id: "102", sender: "@nganguyen92", name: "Nga Nguyễn", message: "Mn nhớ update task trên Trello nhé!", time: "18:56" },
-    { id: "103", sender: "@huynh503", name: "Huy Nguyễn", message: "ok", time: "18:57" },
-    { id: "104", sender: "@nhietpham", name: "Nhiệt Phạm", message: "yup", time: "19:00", isMe: true },
-    { id: "105", sender: "@nguyenthientu413", name: "Tứ Nguyễn", message: "got it", time: "19:05" },
-];
-
-// Giả lập server trả về kết quả dựa trên từ khóa tìm kiếm
-const fetchMessagesFromServer = (query) => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            if (query.trim() === "") {
-                resolve([]); // Nếu không nhập gì thì không trả về gì
-            } else {
-                const filtered = mockServerMessages.filter((msg) =>
-                    msg.message.toLowerCase().includes(query.toLowerCase())
-                );
-                resolve(filtered);
-            }
-        }, 500); // Mô phỏng độ trễ server (500ms)
-    });
-};
+import React, { useState } from 'react';
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { searchMessage } from '../../services/GroupChat/GroupInfoService';
 
 export default function FindGrMessagesScreen() {
     const navigation = useNavigation();
-    const [searchQuery, setSearchQuery] = useState("");
+    const route = useRoute();
+    const { chatId } = route.params || 'null';
+    const [searchQuery, setSearchQuery] = useState('');
     const [filteredMessages, setFilteredMessages] = useState([]);
-    const [loading, setLoading] = useState(false); // Trạng thái tải dữ liệu
+    const [loading, setLoading] = useState(false);
 
     const handleSearch = async () => {
         setLoading(true);
-        const results = await fetchMessagesFromServer(searchQuery);
-        setFilteredMessages(results);
-        setLoading(false);
+        const token = await AsyncStorage.getItem('token');
+        try {
+            const results = await searchMessage(chatId, token, searchQuery);
+            console.log('Search results:', results);
+            setFilteredMessages(results.messages); // Lấy danh sách tin nhắn từ `messages`
+        } catch (error) {
+            console.error('Error searching messages:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <SafeAreaProvider>
-                {/* Header */}
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <Ionicons name="arrow-back" size={24} color="black" />
-                    </TouchableOpacity>
-                    <Text style={styles.headerText}>Find Messages</Text>
-                </View>
-
                 {/* Search Bar */}
                 <View style={styles.searchBar}>
                     <Ionicons name="search-outline" size={20} color="gray" style={styles.searchIcon} />
@@ -77,37 +56,37 @@ export default function FindGrMessagesScreen() {
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
                             <TouchableOpacity style={styles.messageItem}>
-                                <Text style={styles.sender}>{item.sender}</Text>
-                                <Text style={styles.messageText}>{item.message}</Text>
+                                <Image source={{ uri: item.sender.avatar }} style={styles.avatar} />
+                                <View style={styles.messageContent}>
+                                    <Text style={styles.senderName}>{item.sender.name}</Text>
+                                    <Text style={styles.messageText}>{item.content}</Text>
+                                    <Text style={styles.messageTime}>
+                                        {new Date(item.time).toLocaleString()}
+                                    </Text>
+                                </View>
                             </TouchableOpacity>
                         )}
                     />
-                ) : null}
+                ) : (
+                    <View style={styles.noResults}>
+                        <Text style={styles.noResultsText}>No messages found.</Text>
+                    </View>
+                )}
             </SafeAreaProvider>
-        </SafeAreaView>
+        </View>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "white",
+        backgroundColor: 'white',
         padding: 10,
     },
-    header: {
-        flexDirection: "row",
-        alignItems: "center",
-        paddingBottom: 10,
-    },
-    headerText: {
-        fontSize: 18,
-        fontWeight: "bold",
-        marginLeft: 10,
-    },
     searchBar: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "#f0f0f0",
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f0f0f0',
         borderRadius: 8,
         paddingHorizontal: 10,
         marginBottom: 10,
@@ -120,43 +99,58 @@ const styles = StyleSheet.create({
         height: 40,
     },
     searchButton: {
-        backgroundColor: "#007AFF",
+        backgroundColor: '#007AFF',
         paddingVertical: 8,
         paddingHorizontal: 12,
         borderRadius: 6,
     },
     searchButtonText: {
-        color: "white",
-        fontWeight: "bold",
+        color: 'white',
+        fontWeight: 'bold',
     },
     messageItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
         padding: 10,
         borderBottomWidth: 1,
-        borderBottomColor: "#ddd",
+        borderBottomColor: '#ddd',
     },
-    sender: {
-        fontWeight: "bold",
-        color: "#007AFF",
+    avatar: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        marginRight: 10,
+    },
+    messageContent: {
+        flex: 1,
+    },
+    senderName: {
+        fontWeight: 'bold',
+        color: '#007AFF',
     },
     messageText: {
-        color: "#333",
+        color: '#333',
+    },
+    messageTime: {
+        fontSize: 12,
+        color: 'gray',
     },
     loadingContainer: {
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     loadingText: {
-        color: "gray",
+        color: 'gray',
         fontSize: 16,
     },
     noResults: {
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     noResultsText: {
-        color: "gray",
+        color: 'gray',
         fontSize: 16,
     },
 });
