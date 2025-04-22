@@ -475,10 +475,10 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
                                   'Người dùng'}
                         </h3>
                         <div className="flex items-center">
-                            {activeChat?.members && (
+                            {activeChat?.isGroup && (
                                 <div className="flex text-[14px] text-gray-600 items-center dark:text-gray-300">
                                     <CiUser className={`cursor-pointer mr-1`} />
-                                    <p className="text-[10px] mr-1">{activeChat?.members.length} thành viên |</p>
+                                    <p className="text-[10px] mr-1">{activeChat?.participants.length} thành viên |</p>
                                 </div>
                             )}
                             {activeChat.participants?.find((user) => user.accountId === userId)?.category ? (

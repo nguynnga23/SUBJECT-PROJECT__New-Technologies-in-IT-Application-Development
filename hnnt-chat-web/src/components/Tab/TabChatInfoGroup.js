@@ -42,11 +42,11 @@ function TabChatInfoGroup({ setActiveMessageTab, group }) {
                     >
                         <div className="relative">
                             <img
-                                src={g.avatar} // Thay bằng avatar thật
+                                src={g.account.avatar} // Thay bằng avatar thật
                                 alt="avatar"
                                 className="w-[45px] h-[45px] rounded-full border mr-3 object-cover"
                             />
-                            {g.role === 'LEADER' && (
+                            {g?.role === 'LEADER' && (
                                 <RiKey2Line
                                     size={15}
                                     color="yellow"
@@ -59,35 +59,34 @@ function TabChatInfoGroup({ setActiveMessageTab, group }) {
                             {g.id === userId ? (
                                 <h3 className="font-medium text-xs text-lg mt-1 max-w-[270px] truncate">Bạn</h3>
                             ) : (
-                                <h3 className="font-medium text-xs text-lg mt-1 max-w-[270px] truncate">{g.name}</h3>
+                                <h3 className="font-medium text-xs text-lg mt-1 max-w-[270px] truncate">
+                                    {g.account.name}
+                                </h3>
                             )}
-                            {g.role === 'LEADER' && (
+                            {g?.role === 'LEADER' && (
                                 <p className=" text-xs text-lg mt-1 max-w-[270px] truncate">Trưởng nhóm</p>
                             )}
                         </div>
                         <div className="absolute top-[5px] right-[0px]">
-                            {hoveredMember === index &&
-                                userId === g.accountId &&
-                                g.role ===
-                                    'LEADER'(
-                                        <div className="relative ">
-                                            <FiMoreHorizontal
-                                                size={13}
-                                                className="m-2 text-gray-500 hover:bg-blue-200 rounded-[2px]"
-                                                onClick={() => setShowPopup(true)}
-                                            />
-                                            {showPopup && hoveredMember === index && (
-                                                <PopupMemberManage
-                                                    setShowPopup={setShowPopup}
-                                                    setHoveredMember={setHoveredMember}
-                                                    userActive={userActive}
-                                                    leader={userId === g.accountId && g.role === 'LEADER'}
-                                                    member={g}
-                                                    group={group}
-                                                />
-                                            )}
-                                        </div>,
+                            {hoveredMember === index && userId === g.accountId && g?.role === 'LEADER' && (
+                                <div className="relative ">
+                                    <FiMoreHorizontal
+                                        size={13}
+                                        className="m-2 text-gray-500 hover:bg-blue-200 rounded-[2px]"
+                                        onClick={() => setShowPopup(true)}
+                                    />
+                                    {showPopup && hoveredMember === index && (
+                                        <PopupMemberManage
+                                            setShowPopup={setShowPopup}
+                                            setHoveredMember={setHoveredMember}
+                                            userActive={userActive}
+                                            leader={userId === g.accountId && g.role === 'LEADER'}
+                                            member={g}
+                                            group={group}
+                                        />
                                     )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 ))}

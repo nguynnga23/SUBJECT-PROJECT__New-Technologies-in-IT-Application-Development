@@ -3,6 +3,7 @@ import { IoClose } from 'react-icons/io5';
 import { useDispatch, useSelector } from 'react-redux';
 import { addMemberToGroup, createGroupChat } from '../../screens/Messaging/api';
 import { getListFriend } from '../../screens/Contacts/api';
+import { updateAvatar } from '../../screens/Profile/api';
 
 const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
     const dispatch = useDispatch();
@@ -51,13 +52,28 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
 
     const filteredMembers = friend.filter((member) => member.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const handleCreateGroup = () => {
+    const handleCreateGroup = async () => {
+        // const formData = new FormData();
+        // formData.append('image', avatar); // Append the image file directly
+
+        // const avatarGroup = await updateAvatar(formData);
+        // if (avatarGroup) {
         createGroupChat(groupName, avatar, selectedMembers);
+        // }
         clear();
         onClose();
     };
     const handleAddMemberToGroup = () => {
-        const selectedFullMembers = selectedMembers.filter((member) => member.accountId !== userActive.id); // Lọc các member hợp lệ
+        const newMembers = selectedMembers.filter(
+            (member) =>
+                member.accountId !== userActive.id &&
+                !existingMembers.some((existing) => existing.accountId === member.accountId),
+        );
+
+        const selectedFullMembers = newMembers.map(
+            ({ id, name, avatar, status, account, category, categoryId, readed, priority, ...rest }) => rest,
+        );
+
         addMemberToGroup(activeChat.id, selectedFullMembers);
 
         clear();

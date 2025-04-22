@@ -44,7 +44,7 @@ function PopupMemberManage({ setShowPopup, leader, member, group }) {
                 className="flex items-center my-1 hover:bg-gray-100 hover:dark:bg-gray-700 rounded-lg cursor-pointer"
             >
                 {leader ? (
-                    <span className="flex-1 my-1 text-sm text-center" onClick={handleRemoveMember}>
+                    <span className="flex-1 my-1 text-sm text-center" onClick={() => handleRemoveMember(leader)}>
                         Rời nhóm
                     </span>
                 ) : (

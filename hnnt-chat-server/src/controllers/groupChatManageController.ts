@@ -78,8 +78,11 @@ export const addMemberToGroup = async (req: AuthRequest, res: Response): Promise
         const members = req.body;
 
         const membersWithChatId = members.map((member: any) => ({
-            accountId: member.id,
-            chatId,
+            ...member,
+            chatId: chatId,
+            pin: false,
+            notify: true,
+            role: 'MEMBER',
         }));
 
         await prisma.chatParticipant.createMany({ data: membersWithChatId });
@@ -271,56 +274,69 @@ export const leaveGroup = async (req: AuthRequest, res: Response): Promise<void>
         const requesterId = req.user.id;
         if (!requesterId) {
             res.status(401).json({ message: 'Unauthorized' });
-            return;
         }
 
         const chatId = req.params.groupId;
         const accountId = requesterId;
-        // Kiểm tra xem người dùng có trong nhóm không
+
+        // 1. Kiểm tra participant và role
         const participant = await prisma.chatParticipant.findUnique({
             where: { chatId_accountId: { chatId, accountId } },
             select: { role: true },
         });
-
         if (!participant) {
             res.status(404).json({ message: 'Người dùng không tồn tại trong nhóm!' });
-            return;
         }
 
-        // Đếm số thành viên còn lại trong nhóm (trừ người rời đi)
+        // 2. Đếm số thành viên còn lại
         const remainingMembers = await prisma.chatParticipant.count({
             where: { chatId, accountId: { not: accountId } },
         });
-
         if (remainingMembers === 0) {
-            // Nếu người cuối cùng rời nhóm, xóa luôn nhóm
+            // Xóa nhóm nếu không còn thành viên
             await prisma.$transaction([
                 prisma.chatParticipant.deleteMany({ where: { chatId } }),
                 prisma.message.deleteMany({ where: { chatId } }),
                 prisma.chat.delete({ where: { id: chatId } }),
             ]);
-
             res.status(200).json({ message: 'Nhóm đã bị xóa!' });
-            return;
         }
 
+        // 3. Nếu leader rời, tìm leader mới
         if (participant && participant.role === 'LEADER') {
-            const newLeader = await prisma.chatParticipant.findFirst({
-                where: { chatId, accountId: { not: accountId } },
-                orderBy: { accountId: 'asc' },
+            // a) groupBy để tìm sender cuối cùng (trừ chính leader)
+            const recent = await prisma.message.groupBy({
+                by: ['senderId'],
+                where: { chatId, senderId: { not: accountId } },
+                _max: { time: true },
+                orderBy: { _max: { time: 'desc' } },
+                take: 1,
             });
 
+            let newLeaderAccountId: string;
+            if (recent.length > 0 && recent[0]._max.time) {
+                newLeaderAccountId = recent[0].senderId;
+            } else {
+                // b) fallback: chọn accountId nhỏ nhất
+                const fallback = await prisma.chatParticipant.findFirst({
+                    where: { chatId, accountId: { not: accountId } },
+                    orderBy: { accountId: 'asc' },
+                });
+                newLeaderAccountId = fallback!.accountId;
+            }
+
+            // c) transaction: xóa leader cũ và update role mới
             await prisma.$transaction([
                 prisma.chatParticipant.delete({
                     where: { chatId_accountId: { chatId, accountId } },
                 }),
                 prisma.chatParticipant.update({
-                    where: { chatId_accountId: { chatId, accountId: newLeader!.accountId } },
+                    where: { chatId_accountId: { chatId, accountId: newLeaderAccountId } },
                     data: { role: 'LEADER' },
                 }),
             ]);
         } else {
-            // Nếu không phải LEADER, chỉ cần xóa thành viên khỏi nhóm
+            // 4. Nếu không phải leader thì chỉ xóa participant
             await prisma.chatParticipant.delete({
                 where: { chatId_accountId: { chatId, accountId } },
             });
@@ -328,6 +344,7 @@ export const leaveGroup = async (req: AuthRequest, res: Response): Promise<void>
 
         res.status(200).json({ message: 'Rời nhóm thành công!' });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
     }
 };
