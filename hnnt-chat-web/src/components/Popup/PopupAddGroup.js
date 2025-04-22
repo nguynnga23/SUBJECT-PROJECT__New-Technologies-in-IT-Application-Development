@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { IoClose } from 'react-icons/io5';
 import { useDispatch, useSelector } from 'react-redux';
-import { addMemberToGroup, createGroupChat } from '../../screens/Messaging/api';
+import { addMemberToGroup, createGroupChat, uploadFileFormChatGroupToS3 } from '../../screens/Messaging/api';
 import { getListFriend } from '../../screens/Contacts/api';
 import { updateAvatar } from '../../screens/Profile/api';
 
@@ -13,6 +13,7 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
     const [groupName, setGroupName] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [avatar, setAvatar] = useState('');
+    const [preAvatar, setpreAvatar] = useState('');
 
     const existingMembers = activeChat?.isGroup ? activeChat?.participants : [];
     const [selectedMembers, setSelectedMembers] = useState(existingMembers);
@@ -53,13 +54,10 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
     const filteredMembers = friend.filter((member) => member.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const handleCreateGroup = async () => {
-        // const formData = new FormData();
-        // formData.append('image', avatar); // Append the image file directly
-
-        // const avatarGroup = await updateAvatar(formData);
-        // if (avatarGroup) {
-        createGroupChat(groupName, avatar, selectedMembers);
-        // }
+        const avatarGroup = await uploadFileFormChatGroupToS3(avatar);
+        if (avatarGroup.fileUrl) {
+            createGroupChat(groupName, avatarGroup.fileUrl, selectedMembers);
+        }
         clear();
         onClose();
     };
@@ -123,13 +121,14 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
                                         const file = e.target.files[0];
                                         if (file) {
                                             const imageUrl = URL.createObjectURL(file); // Tạo URL tạm thời
-                                            setAvatar(imageUrl);
+                                            setpreAvatar(imageUrl);
+                                            setAvatar(file);
                                         }
                                     }}
                                 />
                                 <img
                                     src={
-                                        avatar ||
+                                        preAvatar ||
                                         'https://img.freepik.com/premium-vector/chat-vector-icon_676179-133.jpg'
                                     }
                                     alt="avatar"
