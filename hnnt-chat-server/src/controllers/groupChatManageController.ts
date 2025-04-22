@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthRequest } from '../types/authRequest';
+import { s3 } from '../utils/s3Uploader';
 
 const prisma = new PrismaClient();
 
@@ -76,10 +77,13 @@ export const addMemberToGroup = async (req: AuthRequest, res: Response): Promise
         }
         const chatId = req.params.groupId;
         const members = req.body;
-
+        
         const membersWithChatId = members.map((member: any) => ({
-            accountId: member.id,
-            chatId,
+            ...member,
+            chatId: chatId,
+            pin: false,
+            notify: true,
+            role: 'MEMBER',
         }));
 
         await prisma.chatParticipant.createMany({ data: membersWithChatId });
@@ -268,69 +272,84 @@ export const changeGroupRole = async (req: AuthRequest, res: Response): Promise<
 // DELETE /api/groups/:groupId/leave
 export const leaveGroup = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const requesterId = req.user.id;
-        if (!requesterId) {
-            res.status(401).json({ message: 'Unauthorized' });
-            return;
-        }
-
-        const chatId = req.params.groupId;
-        const accountId = requesterId;
-        // Kiểm tra xem người dùng có trong nhóm không
-        const participant = await prisma.chatParticipant.findUnique({
-            where: { chatId_accountId: { chatId, accountId } },
-            select: { role: true },
+      const requesterId = req.user.id;
+      if (!requesterId) {
+        res.status(401).json({ message: 'Unauthorized' });
+      }
+  
+      const chatId = req.params.groupId;
+      const accountId = requesterId;
+  
+      // 1. Kiểm tra participant và role
+      const participant = await prisma.chatParticipant.findUnique({
+        where: { chatId_accountId: { chatId, accountId } },
+        select: { role: true },
+      });
+      if (!participant) {
+        res.status(404).json({ message: 'Người dùng không tồn tại trong nhóm!' });
+      }
+  
+      // 2. Đếm số thành viên còn lại
+      const remainingMembers = await prisma.chatParticipant.count({
+        where: { chatId, accountId: { not: accountId } },
+      });
+      if (remainingMembers === 0) {
+        // Xóa nhóm nếu không còn thành viên
+        await prisma.$transaction([
+          prisma.chatParticipant.deleteMany({ where: { chatId } }),
+          prisma.message.deleteMany({ where: { chatId } }),
+          prisma.chat.delete({ where: { id: chatId } }),
+        ]);
+        res.status(200).json({ message: 'Nhóm đã bị xóa!' });
+      }
+  
+      // 3. Nếu leader rời, tìm leader mới
+      if (participant && participant.role === 'LEADER') {
+        // a) groupBy để tìm sender cuối cùng (trừ chính leader)
+        const recent = await prisma.message.groupBy({
+          by: ['senderId'],
+          where: { chatId, senderId: { not: accountId } },
+          _max: { time: true },
+          orderBy: { _max: { time: 'desc' } },
+          take: 1,
         });
-
-        if (!participant) {
-            res.status(404).json({ message: 'Người dùng không tồn tại trong nhóm!' });
-            return;
-        }
-
-        // Đếm số thành viên còn lại trong nhóm (trừ người rời đi)
-        const remainingMembers = await prisma.chatParticipant.count({
-            where: { chatId, accountId: { not: accountId } },
-        });
-
-        if (remainingMembers === 0) {
-            // Nếu người cuối cùng rời nhóm, xóa luôn nhóm
-            await prisma.$transaction([
-                prisma.chatParticipant.deleteMany({ where: { chatId } }),
-                prisma.message.deleteMany({ where: { chatId } }),
-                prisma.chat.delete({ where: { id: chatId } }),
-            ]);
-
-            res.status(200).json({ message: 'Nhóm đã bị xóa!' });
-            return;
-        }
-
-        if (participant && participant.role === 'LEADER') {
-            const newLeader = await prisma.chatParticipant.findFirst({
-                where: { chatId, accountId: { not: accountId } },
-                orderBy: { accountId: 'asc' },
-            });
-
-            await prisma.$transaction([
-                prisma.chatParticipant.delete({
-                    where: { chatId_accountId: { chatId, accountId } },
-                }),
-                prisma.chatParticipant.update({
-                    where: { chatId_accountId: { chatId, accountId: newLeader!.accountId } },
-                    data: { role: 'LEADER' },
-                }),
-            ]);
+  
+        let newLeaderAccountId: string;
+        if (recent.length > 0 && recent[0]._max.time) {
+          newLeaderAccountId = recent[0].senderId;
         } else {
-            // Nếu không phải LEADER, chỉ cần xóa thành viên khỏi nhóm
-            await prisma.chatParticipant.delete({
-                where: { chatId_accountId: { chatId, accountId } },
-            });
+          // b) fallback: chọn accountId nhỏ nhất
+          const fallback = await prisma.chatParticipant.findFirst({
+            where: { chatId, accountId: { not: accountId } },
+            orderBy: { accountId: 'asc' },
+          });
+          newLeaderAccountId = fallback!.accountId;
         }
-
-        res.status(200).json({ message: 'Rời nhóm thành công!' });
+  
+        // c) transaction: xóa leader cũ và update role mới
+        await prisma.$transaction([
+          prisma.chatParticipant.delete({
+            where: { chatId_accountId: { chatId, accountId } },
+          }),
+          prisma.chatParticipant.update({
+            where: { chatId_accountId: { chatId, accountId: newLeaderAccountId } },
+            data: { role: 'LEADER' },
+          }),
+        ]);
+  
+      } else {
+        // 4. Nếu không phải leader thì chỉ xóa participant
+        await prisma.chatParticipant.delete({
+          where: { chatId_accountId: { chatId, accountId } },
+        });
+      }
+  
+      res.status(200).json({ message: 'Rời nhóm thành công!' });
     } catch (error) {
-        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+      console.error(error);
+      res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
     }
-};
+  };
 
 // Disband group
 // DELETE /api/groups/:groupId/disband
@@ -447,3 +466,76 @@ export const updateGroupName = async (req: AuthRequest, res: Response): Promise<
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
     }
 };
+
+//upload image to s3
+// POST /api/groups/upload
+// Body: { file: File }
+export const uploadFileToS3 = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        console.log('Received request for file upload');
+        const file = req.file;
+
+        if (!file) {
+            res.status(400).json({ message: 'No file uploaded' });
+            return;
+        }
+
+        console.log('File received:', file.originalname);
+
+        const fileName = `${Date.now()}-${file.originalname}`;
+        const params = {
+            Bucket: process.env.AWS_S3_BUCKET_NAME || '',
+            Key: `avatar/${fileName}`,
+            Body: file.buffer,
+            ContentType: file.mimetype,
+        };
+
+        const result = await s3.upload(params).promise();
+        console.log('Upload successful:', result);
+
+        res.status(200).json({
+            message: 'File uploaded successfully',
+            fileUrl: result.Location,
+            key: result.Key,
+        });
+    } catch (error) {
+        console.error('Upload error:', error);
+        res.status(500).json({ message: 'Upload failed', error });
+    }
+};
+
+//Update group avatar
+// PUT /api/groups/:groupId/edit-avatar
+// Body: { avatar: string }
+export const updateGroupAvatar = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const requesterId = req.user.id;
+        if (!requesterId) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
+        const chatId = req.params.groupId;
+        const { avatar } = req.body;
+
+        // Kiểm tra xem người yêu cầu có phải là LEADER không
+        const requester = await prisma.chatParticipant.findUnique({
+            where: { chatId_accountId: { chatId, accountId: requesterId } },
+            select: { role: true },
+        });
+
+        if (!requester || requester.role !== 'LEADER') {
+            res.status(403).json({ message: 'Bạn không có quyền đổi ảnh nhóm!' });
+            return;
+        }
+
+        await prisma.chat.update({
+            where: { id: chatId },
+            data: { avatar },
+        });
+
+        res.status(200).json({ message: 'Đổi ảnh nhóm thành công!' });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+    }
+}
