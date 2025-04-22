@@ -1,22 +1,27 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import {
-    removeMemberOfGroup,
-    setActiveChat,
-    setShowOrOffRightBar,
-    setShowOrOffRightBarSearch,
-} from '../../redux/slices/chatSlice';
+import { setActiveChat, setShowOrOffRightBar, setShowOrOffRightBarSearch } from '../../redux/slices/chatSlice';
+import { kickMember, leaveGroup } from '../../screens/Messaging/api';
 
 function PopupMemberManage({ setShowPopup, leader, member, group }) {
     const dispatch = useDispatch();
 
     const handleRemoveMember = (isLeader) => {
-        dispatch(removeMemberOfGroup({ memberId: member.id, groupId: group.id }));
+        // dispatch(removeMemberOfGroup({ memberId: member.id, groupId: group.id }));
+        kickMember(group.id, member.accountId);
         if (isLeader) {
             dispatch(setActiveChat(null));
             dispatch(setShowOrOffRightBar(false));
             dispatch(setShowOrOffRightBarSearch(false));
         }
+    };
+
+    const handleLeaveGroup = () => {
+        // dispatch(removeMemberOfGroup({ memberId: member.id, groupId: group.id }));
+        leaveGroup(group.id, member.accountId);
+        dispatch(setActiveChat(null));
+        dispatch(setShowOrOffRightBar(false));
+        dispatch(setShowOrOffRightBarSearch(false));
     };
 
     const popupRef = useRef(null);
@@ -44,7 +49,7 @@ function PopupMemberManage({ setShowPopup, leader, member, group }) {
                 className="flex items-center my-1 hover:bg-gray-100 hover:dark:bg-gray-700 rounded-lg cursor-pointer"
             >
                 {leader ? (
-                    <span className="flex-1 my-1 text-sm text-center" onClick={() => handleRemoveMember(leader)}>
+                    <span className="flex-1 my-1 text-sm text-center" onClick={handleLeaveGroup}>
                         Rời nhóm
                     </span>
                 ) : (

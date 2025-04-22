@@ -6,20 +6,28 @@ import { GoBellSlash } from 'react-icons/go';
 import { useDispatch, useSelector } from 'react-redux';
 import { IoIosLogOut } from 'react-icons/io';
 import { AiOutlineUsergroupDelete } from 'react-icons/ai';
+import { RxAvatar } from 'react-icons/rx';
 
 import {
-    removeMemberOfGroup,
-    destroyGroup,
     setActiveChat,
     setShowOrOffRightBar,
     setShowOrOffRightBarSearch,
     setOnOrOfPin,
     setOnOrOfNotify,
 } from '../../redux/slices/chatSlice';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Archive from '../Archive/Archive';
 import PopupAddGroup from '../Popup/PopupAddGroup';
-import { deleteAllChatOfChat, getMessage, notifyChatOfUser, pinChatOfUser } from '../../screens/Messaging/api';
+import {
+    deleteAllChatOfChat,
+    disbandGroup,
+    editAvatar,
+    getMessage,
+    leaveGroup,
+    notifyChatOfUser,
+    pinChatOfUser,
+    uploadFileFormChatGroupToS3,
+} from '../../screens/Messaging/api';
 
 function TabChatInfo({ setActiveMessageTab }) {
     const userActive = useSelector((state) => state.auth.userActive);
@@ -35,17 +43,19 @@ function TabChatInfo({ setActiveMessageTab }) {
     const [imageOpen, setImageOpen] = useState(true);
     const [linkOpen, setLinkOpen] = useState(true);
 
+    const fileInputRef = useRef(null);
+
     const dispatch = useDispatch();
 
     const handleRemoveMember = () => {
-        dispatch(removeMemberOfGroup({ memberId: userId, groupId: chatId }));
+        leaveGroup(chatId, userId);
         dispatch(setActiveChat(null));
         dispatch(setShowOrOffRightBar(false));
         dispatch(setShowOrOffRightBarSearch(false));
     };
 
     const handleDeleteGroup = () => {
-        dispatch(destroyGroup({ groupId: chatId }));
+        disbandGroup(chatId);
         dispatch(setActiveChat(null));
         dispatch(setShowOrOffRightBar(false));
         dispatch(setShowOrOffRightBarSearch(false));
@@ -83,6 +93,12 @@ function TabChatInfo({ setActiveMessageTab }) {
                 notifyStatus,
             }),
         );
+    };
+
+    const handleTakePhoto = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
     };
 
     return (
@@ -142,6 +158,39 @@ function TabChatInfo({ setActiveMessageTab }) {
                     </div>
                     <p className="text-[10px]"> {!activeChat?.pin ? 'Ghim hội thoại' : 'Bỏ ghim hội thoại'}</p>
                 </div>
+                {activeChat?.isGroup &&
+                    activeChat.participants?.find((user) => user.accountId === userId)?.role === 'LEADER' && (
+                        <div className="m-4 mt-1 w-[50px] text-center">
+                            <div>
+                                <div className="flex justify-center" onClick={handleTakePhoto}>
+                                    <RxAvatar
+                                        size={35}
+                                        className="p-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer"
+                                    />
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        ref={fileInputRef}
+                                        className="hidden"
+                                        onChange={async (e) => {
+                                            const file = e.target.files[0];
+                                            if (file) {
+                                                try {
+                                                    const upload = await uploadFileFormChatGroupToS3(file);
+                                                    if (upload) {
+                                                        await editAvatar(upload.fileUrl, chatId);
+                                                    }
+                                                } catch (error) {
+                                                    console.log('Lỗi khi cập nhật avatar');
+                                                }
+                                            }
+                                        }}
+                                    />
+                                </div>
+                                <p className="text-[10px]">Đổi avatar</p>
+                            </div>
+                        </div>
+                    )}
                 <div className="m-4 mt-1 w-[50px] text-center">
                     {activeChat?.isGroup ? (
                         <div>

@@ -35,6 +35,7 @@ import {
     openEmojiTab,
     sendEmoji,
     setReadedChatWhenSendNewMessage,
+    setActiveChat,
 } from '../../redux/slices/chatSlice';
 import ChatText from '../Chat/ChatText';
 import ChatGif from '../Chat/ChatGif';
@@ -43,7 +44,6 @@ import ChatFile from '../Chat/ChatFile';
 import ChatDestroy from '../Chat/ChatDestroy';
 import ChatSticker from '../Chat/ChatSticker';
 import PopupAddGroup from '../Popup/PopupAddGroup';
-import PopupVideoCall from '../Popup/PopupVideoCall';
 import { FiMoreHorizontal } from 'react-icons/fi';
 import PopupReacttion from '../Popup/PopupReaction';
 import PopupReactionChat from '../Popup/PopupReactionChat';
@@ -165,17 +165,21 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
 
     const handleSendMessage = async () => {
         if (message.trim() !== '') {
-            const sendMess = await sendMessage(chatId, message, 'text', replyMessage?.id, null, null, null);
-            if (!sendMess) return;
+            try {
+                const sendMess = await sendMessage(chatId, message, 'text', replyMessage?.id, null, null, null);
+                if (!sendMess) return;
 
-            await readedChatOfUser(chatId);
-            dispatch(setReadedChatWhenSendNewMessage({ chatId: chatId, userId: userId }));
-            setMessage('');
-            setReplyMessage(null);
-            socket.emit('send_message', {
-                chatId: activeChat.id,
-                newMessage: sendMess,
-            });
+                await readedChatOfUser(chatId);
+                dispatch(setReadedChatWhenSendNewMessage({ chatId: chatId, userId: userId }));
+                setMessage('');
+                setReplyMessage(null);
+                socket.emit('send_message', {
+                    chatId: activeChat.id,
+                    newMessage: sendMess,
+                });
+            } catch (error) {
+                dispatch(setActiveChat(null));
+            }
         }
         setTimeout(() => {
             if (chatContainerRef.current) {

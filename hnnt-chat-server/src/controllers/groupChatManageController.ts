@@ -517,6 +517,8 @@ export const updateGroupAvatar = async (req: AuthRequest, res: Response): Promis
         const chatId = req.params.groupId;
         const { avatar } = req.body;
 
+        console.log('Avatarr:', avatar);
+
         // Kiểm tra xem người yêu cầu có phải là LEADER không
         const requester = await prisma.chatParticipant.findUnique({
             where: { chatId_accountId: { chatId, accountId: requesterId } },

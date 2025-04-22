@@ -1,13 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { IoClose } from 'react-icons/io5';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { addMemberToGroup, createGroupChat, uploadFileFormChatGroupToS3 } from '../../screens/Messaging/api';
 import { getListFriend } from '../../screens/Contacts/api';
-import { updateAvatar } from '../../screens/Profile/api';
 
 const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
-    const dispatch = useDispatch();
-
     const userActive = useSelector((state) => state.auth.userActive);
 
     const [groupName, setGroupName] = useState('');
