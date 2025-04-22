@@ -209,7 +209,7 @@ export default function GroupInfoScreen() {
                     </View>
 
                     {/* Other Options */}
-                    <TouchableOpacity onPress={() => navigation.navigate('FileStorage')}>
+                    <TouchableOpacity onPress={() => navigation.navigate('FileStorage', { chatId })}>
                         <OptionItem label="Image, file, link" icon="folder" />
                     </TouchableOpacity>
 
