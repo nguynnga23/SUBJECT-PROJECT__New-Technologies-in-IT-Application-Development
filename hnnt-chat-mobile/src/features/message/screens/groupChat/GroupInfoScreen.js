@@ -214,7 +214,9 @@ export default function GroupInfoScreen() {
                     <TouchableOpacity onPress={() => setPinVisible(true)}>
                         <OptionItem label="Pinned message" icon="pin" />
                     </TouchableOpacity>
-
+                    <TouchableOpacity onPress={() => navigation.navigate('ListPollsScreen', { chatId })}>
+                        <OptionItem label="Polls" icon="bar-chart" />
+                    </TouchableOpacity>
                     <TouchableOpacity onPress={() => navigation.navigate('MemberListScreen', { chatId })}>
                         <OptionItem label={numberOfMembers} icon="people" />
                     </TouchableOpacity>

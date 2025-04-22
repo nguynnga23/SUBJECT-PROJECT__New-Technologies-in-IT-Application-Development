@@ -43,6 +43,8 @@ model Account {
   loggedInDevices LoggedInDevice[]
   blockedUsers BlockedUser[] @relation("Blocker") // Người dùng đã chặn
   blockedBy    BlockedUser[] @relation("Blocked") // Người dùng bị chặn bởi người khác
+  polls Poll[] // Relation to Poll model
+  pollVotes PollVote[]
 }
 
 model FriendRequest {
@@ -80,6 +82,7 @@ model Chat {
 
   participants ChatParticipant[]
   messages    Message[]
+  polls Poll[] // Relation to Poll model
 }
 
 enum ChatRole {
@@ -176,6 +179,43 @@ model BlockedUser {
   createdAt   DateTime @default(now()) // Thời gian chặn
 
   @@unique([blockerAccountId, blockedAccountId]) // Đảm bảo một người chỉ chặn một người khác một lần
+}
+
+// Thêm các mô hình này vào schema Prisma hiện tại của bạn
+
+model Poll {
+  id        String   @id @default(uuid()) // ID dạng UUID
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  creator   Account  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  chatId    String
+  creatorId String
+  title     String   @db.VarChar(255) // Tiêu đề của poll, ví dụ: "Team Formation"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  endsAt    DateTime? // Thời gian kết thúc của poll (không bắt buộc)
+
+  options   PollOption[] // Các lựa chọn trong poll
+}
+
+model PollOption {
+  id        String   @id @default(uuid()) // ID dạng UUID
+  poll      Poll     @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  pollId    String
+  text      String   @db.VarChar(255) // Nội dung lựa chọn, ví dụ: "Mobile app (2 dev)"
+  createdAt DateTime @default(now())
+
+  votes     PollVote[] // Các phiếu bầu cho lựa chọn này
+}
+
+model PollVote {
+  id        String     @id @default(uuid()) // ID dạng UUID
+  pollOption PollOption @relation(fields: [pollOptionId], references: [id], onDelete: Cascade)
+  voter     Account    @relation(fields: [voterId], references: [id], onDelete: Cascade)
+  pollOptionId String
+  voterId   String
+  createdAt DateTime   @default(now())
+
+  @@unique([pollOptionId, voterId]) // Đảm bảo mỗi người chỉ được bầu một lần cho mỗi lựa chọn
 }
 
 
