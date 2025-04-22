@@ -14,6 +14,7 @@ import {
     Platform,
     Alert,
     Dimensions,
+    Linking
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -240,7 +241,15 @@ export default function GroupChatScreen() {
     const handleSendMessage = async (content) => {
         Keyboard.dismiss();
         try {
-            const response = await sendMessage(chatId, content, 'text', replyMessage?.id, null, null, null, token);
+            //Kiểm tra xem content có phải là link hay không
+            const isLink = content.match(/https?:\/\/[^\s]+/g);
+            let response = null;
+            if (isLink) {
+                response = await sendMessage(chatId, content, 'link', replyMessage?.id, null, null, null, token);
+            }
+            else {
+                response = await sendMessage(chatId, content, 'text', replyMessage?.id, null, null, null, token);
+            };
             if (replyMessage === null) {
                 socket.emit('send_message', {
                     chatId: chatId,
@@ -487,15 +496,17 @@ export default function GroupChatScreen() {
                                                         <Text style={styles.message}>{item.content}</Text>
                                                     )}
 
-                                                    {/* Hiển thị file, hình ảnh, hoặc audio nếu có */}
-                                                    {/* {item.audioUri && (
+                                                    {item.type === 'link' && (
                                                         <TouchableOpacity
-                                                            onPress={() => playAudio(item.audioUri)}
-                                                            style={styles.playButton}
+                                                            onPress={() => {
+                                                                Linking.openURL(item.content);
+                                                            }}
                                                         >
-                                                            <Ionicons name="play-circle" size={30} color="blue" />
+                                                            <Text style={{ fontSize: 16, lineHeight: 22, color: '#007AFF', textDecorationLine: 'underline' }}>
+                                                                {item.content}
+                                                            </Text>
                                                         </TouchableOpacity>
-                                                    )} */}
+                                                    )}
 
                                                     {item.type === 'image' && (
                                                         <TouchableOpacity
