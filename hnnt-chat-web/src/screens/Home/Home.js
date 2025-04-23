@@ -78,7 +78,6 @@ export default function Home() {
     };
 
     useEffect(() => {
-        console.log('userActive', userActive);
         const userId = userActive?.id;
         socket.on('connect', () => {
             console.log('✅ Đã kết nối đến server, ID:', socket.id);

@@ -656,3 +656,187 @@ export const uploadFileToS3 = async (file) => {
         throw error;
     }
 };
+
+export const kickMember = async (chatId, accountId) => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token is required');
+
+        const response = await fetch(`http://localhost:4000/api/groups/${chatId}/kick`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ accountId }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.message || `Lỗi ${response.status}: ${response.statusText}`);
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error('Lỗi khi upload file:', error);
+        throw error;
+    }
+};
+
+export const leaveGroup = async (chatId, accountId) => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token is required');
+
+        const response = await fetch(`http://localhost:4000/api/groups/${chatId}/leave`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ accountId }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.message || `Lỗi ${response.status}: ${response.statusText}`);
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error('Lỗi khi upload file:', error);
+        throw error;
+    }
+};
+
+export const disbandGroup = async (chatId) => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token is required');
+
+        const response = await fetch(`http://localhost:4000/api/groups/${chatId}/disband`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.message || `Lỗi ${response.status}: ${response.statusText}`);
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error('Lỗi khi upload file:', error);
+        throw error;
+    }
+};
+
+export const changeNameGroup = async (chatId, name) => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token is required');
+
+        const response = await fetch(`http://localhost:4000/api/groups/${chatId}/edit-name`, {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.message || `Lỗi ${response.status}: ${response.statusText}`);
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error('Lỗi khi upload file:', error);
+        throw error;
+    }
+};
+
+export const changeLeaderRole = async (chatId, accountId) => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token is required');
+
+        const response = await fetch(`http://localhost:4000/api/groups/role`, {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ accountId, chatId }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.message || `Lỗi ${response.status}: ${response.statusText}`);
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error('Lỗi khi upload file:', error);
+        throw error;
+    }
+};
+
+export const uploadFileFormChatGroupToS3 = async (file) => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token is required');
+
+        const formData = new FormData();
+        formData.append('file', file); // tên 'file' phải giống với multer .single('file')
+
+        const response = await fetch(`http://localhost:4000/api/groups/upload`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                // KHÔNG set Content-Type nếu dùng FormData!
+            },
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.message || `Lỗi ${response.status}: ${response.statusText}`);
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error('Lỗi khi upload file:', error);
+        throw error;
+    }
+};
+
+export const editAvatar = async (avatar, chatId) => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token is required');
+
+        const response = await fetch(`http://localhost:4000/api/groups/${chatId}/edit-avatar`, {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ avatar }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.message || `Lỗi ${response.status}: ${response.statusText}`);
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error('Lỗi khi upload file:', error);
+        throw error;
+    }
+};

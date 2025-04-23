@@ -77,7 +77,7 @@ export const addMemberToGroup = async (req: AuthRequest, res: Response): Promise
         }
         const chatId = req.params.groupId;
         const members = req.body;
-        
+
         const membersWithChatId = members.map((member: any) => ({
             ...member,
             chatId: chatId,
@@ -272,84 +272,83 @@ export const changeGroupRole = async (req: AuthRequest, res: Response): Promise<
 // DELETE /api/groups/:groupId/leave
 export const leaveGroup = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const requesterId = req.user.id;
-      if (!requesterId) {
-        res.status(401).json({ message: 'Unauthorized' });
-      }
-  
-      const chatId = req.params.groupId;
-      const accountId = requesterId;
-  
-      // 1. Kiểm tra participant và role
-      const participant = await prisma.chatParticipant.findUnique({
-        where: { chatId_accountId: { chatId, accountId } },
-        select: { role: true },
-      });
-      if (!participant) {
-        res.status(404).json({ message: 'Người dùng không tồn tại trong nhóm!' });
-      }
-  
-      // 2. Đếm số thành viên còn lại
-      const remainingMembers = await prisma.chatParticipant.count({
-        where: { chatId, accountId: { not: accountId } },
-      });
-      if (remainingMembers === 0) {
-        // Xóa nhóm nếu không còn thành viên
-        await prisma.$transaction([
-          prisma.chatParticipant.deleteMany({ where: { chatId } }),
-          prisma.message.deleteMany({ where: { chatId } }),
-          prisma.chat.delete({ where: { id: chatId } }),
-        ]);
-        res.status(200).json({ message: 'Nhóm đã bị xóa!' });
-      }
-  
-      // 3. Nếu leader rời, tìm leader mới
-      if (participant && participant.role === 'LEADER') {
-        // a) groupBy để tìm sender cuối cùng (trừ chính leader)
-        const recent = await prisma.message.groupBy({
-          by: ['senderId'],
-          where: { chatId, senderId: { not: accountId } },
-          _max: { time: true },
-          orderBy: { _max: { time: 'desc' } },
-          take: 1,
-        });
-  
-        let newLeaderAccountId: string;
-        if (recent.length > 0 && recent[0]._max.time) {
-          newLeaderAccountId = recent[0].senderId;
-        } else {
-          // b) fallback: chọn accountId nhỏ nhất
-          const fallback = await prisma.chatParticipant.findFirst({
-            where: { chatId, accountId: { not: accountId } },
-            orderBy: { accountId: 'asc' },
-          });
-          newLeaderAccountId = fallback!.accountId;
+        const requesterId = req.user.id;
+        if (!requesterId) {
+            res.status(401).json({ message: 'Unauthorized' });
         }
-  
-        // c) transaction: xóa leader cũ và update role mới
-        await prisma.$transaction([
-          prisma.chatParticipant.delete({
+
+        const chatId = req.params.groupId;
+        const accountId = requesterId;
+
+        // 1. Kiểm tra participant và role
+        const participant = await prisma.chatParticipant.findUnique({
             where: { chatId_accountId: { chatId, accountId } },
-          }),
-          prisma.chatParticipant.update({
-            where: { chatId_accountId: { chatId, accountId: newLeaderAccountId } },
-            data: { role: 'LEADER' },
-          }),
-        ]);
-  
-      } else {
-        // 4. Nếu không phải leader thì chỉ xóa participant
-        await prisma.chatParticipant.delete({
-          where: { chatId_accountId: { chatId, accountId } },
+            select: { role: true },
         });
-      }
-  
-      res.status(200).json({ message: 'Rời nhóm thành công!' });
+        if (!participant) {
+            res.status(404).json({ message: 'Người dùng không tồn tại trong nhóm!' });
+        }
+
+        // 2. Đếm số thành viên còn lại
+        const remainingMembers = await prisma.chatParticipant.count({
+            where: { chatId, accountId: { not: accountId } },
+        });
+        if (remainingMembers === 0) {
+            // Xóa nhóm nếu không còn thành viên
+            await prisma.$transaction([
+                prisma.chatParticipant.deleteMany({ where: { chatId } }),
+                prisma.message.deleteMany({ where: { chatId } }),
+                prisma.chat.delete({ where: { id: chatId } }),
+            ]);
+            res.status(200).json({ message: 'Nhóm đã bị xóa!' });
+        }
+
+        // 3. Nếu leader rời, tìm leader mới
+        if (participant && participant.role === 'LEADER') {
+            // a) groupBy để tìm sender cuối cùng (trừ chính leader)
+            const recent = await prisma.message.groupBy({
+                by: ['senderId'],
+                where: { chatId, senderId: { not: accountId } },
+                _max: { time: true },
+                orderBy: { _max: { time: 'desc' } },
+                take: 1,
+            });
+
+            let newLeaderAccountId: string;
+            if (recent.length > 0 && recent[0]._max.time) {
+                newLeaderAccountId = recent[0].senderId;
+            } else {
+                // b) fallback: chọn accountId nhỏ nhất
+                const fallback = await prisma.chatParticipant.findFirst({
+                    where: { chatId, accountId: { not: accountId } },
+                    orderBy: { accountId: 'asc' },
+                });
+                newLeaderAccountId = fallback!.accountId;
+            }
+
+            // c) transaction: xóa leader cũ và update role mới
+            await prisma.$transaction([
+                prisma.chatParticipant.delete({
+                    where: { chatId_accountId: { chatId, accountId } },
+                }),
+                prisma.chatParticipant.update({
+                    where: { chatId_accountId: { chatId, accountId: newLeaderAccountId } },
+                    data: { role: 'LEADER' },
+                }),
+            ]);
+        } else {
+            // 4. Nếu không phải leader thì chỉ xóa participant
+            await prisma.chatParticipant.delete({
+                where: { chatId_accountId: { chatId, accountId } },
+            });
+        }
+
+        res.status(200).json({ message: 'Rời nhóm thành công!' });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
     }
-  };
+};
 
 // Disband group
 // DELETE /api/groups/:groupId/disband
@@ -538,4 +537,4 @@ export const updateGroupAvatar = async (req: AuthRequest, res: Response): Promis
     } catch (error) {
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
     }
-}
+};
