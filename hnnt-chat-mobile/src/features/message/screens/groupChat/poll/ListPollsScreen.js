@@ -7,6 +7,8 @@ import { getPollsByChat, votePollOption } from '../../../services/GroupChat/poll
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRoute } from '@react-navigation/native';
 import { getUserIdFromToken } from '../../../../../utils/auth';
+import { socket } from '../../../../../configs/socket'; // Import socket instance
+
 const ListPollsScreen = () => {
     const [polls, setPolls] = useState([]);
     const route = useRoute();
@@ -33,6 +35,9 @@ const ListPollsScreen = () => {
         try {
             const updatedPolls = await getPollsByChat(chatId); // Refresh polls after creation
             setPolls(updatedPolls);
+
+            // Emit socket event to notify about the new poll
+            socket.emit('new_poll', { chatId, poll: pollData });
         } catch (error) {
             alert('Cập nhật danh sách cuộc thăm dò thất bại');
         }

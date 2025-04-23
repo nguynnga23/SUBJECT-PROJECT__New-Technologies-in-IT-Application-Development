@@ -9,7 +9,7 @@ const PollDetail = ({ poll, onVote }) => {
     const [selectedOption, setSelectedOption] = useState(null);
 
     // Tính tổng số phiếu bầu
-    const totalVotes = options.reduce((sum, option) => sum + option.votes.length, 0);
+    // const totalVotes = options.reduce((sum, option) => sum + option.votes.length, 0);
 
     // Kiểm tra xem poll đã kết thúc chưa
     const hasEnded = !!endsAt && new Date(endsAt) < new Date();
@@ -43,12 +43,12 @@ const PollDetail = ({ poll, onVote }) => {
             <Text style={styles.status}>
                 {hasEnded ? `Kết thúc lúc ${new Date(endsAt).toLocaleString()}` : 'Đang diễn ra'}
             </Text>
-            <Text style={styles.votes}>{totalVotes} thành viên đã bầu</Text>
+            {/* <Text style={styles.votes}>{totalVotes} thành viên đã bầu</Text> */}
 
             {/* Hiển thị các lựa chọn */}
             {options.map((option) => {
-                const voteCount = option.votes.length;
-                const percentage = totalVotes > 0 ? (voteCount / totalVotes) * 100 : 0;
+                // const voteCount = option.votes.length;
+                // const percentage = totalVotes > 0 ? (voteCount / totalVotes) * 100 : 0;
 
                 return (
                     <TouchableOpacity
@@ -58,8 +58,8 @@ const PollDetail = ({ poll, onVote }) => {
                         disabled={!!hasEnded || !!selectedOption}
                     >
                         <Text style={styles.optionText}>{option.text}</Text>
-                        <Text style={styles.voteCount}>{voteCount}</Text>
-                        <View style={[styles.progressBar, { width: `${percentage}%` }]} />
+                        {/* <Text style={styles.voteCount}>{voteCount}</Text> */}
+                        {/* <View style={[styles.progressBar, { width: `${percentage}%` }]} /> */}
                     </TouchableOpacity>
                 );
             })}

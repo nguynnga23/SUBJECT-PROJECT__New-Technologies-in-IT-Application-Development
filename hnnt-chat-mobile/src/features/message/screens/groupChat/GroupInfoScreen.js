@@ -212,11 +212,12 @@ export default function GroupInfoScreen() {
                     <TouchableOpacity onPress={() => navigation.navigate('FileStorage', { chatId })}>
                         <OptionItem label="Image, file, link" icon="folder" />
                     </TouchableOpacity>
-
+                    <TouchableOpacity onPress={() => navigation.navigate('ListPollsScreen', { chatId })}>
+                        <OptionItem label="Polls" icon="bar-chart" />
+                    </TouchableOpacity>
                     <TouchableOpacity onPress={() => navigation.navigate('MemberListScreen', { chatId })}>
                         <OptionItem label={numberOfMembers} icon="people" />
                     </TouchableOpacity>
-
                     <TouchableOpacity onPress={() => navigation.navigate('AddMemberScreen', { chatId })}>
                         <OptionItem label="Add member" icon="person-add" />
                     </TouchableOpacity>
