@@ -36,7 +36,7 @@ function ModalPoll() {
         try {
             const data = await createPoll(chatId, userId, question, null, formattedOptions);
             if (data) {
-                const sendMess = await sendMessage(chatId, 'polls', 'polls', null, null, null, null);
+                const sendMess = await sendMessage(chatId, data?.id, 'poll', null, null, null, null);
                 socket.emit('send_message', {
                     chatId: chatId,
                     newMessage: sendMess,

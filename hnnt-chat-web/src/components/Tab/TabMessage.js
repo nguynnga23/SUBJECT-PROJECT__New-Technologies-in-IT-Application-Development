@@ -142,7 +142,7 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
         sticker: ChatSticker,
         audio: ChatAudio,
         imageGroup: ChatImageGroup,
-        polls: ChatPollCard,
+        poll: ChatPollCard,
     };
 
     const getFileIcon = (fileType) => {
@@ -732,7 +732,7 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
                         <div
                             id={`message-${message.id}`}
                             className={`relative ${
-                                message.type === 'polls'
+                                message.type === 'poll'
                                     ? 'flex justify-center mb-2'
                                     : `flex items-center mb-2 ${
                                           message.sender.id === userId ? 'justify-end' : 'justify-start'
@@ -769,7 +769,11 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
                                         )}
                                     </div>
 
-                                    <div className="flex relative items-center">
+                                    <div
+                                        className={`flex relative items-center ${
+                                            Component === ChatPollCard && 'w-[390px]'
+                                        }`}
+                                    >
                                         {hoveredMessage === index &&
                                             isPopupOpenIndex === null &&
                                             message.sender.id === userActive.id && (
@@ -794,7 +798,7 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
                                                     )}
                                                 </div>
                                             )}
-                                        <div className="relative">
+                                        <div className={`relative ${Component === ChatPollCard && 'w-full'}`}>
                                             <Component
                                                 key={index}
                                                 index={index}
@@ -812,13 +816,15 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
                                             {message.id === lastMessage.id && message.sender.id === userId && (
                                                 <span className="absolute bottom-[-27px] right-[0]">
                                                     <p className="text-[10px] p-1 bg-gray-300 rounded-lg text-gray-500 mt-1 ">
-                                                        {!activeChat.isGroup
-                                                            ? activeChat.participants?.find(
-                                                                  (user) => user.accountId !== userId,
-                                                              ).readed
-                                                                ? 'Đã xem'
-                                                                : 'Đã gửi'
-                                                            : 'Đã nhận'}
+                                                        {Component !== ChatPollCard
+                                                            ? !activeChat.isGroup
+                                                                ? activeChat.participants?.find(
+                                                                      (user) => user.accountId !== userId,
+                                                                  )?.readed
+                                                                    ? 'Đã xem'
+                                                                    : 'Đã gửi'
+                                                                : 'Đã nhận'
+                                                            : ''}
                                                     </p>
                                                 </span>
                                             )}
@@ -844,7 +850,8 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
                                                     )}
                                                 </div>
                                             )}
-                                            {hoveredMessage === index &&
+                                            {Component !== ChatPollCard &&
+                                                hoveredMessage === index &&
                                                 isPopupOpenIndex === null &&
                                                 !message.destroy && (
                                                     <button
@@ -858,7 +865,8 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
                                                     </button>
                                                 )}
 
-                                            {showPopupReaction &&
+                                            {Component !== ChatPollCard &&
+                                                showPopupReaction &&
                                                 hoveredMessage === index &&
                                                 isPopupOpenIndex === null && (
                                                     <PopupReacttion
@@ -870,12 +878,14 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
                                                         userId={userId}
                                                     />
                                                 )}
-                                            {openReactionChat && hoveredMessage === index && (
-                                                <PopupReactionChat
-                                                    onClose={setOpenReactionChat}
-                                                    reactions={message.reactions}
-                                                />
-                                            )}
+                                            {Component !== ChatPollCard &&
+                                                openReactionChat &&
+                                                hoveredMessage === index && (
+                                                    <PopupReactionChat
+                                                        onClose={setOpenReactionChat}
+                                                        reactions={message.reactions}
+                                                    />
+                                                )}
                                         </div>
 
                                         {hoveredMessage === index &&

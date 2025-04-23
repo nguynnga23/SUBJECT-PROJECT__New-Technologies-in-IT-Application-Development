@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setShowModalVotePoll } from '../../redux/slices/modalSlice';
 import { getUserById } from '../../screens/Profile/api';
-import { votePollOption } from '../../screens/Polls/api';
+import { updateVotePoll, votePollOption } from '../../screens/Polls/api';
 
 export function ModalVotePoll() {
     const valueModalVotePoll = useSelector((state) => state.modal.valueModalVotePoll);
@@ -41,12 +41,22 @@ export function ModalVotePoll() {
         fetchUser();
     });
 
+    useEffect(() => {
+        const preSelected = options
+            .filter((option) => option.votes?.some((v) => v.voterId === userActive?.id))
+            .map((option) => option.id);
+        setSelectedOptions(preSelected);
+    }, [options, userActive?.id]);
+
     const handleVote = async () => {
         try {
             if (selectedOptions.length === 0) return;
-            selectedOptions.forEach(async (optionId) => {
-                await votePollOption(optionId, userActive?.id);
-            });
+            // selectedOptions.forEach(async (optionId) => {
+            //     await votePollOption(optionId, userActive?.id);
+            // });
+
+            await updateVotePoll(valueModalVotePoll?.id, selectedOptions, userActive?.id);
+
             dispatch(setShowModalVotePoll(false));
         } catch (error) {
             console.error('Lỗi khi bình chọn:', error);
@@ -73,7 +83,7 @@ export function ModalVotePoll() {
                         >
                             <input type="checkbox" checked={selectedOptions.includes(option?.id)} readOnly />
                             <div className="flex-1">{option?.text}</div>
-                            <span className="text-sm text-gray-500">0</span>
+                            <span className="text-sm text-gray-500">{option?._count?.votes}</span>
                         </div>
                     ))}
 
@@ -115,10 +125,7 @@ export function ModalVotePoll() {
                             Hủy
                         </button>
                         <button
-                            disabled={selectedOptions.length === 0}
-                            className={`px-3 py-1.5 rounded-lg text-white border-none ${
-                                selectedOptions.length === 0 ? 'bg-slate-300' : 'bg-blue-600'
-                            }`}
+                            className="px-3 py-1.5 rounded-lg text-white border-none bg-blue-600"
                             onClick={handleVote}
                         >
                             Xác nhận
