@@ -1,5 +1,6 @@
 import { IoIosArrowDropdown, IoIosArrowDropright } from 'react-icons/io';
 import { MdFilePresent } from 'react-icons/md';
+import { FaRegFileAlt } from 'react-icons/fa';
 import PopupViewImage from '../Popup/PopupViewImage';
 import { VscFilePdf } from 'react-icons/vsc';
 import { FaRegFileWord } from 'react-icons/fa';
@@ -7,7 +8,8 @@ import { FaRegFileExcel } from 'react-icons/fa';
 import { FaRegFilePowerpoint } from 'react-icons/fa';
 import { useState } from 'react';
 import { RiGroupLine } from 'react-icons/ri';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { showModal, hideModal, toggleModal } from '../../redux/slices/modalSlice';
 
 const getFileIcon = (fileType) => {
     if (fileType.includes('pdf')) return <VscFilePdf className="text-3xl text-red-500 mr-2" />;
@@ -24,6 +26,8 @@ const Archive = ({ title, isOpen, toggleOpen, messages, type, group, setActiveMe
     const userActive = useSelector((state) => state.auth.userActive);
     const userId = userActive.id;
     const [selectedImage, setSelectedImage] = useState(null);
+
+    const dispatch = useDispatch();
 
     return (
         <div className="p-2 relative border-b-[7px] dark:border-b-gray-900 cursor-pointer">
@@ -42,6 +46,15 @@ const Archive = ({ title, isOpen, toggleOpen, messages, type, group, setActiveMe
                 >
                     <RiGroupLine size={16} className="m-2" />
                     <p className="text-[12px]">{group.length} thành viên</p>
+                </div>
+            )}
+            {isOpen && type === 'groupNews' && (
+                <div
+                    className="w-full p-1 flex items-center hover:bg-gray-100 hover:dark:bg-gray-700"
+                    onClick={() => dispatch(toggleModal())}
+                >
+                    <FaRegFileAlt size={16} className="m-2" />
+                    <p className="text-[12px]">Ghi chú, ghim, bình chọn</p>
                 </div>
             )}
             {isOpen && (

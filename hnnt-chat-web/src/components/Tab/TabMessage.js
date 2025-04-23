@@ -65,6 +65,7 @@ import { getUserById } from '../../screens/Profile/api';
 import { createMeeting } from '../../configs/createMeeting';
 import { MeetingProvider } from '@videosdk.live/react-sdk';
 import MeetingView from '../../components/Views/MeetingView';
+import ChatPollCard from '../Chat/ChatPollCard';
 
 function TabMessage({ setShowModalShareMes, setMessageShare }) {
     const [message, setMessage] = useState('');
@@ -141,6 +142,7 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
         sticker: ChatSticker,
         audio: ChatAudio,
         imageGroup: ChatImageGroup,
+        polls: ChatPollCard,
     };
 
     const getFileIcon = (fileType) => {
@@ -729,8 +731,12 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
                     return (
                         <div
                             id={`message-${message.id}`}
-                            className={`relative flex items-center mb-2 ${
-                                message.sender.id === userId ? 'justify-end' : 'justify-start'
+                            className={`relative ${
+                                message.type === 'polls'
+                                    ? 'flex justify-center mb-2'
+                                    : `flex items-center mb-2 ${
+                                          message.sender.id === userId ? 'justify-end' : 'justify-start'
+                                      }`
                             }`}
                             key={index}
                             onMouseEnter={() => {
@@ -802,6 +808,7 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
                                                 replyMessage={message?.replyTo}
                                                 scrollToMessage={scrollToMessage}
                                             />
+
                                             {message.id === lastMessage.id && message.sender.id === userId && (
                                                 <span className="absolute bottom-[-27px] right-[0]">
                                                     <p className="text-[10px] p-1 bg-gray-300 rounded-lg text-gray-500 mt-1 ">

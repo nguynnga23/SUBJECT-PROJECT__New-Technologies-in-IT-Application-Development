@@ -7,6 +7,8 @@ import { socket } from '../../configs/socket';
 import { useEffect, useState } from 'react';
 import { getChat } from './api';
 import ModalShareMessage from '../../components/Modal/ModalShareMessage';
+import ModalPoll from '../../components/Modal/ModalPoll';
+import { ModalVotePoll } from '../../components/Modal/ModalVotePoll';
 
 function Messaging() {
     const userActive = useSelector((state) => state.auth.userActive);
@@ -17,6 +19,10 @@ function Messaging() {
     const [chats, setChats] = useState([]);
     const [showModalShareMes, setShowModalShareMes] = useState(false);
     const [message, setMessage] = useState();
+
+    // open modal poll
+    const isModalCreatePoll = useSelector((state) => state.modal.showModalCreatePoll);
+    const showModalVotePoll = useSelector((state) => state.modal.showModalVotePoll);
 
     useEffect(() => {
         const fetchMessages = async () => {
@@ -70,6 +76,8 @@ function Messaging() {
                             {showModalShareMes && (
                                 <ModalShareMessage setShowModalShareMes={setShowModalShareMes} message={message} />
                             )}
+                            {isModalCreatePoll && <ModalPoll />}
+                            {showModalVotePoll && <ModalVotePoll />}
                             <TabMessage setShowModalShareMes={setShowModalShareMes} setMessageShare={setMessage} />
                         </>
                     ) : (
