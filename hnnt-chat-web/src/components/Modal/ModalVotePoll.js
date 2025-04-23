@@ -1,21 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setShowModalVotePoll } from '../../redux/slices/modalSlice';
+import { getUserById } from '../../screens/Profile/api';
+import { votePollOption } from '../../screens/Polls/api';
 
 export function ModalVotePoll() {
     const valueModalVotePoll = useSelector((state) => state.modal.valueModalVotePoll);
+    const userActive = useSelector((state) => state.auth.userActive);
 
     const [options, setOptions] = useState(valueModalVotePoll?.options || []);
     const [selectedOptions, setSelectedOptions] = useState([]);
     const [isAdding, setIsAdding] = useState(false);
     const [newOption, setNewOption] = useState('');
-
-    console.log('valueModalVotePoll', valueModalVotePoll);
+    const [user, setUser] = useState(null);
 
     const dispatch = useDispatch();
 
-    const handleSelect = (index) => {
-        setSelectedOptions((prev) => (prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]));
+    const handleSelect = (id) => {
+        setSelectedOptions((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
     };
 
     const handleAddOption = () => {
@@ -26,12 +28,37 @@ export function ModalVotePoll() {
         }
     };
 
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const data = await getUserById(valueModalVotePoll?.creatorId);
+                setUser(data);
+            } catch (error) {
+                console.error('Lỗi khi lấy dữ liệu người dùng:', error);
+            }
+        };
+
+        fetchUser();
+    });
+
+    const handleVote = async () => {
+        try {
+            if (selectedOptions.length === 0) return;
+            selectedOptions.forEach(async (optionId) => {
+                await votePollOption(optionId, userActive?.id);
+            });
+            dispatch(setShowModalVotePoll(false));
+        } catch (error) {
+            console.error('Lỗi khi bình chọn:', error);
+        }
+    };
+
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-10">
             <div className="w-[500px] bg-white rounded-2xl shadow-lg p-6">
                 <h2 className="text-lg font-semibold mb-2">Bình chọn</h2>
                 <p className="font-bold">{valueModalVotePoll?.title}</p>
-                <p className="text-sm text-gray-500 mb-4">Tạo bởi Nguyễn Thiên Tú - Hôm nay</p>
+                <p className="text-sm text-gray-500 mb-4">Tạo bởi {user?.name} - Hôm nay</p>
 
                 <label className="flex items-center gap-2 text-sm font-medium mb-4">Chọn nhiều phương án</label>
 
@@ -39,12 +66,12 @@ export function ModalVotePoll() {
                     {options.map((option, index) => (
                         <div
                             key={index}
-                            onClick={() => handleSelect(index)}
+                            onClick={() => handleSelect(option?.id)}
                             className={`flex items-center gap-2 mb-3 cursor-pointer rounded-lg px-3 py-1.5 ${
-                                selectedOptions.includes(index) ? 'bg-sky-100' : ''
+                                selectedOptions.includes(option?.id) ? 'bg-sky-100' : ''
                             }`}
                         >
-                            <input type="checkbox" checked={selectedOptions.includes(index)} readOnly />
+                            <input type="checkbox" checked={selectedOptions.includes(option?.id)} readOnly />
                             <div className="flex-1">{option?.text}</div>
                             <span className="text-sm text-gray-500">0</span>
                         </div>
@@ -92,6 +119,7 @@ export function ModalVotePoll() {
                             className={`px-3 py-1.5 rounded-lg text-white border-none ${
                                 selectedOptions.length === 0 ? 'bg-slate-300' : 'bg-blue-600'
                             }`}
+                            onClick={handleVote}
                         >
                             Xác nhận
                         </button>
