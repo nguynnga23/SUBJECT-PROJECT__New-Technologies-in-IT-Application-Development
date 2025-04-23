@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { getPolls } from '../../screens/Polls/api';
 import { useEffect, useState } from 'react';
-import { setShowModalVotePoll } from '../../redux/slices/modalSlice';
+import { setShowModalVotePoll, setValueModalVotePoll } from '../../redux/slices/modalSlice';
 
 function ChatPollCard() {
     const [data, setData] = useState([]);
@@ -46,7 +46,10 @@ function ChatPollCard() {
 
                     <button
                         className="w-full border border-blue-500 text-blue-600 font-medium py-2 rounded hover:bg-blue-50"
-                        onClick={() => dispatch(setShowModalVotePoll(true))}
+                        onClick={() => {
+                            dispatch(setShowModalVotePoll(true));
+                            dispatch(setValueModalVotePoll(item));
+                        }}
                     >
                         Bình chọn
                     </button>
