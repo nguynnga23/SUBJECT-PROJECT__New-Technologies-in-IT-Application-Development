@@ -45,7 +45,7 @@ function TabChatInfoGroup({ setActiveMessageTab, group }) {
                         >
                             <div className="relative">
                                 <img
-                                    src={g.account.avatar} // Thay bằng avatar thật
+                                    src={g.account?.avatar} // Thay bằng avatar thật
                                     alt="avatar"
                                     className="w-[45px] h-[45px] rounded-full border mr-3 object-cover"
                                 />
@@ -63,7 +63,7 @@ function TabChatInfoGroup({ setActiveMessageTab, group }) {
                                     <h3 className="font-medium text-xs text-lg mt-1 max-w-[270px] truncate">Bạn</h3>
                                 ) : (
                                     <h3 className="font-medium text-xs text-lg mt-1 max-w-[270px] truncate">
-                                        {g.account.name}
+                                        {g.account?.name}
                                     </h3>
                                 )}
                                 {g?.role === 'LEADER' && (

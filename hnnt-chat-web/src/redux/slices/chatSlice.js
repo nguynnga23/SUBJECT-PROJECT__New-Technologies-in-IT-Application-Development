@@ -221,25 +221,31 @@ const chatSlice = createSlice({
             };
             state.data.push(newGroup);
         },
-        addMemberToGroup: (state, action) => {
-            const { groupId, members } = action.payload;
-            const group = state.data.find((g) => g.id === groupId);
-            group.members = [
-                ...group.members,
-                ...members.filter((newMember) => !group.members.some((member) => member.id === newMember.id)),
-            ];
-        },
-        removeMemberOfGroup: (state, action) => {
-            const { memberId, groupId } = action.payload;
+        addMemberToGroupSlice: (state, action) => {
+            const { members } = action.payload; // mảng member cần thêm
 
-            return {
-                ...state,
-                data: state.data.map((group) =>
-                    group.id === groupId
-                        ? { ...group, members: group.members.filter((m) => m.id !== memberId) }
-                        : group,
-                ),
-            };
+            if (!state.activeChat?.participants) {
+                state.activeChat.participants = [];
+            }
+
+            const newParticipants = members.map((member) => ({
+                account: {
+                    id: member.accountId,
+                    name: member.name,
+                    avatar: member.avatar,
+                },
+            }));
+
+            state.activeChat.participants.push(...newParticipants);
+        },
+        removeMemberOfGroupSlice: (state, action) => {
+            const { memberId } = action.payload; // chỉ xóa một thành viên theo id
+
+            if (state.activeChat?.participants) {
+                state.activeChat.participants = state.activeChat.participants.filter(
+                    (participant) => participant.accountId !== memberId,
+                );
+            }
         },
 
         destroyGroup: (state, action) => {
@@ -270,6 +276,11 @@ const chatSlice = createSlice({
                 ),
             };
         },
+
+        setAvatarForGroupChat: (state, action) => {
+            const { avatar } = action.payload;
+            state.activeChat.avatar = avatar;
+        },
     },
 });
 
@@ -293,9 +304,10 @@ export const {
     addOrChangeCategory,
     deleteChatForUser,
     createGroup,
-    addMemberToGroup,
-    removeMemberOfGroup,
+    addMemberToGroupSlice,
+    removeMemberOfGroupSlice,
     destroyGroup,
     searchFollowKeyWord,
+    setAvatarForGroupChat,
 } = chatSlice.actions;
 export default chatSlice.reducer;

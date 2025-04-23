@@ -14,6 +14,7 @@ import {
     setShowOrOffRightBarSearch,
     setOnOrOfPin,
     setOnOrOfNotify,
+    setAvatarForGroupChat,
 } from '../../redux/slices/chatSlice';
 import { useEffect, useRef, useState } from 'react';
 import Archive from '../Archive/Archive';
@@ -178,7 +179,10 @@ function TabChatInfo({ setActiveMessageTab }) {
                                                 try {
                                                     const upload = await uploadFileFormChatGroupToS3(file);
                                                     if (upload) {
-                                                        await editAvatar(upload.fileUrl, chatId);
+                                                        const saveAvatar = await editAvatar(upload.fileUrl, chatId);
+                                                        if (saveAvatar) {
+                                                            dispatch(setAvatarForGroupChat({ avatar: upload.fileUrl }));
+                                                        }
                                                     }
                                                 } catch (error) {
                                                     console.log('Lỗi khi cập nhật avatar');

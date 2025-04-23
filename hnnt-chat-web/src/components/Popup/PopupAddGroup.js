@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { IoClose } from 'react-icons/io5';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { addMemberToGroup, createGroupChat, uploadFileFormChatGroupToS3 } from '../../screens/Messaging/api';
 import { getListFriend } from '../../screens/Contacts/api';
+import { addMemberToGroupSlice } from '../../redux/slices/chatSlice';
 
 const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
     const userActive = useSelector((state) => state.auth.userActive);
+
+    const dispatch = useDispatch();
 
     const [groupName, setGroupName] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
@@ -51,6 +54,7 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
     const filteredMembers = friend.filter((member) => member.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const handleCreateGroup = async () => {
+        if (!avatar) return;
         const avatarGroup = await uploadFileFormChatGroupToS3(avatar);
         if (avatarGroup.fileUrl) {
             createGroupChat(groupName, avatarGroup.fileUrl, selectedMembers);
@@ -58,7 +62,7 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
         clear();
         onClose();
     };
-    const handleAddMemberToGroup = () => {
+    const handleAddMemberToGroup = async () => {
         const newMembers = selectedMembers.filter(
             (member) =>
                 member.accountId !== userActive.id &&
@@ -69,7 +73,11 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
             ({ id, name, avatar, status, account, category, categoryId, readed, priority, ...rest }) => rest,
         );
 
-        addMemberToGroup(activeChat.id, selectedFullMembers);
+        const saveMemberToGroup = await addMemberToGroup(activeChat.id, selectedFullMembers);
+
+        if (saveMemberToGroup) {
+            dispatch(addMemberToGroupSlice({ members: newMembers }));
+        }
 
         clear();
         onClose();
@@ -178,10 +186,10 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
                                     />
                                     <img
                                         className="w-10 h-10 bg-gray-300 rounded-full object-cover"
-                                        src={member.avatar}
+                                        src={member?.avatar}
                                         alt="avatar"
                                     />
-                                    <span className="ml-3">{member.name}</span>
+                                    <span className="ml-3">{member?.name}</span>
                                 </div>
                             );
                         })}

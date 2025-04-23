@@ -1,14 +1,22 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { setActiveChat, setShowOrOffRightBar, setShowOrOffRightBarSearch } from '../../redux/slices/chatSlice';
+import {
+    removeMemberOfGroupSlice,
+    setActiveChat,
+    setShowOrOffRightBar,
+    setShowOrOffRightBarSearch,
+} from '../../redux/slices/chatSlice';
 import { kickMember, leaveGroup } from '../../screens/Messaging/api';
 
 function PopupMemberManage({ setShowPopup, leader, member, group }) {
     const dispatch = useDispatch();
 
-    const handleRemoveMember = (isLeader) => {
+    const handleRemoveMember = async (isLeader) => {
         // dispatch(removeMemberOfGroup({ memberId: member.id, groupId: group.id }));
-        kickMember(group.id, member.accountId);
+        const removeMember = await kickMember(group.id, member.accountId);
+        if (removeMember) {
+            dispatch(removeMemberOfGroupSlice({ memberId: member.accountId }));
+        }
         if (isLeader) {
             dispatch(setActiveChat(null));
             dispatch(setShowOrOffRightBar(false));
