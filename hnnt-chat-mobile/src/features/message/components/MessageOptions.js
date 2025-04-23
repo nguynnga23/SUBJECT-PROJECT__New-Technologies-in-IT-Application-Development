@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { getUserIdFromToken } from '../../../utils/auth';
 import { socket } from '../../../configs/socket';
-import { deleteMessage, destroyMessage, pinMessage } from '../services/privateChat/PrivateChatService';
+import { deleteMessage, destroyMessage, pinMessage } from '../services/ChatService';
 
 let setModalStateGlobal = null;
 
@@ -150,7 +150,7 @@ function showMessage(title, message) {
         options: [
             {
                 text: 'OK',
-                onPress: () => {},
+                onPress: () => { },
             },
         ],
     });

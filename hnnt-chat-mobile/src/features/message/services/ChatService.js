@@ -1,135 +1,18 @@
-import { Alert, Platform } from 'react-native';
+import { Alert, Platform, Linking } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Audio } from 'expo-av';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
-import { getUserIdFromToken } from '../../../../utils/auth';
-import { getCurrentTimeString } from '../../../../utils/dateNow';
+import { getUserIdFromToken } from '../../../utils/auth';
+import { getCurrentTimeString } from '../../../utils/dateNow';
 import axios from 'axios';
 import * as WebBrowser from 'expo-web-browser';
-import { localhost } from '../../../../utils/localhosts';
-import { socket } from '../../../../configs/socket';
+import { localhost } from '../../../utils/localhosts';
+import { socket } from '../../../configs/socket';
 const API_URL = `http://${localhost}/api`;
 
 let recording = null;
-
-//Hiển thị menu khi nhấn giữ tin nhắn
-// export function handleLongPressMessage(
-//     messageId,
-//     messages,
-//     setMessages,
-//     chatId,
-//     token,
-//     setReplyMessage,
-//     setModalReplyVisible,
-// ) {
-//     const message = messages.find((msg) => msg.id === messageId);
-
-//     if (!message) return;
-
-//     let options = [];
-
-//     if (message.destroy) {
-//         // Nếu tin nhắn bị thu hồi, chỉ hiển thị tùy chọn "Delete"
-//         options.push({
-//             text: '🗑️ Delete',
-//             onPress: async () => {
-//                 try {
-//                     if (!messageId || !token) {
-//                         console.warn('Invalid messageId or token:', { messageId, token });
-//                         return;
-//                     }
-//                     const response = await deleteMessage(messageId, token);
-//                     socket.emit('del_message', {
-//                         chatId: chatId,
-//                     });
-//                     Alert.alert('Success', response.message);
-//                 } catch (error) {
-//                     console.warn('Error deleting message:', error);
-//                     Alert.alert('Error', 'Failed to delete the message.');
-//                 }
-//             },
-//         });
-//     } else {
-//         // Nếu tin nhắn chưa bị thu hồi, hiển thị các tùy chọn khác
-//         options = [
-//             {
-//                 text: '📌 Pin',
-//                 onPress: async () => {
-//                     try {
-//                         if (!messageId || !token) {
-//                             console.error('Invalid messageId or token:', { messageId, token });
-//                             return;
-//                         }
-//                         await pinMessage(messageId, token);
-//                         Alert.alert('Success', 'Pinned!');
-//                     } catch (error) {
-//                         console.warn('Error pinning message:', error);
-//                         Alert.alert('Error', 'Failed to pin the message.');
-//                     }
-//                 },
-//             },
-//             {
-//                 text: '↩️ Answer',
-//                 onPress: () => {
-//                     setReplyMessage(message);
-//                     setModalReplyVisible(true); // Chỉ bật modal khi chọn Answer
-//                 },
-//             },
-//             {
-//                 text: '🔄 Forward',
-//                 onPress: () => {
-//                     Alert.alert('Forward Message', 'This feature is under development.');
-//                     // Add logic for forwarding the message here
-//                 },
-//             },
-//             {
-//                 text: '🗑️ Delete',
-//                 onPress: async () => {
-//                     try {
-//                         if (!messageId || !token) {
-//                             console.warn('Invalid messageId or token:', { messageId, token });
-//                             return;
-//                         }
-//                         const response = await deleteMessage(messageId, token);
-//                         socket.emit('del_message', {
-//                             chatId: chatId,
-//                         });
-//                         Alert.alert('Success', response.message);
-//                     } catch (error) {
-//                         console.warn('Error deleting message:', error);
-//                         Alert.alert('Error', 'Failed to delete the message.');
-//                     }
-//                 },
-//             },
-//         ];
-
-//         if (message.sender.id === getUserIdFromToken(token)) {
-//             options.splice(4, 0, {
-//                 text: 'Recall',
-//                 onPress: async () => {
-//                     try {
-//                         if (!messageId || !token) {
-//                             console.warn('Invalid messageId or token:', { messageId, token });
-//                             return;
-//                         }
-//                         const response = await destroyMessage(messageId, token);
-//                         socket.emit('del_message', {
-//                             chatId: chatId,
-//                         });
-//                         Alert.alert('Success', 'Recall message success!');
-//                     } catch (error) {
-//                         console.warn('Error recalling message:', error);
-//                         Alert.alert('Error', 'Failed to recall the message.');
-//                     }
-//                 },
-//             });
-//         }
-//     }
-
-//     Alert.alert('Select an action', 'What do you want to do with this message?', options, { cancelable: true });
-// }
 
 export const fetchMessages = async (chatId, token) => {
     try {
@@ -322,7 +205,21 @@ export async function prepareImage(chatId, token, replyId) {
                             const timeStamp = getCurrentTimeString();
                             const fileName = `${originalName.replace(`.${extension}`, '')}_${timeStamp}.${extension}`;
                             const fileType = asset.type || (extension === 'mp4' ? 'video/mp4' : 'image/jpeg');
-                            const fileSize = asset.fileSize || 0;
+                            // Lấy kích thước tệp bằng expo-file-system
+                            let fileSize = 0;
+                            try {
+                                const fileInfo = await FileSystem.getInfoAsync(fileUri);
+                                fileSize = fileInfo.size; // Kích thước tệp (bytes)
+                            } catch (error) {
+                                console.warn('Error getting file size:', error);
+                            }
+                            console.log('File size:', fileSize);
+                            // Kiểm tra kích thước tệp (giới hạn 10MB)
+                            if (fileSize === 0 || fileSize >= 10 * 1024 * 1024) {
+                                Alert.alert('File too large', 'Please select a file smaller than 10MB.');
+                                return;
+                            }
+
                             const fileSizeString = fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : 'Unknown size';
 
                             const file = {
@@ -445,6 +342,12 @@ export async function prepareFile(chatId, token, replyId) {
         const fileName = `file_${timeStamp}.${extension}`;
         const fileType = fileAsset.mimeType || 'application/octet-stream';
         const fileSize = fileAsset.size || 0;
+        // Kiểm tra kích thước tệp có lớn hơn 10MB hay không
+        if (!fileSize || fileSize === 0 || fileSize >= 10 * 1024 * 1024) {
+            Alert.alert('File too large', 'Please select a file smaller than 10MB.');
+            return;
+        }
+
         const fileSize_String = fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : 'Unknown size';
 
         const file = {
@@ -641,7 +544,7 @@ export const downloadImage = async (imageUrl) => {
 
 import * as Sharing from 'expo-sharing';
 
-export const downloadAnyFile = async (fileUrl) => {
+export const ShareAnyFile = async (fileUrl) => {
     try {
         const fileName = fileUrl.split('/').pop()?.split('?')[0] || `file_${Date.now()}`;
         const downloadUri = `${FileSystem.documentDirectory}${fileName}`;
@@ -662,14 +565,28 @@ export const downloadAnyFile = async (fileUrl) => {
         await Sharing.shareAsync(downloadRes.uri);
     } catch (error) {
         console.error('Error downloading file:', error);
-        Alert.alert('Error', 'Failed to download or share file.');
+        Alert.alert('Error', 'Failed to share file.');
+    }
+};
+
+export const downloadAnyFile = async (fileUrl) => {
+    try {
+        // Tạo link tới server trung gian (đã cấu hình Content-Disposition: attachment)
+        const encodedUrl = encodeURIComponent(fileUrl);
+        const fileName = fileUrl.split('/').pop()?.split('?')[0] || `file_${Date.now()}`;
+        const serverDownloadUrl = `${API_URL}/public-download/?url=${encodedUrl}&name=${fileName}`;
+
+        await Linking.openURL(serverDownloadUrl);
+    } catch (error) {
+        console.error('Error open browser to download file:', error);
+        Alert.alert('Error', 'Error open browser to download file.');
     }
 };
 
 //Preview file
 export const previewFile = async (fileUrl) => {
     try {
-        await WebBrowser.openBrowserAsync(fileUrl);
+        await Linking.openURL(fileUrl);
     } catch (error) {
         console.error('Error open browser to preview file:', error);
         Alert.alert('Error', 'Error open browser to preview file.');

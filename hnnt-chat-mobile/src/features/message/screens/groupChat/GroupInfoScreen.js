@@ -12,6 +12,7 @@ import {
     Button,
     Alert,
     TouchableWithoutFeedback,
+    Keyboard,
 } from 'react-native';
 import { Ionicons, AntDesign, Feather } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
@@ -20,27 +21,28 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUserIdFromToken } from '../../../../utils/auth';
 import {
-    handleReport,
     leaveGroup,
     toggleMute,
     editGroupName,
-    handleChangeAvatar,
+    prepareImage,
     disbandGroup,
     fetchChat,
     getPinMess,
     unPinMess,
 } from '../../services/GroupChat/GroupInfoService';
+import { set } from 'date-fns';
+import { socket } from '../../../../configs/socket';
 
 export default function GroupInfoScreen() {
     const navigation = useNavigation();
     const route = useRoute();
     const chatId = route.params?.chatId || 'null';
+    const [data, setData] = useState(null);
+    const [token, setToken] = useState(null);
     const [isMuted, setIsMuted] = useState();
     const [editVisible, setEditVisible] = useState(false);
     const [newGroupName, setNewGroupName] = useState('');
-    // const [reportVisible, setReportVisible] = useState(false);
     const [leaveVisible, setLeaveVisible] = useState(false);
-    // const [reportReason, setReportReason] = useState("");
     const [avatar, setAvatar] = useState(null);
     const [userRole, setUserRole] = useState('');
     const [disbandVisible, setDisbandVisible] = useState(false);
@@ -51,7 +53,9 @@ export default function GroupInfoScreen() {
     const fetchChatInfo = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
+            setToken(token);
             const chatInfo = await fetchChat(chatId, token); // Replace with actual token
+            setData(chatInfo);
             setNewGroupName(chatInfo.name);
             setAvatar(chatInfo.avatar);
             const userId = getUserIdFromToken(token);
@@ -62,31 +66,29 @@ export default function GroupInfoScreen() {
             }
             setNumberOfMembers('View members (' + chatInfo.participants.length + ')');
 
-            try {
-                const pin_Mess = await getPinMess(chatId, token);
-                setPinMess(pin_Mess);
-            } catch (error) {
-                if (error.response?.status === 404) {
-                    // Xử lý lỗi 404 một cách yên lặng
-                    console.warn('No pinned message found.'); // Log cảnh báo nếu cần
-                    setPinMess('No pinned message'); // Đặt giá trị mặc định
-                } else {
-                    // Xử lý các lỗi khác
-                    console.warn('Error fetching pinned message:', error); // Log lỗi nếu cần
-                    setPinMess(null); // Đặt giá trị mặc định nếu xảy ra lỗi khác
-                }
-            }
+            // try {
+            //     const pin_Mess = await getPinMess(chatId, token);
+            //     setPinMess(pin_Mess);
+            // } catch (error) {
+            //     if (error.response?.status === 404) {
+            //         // Xử lý lỗi 404 một cách yên lặng
+            //         console.warn('No pinned message found.'); // Log cảnh báo nếu cần
+            //         setPinMess('No pinned message'); // Đặt giá trị mặc định
+            //     } else {
+            //         // Xử lý các lỗi khác
+            //         console.warn('Error fetching pinned message:', error); // Log lỗi nếu cần
+            //         setPinMess(null); // Đặt giá trị mặc định nếu xảy ra lỗi khác
+            //     }
+            // }
         } catch (error) {
             console.error('Error fetching chat info:', error);
         }
     };
 
-    const handleEditGroupName = async () => {
+    const handleEditGroupName = async (n_groupName) => {
         try {
             const token = await AsyncStorage.getItem('token');
-            const response = await editGroupName(newGroupName, chatId, token);
-            setNewGroupName(response.name);
-            setEditVisible(false);
+            const response = await editGroupName(n_groupName, chatId, token);
             fetchChatInfo();
             Alert.alert('Success', response.message);
         } catch (error) {
@@ -96,7 +98,7 @@ export default function GroupInfoScreen() {
 
     useEffect(() => {
         fetchChatInfo();
-    }, [chatId]);
+    }, [data]);
 
     useFocusEffect(
         useCallback(() => {
@@ -189,11 +191,11 @@ export default function GroupInfoScreen() {
                         <TouchableOpacity onPress={() => navigation.navigate('FindGrMessagesScreen', { chatId })}>
                             <ActionButton icon="search" label="Search messages" />
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => navigation.navigate('FindGrMessagesScreen')}>
+                        {/* <TouchableOpacity onPress={() => navigation.navigate('FindGrMessagesScreen')}>
                             <ActionButton icon="person-add" label="Add members" />
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                         {userRole === 'LEADER' && (
-                            <TouchableOpacity onPress={() => handleChangeAvatar(setAvatar)}>
+                            <TouchableOpacity onPress={async () => await prepareImage(chatId, token)}>
                                 <ActionButton icon="image" label="Change avatar" />
                             </TouchableOpacity>
                         )}
@@ -207,16 +209,10 @@ export default function GroupInfoScreen() {
                     </View>
 
                     {/* Other Options */}
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={() => navigation.navigate('FileStorage', { chatId })}>
                         <OptionItem label="Image, file, link" icon="folder" />
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={() => setPinVisible(true)}>
-                        <OptionItem label="Pinned message" icon="pin" />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigation.navigate('ListPollsScreen', { chatId })}>
-                        <OptionItem label="Polls" icon="bar-chart" />
-                    </TouchableOpacity>
                     <TouchableOpacity onPress={() => navigation.navigate('MemberListScreen', { chatId })}>
                         <OptionItem label={numberOfMembers} icon="people" />
                     </TouchableOpacity>
@@ -235,9 +231,6 @@ export default function GroupInfoScreen() {
                     /> */}
 
                     {/* Danger Zone */}
-                    {/* <TouchableOpacity onPress={() => setReportVisible(true)}>
-                        <OptionItem label="Report" textColor="red" />
-                    </TouchableOpacity> */}
                     <TouchableOpacity onPress={() => setLeaveVisible(true)}>
                         <OptionItem label="Leave group" icon="exit" textColor="red" />
                     </TouchableOpacity>
@@ -255,7 +248,14 @@ export default function GroupInfoScreen() {
                                 <TextInput style={styles.input} value={newGroupName} onChangeText={setNewGroupName} />
                                 <View style={styles.modalActions}>
                                     <Button title="Cancel" color="red" onPress={() => setEditVisible(false)} />
-                                    <Button title="Apply" onPress={() => handleEditGroupName()} />
+                                    <Button
+                                        title="Apply"
+                                        onPress={() => {
+                                            Keyboard.dismiss();
+                                            handleEditGroupName(newGroupName);
+                                            setEditVisible(false);
+                                        }}
+                                    />
                                 </View>
                             </View>
                         </View>

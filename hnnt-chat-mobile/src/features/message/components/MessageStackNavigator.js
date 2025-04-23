@@ -31,7 +31,7 @@ export default function MessageStackNavigator() {
                             chatId={route.params?.chatId}
                             actions={[
                                 { icon: 'video', onPress: () => navigation.navigate('GroupCallScreen') },
-                                { icon: 'search', onPress: () => navigation.navigate('FindGrMessagesScreen') },
+                                { icon: 'search', onPress: () => navigation.navigate('FindGrMessagesScreen', { chatId: route.params?.chatId }) },
 
                                 {
                                     icon: 'info',
@@ -90,7 +90,14 @@ export default function MessageStackNavigator() {
                     ),
                 })}
             />
-            <MessageStack.Screen name="FindGrMessagesScreen" component={FindGrMessagesScreen} />
+            <MessageStack.Screen
+                name="FindGrMessagesScreen"
+                component={FindGrMessagesScreen}
+                options={({ navigation, route }) => ({
+                    headerShown: true,
+                    header: () => <SharedChatHeader navigation={navigation} chatName="Search messangs" actions={[]} />,
+                })}
+            />
             <MessageStack.Screen
                 name="AddMemberScreen"
                 component={AddMembersScreen}
