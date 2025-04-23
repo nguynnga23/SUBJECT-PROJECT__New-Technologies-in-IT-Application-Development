@@ -14,7 +14,7 @@ import {
     Platform,
     Alert,
     Dimensions,
-    Linking
+    Linking,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -52,6 +52,8 @@ import { socket } from '../../../../configs/socket';
 import { set } from 'date-fns';
 import { Audio } from 'expo-av';
 import ForwardMessageModal from '../../components/ForwardMessageModal';
+import { getPollById } from '../../services/GroupChat/poll/PollService'; // Import the API function
+import PollDetail from './poll/PollDetail'; // Import PollDetail component
 
 const groupMessagesByDate = (messages) => {
     return messages.reduce((acc, message) => {
@@ -103,6 +105,8 @@ export default function GroupChatScreen() {
     const [selectedVideo, setSelectedVideo] = useState(null);
     const [modalVideoVisible, setModalVideoVisible] = useState(false);
     const [selectedForwardMessage, setSelectedForwardMessage] = useState(null);
+    const [selectedPoll, setSelectedPoll] = useState(null);
+    const [modalPollVisible, setModalPollVisible] = useState(false);
 
     useEffect(() => {
         const parentNav = navigation.getParent();
@@ -246,10 +250,9 @@ export default function GroupChatScreen() {
             let response = null;
             if (isLink) {
                 response = await sendMessage(chatId, content, 'link', replyMessage?.id, null, null, null, token);
-            }
-            else {
+            } else {
                 response = await sendMessage(chatId, content, 'text', replyMessage?.id, null, null, null, token);
-            };
+            }
             if (replyMessage === null) {
                 socket.emit('send_message', {
                     chatId: chatId,
@@ -401,6 +404,17 @@ export default function GroupChatScreen() {
         }
     };
 
+    const handlePollClick = async (pollId) => {
+        try {
+            const pollDetails = await getPollById(pollId);
+            setSelectedPoll(pollDetails);
+            setModalPollVisible(true);
+        } catch (error) {
+            console.warn('Error fetching poll details:', error);
+            Alert.alert('Error', 'Failed to fetch poll details.');
+        }
+    };
+
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <View style={styles.container}>
@@ -502,7 +516,14 @@ export default function GroupChatScreen() {
                                                                 Linking.openURL(item.content);
                                                             }}
                                                         >
-                                                            <Text style={{ fontSize: 16, lineHeight: 22, color: '#007AFF', textDecorationLine: 'underline' }}>
+                                                            <Text
+                                                                style={{
+                                                                    fontSize: 16,
+                                                                    lineHeight: 22,
+                                                                    color: '#007AFF',
+                                                                    textDecorationLine: 'underline',
+                                                                }}
+                                                            >
                                                                 {item.content}
                                                             </Text>
                                                         </TouchableOpacity>
@@ -605,6 +626,14 @@ export default function GroupChatScreen() {
                                                                 shouldPlay={false}
                                                                 isLooping={true}
                                                             />
+                                                        </TouchableOpacity>
+                                                    )}
+
+                                                    {item.type === 'poll' && (
+                                                        <TouchableOpacity onPress={() => handlePollClick(item.content)}>
+                                                            <Text style={styles.pollText}>
+                                                                [Poll] Click to view details
+                                                            </Text>
                                                         </TouchableOpacity>
                                                     )}
                                                 </>
@@ -939,6 +968,28 @@ export default function GroupChatScreen() {
                         onClose={() => setModalForwardVisible(false)}
                         onForward={handleForwardMessage}
                     />
+
+                    {/* Modal for Poll Details */}
+                    <Modal visible={modalPollVisible} transparent={true} animationType="fade">
+                        <View style={styles.modalContainer}>
+                            <View style={styles.pollModalContent}>
+                                {selectedPoll && (
+                                    <PollDetail
+                                        poll={selectedPoll}
+                                        onVote={async (chatId, pollId, optionId, voterId) => {
+                                            // Implement voting logic here
+                                            console.log(
+                                                `Voted on poll ${pollId} with option ${optionId} by user ${voterId}`,
+                                            );
+                                        }}
+                                    />
+                                )}
+                                <TouchableOpacity style={styles.closeButton} onPress={() => setModalPollVisible(false)}>
+                                    <Text style={styles.closeButtonText}>Close</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </Modal>
                 </SafeAreaProvider>
             </View>
         </KeyboardAvoidingView>
@@ -1305,5 +1356,29 @@ const styles = StyleSheet.create({
     forwardMessageText: {
         fontSize: 16,
         color: '#333',
+    },
+    pollText: {
+        fontSize: 16,
+        color: '#007AFF',
+        textDecorationLine: 'underline',
+    },
+    pollModalContent: {
+        width: '90%',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+        alignItems: 'center',
+        elevation: 5,
+    },
+    closeButton: {
+        marginTop: 10,
+        padding: 10,
+        backgroundColor: '#007AFF',
+        borderRadius: 5,
+    },
+    closeButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });

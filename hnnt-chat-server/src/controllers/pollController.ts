@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import prisma from '../utils/prismaClient';
 
 // Create a new poll
-export const createPoll = async (req: Request, res: Response) => {
+export const createPoll = async (req: Request, res: Response): Promise<void> => {
     try {
         const { chatId, creatorId, title, endsAt, options } = req.body;
 
@@ -19,6 +19,16 @@ export const createPoll = async (req: Request, res: Response) => {
             include: { options: true },
         });
 
+        // Create a message with type 'poll' and content containing the pollId
+        await prisma.message.create({
+            data: {
+                type: 'poll',
+                content: poll.id,
+                chat: { connect: { id: chatId } },
+                sender: { connect: { id: creatorId } },
+            },
+        });
+
         res.status(201).json(poll);
     } catch (error) {
         console.error(error);
@@ -27,7 +37,7 @@ export const createPoll = async (req: Request, res: Response) => {
 };
 
 // Get all polls for a chat
-export const getPollsByChat = async (req: Request, res: Response) => {
+export const getPollsByChat = async (req: Request, res: Response): Promise<void> => {
     try {
         const { chatId } = req.params;
 
@@ -43,8 +53,29 @@ export const getPollsByChat = async (req: Request, res: Response) => {
     }
 };
 
+// Get a poll by ID
+export const getPollById = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { pollId } = req.params;
+
+        const poll = await prisma.poll.findUnique({
+            where: { id: pollId },
+            include: { options: { include: { votes: true } } },
+        });
+
+        if (!poll) {
+            res.status(404).json({ error: 'Poll not found' });
+        }
+
+        res.status(200).json(poll);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch poll' });
+    }
+};
+
 // Vote on a poll option
-export const votePollOption = async (req: Request, res: Response) => {
+export const votePollOption = async (req: Request, res: Response): Promise<void> => {
     try {
         const { pollOptionId, voterId } = req.body;
 
@@ -63,7 +94,7 @@ export const votePollOption = async (req: Request, res: Response) => {
 };
 
 // Delete a poll
-export const deletePoll = async (req: Request, res: Response) => {
+export const deletePoll = async (req: Request, res: Response): Promise<void> => {
     try {
         const { pollId } = req.params;
 
