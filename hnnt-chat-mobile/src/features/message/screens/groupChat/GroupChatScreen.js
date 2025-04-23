@@ -52,7 +52,7 @@ import { socket } from '../../../../configs/socket';
 import { set } from 'date-fns';
 import { Audio } from 'expo-av';
 import ForwardMessageModal from '../../components/ForwardMessageModal';
-import { getPollById } from '../../services/GroupChat/poll/PollService'; // Import the API function
+import { getPollById, votePollOption, getPollsByChat } from '../../services/GroupChat/poll/PollService'; // Import the API function
 import PollDetail from './poll/PollDetail'; // Import PollDetail component
 
 const groupMessagesByDate = (messages) => {
@@ -420,15 +420,14 @@ export default function GroupChatScreen() {
             console.warn('Error forwarding message:', error);
         }
     };
-
-    const handlePollClick = async (pollId) => {
+    const handleVote = async (chatId, pollId, optionId, voterId) => {
         try {
-            const pollDetails = await getPollById(pollId);
-            setSelectedPoll(pollDetails);
-            setModalPollVisible(true);
+            console.log('Attempting to vote:', { chatId, pollId, optionId, voterId });
+            await votePollOption({ chatId, pollId, pollOptionId: optionId, voterId });
+            Alert.alert('Success', 'Your vote has been recorded.');
         } catch (error) {
-            console.warn('Error fetching poll details:', error);
-            Alert.alert('Error', 'Failed to fetch poll details.');
+            console.error('Error during voting:', error.response?.data || error.message);
+            Alert.alert('Error', `Failed to record your vote: ${error.response?.data?.error || error.message}`);
         }
     };
 
@@ -1024,24 +1023,9 @@ export default function GroupChatScreen() {
                     <Modal visible={modalPollVisible} transparent={true} animationType="fade">
                         <View style={styles.modalContainer}>
                             <View style={styles.pollModalContent}>
-                                {selectedPoll && (
-                                    <PollDetail
-                                        poll={selectedPoll}
-                                        onVote={async (pollId, optionId) => {
-                                            try {
-                                                const voterId = currentUserId;
-                                                await voteOnPoll(pollId, optionId, voterId, token); // Implement the voting API call
-                                                Alert.alert('Success', 'Your vote has been recorded.');
-                                                setModalPollVisible(false);
-                                            } catch (error) {
-                                                console.warn('Error voting on poll:', error);
-                                                Alert.alert('Error', 'Failed to record your vote.');
-                                            }
-                                        }}
-                                    />
-                                )}
+                                {selectedPoll && <PollDetail poll={selectedPoll} onVote={handleVote} />}
                                 <TouchableOpacity style={styles.closeButton} onPress={() => setModalPollVisible(false)}>
-                                    <Text style={styles.closeButtonText}>Close</Text>
+                                    <Ionicons name="close" size={24} />
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -1427,16 +1411,16 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     closeButton: {
-        marginTop: 10,
-        padding: 10,
-        backgroundColor: '#007AFF',
-        borderRadius: 5,
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        padding: 5,
+        backgroundColor: 'transparent',
     },
     closeButtonText: {
-        color: 'white',
-        textAlign: 'center',
-        fontSize: 16,
+        fontSize: 20,
         fontWeight: 'bold',
+        color: '#007AFF',
     },
     pollMessage: {
         backgroundColor: '#fff', // Màu nền cho poll message
