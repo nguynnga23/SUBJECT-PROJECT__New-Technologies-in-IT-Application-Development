@@ -760,6 +760,32 @@ export const changeNameGroup = async (chatId, name) => {
     }
 };
 
+export const changeLeaderRole = async (chatId, accountId) => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token is required');
+
+        const response = await fetch(`http://localhost:4000/api/groups/role`, {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ accountId, chatId }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.message || `Lỗi ${response.status}: ${response.statusText}`);
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error('Lỗi khi upload file:', error);
+        throw error;
+    }
+};
+
 export const uploadFileFormChatGroupToS3 = async (file) => {
     try {
         const token = localStorage.getItem('token');

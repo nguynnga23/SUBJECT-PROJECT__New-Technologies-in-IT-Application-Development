@@ -5,14 +5,14 @@ import {
     setActiveChat,
     setShowOrOffRightBar,
     setShowOrOffRightBarSearch,
+    changeLeaderSlice,
 } from '../../redux/slices/chatSlice';
-import { kickMember, leaveGroup } from '../../screens/Messaging/api';
+import { changeLeaderRole, kickMember, leaveGroup } from '../../screens/Messaging/api';
 
 function PopupMemberManage({ setShowPopup, leader, member, group }) {
     const dispatch = useDispatch();
 
     const handleRemoveMember = async (isLeader) => {
-        // dispatch(removeMemberOfGroup({ memberId: member.id, groupId: group.id }));
         const removeMember = await kickMember(group.id, member.accountId);
         if (removeMember) {
             dispatch(removeMemberOfGroupSlice({ memberId: member.accountId }));
@@ -22,6 +22,13 @@ function PopupMemberManage({ setShowPopup, leader, member, group }) {
             dispatch(setShowOrOffRightBar(false));
             dispatch(setShowOrOffRightBarSearch(false));
         }
+    };
+
+    const handleChangeLeader = async (isLeader) => {
+        const changeLeader = await changeLeaderRole(group.id, member.accountId);
+        // if (changeLeader) {
+        //     dispatch(changeLeaderSlice({ memberId: member.accountId }));
+        // }
     };
 
     const handleLeaveGroup = () => {
@@ -47,23 +54,37 @@ function PopupMemberManage({ setShowPopup, leader, member, group }) {
 
     return (
         <div
-            className="absolute right-[5px] top-0 w-40 bg-white shadow-lg rounded-lg border z-999 dark:bg-gray-700 dark:text-gray-300"
+            className="absolute right-[5px] top-0 w-40 bg-white shadow-lg rounded-lg border z-999 dark:bg-gray-700 dark:text-gray-300 z-10"
             ref={popupRef}
         >
             <div
                 onClick={() => {
                     setShowPopup(false);
                 }}
-                className="flex items-center my-1 hover:bg-gray-100 hover:dark:bg-gray-700 rounded-lg cursor-pointer"
+                className="my-1 mx-1 rounded-lg"
             >
                 {leader ? (
-                    <span className="flex-1 my-1 text-sm text-center" onClick={handleLeaveGroup}>
+                    <div
+                        className="flex-1 p-2 text-sm hover:bg-gray-100 hover:dark:bg-gray-700 cursor-pointer"
+                        onClick={handleLeaveGroup}
+                    >
                         Rời nhóm
-                    </span>
+                    </div>
                 ) : (
-                    <span className="flex-1 my-1 text-sm text-center" onClick={() => handleRemoveMember(leader)}>
-                        Xóa khỏi nhóm
-                    </span>
+                    <div>
+                        <div
+                            className="flex-1 p-2 text-sm hover:bg-gray-100 hover:dark:bg-gray-700 cursor-pointer"
+                            onClick={() => handleChangeLeader(leader)}
+                        >
+                            Chuyển trưởng nhóm
+                        </div>
+                        <div
+                            className="flex-1 p-2 text-sm hover:bg-gray-100 hover:dark:bg-gray-700 cursor-pointer"
+                            onClick={() => handleRemoveMember(leader)}
+                        >
+                            Xóa khỏi nhóm
+                        </div>
+                    </div>
                 )}
             </div>
         </div>

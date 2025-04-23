@@ -286,6 +286,24 @@ const chatSlice = createSlice({
             const { name } = action.payload;
             state.activeChat.name = name;
         },
+        changeLeaderSlice: (state, action) => {
+            const { accountId } = action.payload;
+            if (state.activeChat?.isGroup && state.activeChat.chatParticipants) {
+                state.activeChat.chatParticipants = state.activeChat.chatParticipants.map((participant) => {
+                    if (participant.account.id === accountId) {
+                        // Gán quyền leader cho người được chọn
+                        return { ...participant, role: 'LEADER' };
+                    }
+
+                    if (participant.role === 'LEADER') {
+                        // Hạ cấp leader hiện tại về member
+                        return { ...participant, role: 'MEMBER' };
+                    }
+
+                    return participant;
+                });
+            }
+        },
     },
 });
 
@@ -315,5 +333,6 @@ export const {
     searchFollowKeyWord,
     setAvatarForGroupChat,
     updateGroupName,
+    changeLeaderSlice,
 } = chatSlice.actions;
 export default chatSlice.reducer;

@@ -12,7 +12,7 @@ import {
     getPinnedMessage,
     updateGroupName,
     uploadFileToS3,
-    updateGroupAvatar
+    updateGroupAvatar,
 } from '../controllers/groupChatManageController';
 import { authenticate } from '../middleware/auth';
 import multer from 'multer';

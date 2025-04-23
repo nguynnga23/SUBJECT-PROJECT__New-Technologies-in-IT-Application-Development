@@ -14,7 +14,7 @@ function TabChatInfoGroup({ setActiveMessageTab, group }) {
     const leader = group?.participants?.find((g) => g.role === 'LEADER');
     const leaderId = leader?.accountId;
     return (
-        <div className="overflow-auto">
+        <div className="overflow-auto h-[calc(100vh-105px)]">
             <div className="flex relative border-b p-4 items-center justify-center dark:bg-gray-800 dark:text-gray-300">
                 <IoChevronBack
                     size={25}
