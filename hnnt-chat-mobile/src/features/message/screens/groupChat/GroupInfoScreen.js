@@ -41,6 +41,7 @@ export default function GroupInfoScreen() {
     const [token, setToken] = useState(null);
     const [isMuted, setIsMuted] = useState();
     const [editVisible, setEditVisible] = useState(false);
+    const [groupName, setGroupName] = useState('');
     const [newGroupName, setNewGroupName] = useState('');
     const [leaveVisible, setLeaveVisible] = useState(false);
     const [avatar, setAvatar] = useState(null);
@@ -56,7 +57,7 @@ export default function GroupInfoScreen() {
             setToken(token);
             const chatInfo = await fetchChat(chatId, token); // Replace with actual token
             setData(chatInfo);
-            setNewGroupName(chatInfo.name);
+            setGroupName(chatInfo.name);
             setAvatar(chatInfo.avatar);
             const userId = getUserIdFromToken(token);
             const participant = chatInfo.participants.find((p) => p.accountId === userId);
@@ -85,10 +86,10 @@ export default function GroupInfoScreen() {
         }
     };
 
-    const handleEditGroupName = async (n_groupName) => {
+    const handleEditGroupName = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
-            const response = await editGroupName(n_groupName, chatId, token);
+            const response = await editGroupName(newGroupName, chatId, token);
             fetchChatInfo();
             Alert.alert('Success', response.message);
         } catch (error) {
@@ -177,7 +178,7 @@ export default function GroupInfoScreen() {
                             />
                         )}
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Text style={styles.groupName}>{newGroupName}</Text>
+                            <Text style={styles.groupName}>{groupName}</Text>
                             {userRole === 'LEADER' && (
                                 <TouchableOpacity onPress={() => setEditVisible(true)}>
                                     <AntDesign style={{ marginTop: 7 }} name="edit" size={24} color="black" />
