@@ -15,11 +15,13 @@ import {
     setOnOrOfPin,
     setOnOrOfNotify,
     setAvatarForGroupChat,
+    updateGroupName,
 } from '../../redux/slices/chatSlice';
 import { useEffect, useRef, useState } from 'react';
 import Archive from '../Archive/Archive';
 import PopupAddGroup from '../Popup/PopupAddGroup';
 import {
+    changeNameGroup,
     deleteAllChatOfChat,
     disbandGroup,
     editAvatar,
@@ -45,8 +47,22 @@ function TabChatInfo({ setActiveMessageTab }) {
     const [linkOpen, setLinkOpen] = useState(true);
 
     const fileInputRef = useRef(null);
+    const leader = activeChat?.participants?.find((g) => g.role === 'LEADER');
+    const isGroupLeader = leader?.accountId === userId;
 
     const dispatch = useDispatch();
+
+    const [groupName, setGroupName] = useState(activeChat?.name || '');
+
+    const handleGroupNameChange = async () => {
+        if (groupName.trim() && groupName !== activeChat?.name) {
+            // Gửi API đổi tên nhóm ở đây
+            const saveGroupName = await changeNameGroup(activeChat.id, groupName);
+            if (saveGroupName) {
+                dispatch(updateGroupName({ name: groupName }));
+            }
+        }
+    };
 
     const handleRemoveMember = () => {
         leaveGroup(chatId, userId);
@@ -116,10 +132,23 @@ function TabChatInfo({ setActiveMessageTab }) {
                     className="w-[55px] h-[55px] rounded-full border object-cover"
                 />
                 <h3 className="font-bold text-lg mt-2 font-medium">
-                    {activeChat?.isGroup
-                        ? activeChat?.name
-                        : activeChat?.participants?.find((user) => user.accountId !== userId)?.account?.name ||
-                          'Người dùng'}
+                    {activeChat?.isGroup ? (
+                        isGroupLeader ? (
+                            <input
+                                className="font-bold text-lg mt-2 font-medium bg-transparent border-b border-gray-300 outline-none text-center"
+                                value={groupName}
+                                onChange={(e) => setGroupName(e.target.value)}
+                                onBlur={handleGroupNameChange}
+                            />
+                        ) : (
+                            <h3 className="font-bold text-lg mt-2 font-medium">{activeChat?.name}</h3>
+                        )
+                    ) : (
+                        <h3 className="font-bold text-lg mt-2 font-medium">
+                            {activeChat?.participants?.find((user) => user.accountId !== userId)?.account?.name ||
+                                'Người dùng'}
+                        </h3>
+                    )}
                 </h3>
             </div>
             <div className="flex item-center justify-center border-b-[7px] dark:border-b-gray-900 ">

@@ -281,6 +281,11 @@ const chatSlice = createSlice({
             const { avatar } = action.payload;
             state.activeChat.avatar = avatar;
         },
+
+        updateGroupName: (state, action) => {
+            const { name } = action.payload;
+            state.activeChat.name = name;
+        },
     },
 });
 
@@ -309,5 +314,6 @@ export const {
     destroyGroup,
     searchFollowKeyWord,
     setAvatarForGroupChat,
+    updateGroupName,
 } = chatSlice.actions;
 export default chatSlice.reducer;
