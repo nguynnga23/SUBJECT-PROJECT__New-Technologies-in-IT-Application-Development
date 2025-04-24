@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, FlatList, TouchableOpacity, Text } from 'react-native';
 import { createPoll } from '../../../services/GroupChat/poll/PollService';
-
+import { sendMessage } from '../../../services/ChatService';
 const CreateNewPoll = ({ chatId, creatorId, onCreatePoll }) => {
     const [title, setTitle] = useState('');
     const [options, setOptions] = useState(['', '']); // Bắt đầu với 2 lựa chọn trống

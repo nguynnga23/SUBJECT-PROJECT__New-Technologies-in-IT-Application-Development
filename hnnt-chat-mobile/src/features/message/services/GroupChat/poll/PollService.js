@@ -17,7 +17,7 @@ export const createPoll = async (pollData) => {
 // Get polls by chat ID
 export const getPollsByChat = async (chatId) => {
     try {
-        const response = await axios.get(`${API_BASE_URL}/chat/${chatId}`);
+        const response = await axios.get(`${API_BASE_URL}/${chatId}`);
         return response.data;
     } catch (error) {
         console.error('Failed to fetch polls:', error);
@@ -28,7 +28,7 @@ export const getPollsByChat = async (chatId) => {
 // Get a poll by ID
 export const getPollById = async (pollId) => {
     try {
-        const response = await axios.get(`${API_BASE_URL}/${pollId}`);
+        const response = await axios.get(`${API_BASE_URL}/pollChat/${pollId}`);
         return response.data;
     } catch (error) {
         console.error('Failed to fetch poll by ID:', error);
