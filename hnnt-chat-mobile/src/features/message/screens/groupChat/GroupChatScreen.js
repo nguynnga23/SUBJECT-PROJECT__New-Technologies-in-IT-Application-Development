@@ -14,6 +14,7 @@ import {
     Platform,
     Alert,
     Dimensions,
+    Linking,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -51,6 +52,8 @@ import { socket } from '../../../../configs/socket';
 import { set } from 'date-fns';
 import { Audio } from 'expo-av';
 import ForwardMessageModal from '../../components/ForwardMessageModal';
+import { getPollById, votePollOption, getPollsByChat } from '../../services/GroupChat/poll/PollService'; // Import the API function
+import PollDetail from './poll/PollDetail'; // Import PollDetail component
 
 const groupMessagesByDate = (messages) => {
     return messages.reduce((acc, message) => {
@@ -102,6 +105,9 @@ export default function GroupChatScreen() {
     const [selectedVideo, setSelectedVideo] = useState(null);
     const [modalVideoVisible, setModalVideoVisible] = useState(false);
     const [selectedForwardMessage, setSelectedForwardMessage] = useState(null);
+    const [selectedPoll, setSelectedPoll] = useState(null);
+    const [modalPollVisible, setModalPollVisible] = useState(false);
+    const [pollMap, setPollMap] = useState({});
 
     useEffect(() => {
         const parentNav = navigation.getParent();
@@ -130,6 +136,21 @@ export default function GroupChatScreen() {
 
             const data = await fetchMessages(chatId, token); // Gọi API để lấy danh sách tin nhắn
             setMessages(data);
+            // 👉 Lấy ra tất cả pollId từ messages
+            const pollMessages = data.filter((msg) => msg.type === 'poll' && msg.content);
+            const pollIds = pollMessages.map((msg) => msg.content);
+            // 👉 Gọi API để lấy chi tiết của từng poll
+            const pollDetails = {};
+            for (const pollId of pollIds) {
+                try {
+                    const poll = await getPollById(pollId); // giả sử có API này
+                    pollDetails[pollId] = poll;
+                } catch (error) {
+                    console.warn(`Could not fetch poll ${pollId}:`, error);
+                }
+            }
+            setPollMap(pollDetails); // ⬅️ set vào state (tạo useState pollMap trước)
+            // console.log(pollDetails);
 
             // //get blocked users
             // const chatInfo = await fetchChat(chatId, token);
@@ -166,20 +187,28 @@ export default function GroupChatScreen() {
 
     //send message
     useEffect(() => {
-        const handleReceiveMessage = ({ chatId: receivedChatId, newMessage }) => {
-            if (chatId !== receivedChatId) {
-                return;
+        const handleReceiveMessage = async ({ chatId: receivedChatId, newMessage }) => {
+            if (chatId !== receivedChatId) return;
+
+            setMessages((prev) => [...prev, newMessage]);
+
+            // Nếu là poll → gọi thêm API lấy chi tiết
+            if (newMessage.type === 'poll' && newMessage.content) {
+                try {
+                    const poll = await getPollById(newMessage.content);
+                    setPollMap((prevMap) => ({
+                        ...prevMap,
+                        [newMessage.content]: poll,
+                    }));
+                } catch (error) {
+                    console.warn('Could not fetch poll:', error);
+                }
             }
-            // loadMessages();
-            setMessages((prevMessages) => [...prevMessages, newMessage]);
         };
 
         socket.on('receive_message', handleReceiveMessage);
-
-        return () => {
-            socket.off('receive_message', handleReceiveMessage);
-        };
-    }, []);
+        return () => socket.off('receive_message', handleReceiveMessage);
+    }, [chatId]); // Ensure this hook is at the top level
 
     //del and destroy
     useEffect(() => {
@@ -240,7 +269,14 @@ export default function GroupChatScreen() {
     const handleSendMessage = async (content) => {
         Keyboard.dismiss();
         try {
-            const response = await sendMessage(chatId, content, 'text', replyMessage?.id, null, null, null, token);
+            //Kiểm tra xem content có phải là link hay không
+            const isLink = content.match(/https?:\/\/[^\s]+/g);
+            let response = null;
+            if (isLink) {
+                response = await sendMessage(chatId, content, 'link', replyMessage?.id, null, null, null, token);
+            } else {
+                response = await sendMessage(chatId, content, 'text', replyMessage?.id, null, null, null, token);
+            }
             if (replyMessage === null) {
                 socket.emit('send_message', {
                     chatId: chatId,
@@ -391,6 +427,16 @@ export default function GroupChatScreen() {
             console.warn('Error forwarding message:', error);
         }
     };
+    const handleVote = async (chatId, pollId, optionId, voterId) => {
+        try {
+            console.log('Attempting to vote:', { chatId, pollId, optionId, voterId });
+            await votePollOption({ chatId, pollId, pollOptionId: optionId, voterId });
+            Alert.alert('Success', 'Your vote has been recorded.');
+        } catch (error) {
+            console.error('Error during voting:', error.response?.data || error.message);
+            Alert.alert('Error', `Failed to record your vote: ${error.response?.data?.error || error.message}`);
+        }
+    };
 
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -431,214 +477,265 @@ export default function GroupChatScreen() {
                                     >
                                         <View
                                             style={[
-                                                styles.messageContainer,
-                                                item.senderId === currentUserId
-                                                    ? styles.myMessage
-                                                    : styles.otherMessage,
+                                                styles.messageContainer, // Kế thừa từ messageContainer
+                                                item.type === 'poll' // Nếu message là 'poll', sẽ áp dụng style pollMessage
+                                                    ? styles.pollMessage
+                                                    : item.senderId === currentUserId
+                                                    ? styles.myMessage // Nếu là message của người gửi, sử dụng myMessage
+                                                    : styles.otherMessage, // Nếu không phải của người gửi, sử dụng otherMessage
                                             ]}
                                         >
-                                            <Text style={styles.sender}>{item.sender.name}</Text>
-
-                                            {/* Kiểm tra nếu tin nhắn bị thu hồi */}
-                                            {item.destroy ? (
-                                                <Text style={styles.recalledMessage}>message had recall</Text>
-                                            ) : (
+                                            {item.type !== 'poll' && (
                                                 <>
-                                                    {item.replyToId !== null && (
-                                                        <TouchableOpacity
-                                                            style={styles.replyBox}
-                                                            onPress={() => {
-                                                                const replyToMessageIndex = messages.findIndex(
-                                                                    (msg) => msg.id === item.replyToId,
-                                                                );
-                                                                if (
-                                                                    replyToMessageIndex !== -1 &&
-                                                                    flatListRef?.current
-                                                                ) {
-                                                                    flatListRef.current.scrollToIndex({
-                                                                        index: replyToMessageIndex,
-                                                                        animated: true,
-                                                                    });
-                                                                } else {
-                                                                    Alert.alert(
-                                                                        'Error',
-                                                                        'The replied message could not be found.',
-                                                                    );
-                                                                }
-                                                            }}
-                                                        >
-                                                            <Text style={styles.replyUser}>
-                                                                Replying to {item.replyTo.sender.name}
-                                                            </Text>
-                                                            <Text style={styles.replyMessage}>
-                                                                {item.replyTo.content}
-                                                            </Text>
-                                                            {/* {!item.replyTo.destroy &&({item.replyTo.type === 'text' ? (<Text style={styles.replyMessage}>
+                                                    <Text style={styles.sender}>{item.sender.name}</Text>
+
+                                                    {/* Kiểm tra nếu tin nhắn bị thu hồi */}
+                                                    {item.destroy ? (
+                                                        <Text style={styles.recalledMessage}>message had recall</Text>
+                                                    ) : (
+                                                        <>
+                                                            {item.replyToId !== null && (
+                                                                <TouchableOpacity
+                                                                    style={styles.replyBox}
+                                                                    onPress={() => {
+                                                                        const replyToMessageIndex = messages.findIndex(
+                                                                            (msg) => msg.id === item.replyToId,
+                                                                        );
+                                                                        if (
+                                                                            replyToMessageIndex !== -1 &&
+                                                                            flatListRef?.current
+                                                                        ) {
+                                                                            flatListRef.current.scrollToIndex({
+                                                                                index: replyToMessageIndex,
+                                                                                animated: true,
+                                                                            });
+                                                                        } else {
+                                                                            Alert.alert(
+                                                                                'Error',
+                                                                                'The replied message could not be found.',
+                                                                            );
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <Text style={styles.replyUser}>
+                                                                        Replying to {item.replyTo.sender.name}
+                                                                    </Text>
+                                                                    <Text style={styles.replyMessage}>
+                                                                        {item.replyTo.content}
+                                                                    </Text>
+                                                                    {/* {!item.replyTo.destroy &&({item.replyTo.type === 'text' ? (<Text style={styles.replyMessage}>
                                                                 {item.replyTo.content}
                                                             </Text>
                                                             ) : (<Text style={styles.replyMessage}>
                                                                 {item.replyTo.fileName}
                                                             </Text>)};)}; */}
-                                                        </TouchableOpacity>
-                                                    )}
+                                                                </TouchableOpacity>
+                                                            )}
 
-                                                    {/* Hiển thị nội dung tin nhắn */}
-                                                    {item.type === 'text' && (
-                                                        <Text style={styles.message}>{item.content}</Text>
-                                                    )}
+                                                            {/* Hiển thị nội dung tin nhắn */}
+                                                            {item.type === 'text' && (
+                                                                <Text style={styles.message}>{item.content}</Text>
+                                                            )}
 
-                                                    {/* Hiển thị file, hình ảnh, hoặc audio nếu có */}
-                                                    {/* {item.audioUri && (
-                                                        <TouchableOpacity
-                                                            onPress={() => playAudio(item.audioUri)}
-                                                            style={styles.playButton}
-                                                        >
-                                                            <Ionicons name="play-circle" size={30} color="blue" />
-                                                        </TouchableOpacity>
-                                                    )} */}
-
-                                                    {item.type === 'image' && (
-                                                        <TouchableOpacity
-                                                            onPress={() => {
-                                                                setSelectedImage(item.content);
-                                                                setModalZoomVisible(true);
-                                                            }}
-                                                            onLongPress={() => {
-                                                                setSelectedImage(item.content);
-                                                                setModalDownVisible(true);
-                                                            }}
-                                                        >
-                                                            <Image
-                                                                source={{ uri: encodeURI(item.content) }}
-                                                                style={{ width: 200, height: 200, borderRadius: 10 }}
-                                                            />
-                                                        </TouchableOpacity>
-                                                    )}
-
-                                                    {item.type === 'imageGroup' && (
-                                                        <View
-                                                            style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}
-                                                        >
-                                                            {JSON.parse(item.content || '[]').map((img, index) => (
+                                                            {item.type === 'link' && (
                                                                 <TouchableOpacity
-                                                                    key={index}
                                                                     onPress={() => {
-                                                                        setSelectedImage(img.url);
+                                                                        Linking.openURL(item.content);
+                                                                    }}
+                                                                >
+                                                                    <Text
+                                                                        style={{
+                                                                            fontSize: 16,
+                                                                            lineHeight: 22,
+                                                                            color: '#007AFF',
+                                                                            textDecorationLine: 'underline',
+                                                                        }}
+                                                                    >
+                                                                        {item.content}
+                                                                    </Text>
+                                                                </TouchableOpacity>
+                                                            )}
+
+                                                            {item.type === 'image' && (
+                                                                <TouchableOpacity
+                                                                    onPress={() => {
+                                                                        setSelectedImage(item.content);
                                                                         setModalZoomVisible(true);
                                                                     }}
                                                                     onLongPress={() => {
-                                                                        setSelectedImage(img.url);
+                                                                        setSelectedImage(item.content);
                                                                         setModalDownVisible(true);
                                                                     }}
                                                                 >
                                                                     <Image
-                                                                        source={{ uri: img.url }}
+                                                                        source={{ uri: encodeURI(item.content) }}
                                                                         style={{
-                                                                            width: 100,
-                                                                            height: 100,
+                                                                            width: 200,
+                                                                            height: 200,
                                                                             borderRadius: 10,
-                                                                            marginBottom: 8,
                                                                         }}
                                                                     />
+                                                                </TouchableOpacity>
+                                                            )}
+
+                                                            {item.type === 'imageGroup' && (
+                                                                <View
+                                                                    style={{
+                                                                        flexDirection: 'row',
+                                                                        flexWrap: 'wrap',
+                                                                        gap: 8,
+                                                                    }}
+                                                                >
+                                                                    {JSON.parse(item.content || '[]').map(
+                                                                        (img, index) => (
+                                                                            <TouchableOpacity
+                                                                                key={index}
+                                                                                onPress={() => {
+                                                                                    setSelectedImage(img.url);
+                                                                                    setModalZoomVisible(true);
+                                                                                }}
+                                                                                onLongPress={() => {
+                                                                                    setSelectedImage(img.url);
+                                                                                    setModalDownVisible(true);
+                                                                                }}
+                                                                            >
+                                                                                <Image
+                                                                                    source={{ uri: img.url }}
+                                                                                    style={{
+                                                                                        width: 100,
+                                                                                        height: 100,
+                                                                                        borderRadius: 10,
+                                                                                        marginBottom: 8,
+                                                                                    }}
+                                                                                />
+                                                                            </TouchableOpacity>
+                                                                        ),
+                                                                    )}
+                                                                </View>
+                                                            )}
+
+                                                            {item.type === 'file' && (
+                                                                <TouchableOpacity
+                                                                    onLongPress={() => {
+                                                                        setSelectedFile(item.content);
+                                                                        setModalDownFileVisible(true);
+                                                                    }}
+                                                                    style={styles.fileContainer}
+                                                                >
+                                                                    <Ionicons
+                                                                        name="document-text-outline"
+                                                                        size={24}
+                                                                        color="blue"
+                                                                    />
+                                                                    <Text style={styles.fileName}>
+                                                                        {item.fileName} {item.fileSize}
+                                                                    </Text>
+                                                                </TouchableOpacity>
+                                                            )}
+
+                                                            {item.type === 'audio' && (
+                                                                <TouchableOpacity
+                                                                    onPress={() => playAudio(item.content)}
+                                                                    style={styles.audioMessageContainer}
+                                                                    onLongPress={() => {
+                                                                        setSelectedFile(item.content);
+                                                                        setModalDownFileVisible(true);
+                                                                    }}
+                                                                >
+                                                                    <Ionicons
+                                                                        name="play-circle"
+                                                                        size={30}
+                                                                        color="blue"
+                                                                    />
+                                                                    <Text style={styles.audioMessageText}>
+                                                                        Voice Message
+                                                                    </Text>
+                                                                </TouchableOpacity>
+                                                            )}
+
+                                                            {item.fileType?.includes('video') && (
+                                                                <TouchableOpacity
+                                                                    style={styles.inlineVideoContainer}
+                                                                    onLongPress={() => {
+                                                                        setSelectedFile(item.content);
+                                                                        setModalDownFileVisible(true);
+                                                                    }}
+                                                                >
+                                                                    <Video
+                                                                        source={{ uri: item.content }}
+                                                                        style={styles.inlineVideo}
+                                                                        useNativeControls
+                                                                        resizeMode="contain"
+                                                                        shouldPlay={false}
+                                                                        isLooping={true}
+                                                                    />
+                                                                </TouchableOpacity>
+                                                            )}
+                                                        </>
+                                                    )}
+
+                                                    {/* Hiển thị reaction và thời gian */}
+                                                    <View style={{ flexDirection: 'row' }}>
+                                                        <View style={styles.timeReactionContainer}>
+                                                            <Text style={styles.time}>
+                                                                {formatDateTime(item.time).split(' ')[1].slice(0, 5)}
+                                                            </Text>
+                                                        </View>
+
+                                                        {!item.destroy && (
+                                                            <TouchableOpacity
+                                                                onPress={() => {
+                                                                    showReactionOptions(item.id);
+                                                                    setMessageId(item.id);
+                                                                }}
+                                                                style={{ justifyContent: 'flex-end', marginLeft: '10' }}
+                                                            >
+                                                                <FontAwesome name="smile-o" size={20} color="gray" />
+                                                            </TouchableOpacity>
+                                                        )}
+                                                    </View>
+
+                                                    {hasReactions && !item.destroy && (
+                                                        <View style={styles.reactionContainer}>
+                                                            {groupedReactions.map((reaction, index) => (
+                                                                <TouchableOpacity
+                                                                    key={index}
+                                                                    style={styles.reactionItem}
+                                                                    onPress={() =>
+                                                                        handleShowReactionDetails(
+                                                                            reaction.reaction,
+                                                                            item.reactions,
+                                                                            item.id,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <Text style={styles.reactionText}>
+                                                                        {reaction.reaction} {reaction.sum}
+                                                                    </Text>
                                                                 </TouchableOpacity>
                                                             ))}
                                                         </View>
                                                     )}
-
-                                                    {item.type === 'file' && (
-                                                        <TouchableOpacity
-                                                            onLongPress={() => {
-                                                                setSelectedFile(item.content);
-                                                                setModalDownFileVisible(true);
-                                                            }}
-                                                            style={styles.fileContainer}
-                                                        >
-                                                            <Ionicons
-                                                                name="document-text-outline"
-                                                                size={24}
-                                                                color="blue"
-                                                            />
-                                                            <Text style={styles.fileName}>
-                                                                {item.fileName} {item.fileSize}
-                                                            </Text>
-                                                        </TouchableOpacity>
-                                                    )}
-
-                                                    {item.type === 'audio' && (
-                                                        <TouchableOpacity
-                                                            onPress={() => playAudio(item.content)}
-                                                            style={styles.audioMessageContainer}
-                                                            onLongPress={() => {
-                                                                setSelectedFile(item.content);
-                                                                setModalDownFileVisible(true);
-                                                            }}
-                                                        >
-                                                            <Ionicons name="play-circle" size={30} color="blue" />
-                                                            <Text style={styles.audioMessageText}>Voice Message</Text>
-                                                        </TouchableOpacity>
-                                                    )}
-
-                                                    {item.fileType?.includes('video') && (
-                                                        <TouchableOpacity
-                                                            style={styles.inlineVideoContainer}
-                                                            onLongPress={() => {
-                                                                setSelectedFile(item.content);
-                                                                setModalDownFileVisible(true);
-                                                            }}
-                                                        >
-                                                            <Video
-                                                                source={{ uri: item.content }}
-                                                                style={styles.inlineVideo}
-                                                                useNativeControls
-                                                                resizeMode="contain"
-                                                                shouldPlay={false}
-                                                                isLooping={true}
-                                                            />
-                                                        </TouchableOpacity>
-                                                    )}
                                                 </>
                                             )}
 
-                                            {/* Hiển thị reaction và thời gian */}
-                                            <View style={{ flexDirection: 'row' }}>
-                                                <View style={styles.timeReactionContainer}>
-                                                    <Text style={styles.time}>
-                                                        {formatDateTime(item.time).split(' ')[1].slice(0, 5)}
-                                                    </Text>
-                                                </View>
-
-                                                {!item.destroy && (
-                                                    <TouchableOpacity
-                                                        onPress={() => {
-                                                            showReactionOptions(item.id);
-                                                            setMessageId(item.id);
-                                                        }}
-                                                        style={{ justifyContent: 'flex-end', marginLeft: '10' }}
-                                                    >
-                                                        <FontAwesome name="smile-o" size={20} color="gray" />
-                                                    </TouchableOpacity>
-                                                )}
-                                            </View>
-
-                                            {hasReactions && !item.destroy && (
-                                                <View style={styles.reactionContainer}>
-                                                    {groupedReactions.map((reaction, index) => (
-                                                        <TouchableOpacity
-                                                            key={index}
-                                                            style={styles.reactionItem}
-                                                            onPress={() =>
-                                                                handleShowReactionDetails(
-                                                                    reaction.reaction,
-                                                                    item.reactions,
-                                                                    item.id,
-                                                                )
-                                                            }
-                                                        >
-                                                            <Text style={styles.reactionText}>
-                                                                {reaction.reaction} {reaction.sum}
-                                                            </Text>
-                                                        </TouchableOpacity>
+                                            {item.type === 'poll' && pollMap[item.content] && (
+                                                <View style={{ marginVertical: 10 }}>
+                                                    <Text style={styles.pollTitle}>{pollMap[item.content].title}</Text>
+                                                    {pollMap[item.content].options.map((option) => (
+                                                        <View key={option.id} style={styles.pollOptionContainer}>
+                                                            <Text style={styles.pollOptionText}>{option.text}</Text>
+                                                        </View>
                                                     ))}
+                                                    <TouchableOpacity
+                                                        style={styles.pollActionButton}
+                                                        onPress={() => {
+                                                            setSelectedPoll(pollMap[item.content]);
+                                                            setModalPollVisible(true);
+                                                        }}
+                                                    >
+                                                        <Text style={styles.pollActionText}>Participate in Poll</Text>
+                                                    </TouchableOpacity>
                                                 </View>
                                             )}
                                         </View>
@@ -928,6 +1025,18 @@ export default function GroupChatScreen() {
                         onClose={() => setModalForwardVisible(false)}
                         onForward={handleForwardMessage}
                     />
+
+                    {/* Modal for Poll Details */}
+                    <Modal visible={modalPollVisible} transparent={true} animationType="fade">
+                        <View style={styles.modalContainer}>
+                            <View style={styles.pollModalContent}>
+                                {selectedPoll && <PollDetail poll={selectedPoll} onVote={handleVote} />}
+                                <TouchableOpacity style={styles.closeButton} onPress={() => setModalPollVisible(false)}>
+                                    <Ionicons name="close" size={24} />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </Modal>
                 </SafeAreaProvider>
             </View>
         </KeyboardAvoidingView>
@@ -1294,5 +1403,75 @@ const styles = StyleSheet.create({
     forwardMessageText: {
         fontSize: 16,
         color: '#333',
+    },
+    pollText: {
+        fontSize: 16,
+        color: '#007AFF',
+        textDecorationLine: 'underline',
+    },
+    pollModalContent: {
+        width: '90%',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+        // alignItems: 'center',
+        elevation: 5,
+    },
+    closeButton: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        padding: 5,
+        backgroundColor: 'transparent',
+    },
+    closeButtonText: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#007AFF',
+    },
+    pollMessage: {
+        backgroundColor: '#fff', // Màu nền cho poll message
+        borderRadius: 12,
+        padding: 16,
+        alignSelf: 'center', // Căn giữa message poll
+        width: '80%', // Có thể thêm điều này để làm cho poll message có kích thước cố định
+    },
+    pollCard: {
+        backgroundColor: '#f9f9f9',
+        padding: 16,
+        marginVertical: 8,
+        marginHorizontal: 12,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#d1d1d1',
+        width: 250,
+    },
+    pollTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 12,
+    },
+    pollOptionContainer: {
+        backgroundColor: '#e6f7ff',
+        padding: 8,
+        borderRadius: 8,
+        marginBottom: 8,
+    },
+    pollOptionText: {
+        fontSize: 16,
+        color: '#007AFF',
+    },
+    pollActionButton: {
+        marginTop: 12,
+        paddingVertical: 10,
+        backgroundColor: '#007AFF',
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    pollActionText: {
+        fontSize: 14,
+        color: '#fff',
+        fontWeight: 'bold',
     },
 });

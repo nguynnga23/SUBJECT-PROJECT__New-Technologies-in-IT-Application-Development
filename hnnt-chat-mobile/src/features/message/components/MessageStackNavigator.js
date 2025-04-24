@@ -12,6 +12,7 @@ import FindPrMessagesScreen from '../screens/privateChat/FindPrMessageScreen';
 import AddMembersScreen from '../screens/groupChat/AddMembersScreen';
 import SharedChatHeader from './SharedChatHeader';
 import FileStorage from './FileStorage';
+import ListPollsScreen from '../screens/groupChat/poll/ListPollsScreen';
 const MessageStack = createNativeStackNavigator();
 
 export default function MessageStackNavigator() {
@@ -59,7 +60,11 @@ export default function MessageStackNavigator() {
                                 {
                                     icon: 'info',
                                     onPress: () =>
-                                        navigation.navigate('PrivateChatInfoScreen', { chatId: route.params?.chatId, chatName: route.params?.chatName, avatar: route.params?.avatarUri }),
+                                        navigation.navigate('PrivateChatInfoScreen', {
+                                            chatId: route.params?.chatId,
+                                            chatName: route.params?.chatName,
+                                            avatar: route.params?.avatarUri,
+                                        }),
                                 },
                             ]}
                         />
@@ -128,7 +133,16 @@ export default function MessageStackNavigator() {
                 component={FindPrMessagesScreen}
                 options={({ navigation, route }) => ({
                     headerShown: true,
-                    header: () => <SharedChatHeader navigation={navigation} chatName="Search messangs" actions={[]} />,
+                    header: () => <SharedChatHeader navigation={navigation} chatName="Search message" actions={[]} />,
+                })}
+            />
+
+            <MessageStack.Screen
+                name="ListPollsScreen"
+                component={ListPollsScreen}
+                options={({ navigation, route }) => ({
+                    headerShown: true,
+                    header: () => <SharedChatHeader navigation={navigation} chatName="Group board" actions={[]} />,
                 })}
             />
         </MessageStack.Navigator>

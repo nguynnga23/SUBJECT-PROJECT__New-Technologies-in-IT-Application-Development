@@ -5,11 +5,12 @@ import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons } from '@expo/vector-icons';
 import { RadioButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { createGroup, getListFriends } from '../components/services/AddGroupService';
+import { createGroup, getListFriends, prepare_uploadImg_createGroup } from '../components/services/AddGroupService';
 
 export default function AddGroupScreen() {
     const navigation = useNavigation();
     const [selectedImage, setSelectedImage] = useState(null);
+    const [grFileAsset, setGrFileAsset] = useState(null);
     const [groupName, setGroupName] = useState('');
     const [friends, setFriends] = useState([]);
     const [filteredFriends, setFilteredFriends] = useState([]);
@@ -53,6 +54,7 @@ export default function AddGroupScreen() {
         });
 
         if (!result.canceled && result.assets?.length > 0) {
+            setGrFileAsset(result.assets[0]);
             setSelectedImage(result.assets[0].uri);
         }
     };
@@ -86,8 +88,8 @@ export default function AddGroupScreen() {
         try {
             const token = await AsyncStorage.getItem('token');
             const participants = selectedUsers.map((id) => ({ accountId: id }));
-            const response = await createGroup(groupName, selectedImage || '', participants, token);
-
+            // const response = await createGroup(groupName, selectedImage || '', participants, token);
+            await prepare_uploadImg_createGroup(groupName, grFileAsset, participants, token);
             Alert.alert('Success', 'Nhóm đã được tạo thành công!');
             navigation.navigate('HomeTab');
         } catch (error) {

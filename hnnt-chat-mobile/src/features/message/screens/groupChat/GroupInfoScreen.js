@@ -12,7 +12,7 @@ import {
     Button,
     Alert,
     TouchableWithoutFeedback,
-    Keyboard
+    Keyboard,
 } from 'react-native';
 import { Ionicons, AntDesign, Feather } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
@@ -41,6 +41,7 @@ export default function GroupInfoScreen() {
     const [token, setToken] = useState(null);
     const [isMuted, setIsMuted] = useState();
     const [editVisible, setEditVisible] = useState(false);
+    const [groupName, setGroupName] = useState('');
     const [newGroupName, setNewGroupName] = useState('');
     const [leaveVisible, setLeaveVisible] = useState(false);
     const [avatar, setAvatar] = useState(null);
@@ -56,7 +57,7 @@ export default function GroupInfoScreen() {
             setToken(token);
             const chatInfo = await fetchChat(chatId, token); // Replace with actual token
             setData(chatInfo);
-            setNewGroupName(chatInfo.name);
+            setGroupName(chatInfo.name);
             setAvatar(chatInfo.avatar);
             const userId = getUserIdFromToken(token);
             const participant = chatInfo.participants.find((p) => p.accountId === userId);
@@ -85,10 +86,10 @@ export default function GroupInfoScreen() {
         }
     };
 
-    const handleEditGroupName = async (n_groupName) => {
+    const handleEditGroupName = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
-            const response = await editGroupName(n_groupName, chatId, token);
+            const response = await editGroupName(newGroupName, chatId, token);
             fetchChatInfo();
             Alert.alert('Success', response.message);
         } catch (error) {
@@ -177,7 +178,7 @@ export default function GroupInfoScreen() {
                             />
                         )}
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Text style={styles.groupName}>{newGroupName}</Text>
+                            <Text style={styles.groupName}>{groupName}</Text>
                             {userRole === 'LEADER' && (
                                 <TouchableOpacity onPress={() => setEditVisible(true)}>
                                     <AntDesign style={{ marginTop: 7 }} name="edit" size={24} color="black" />
@@ -209,14 +210,15 @@ export default function GroupInfoScreen() {
                     </View>
 
                     {/* Other Options */}
-                    <TouchableOpacity onPress={() => navigation.navigate('FileStorage')}>
+                    <TouchableOpacity onPress={() => navigation.navigate('FileStorage', { chatId })}>
                         <OptionItem label="Image, file, link" icon="folder" />
                     </TouchableOpacity>
-
+                    <TouchableOpacity onPress={() => navigation.navigate('ListPollsScreen', { chatId })}>
+                        <OptionItem label="Polls" icon="bar-chart" />
+                    </TouchableOpacity>
                     <TouchableOpacity onPress={() => navigation.navigate('MemberListScreen', { chatId })}>
                         <OptionItem label={numberOfMembers} icon="people" />
                     </TouchableOpacity>
-
                     <TouchableOpacity onPress={() => navigation.navigate('AddMemberScreen', { chatId })}>
                         <OptionItem label="Add member" icon="person-add" />
                     </TouchableOpacity>
@@ -248,11 +250,14 @@ export default function GroupInfoScreen() {
                                 <TextInput style={styles.input} value={newGroupName} onChangeText={setNewGroupName} />
                                 <View style={styles.modalActions}>
                                     <Button title="Cancel" color="red" onPress={() => setEditVisible(false)} />
-                                    <Button title="Apply" onPress={() => {
-                                        Keyboard.dismiss();
-                                        handleEditGroupName(newGroupName);
-                                        setEditVisible(false);
-                                    }} />
+                                    <Button
+                                        title="Apply"
+                                        onPress={() => {
+                                            Keyboard.dismiss();
+                                            handleEditGroupName(newGroupName);
+                                            setEditVisible(false);
+                                        }}
+                                    />
                                 </View>
                             </View>
                         </View>

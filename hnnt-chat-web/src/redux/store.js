@@ -3,6 +3,7 @@ import authReducer from './slices/authSlice';
 import chatReducer from './slices/chatSlice';
 import categoryReducer from './slices/categorySlice';
 import appReducer from './slices/appSlice';
+import modalReducer from './slices/modalSlice';
 import storage from 'redux-persist/lib/storage'; // Lưu vào localStorage
 import { persistStore, persistReducer } from 'redux-persist';
 import { combineReducers } from '@reduxjs/toolkit';
@@ -18,6 +19,7 @@ const rootReducer = combineReducers({
     chat: chatReducer,
     category: categoryReducer,
     app: appReducer,
+    modal: modalReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

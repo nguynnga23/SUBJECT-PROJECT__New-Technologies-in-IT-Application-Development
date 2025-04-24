@@ -114,33 +114,6 @@ export const toggleMute = async (chatId, token) => {
     }
 };
 
-export const handleChangeAvatar = async (setAvatar) => {
-    console.log("📸 Bắt đầu xử lý đổi avatar...");
-
-    // Kiểm tra quyền truy cập ảnh
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    console.log("📜 Quyền truy cập:", status);
-
-    if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'We need permission to access your photos.');
-        return;
-    }
-
-    // Mở thư viện ảnh
-    const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        quality: 1,
-    });
-
-    console.log("📷 Kết quả chọn ảnh:", result);
-
-    if (!result.canceled) {
-        console.log("✅ Ảnh được chọn:", result.assets[0].uri);
-        setAvatar(result.assets[0].uri);
-    }
-};
-
 const editGroupAvatar = async (groupId, token, avatar) => {
     try {
         const response = await axios.put(`${API_URL}/groups/${groupId}/edit-avatar`,
@@ -206,7 +179,7 @@ export async function prepareImage(chatId, token) {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All,
             allowsMultipleSelection: false,
-            allowsEditing: false,
+            allowsEditing: true,
             quality: 1,
         });
 

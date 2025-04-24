@@ -65,6 +65,7 @@ import { getUserById } from '../../screens/Profile/api';
 import { createMeeting } from '../../configs/createMeeting';
 import { MeetingProvider } from '@videosdk.live/react-sdk';
 import MeetingView from '../../components/Views/MeetingView';
+import ChatPollCard from '../Chat/ChatPollCard';
 
 function TabMessage({ setShowModalShareMes, setMessageShare }) {
     const [message, setMessage] = useState('');
@@ -141,6 +142,7 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
         sticker: ChatSticker,
         audio: ChatAudio,
         imageGroup: ChatImageGroup,
+        poll: ChatPollCard,
     };
 
     const getFileIcon = (fileType) => {
