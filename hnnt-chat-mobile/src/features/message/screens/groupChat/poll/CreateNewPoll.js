@@ -1,5 +1,7 @@
 // CreatePoll.js
 import React, { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { socket } from '../../../../../configs/socket';
 import { View, TextInput, Button, StyleSheet, FlatList, TouchableOpacity, Text } from 'react-native';
 import { createPoll } from '../../../services/GroupChat/poll/PollService';
 import { sendMessage } from '../../../services/ChatService';
@@ -7,7 +9,7 @@ const CreateNewPoll = ({ chatId, creatorId, onCreatePoll }) => {
     const [title, setTitle] = useState('');
     const [options, setOptions] = useState(['', '']); // Bắt đầu với 2 lựa chọn trống
     const [endsAt, setEndsAt] = useState(null); // Tùy chọn: Thêm chọn ngày kết thúc
-
+    const [token, setToken] = useState(null);
     const addOption = () => {
         setOptions([...options, '']);
     };
@@ -19,6 +21,13 @@ const CreateNewPoll = ({ chatId, creatorId, onCreatePoll }) => {
     };
 
     const handleCreate = async () => {
+        const token = await AsyncStorage.getItem('token'); // Lấy token từ AsyncStorage
+        setToken(token); // Lưu token vào state
+
+        if (!token) {
+            Alert.alert('Error', 'You are not logged in!');
+            return;
+        }
         if (!title || options.some((opt) => !opt)) {
             alert('Vui lòng điền đầy đủ thông tin');
             return;
@@ -33,8 +42,15 @@ const CreateNewPoll = ({ chatId, creatorId, onCreatePoll }) => {
         };
 
         try {
-            await createPoll(pollData); // Call the API to create the poll
+            const data = await createPoll(pollData); // Call the API to create the poll
             onCreatePoll(pollData); // Notify parent component
+            if (data) {
+                const sendMess = await sendMessage(data?.chatId, data?.id, 'poll', null, null, null, null, token);
+                socket.emit('send_message', {
+                    chatId: data?.chatId,
+                    newMessage: sendMess,
+                });
+            }
         } catch (error) {
             alert('Tạo cuộc thăm dò thất bại');
         }

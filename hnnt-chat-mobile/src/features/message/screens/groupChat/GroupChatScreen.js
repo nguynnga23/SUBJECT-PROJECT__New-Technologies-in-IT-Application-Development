@@ -139,7 +139,6 @@ export default function GroupChatScreen() {
             // 👉 Lấy ra tất cả pollId từ messages
             const pollMessages = data.filter((msg) => msg.type === 'poll' && msg.content);
             const pollIds = pollMessages.map((msg) => msg.content);
-            console.log(pollIds);
             // 👉 Gọi API để lấy chi tiết của từng poll
             const pollDetails = {};
             for (const pollId of pollIds) {
@@ -188,20 +187,28 @@ export default function GroupChatScreen() {
 
     //send message
     useEffect(() => {
-        const handleReceiveMessage = ({ chatId: receivedChatId, newMessage }) => {
-            if (chatId !== receivedChatId) {
-                return;
+        const handleReceiveMessage = async ({ chatId: receivedChatId, newMessage }) => {
+            if (chatId !== receivedChatId) return;
+
+            setMessages((prev) => [...prev, newMessage]);
+
+            // Nếu là poll → gọi thêm API lấy chi tiết
+            if (newMessage.type === 'poll' && newMessage.content) {
+                try {
+                    const poll = await getPollById(newMessage.content);
+                    setPollMap((prevMap) => ({
+                        ...prevMap,
+                        [newMessage.content]: poll,
+                    }));
+                } catch (error) {
+                    console.warn('Could not fetch poll:', error);
+                }
             }
-            // loadMessages();
-            setMessages((prevMessages) => [...prevMessages, newMessage]);
         };
 
         socket.on('receive_message', handleReceiveMessage);
-
-        return () => {
-            socket.off('receive_message', handleReceiveMessage);
-        };
-    }, []);
+        return () => socket.off('receive_message', handleReceiveMessage);
+    }, [chatId]); // Ensure this hook is at the top level
 
     //del and destroy
     useEffect(() => {

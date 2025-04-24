@@ -19,16 +19,6 @@ export const createPoll = async (req: Request, res: Response): Promise<void> => 
             include: { options: true },
         });
 
-        // Create a message with type 'poll' and content containing the pollId
-        await prisma.message.create({
-            data: {
-                type: 'poll',
-                content: poll.id,
-                chat: { connect: { id: chatId } },
-                sender: { connect: { id: creatorId } },
-            },
-        });
-
         res.status(201).json(poll);
     } catch (error) {
         console.error(error);
