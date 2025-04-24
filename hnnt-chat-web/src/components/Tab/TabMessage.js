@@ -742,8 +742,12 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
                         return (
                             <div
                                 id={`message-${message.id}`}
-                                className={`relative flex items-center mb-2 ${
-                                    message.sender.id === userId ? 'justify-end' : 'justify-start'
+                                className={`relative ${
+                                    message.type === 'poll'
+                                        ? 'flex justify-center mb-2'
+                                        : `flex items-center mb-2 ${
+                                              message.sender.id === userId ? 'justify-end' : 'justify-start'
+                                          }`
                                 }`}
                                 key={index}
                                 onMouseEnter={() => {
@@ -776,7 +780,11 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
                                             )}
                                         </div>
 
-                                        <div className="flex relative items-center">
+                                        <div
+                                            className={`flex relative items-center ${
+                                                Component === ChatPollCard && 'w-[390px]'
+                                            }`}
+                                        >
                                             {hoveredMessage === index &&
                                                 isPopupOpenIndex === null &&
                                                 message.sender.id === userActive.id && (
@@ -801,7 +809,7 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
                                                         )}
                                                     </div>
                                                 )}
-                                            <div className="relative">
+                                            <div className={`relative ${Component === ChatPollCard && 'w-full'}`}>
                                                 <Component
                                                     key={index}
                                                     index={index}
@@ -818,13 +826,15 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
                                                 {message.id === lastMessage.id && message.sender.id === userId && (
                                                     <span className="absolute bottom-[-27px] right-[0]">
                                                         <p className="text-[10px] p-1 bg-gray-300 rounded-lg text-gray-500 mt-1 ">
-                                                            {!activeChat.isGroup
-                                                                ? activeChat.participants?.find(
-                                                                      (user) => user.accountId !== userId,
-                                                                  ).readed
-                                                                    ? 'Đã xem'
-                                                                    : 'Đã gửi'
-                                                                : 'Đã nhận'}
+                                                            {Component !== ChatPollCard
+                                                                ? !activeChat.isGroup
+                                                                    ? activeChat.participants?.find(
+                                                                          (user) => user.accountId !== userId,
+                                                                      )?.readed
+                                                                        ? 'Đã xem'
+                                                                        : 'Đã gửi'
+                                                                    : 'Đã nhận'
+                                                                : ''}
                                                         </p>
                                                     </span>
                                                 )}
