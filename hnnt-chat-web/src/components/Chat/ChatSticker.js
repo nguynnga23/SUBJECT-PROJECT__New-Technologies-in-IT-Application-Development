@@ -14,7 +14,9 @@ function ChatSticker({ userId, message, showName, replyMessage }) {
                 )}
             </div>
             {showName && (
-                <p className="text-[10px] text-gray-400 pb-[2px]">{message?.sender.id !== userId && message?.name}</p>
+                <p className="text-[10px] text-gray-400 pb-[2px]">
+                    {message?.sender.id !== userId && message?.sender.name}
+                </p>
             )}
             <img src={message.content} alt="STICKER" className="w-[150px] h-[150px] rounded-lg" />
             <p className={`absolute left-[8px] bottom-[5px] text-gray-500 text-[10px]`}>

@@ -28,7 +28,9 @@ function ChatText({ index, userId, message, reactions, showName, replyMessage, s
             }`}
         >
             {showName && (
-                <p className="text-[10px] text-gray-400 pb-[2px]">{message?.sender.id !== userId && message?.name}</p>
+                <p className="text-[10px] text-gray-400 pb-[2px]">
+                    {message?.sender.id !== userId && message?.sender.name}
+                </p>
             )}
             <div>
                 {replyMessage && (

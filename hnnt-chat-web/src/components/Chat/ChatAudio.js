@@ -49,7 +49,7 @@ function ChatAudio({ userId, message, showName }) {
         >
             {showName && (
                 <p className="absolute top-[-18px] left-0 text-[10px] text-gray-400">
-                    {message?.sender !== userId && message?.name}
+                    {message?.sender !== userId && message?.sender.name}
                 </p>
             )}
             <button

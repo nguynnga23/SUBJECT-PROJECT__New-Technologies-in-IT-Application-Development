@@ -29,6 +29,7 @@ import {
     leaveGroup,
     notifyChatOfUser,
     pinChatOfUser,
+    sendMessage,
     uploadFileFormChatGroupToS3,
 } from '../../screens/Messaging/api';
 
@@ -60,12 +61,25 @@ function TabChatInfo({ setActiveMessageTab }) {
             const saveGroupName = await changeNameGroup(activeChat.id, groupName);
             if (saveGroupName) {
                 dispatch(updateGroupName({ name: groupName }));
+                await sendMessage(
+                    chatId,
+                    `${userActive.name} đã đổi tên nhóm thành ${groupName}`,
+                    'notify',
+                    null,
+                    null,
+                    null,
+                    null,
+                );
             }
         }
     };
 
-    const handleRemoveMember = () => {
-        leaveGroup(chatId, userId);
+    const handleLeaveGroup = async () => {
+        const leave = await leaveGroup(chatId, userId);
+        if (leave) {
+            await sendMessage(chatId, `${userActive.name} đã rời nhóm`, 'notify', null, null, null, null);
+        }
+
         dispatch(setActiveChat(null));
         dispatch(setShowOrOffRightBar(false));
         dispatch(setShowOrOffRightBarSearch(false));
@@ -308,7 +322,7 @@ function TabChatInfo({ setActiveMessageTab }) {
             {activeChat?.isGroup && (
                 <div className="text-red-500 flex items-center space-x-2 py-3 font-medium cursor-pointer text-base pl-2 hover:bg-gray-100 hover:dark:bg-gray-700">
                     <IoIosLogOut />
-                    <span className="text-[12px]" onClick={handleRemoveMember}>
+                    <span className="text-[12px]" onClick={handleLeaveGroup}>
                         Rời nhóm
                     </span>
                 </div>

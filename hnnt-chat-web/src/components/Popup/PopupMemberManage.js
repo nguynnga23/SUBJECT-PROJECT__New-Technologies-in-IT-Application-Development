@@ -1,21 +1,23 @@
 import { useEffect, useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
     removeMemberOfGroupSlice,
     setActiveChat,
     setShowOrOffRightBar,
     setShowOrOffRightBarSearch,
-    changeLeaderSlice,
 } from '../../redux/slices/chatSlice';
-import { changeLeaderRole, kickMember, leaveGroup } from '../../screens/Messaging/api';
+import { changeLeaderRole, kickMember, leaveGroup, sendMessage } from '../../screens/Messaging/api';
 
 function PopupMemberManage({ setShowPopup, leader, member, group }) {
     const dispatch = useDispatch();
+    const activeChat = useSelector((state) => state.chat.activeChat);
+    const chatId = activeChat?.id;
 
     const handleRemoveMember = async (isLeader) => {
         const removeMember = await kickMember(group.id, member.accountId);
         if (removeMember) {
             dispatch(removeMemberOfGroupSlice({ memberId: member.accountId }));
+            await sendMessage(chatId, `${member?.account.name} đã bị xóa khỏi nhóm`, 'notify', null, null, null, null);
         }
         if (isLeader) {
             dispatch(setActiveChat(null));
@@ -26,14 +28,26 @@ function PopupMemberManage({ setShowPopup, leader, member, group }) {
 
     const handleChangeLeader = async (isLeader) => {
         const changeLeader = await changeLeaderRole(group.id, member.accountId);
-        // if (changeLeader) {
-        //     dispatch(changeLeaderSlice({ memberId: member.accountId }));
-        // }
+        if (changeLeader) {
+            //     dispatch(changeLeaderSlice({ memberId: member.accountId }));
+            await sendMessage(
+                chatId,
+                `${member?.account.name} đã được bổ nhiệm làm trưởng nhóm`,
+                'notify',
+                null,
+                null,
+                null,
+                null,
+            );
+        }
     };
 
-    const handleLeaveGroup = () => {
+    const handleLeaveGroup = async () => {
         // dispatch(removeMemberOfGroup({ memberId: member.id, groupId: group.id }));
-        leaveGroup(group.id, member.accountId);
+        const leave = await leaveGroup(group.id, member.accountId);
+        if (leave) {
+            await sendMessage(chatId, `${member?.account.name} đã rời nhóm`, 'notify', null, null, null, null);
+        }
         dispatch(setActiveChat(null));
         dispatch(setShowOrOffRightBar(false));
         dispatch(setShowOrOffRightBarSearch(false));

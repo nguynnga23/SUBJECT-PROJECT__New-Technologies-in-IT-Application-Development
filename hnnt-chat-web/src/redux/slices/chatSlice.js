@@ -229,6 +229,7 @@ const chatSlice = createSlice({
             }
 
             const newParticipants = members.map((member) => ({
+                accountId: member.accountId,
                 account: {
                     id: member.accountId,
                     name: member.name,
