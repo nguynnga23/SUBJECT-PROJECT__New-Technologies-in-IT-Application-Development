@@ -45,6 +45,7 @@ function TabChatInfo({ setActiveMessageTab }) {
     const [fileOpen, setFileOpen] = useState(true);
     const [imageOpen, setImageOpen] = useState(true);
     const [linkOpen, setLinkOpen] = useState(true);
+    const [groupNewsOpen, setGroupNewsOpen] = useState([]);
 
     const fileInputRef = useRef(null);
     const leader = activeChat?.participants?.find((g) => g.role === 'LEADER');
@@ -271,6 +272,17 @@ function TabChatInfo({ setActiveMessageTab }) {
                         toggleOpen={() => setMemberOpen(!memberOpen)}
                         messages={data}
                         type="member"
+                        group={activeChat?.participants}
+                        setActiveMessageTab={setActiveMessageTab}
+                    />
+                )}
+                {activeChat?.isGroup && (
+                    <Archive
+                        title="Bảng tin nhóm"
+                        isOpen={groupNewsOpen}
+                        toggleOpen={() => setGroupNewsOpen(!groupNewsOpen)}
+                        messages={data}
+                        type="groupNews"
                         group={activeChat?.participants}
                         setActiveMessageTab={setActiveMessageTab}
                     />
