@@ -447,3 +447,32 @@ export const updateGroupName = async (req: AuthRequest, res: Response): Promise<
         res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
     }
 };
+
+// Invite member to group
+// POST /api/groups/:groupId/invite
+// Body: { accountId: string}
+export const inviteMemberToGroup = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const requesterId = req.user?.id;
+        if (!requesterId) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+        const chatId = req.params.groupId;
+        const { accountId } = req.body;
+
+        console.log('accountId', accountId);
+        console.log('chatId', chatId);
+
+        await prisma.chatParticipant.create({
+            data: {
+                chatId,
+                accountId,
+            },
+        });
+
+        res.status(201).json({ message: 'Vào nhóm thành công!' });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi server', error: (error as Error).message });
+    }
+};

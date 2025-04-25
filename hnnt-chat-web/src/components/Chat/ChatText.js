@@ -16,6 +16,16 @@ function ChatText({ index, userId, message, reactions, showName, replyMessage, s
         return <MdFilePresent className="text-3xl text-gray-500 mr-2" />; // Mặc định
     };
 
+    // chuyển text thành link/path
+    const isUrl = (text) => {
+        try {
+            const url = new URL(text);
+            return url.protocol === 'http:' || url.protocol === 'https:';
+        } catch (_) {
+            return false;
+        }
+    };
+
     return (
         <div
             key={index}
@@ -66,7 +76,18 @@ function ChatText({ index, userId, message, reactions, showName, replyMessage, s
                 )}
             </div>
 
-            {message.content}
+            {isUrl(message.content) ? (
+                <a
+                    href={message.content}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline break-words"
+                >
+                    {message.content}
+                </a>
+            ) : (
+                message.content
+            )}
 
             <p
                 className={`absolute left-[8px] ${

@@ -35,6 +35,7 @@ function TabChatInfo({ setActiveMessageTab }) {
     const [imageOpen, setImageOpen] = useState(true);
     const [linkOpen, setLinkOpen] = useState(true);
     const [groupNewsOpen, setGroupNewsOpen] = useState([]);
+    const [inviteOpen, setInviteOpen] = useState([]);
 
     const dispatch = useDispatch();
 
@@ -201,6 +202,17 @@ function TabChatInfo({ setActiveMessageTab }) {
                         toggleOpen={() => setGroupNewsOpen(!groupNewsOpen)}
                         messages={data}
                         type="groupNews"
+                        group={activeChat?.participants}
+                        setActiveMessageTab={setActiveMessageTab}
+                    />
+                )}
+                {activeChat?.isGroup && (
+                    <Archive
+                        title="Tham gia nhóm"
+                        isOpen={inviteOpen}
+                        toggleOpen={() => setInviteOpen(!inviteOpen)}
+                        messages={data}
+                        type="invite"
                         group={activeChat?.participants}
                         setActiveMessageTab={setActiveMessageTab}
                     />

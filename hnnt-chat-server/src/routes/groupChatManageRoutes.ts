@@ -11,6 +11,7 @@ import {
     kickMember,
     getPinnedMessage,
     updateGroupName,
+    inviteMemberToGroup,
 } from '../controllers/groupChatManageController';
 import { authenticate } from '../middleware/auth';
 
@@ -27,5 +28,6 @@ router.delete('/:groupId/leave', authenticate, leaveGroup);
 router.delete('/:groupId/disband', authenticate, disbandGroup);
 router.delete('/:groupId/kick', authenticate, kickMember);
 router.put('/:groupId/edit-name', authenticate, updateGroupName);
+router.post('/:groupId/invite', authenticate, inviteMemberToGroup);
 
 export default router;

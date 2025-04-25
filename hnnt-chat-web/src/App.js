@@ -3,6 +3,7 @@ import Authentication from './screens/Authentication/Authentication';
 import Home from './screens/Home';
 import { useEffect } from 'react';
 import { socket } from './configs/socket';
+import Invite from './screens/Invite/Invite';
 
 export default function App() {
     useEffect(() => {
@@ -21,6 +22,7 @@ export default function App() {
             <Routes>
                 <Route path="/" element={<Authentication />} />
                 <Route path="/home" element={<Home />} />
+                <Route path="/invite/:chatId" element={<Invite />} />
             </Routes>
         </Router>
     );
