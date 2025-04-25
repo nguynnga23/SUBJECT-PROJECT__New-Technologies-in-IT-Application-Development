@@ -207,6 +207,7 @@ export default function GroupChatScreen() {
         };
 
         socket.on('receive_message', handleReceiveMessage);
+        socket.on('receive_vote_poll', handleReceiveMessage);
         return () => socket.off('receive_message', handleReceiveMessage);
     }, [chatId]); // Ensure this hook is at the top level
 
@@ -431,6 +432,10 @@ export default function GroupChatScreen() {
         try {
             console.log('Attempting to vote:', { chatId, pollId, optionId, voterId });
             await votePollOption({ chatId, pollId, pollOptionId: optionId, voterId });
+            socket.emit('vote_poll', {
+                chatId: chatId,
+                newMessage: pollId,
+            });
             Alert.alert('Success', 'Your vote has been recorded.');
         } catch (error) {
             console.error('Error during voting:', error.response?.data || error.message);
@@ -722,11 +727,42 @@ export default function GroupChatScreen() {
                                             {item.type === 'poll' && pollMap[item.content] && (
                                                 <View style={{ marginVertical: 10 }}>
                                                     <Text style={styles.pollTitle}>{pollMap[item.content].title}</Text>
-                                                    {pollMap[item.content].options.map((option) => (
-                                                        <View key={option.id} style={styles.pollOptionContainer}>
-                                                            <Text style={styles.pollOptionText}>{option.text}</Text>
-                                                        </View>
-                                                    ))}
+                                                    {pollMap[item.content].options.map((option) => {
+                                                        const totalVotes = pollMap[item.content].options.reduce(
+                                                            (sum, opt) => sum + opt.votes.length,
+                                                            0,
+                                                        );
+                                                        const voteCount = option.votes.length;
+                                                        const percentage =
+                                                            totalVotes > 0 ? (voteCount / totalVotes) * 100 : 0;
+                                                        // const isSelected = selectedOption === option.id;
+
+                                                        return (
+                                                            <View key={option.id} style={styles.pollOptionContainer}>
+                                                                <Text style={styles.pollOptionText}>
+                                                                    {option.text} - {voteCount} ({percentage.toFixed(1)}
+                                                                    %)
+                                                                </Text>
+                                                                <View
+                                                                    style={{
+                                                                        height: 5,
+                                                                        backgroundColor: '#e0e0e0',
+                                                                        borderRadius: 5,
+                                                                        overflow: 'hidden',
+                                                                        marginTop: 5,
+                                                                    }}
+                                                                >
+                                                                    <View
+                                                                        style={{
+                                                                            width: `${percentage}%`,
+                                                                            height: '100%',
+                                                                            backgroundColor: '#007AFF',
+                                                                        }}
+                                                                    />
+                                                                </View>
+                                                            </View>
+                                                        );
+                                                    })}
                                                     <TouchableOpacity
                                                         style={styles.pollActionButton}
                                                         onPress={() => {

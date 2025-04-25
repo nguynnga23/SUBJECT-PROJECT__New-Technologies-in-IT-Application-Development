@@ -126,6 +126,10 @@ export const initSocket = (server: HttpServer) => {
             console.log(`📊 New poll created in chat ${chatId}`);
         });
 
+        // socket.on('vote_poll', ({ pollId, selectedOptions, votedBy }) => {
+        //     io.emit('receive_vote_poll', { pollId, selectedOptions, votedBy });
+        // });
+
         socket.on('disconnect', () => {
             // Xóa socket khỏi map
             for (let [userId, id] of userSocketMap.entries()) {

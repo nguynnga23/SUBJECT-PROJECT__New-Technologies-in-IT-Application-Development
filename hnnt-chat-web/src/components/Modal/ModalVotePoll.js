@@ -3,10 +3,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setShowModalVotePoll } from '../../redux/slices/modalSlice';
 import { getUserById } from '../../screens/Profile/api';
 import { updateVotePoll, votePollOption } from '../../screens/Polls/api';
+import { socket } from '../../configs/socket';
 
 export function ModalVotePoll() {
     const valueModalVotePoll = useSelector((state) => state.modal.valueModalVotePoll);
     const userActive = useSelector((state) => state.auth.userActive);
+    const activeChat = useSelector((state) => state.chat.activeChat);
 
     const [options, setOptions] = useState(valueModalVotePoll?.options || []);
     const [selectedOptions, setSelectedOptions] = useState([]);
@@ -56,7 +58,10 @@ export function ModalVotePoll() {
             // });
 
             await updateVotePoll(valueModalVotePoll?.id, selectedOptions, userActive?.id);
-
+            // socket.emit('send_message', {
+            //     chatId: activeChat?.id,
+            //     newMessage: 'nothing',
+            // });
             dispatch(setShowModalVotePoll(false));
         } catch (error) {
             console.error('Lỗi khi bình chọn:', error);

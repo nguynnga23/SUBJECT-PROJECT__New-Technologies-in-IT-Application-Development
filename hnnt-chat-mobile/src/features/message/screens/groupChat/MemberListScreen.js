@@ -191,7 +191,7 @@ export default function MemberListScreen() {
 
     const handleViewProfile = () => {
         setFooterModalVisible(false);
-        navigation.navigate('ProfileScreen', { userId: selectedMember.accId });
+        navigation.navigate('FriendProfileScreen', { userId: selectedMember.accId });
     };
 
     const handleAppointAsAdmin = () => {
@@ -218,7 +218,12 @@ export default function MemberListScreen() {
                     renderItem={({ item }) => (
                         <TouchableOpacity onLongPress={() => handleLongPressMember(item)} activeOpacity={0.7}>
                             <View style={styles.memberItem}>
-                                <Image source={{ uri: item.avatar }} style={styles.avatar} />
+                                <View style={styles.avatarContainer}>
+                                    <Image source={{ uri: item.avatar }} style={styles.avatar} />
+                                    {item.role === 'LEADER' && (
+                                        <Ionicons name="key" size={16} color="gold" style={styles.leaderIcon} />
+                                    )}
+                                </View>
                                 <View style={styles.memberInfo}>
                                     <Text style={styles.name}>{item.name}</Text>
                                     <Text style={styles.role}>{item.role}</Text>
@@ -360,11 +365,23 @@ const styles = StyleSheet.create({
         borderRadius: 10, // Rounded corners
         marginBottom: 5, // Spacing between items
     },
+    avatarContainer: {
+        position: 'relative',
+    },
     avatar: {
         width: 50,
         height: 50,
         borderRadius: 25,
         marginRight: 15,
+    },
+    leaderIcon: {
+        position: 'absolute',
+        bottom: 0,
+        right: 12,
+        backgroundColor: '#fff',
+        // opacity: 0.8,
+        borderRadius: 50,
+        padding: 2,
     },
     memberInfo: {
         flex: 1,

@@ -57,3 +57,29 @@ export const deletePoll = async (pollId) => {
         throw error;
     }
 };
+
+// Update poll votes
+export const updatePollVotes = async (pollId, optionIds, voterId) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/update-vote`, {
+            pollId,
+            optionIds,
+            voterId,
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to update poll votes:', error);
+        throw error;
+    }
+};
+
+// Get poll results
+export const getPollResults = async (pollId) => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/results/${pollId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch poll results:', error);
+        throw error;
+    }
+};
