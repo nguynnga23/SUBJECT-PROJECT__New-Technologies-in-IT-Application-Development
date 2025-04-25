@@ -9,15 +9,20 @@ function Invite() {
     const navigate = useNavigate();
 
     const userActive = useSelector((state) => state.auth.userActive);
-    const userId = userActive.id;
+    const userId = userActive?.id;
 
     useEffect(() => {
+        if (!userActive) {
+            navigate('/');
+            return;
+        }
+
         const fetchGroupInfo = async () => {
             const res = await getChatById(chatId);
             setDataGroup(res);
         };
         fetchGroupInfo();
-    }, [chatId]);
+    }, [chatId, userActive, navigate]);
 
     const handleViteGroup = async () => {
         await inviteMemberToGroup(chatId, userId);
