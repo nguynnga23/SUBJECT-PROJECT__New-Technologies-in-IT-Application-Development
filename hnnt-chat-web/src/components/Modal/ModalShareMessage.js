@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getListFriend } from '../../screens/Contacts/api';
+import { getListFriend, getListGroupChatByUserId } from '../../screens/Contacts/api';
 import { useSelector } from 'react-redux';
 import { getChatByUser, sendMessage } from '../../screens/Messaging/api';
 import { socket } from '../../configs/socket';
@@ -7,6 +7,7 @@ import { socket } from '../../configs/socket';
 const ModalShareMessage = ({ setShowModalShareMes, message }) => {
     const [selected, setSelected] = useState([]);
     const [contacts, setContacts] = useState([]);
+    const [groupData, setGroupData] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
 
     const activeChat = useSelector((state) => state.chat.activeChat);
@@ -15,6 +16,8 @@ const ModalShareMessage = ({ setShowModalShareMes, message }) => {
         const fetchContacts = async () => {
             try {
                 const data = await getListFriend();
+                const dataGroup = await getListGroupChatByUserId();
+                setGroupData(dataGroup);
                 setContacts(data);
             } catch (error) {
                 console.error('Lỗi khi lấy danh sách bạn bè', error);
@@ -24,17 +27,24 @@ const ModalShareMessage = ({ setShowModalShareMes, message }) => {
         fetchContacts();
     });
 
-    const toggleSelect = (name) => {
-        setSelected((prev) => (prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]));
+    const toggleSelect = (item) => {
+        setSelected((prev) =>
+            prev.some((n) => n.id === item.id) // hoặc n.name === item.name nếu bạn muốn so theo tên
+                ? prev.filter((n) => n.id !== item.id)
+                : [...prev, item],
+        );
     };
 
-    const handleShareMessage = async () => {
-        for (const userId of selected) {
-            const data = await getChatByUser(userId);
-            console.log(`ID của cuộc trò chuyện với ${userId}:`, data);
+    console.log('contacts', selected);
 
+    const handleShareMessage = async () => {
+        for (const item of selected) {
+            let data = null;
+            if (!item?.isGroup) {
+                data = await getChatByUser(item?.id);
+            }
             const sendMess = await sendMessage(
-                data?.id,
+                data?.id || item?.id,
                 message?.content,
                 message.type,
                 message.replyToId,
@@ -49,14 +59,12 @@ const ModalShareMessage = ({ setShowModalShareMes, message }) => {
             });
         }
 
-        console.log('Selected:', activeChat);
-
         setShowModalShareMes(false);
     };
 
-    const filteredContacts = contacts.filter((contact) =>
-        contact.name.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
+    const filteredFriends = contacts.filter((contact) => contact.name.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const filteredContacts = [...filteredFriends, ...groupData];
 
     return (
         // Overlay
@@ -82,8 +90,8 @@ const ModalShareMessage = ({ setShowModalShareMes, message }) => {
                             </div>
                             <input
                                 type="checkbox"
-                                checked={selected.includes(items?.id)}
-                                onChange={() => toggleSelect(items?.id)}
+                                checked={selected.some((s) => s.id === items.id)}
+                                onChange={() => toggleSelect(items)}
                             />
                             <span>{items?.name}</span>
                         </label>
