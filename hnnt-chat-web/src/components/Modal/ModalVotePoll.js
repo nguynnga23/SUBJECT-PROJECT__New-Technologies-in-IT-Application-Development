@@ -58,10 +58,7 @@ export function ModalVotePoll() {
             // });
 
             await updateVotePoll(valueModalVotePoll?.id, selectedOptions, userActive?.id);
-            // socket.emit('send_message', {
-            //     chatId: activeChat?.id,
-            //     newMessage: 'nothing',
-            // });
+
             dispatch(setShowModalVotePoll(false));
         } catch (error) {
             console.error('Lỗi khi bình chọn:', error);

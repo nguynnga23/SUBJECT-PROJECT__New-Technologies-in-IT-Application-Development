@@ -136,10 +136,10 @@ export default function GroupChatScreen() {
 
             const data = await fetchMessages(chatId, token); // Gọi API để lấy danh sách tin nhắn
             setMessages(data);
-            // 👉 Lấy ra tất cả pollId từ messages
+            //  Lấy ra tất cả pollId từ messages
             const pollMessages = data.filter((msg) => msg.type === 'poll' && msg.content);
             const pollIds = pollMessages.map((msg) => msg.content);
-            // 👉 Gọi API để lấy chi tiết của từng poll
+            //  Gọi API để lấy chi tiết của từng poll
             const pollDetails = {};
             for (const pollId of pollIds) {
                 try {
@@ -207,7 +207,7 @@ export default function GroupChatScreen() {
         };
 
         socket.on('receive_message', handleReceiveMessage);
-        socket.on('receive_vote_poll', handleReceiveMessage);
+        // socket.on('receive_vote_poll', handleReceiveMessage);
         return () => socket.off('receive_message', handleReceiveMessage);
     }, [chatId]); // Ensure this hook is at the top level
 
@@ -432,11 +432,8 @@ export default function GroupChatScreen() {
         try {
             console.log('Attempting to vote:', { chatId, pollId, optionId, voterId });
             await votePollOption({ chatId, pollId, pollOptionId: optionId, voterId });
-            socket.emit('vote_poll', {
-                chatId: chatId,
-                newMessage: pollId,
-            });
-            Alert.alert('Success', 'Your vote has been recorded.');
+            setModalPollVisible(false);
+            await loadMessages(); // Reload messages to update the latest state
         } catch (error) {
             console.error('Error during voting:', error.response?.data || error.message);
             Alert.alert('Error', `Failed to record your vote: ${error.response?.data?.error || error.message}`);
