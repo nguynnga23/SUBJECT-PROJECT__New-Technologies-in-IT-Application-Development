@@ -732,193 +732,198 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
                     // Xác định tin nhắn cuối cùng của userId
                     const lastMessage = data[data.length - 1];
 
-                    return (
-                        <div
-                            id={`message-${message.id}`}
-                            className={`relative ${
-                                message.type === 'poll'
-                                    ? 'flex justify-center mb-2'
-                                    : `flex items-center mb-2 ${
-                                          message.sender.id === userId ? 'justify-end' : 'justify-start'
-                                      }`
-                            }`}
-                            key={index}
-                            onMouseEnter={() => {
-                                if (isPopupOpenIndex === null) setHoveredMessage(index);
-                                setOpenReactionChat(false);
-                            }}
-                            onMouseLeave={() => {
-                                if (isPopupOpenIndex === null) setHoveredMessage(null);
-                                setOpenReactionChat(false);
-                            }}
-                        >
-                            {!isDeleted && Component && (
-                                <div className="flex items-center">
-                                    <div className=" mr-3 w-[45px] h-[45px] ">
-                                        {message.sender.id !== userId && showAvatar && (
-                                            <div className="relative w-[45px] h-[45px] flex-shrink-0">
-                                                <img
-                                                    src={message.sender.avatar}
-                                                    alt="avatar"
-                                                    className="w-full h-full rounded-full border object-cover"
+                    if (message.type === 'notify') {
+                        return (
+                            <div className="relative flex items-center mb-2 text-[8px] text-gray-500 justify-center ">
+                                <p className="bg-gray-300 rounded-lg p-1 px-2 font-bold">{message.content}</p>
+                            </div>
+                        );
+                    } else {
+                        return (
+                            <div
+                                id={`message-${message.id}`}
+                                className={`relative ${
+                                    message.type === 'poll'
+                                        ? 'flex justify-center mb-2'
+                                        : `flex items-center mb-2 ${
+                                              message.sender.id === userId ? 'justify-end' : 'justify-start'
+                                          }`
+                                }`}
+                                key={index}
+                                onMouseEnter={() => {
+                                    if (isPopupOpenIndex === null) setHoveredMessage(index);
+                                    setOpenReactionChat(false);
+                                }}
+                                onMouseLeave={() => {
+                                    if (isPopupOpenIndex === null) setHoveredMessage(null);
+                                    setOpenReactionChat(false);
+                                }}
+                            >
+                                {!isDeleted && Component && (
+                                    <div className="flex items-center">
+                                        <div className=" mr-3 w-[45px] h-[45px] ">
+                                            {message.sender.id !== userId && showAvatar && (
+                                                <div className="relative w-[45px] h-[45px] flex-shrink-0">
+                                                    <img
+                                                        src={message.sender.avatar}
+                                                        alt="avatar"
+                                                        className="w-full h-full rounded-full border object-cover"
+                                                    />
+                                                    {leader?.id === message.sender.id && (
+                                                        <RiKey2Line
+                                                            size={15}
+                                                            color="yellow"
+                                                            className="absolute bottom-[0px] right-[0px] bg-gray-500  bg-opacity-50 rounded-full p-[2px]"
+                                                        />
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div
+                                            className={`flex relative items-center ${
+                                                Component === ChatPollCard && 'w-[390px]'
+                                            }`}
+                                        >
+                                            {hoveredMessage === index &&
+                                                isPopupOpenIndex === null &&
+                                                message.sender.id === userActive.id && (
+                                                    <div className="flex">
+                                                        <button
+                                                            className={`absolute left-[-25px] bottom-[10px] dark:bg-gray-700  p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 mr-1 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
+                                                            onClick={() => {
+                                                                setIsPopupOpenIndex(index);
+                                                            }}
+                                                        >
+                                                            <FiMoreHorizontal size={15} />
+                                                        </button>
+                                                        {!message.destroy && (
+                                                            <button
+                                                                className={`absolute left-[-50px] bottom-[10px] dark:bg-gray-700  p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
+                                                                onClick={() => {
+                                                                    setReplyMessage(message);
+                                                                }}
+                                                            >
+                                                                <MdOutlineReply size={15} />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            <div className={`relative ${Component === ChatPollCard && 'w-full'}`}>
+                                                <Component
+                                                    key={index}
+                                                    index={index}
+                                                    userId={userId}
+                                                    activeChat={activeChat}
+                                                    message={message}
+                                                    reactions={message.reactions}
+                                                    showName={
+                                                        message.sender.id !== userId && showAvatar && activeChat.isGroup
+                                                    }
+                                                    replyMessage={message?.replyTo}
+                                                    scrollToMessage={scrollToMessage}
                                                 />
-                                                {leader?.id === message.sender.id && (
-                                                    <RiKey2Line
-                                                        size={15}
-                                                        color="yellow"
-                                                        className="absolute bottom-[0px] right-[0px] bg-gray-500  bg-opacity-50 rounded-full p-[2px]"
+                                                {message.id === lastMessage.id && message.sender.id === userId && (
+                                                    <span className="absolute bottom-[-27px] right-[0]">
+                                                        <p className="text-[10px] p-1 bg-gray-300 rounded-lg text-gray-500 mt-1 ">
+                                                            {Component !== ChatPollCard
+                                                                ? !activeChat.isGroup
+                                                                    ? activeChat.participants?.find(
+                                                                          (user) => user.accountId !== userId,
+                                                                      )?.readed
+                                                                        ? 'Đã xem'
+                                                                        : 'Đã gửi'
+                                                                    : 'Đã nhận'
+                                                                : ''}
+                                                        </p>
+                                                    </span>
+                                                )}
+                                                {isPopupOpenIndex === index && (
+                                                    <PopupMenuForChat
+                                                        setIsPopupOpen={setIsPopupOpenIndex}
+                                                        position={position}
+                                                        message={message}
+                                                        setShowModalShareMes={setShowModalShareMes}
+                                                        setMessageShare={setMessageShare}
+                                                    />
+                                                )}
+                                                {sumReaction > 0 && !message.destroy && (
+                                                    <div
+                                                        className="absolute flex items-center bottom-[-5px] right-[10px] rounded-full p-0.5 bg-white text-[12px] cursor-pointer dark:bg-gray-700"
+                                                        onClick={() => setOpenReactionChat(true)}
+                                                    >
+                                                        {message.reactions.slice(0, 2).map((re, index) => {
+                                                            return <div key={index}>{re.reaction}</div>;
+                                                        })}
+                                                        {sumReaction >= 2 && (
+                                                            <div className="text-gray-500 text-[10px]">
+                                                                {sumReaction}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                                {hoveredMessage === index &&
+                                                    isPopupOpenIndex === null &&
+                                                    !message.destroy && (
+                                                        <button
+                                                            className="absolute bottom-[-5px] right-[-10px] rounded-full p-0.5 text-[12px] bg-white dark:bg-gray-700"
+                                                            onMouseEnter={() => setShowPopupReaction(true)}
+                                                            onMouseLeave={() =>
+                                                                !showPopupReaction && setShowPopupReaction(false)
+                                                            }
+                                                        >
+                                                            <AiOutlineLike className="text-gray-400 " size={13} />
+                                                        </button>
+                                                    )}
+
+                                                {showPopupReaction &&
+                                                    hoveredMessage === index &&
+                                                    isPopupOpenIndex === null && (
+                                                        <PopupReacttion
+                                                            position={position}
+                                                            setShowPopupReaction={setShowPopupReaction}
+                                                            chatId={activeChat.id}
+                                                            message={message}
+                                                            reactions={message.reactions}
+                                                            userId={userId}
+                                                        />
+                                                    )}
+                                                {openReactionChat && hoveredMessage === index && (
+                                                    <PopupReactionChat
+                                                        onClose={setOpenReactionChat}
+                                                        reactions={message.reactions}
                                                     />
                                                 )}
                                             </div>
-                                        )}
-                                    </div>
 
-                                    <div
-                                        className={`flex relative items-center ${
-                                            Component === ChatPollCard && 'w-[390px]'
-                                        }`}
-                                    >
-                                        {hoveredMessage === index &&
-                                            isPopupOpenIndex === null &&
-                                            message.sender.id === userActive.id && (
-                                                <div className="flex">
-                                                    <button
-                                                        className={`absolute left-[-25px] bottom-[10px] dark:bg-gray-700  p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 mr-1 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
-                                                        onClick={() => {
-                                                            setIsPopupOpenIndex(index);
-                                                        }}
-                                                    >
-                                                        <FiMoreHorizontal size={15} />
-                                                    </button>
-                                                    {!message.destroy && (
+                                            {hoveredMessage === index &&
+                                                isPopupOpenIndex === null &&
+                                                message.sender.id !== userActive.id && (
+                                                    <div className="relative flex ">
                                                         <button
-                                                            className={`absolute left-[-50px] bottom-[10px] dark:bg-gray-700  p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
+                                                            className={`absolute dark:bg-gray-700 right-[-25px] bottom-[-10px] p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
+                                                            onClick={() => {
+                                                                setIsPopupOpenIndex(index);
+                                                            }}
+                                                        >
+                                                            <FiMoreHorizontal size={15} />
+                                                        </button>
+                                                        <button
+                                                            className={`absolute dark:bg-gray-700 right-[-50px] bottom-[-10px] p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
                                                             onClick={() => {
                                                                 setReplyMessage(message);
                                                             }}
                                                         >
                                                             <MdOutlineReply size={15} />
                                                         </button>
-                                                    )}
-                                                </div>
-                                            )}
-                                        <div className={`relative ${Component === ChatPollCard && 'w-full'}`}>
-                                            <Component
-                                                key={index}
-                                                index={index}
-                                                userId={userId}
-                                                activeChat={activeChat}
-                                                message={message}
-                                                reactions={message.reactions}
-                                                showName={
-                                                    message.sender.id !== userId && showAvatar && activeChat.group
-                                                }
-                                                replyMessage={message?.replyTo}
-                                                scrollToMessage={scrollToMessage}
-                                            />
-
-                                            {message.id === lastMessage.id && message.sender.id === userId && (
-                                                <span className="absolute bottom-[-27px] right-[0]">
-                                                    <p className="text-[10px] p-1 bg-gray-300 rounded-lg text-gray-500 mt-1 ">
-                                                        {Component !== ChatPollCard
-                                                            ? !activeChat.isGroup
-                                                                ? activeChat.participants?.find(
-                                                                      (user) => user.accountId !== userId,
-                                                                  )?.readed
-                                                                    ? 'Đã xem'
-                                                                    : 'Đã gửi'
-                                                                : 'Đã nhận'
-                                                            : ''}
-                                                    </p>
-                                                </span>
-                                            )}
-                                            {isPopupOpenIndex === index && (
-                                                <PopupMenuForChat
-                                                    setIsPopupOpen={setIsPopupOpenIndex}
-                                                    position={position}
-                                                    message={message}
-                                                    setShowModalShareMes={setShowModalShareMes}
-                                                    setMessageShare={setMessageShare}
-                                                />
-                                            )}
-                                            {sumReaction > 0 && !message.destroy && (
-                                                <div
-                                                    className="absolute flex items-center bottom-[-5px] right-[10px] rounded-full p-0.5 bg-white text-[12px] cursor-pointer dark:bg-gray-700"
-                                                    onClick={() => setOpenReactionChat(true)}
-                                                >
-                                                    {message.reactions.slice(0, 2).map((re, index) => {
-                                                        return <div key={index}>{re.reaction}</div>;
-                                                    })}
-                                                    {sumReaction >= 2 && (
-                                                        <div className="text-gray-500 text-[10px]">{sumReaction}</div>
-                                                    )}
-                                                </div>
-                                            )}
-                                            {Component !== ChatPollCard &&
-                                                hoveredMessage === index &&
-                                                isPopupOpenIndex === null &&
-                                                !message.destroy && (
-                                                    <button
-                                                        className="absolute bottom-[-5px] right-[-10px] rounded-full p-0.5 text-[12px] bg-white dark:bg-gray-700"
-                                                        onMouseEnter={() => setShowPopupReaction(true)}
-                                                        onMouseLeave={() =>
-                                                            !showPopupReaction && setShowPopupReaction(false)
-                                                        }
-                                                    >
-                                                        <AiOutlineLike className="text-gray-400 " size={13} />
-                                                    </button>
-                                                )}
-
-                                            {Component !== ChatPollCard &&
-                                                showPopupReaction &&
-                                                hoveredMessage === index &&
-                                                isPopupOpenIndex === null && (
-                                                    <PopupReacttion
-                                                        position={position}
-                                                        setShowPopupReaction={setShowPopupReaction}
-                                                        chatId={activeChat.id}
-                                                        message={message}
-                                                        reactions={message.reactions}
-                                                        userId={userId}
-                                                    />
-                                                )}
-                                            {Component !== ChatPollCard &&
-                                                openReactionChat &&
-                                                hoveredMessage === index && (
-                                                    <PopupReactionChat
-                                                        onClose={setOpenReactionChat}
-                                                        reactions={message.reactions}
-                                                    />
+                                                    </div>
                                                 )}
                                         </div>
-
-                                        {hoveredMessage === index &&
-                                            isPopupOpenIndex === null &&
-                                            message.sender.id !== userActive.id && (
-                                                <div className="relative flex ">
-                                                    <button
-                                                        className={`absolute dark:bg-gray-700 right-[-25px] bottom-[-10px] p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
-                                                        onClick={() => {
-                                                            setIsPopupOpenIndex(index);
-                                                        }}
-                                                    >
-                                                        <FiMoreHorizontal size={15} />
-                                                    </button>
-                                                    <button
-                                                        className={`absolute dark:bg-gray-700 right-[-50px] bottom-[-10px] p-1 rounded-full hover:bg-gray-300 hover:text-blue-500 hover:dark:bg-blue-300 hover:dark:text-gray-100`}
-                                                        onClick={() => {
-                                                            setReplyMessage(message);
-                                                        }}
-                                                    >
-                                                        <MdOutlineReply size={15} />
-                                                    </button>
-                                                </div>
-                                            )}
                                     </div>
-                                </div>
-                            )}
-                        </div>
-                    );
+                                )}
+                            </div>
+                        );
+                    }
                 })}
             </div>
             <div>
