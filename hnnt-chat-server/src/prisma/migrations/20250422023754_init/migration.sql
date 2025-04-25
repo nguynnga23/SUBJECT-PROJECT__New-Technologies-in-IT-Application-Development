@@ -134,6 +134,39 @@ CREATE TABLE "BlockedUser" (
     CONSTRAINT "BlockedUser_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "Poll" (
+    "id" TEXT NOT NULL,
+    "chatId" TEXT NOT NULL,
+    "creatorId" TEXT NOT NULL,
+    "title" VARCHAR(255) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "endsAt" TIMESTAMP(3),
+
+    CONSTRAINT "Poll_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PollOption" (
+    "id" TEXT NOT NULL,
+    "pollId" TEXT NOT NULL,
+    "text" VARCHAR(255) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "PollOption_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PollVote" (
+    "id" TEXT NOT NULL,
+    "pollOptionId" TEXT NOT NULL,
+    "voterId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "PollVote_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Account_number_key" ON "Account"("number");
 
@@ -151,6 +184,9 @@ CREATE UNIQUE INDEX "ChatParticipant_chatId_accountId_key" ON "ChatParticipant"(
 
 -- CreateIndex
 CREATE UNIQUE INDEX "BlockedUser_blockerAccountId_blockedAccountId_key" ON "BlockedUser"("blockerAccountId", "blockedAccountId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PollVote_pollOptionId_voterId_key" ON "PollVote"("pollOptionId", "voterId");
 
 -- AddForeignKey
 ALTER TABLE "FriendRequest" ADD CONSTRAINT "FriendRequest_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -199,3 +235,18 @@ ALTER TABLE "BlockedUser" ADD CONSTRAINT "BlockedUser_blockerAccountId_fkey" FOR
 
 -- AddForeignKey
 ALTER TABLE "BlockedUser" ADD CONSTRAINT "BlockedUser_blockedAccountId_fkey" FOREIGN KEY ("blockedAccountId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Poll" ADD CONSTRAINT "Poll_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "Chat"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Poll" ADD CONSTRAINT "Poll_creatorId_fkey" FOREIGN KEY ("creatorId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PollOption" ADD CONSTRAINT "PollOption_pollId_fkey" FOREIGN KEY ("pollId") REFERENCES "Poll"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PollVote" ADD CONSTRAINT "PollVote_pollOptionId_fkey" FOREIGN KEY ("pollOptionId") REFERENCES "PollOption"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PollVote" ADD CONSTRAINT "PollVote_voterId_fkey" FOREIGN KEY ("voterId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;

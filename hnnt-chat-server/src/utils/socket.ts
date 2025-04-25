@@ -121,6 +121,11 @@ export const initSocket = (server: HttpServer) => {
             io.to(from).emit('call_rejected', { to }); // Gửi thông báo cuộc gọi bị từ chối
         });
 
+        socket.on('new_poll', ({ chatId, poll }) => {
+            io.emit('new_poll', { chatId, poll });
+            console.log(`📊 New poll created in chat ${chatId}`);
+        });
+
         socket.on('disconnect', () => {
             // Xóa socket khỏi map
             for (let [userId, id] of userSocketMap.entries()) {

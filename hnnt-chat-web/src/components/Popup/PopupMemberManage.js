@@ -1,22 +1,42 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import {
-    removeMemberOfGroup,
+    removeMemberOfGroupSlice,
     setActiveChat,
     setShowOrOffRightBar,
     setShowOrOffRightBarSearch,
+    changeLeaderSlice,
 } from '../../redux/slices/chatSlice';
+import { changeLeaderRole, kickMember, leaveGroup } from '../../screens/Messaging/api';
 
 function PopupMemberManage({ setShowPopup, leader, member, group }) {
     const dispatch = useDispatch();
 
-    const handleRemoveMember = (isLeader) => {
-        dispatch(removeMemberOfGroup({ memberId: member.id, groupId: group.id }));
+    const handleRemoveMember = async (isLeader) => {
+        const removeMember = await kickMember(group.id, member.accountId);
+        if (removeMember) {
+            dispatch(removeMemberOfGroupSlice({ memberId: member.accountId }));
+        }
         if (isLeader) {
             dispatch(setActiveChat(null));
             dispatch(setShowOrOffRightBar(false));
             dispatch(setShowOrOffRightBarSearch(false));
         }
+    };
+
+    const handleChangeLeader = async (isLeader) => {
+        const changeLeader = await changeLeaderRole(group.id, member.accountId);
+        // if (changeLeader) {
+        //     dispatch(changeLeaderSlice({ memberId: member.accountId }));
+        // }
+    };
+
+    const handleLeaveGroup = () => {
+        // dispatch(removeMemberOfGroup({ memberId: member.id, groupId: group.id }));
+        leaveGroup(group.id, member.accountId);
+        dispatch(setActiveChat(null));
+        dispatch(setShowOrOffRightBar(false));
+        dispatch(setShowOrOffRightBarSearch(false));
     };
 
     const popupRef = useRef(null);
@@ -34,23 +54,37 @@ function PopupMemberManage({ setShowPopup, leader, member, group }) {
 
     return (
         <div
-            className="absolute right-[5px] top-0 w-40 bg-white shadow-lg rounded-lg border z-999 dark:bg-gray-700 dark:text-gray-300"
+            className="absolute right-[5px] top-0 w-40 bg-white shadow-lg rounded-lg border z-999 dark:bg-gray-700 dark:text-gray-300 z-10"
             ref={popupRef}
         >
             <div
                 onClick={() => {
                     setShowPopup(false);
                 }}
-                className="flex items-center my-1 hover:bg-gray-100 hover:dark:bg-gray-700 rounded-lg cursor-pointer"
+                className="my-1 mx-1 rounded-lg"
             >
                 {leader ? (
-                    <span className="flex-1 my-1 text-sm text-center" onClick={handleRemoveMember}>
+                    <div
+                        className="flex-1 p-2 text-sm hover:bg-gray-100 hover:dark:bg-gray-700 cursor-pointer"
+                        onClick={handleLeaveGroup}
+                    >
                         Rời nhóm
-                    </span>
+                    </div>
                 ) : (
-                    <span className="flex-1 my-1 text-sm text-center" onClick={() => handleRemoveMember(leader)}>
-                        Xóa khỏi nhóm
-                    </span>
+                    <div>
+                        <div
+                            className="flex-1 p-2 text-sm hover:bg-gray-100 hover:dark:bg-gray-700 cursor-pointer"
+                            onClick={() => handleChangeLeader(leader)}
+                        >
+                            Chuyển trưởng nhóm
+                        </div>
+                        <div
+                            className="flex-1 p-2 text-sm hover:bg-gray-100 hover:dark:bg-gray-700 cursor-pointer"
+                            onClick={() => handleRemoveMember(leader)}
+                        >
+                            Xóa khỏi nhóm
+                        </div>
+                    </div>
                 )}
             </div>
         </div>

@@ -1,17 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { IoClose } from 'react-icons/io5';
-import { useDispatch, useSelector } from 'react-redux';
-import { addMemberToGroup, createGroupChat } from '../../screens/Messaging/api';
+import { useSelector, useDispatch } from 'react-redux';
+import { addMemberToGroup, createGroupChat, uploadFileFormChatGroupToS3 } from '../../screens/Messaging/api';
 import { getListFriend } from '../../screens/Contacts/api';
+import { addMemberToGroupSlice } from '../../redux/slices/chatSlice';
 
 const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
-    const dispatch = useDispatch();
-
     const userActive = useSelector((state) => state.auth.userActive);
+
+    const dispatch = useDispatch();
 
     const [groupName, setGroupName] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [avatar, setAvatar] = useState('');
+    const [preAvatar, setpreAvatar] = useState('');
 
     const existingMembers = activeChat?.isGroup ? activeChat?.participants : [];
     const [selectedMembers, setSelectedMembers] = useState(existingMembers);
@@ -51,14 +53,31 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
 
     const filteredMembers = friend.filter((member) => member.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const handleCreateGroup = () => {
-        createGroupChat(groupName, avatar, selectedMembers);
+    const handleCreateGroup = async () => {
+        if (!avatar) return;
+        const avatarGroup = await uploadFileFormChatGroupToS3(avatar);
+        if (avatarGroup.fileUrl) {
+            createGroupChat(groupName, avatarGroup.fileUrl, selectedMembers);
+        }
         clear();
         onClose();
     };
-    const handleAddMemberToGroup = () => {
-        const selectedFullMembers = selectedMembers.filter((member) => member.accountId !== userActive.id); // Lọc các member hợp lệ
-        addMemberToGroup(activeChat.id, selectedFullMembers);
+    const handleAddMemberToGroup = async () => {
+        const newMembers = selectedMembers.filter(
+            (member) =>
+                member.accountId !== userActive.id &&
+                !existingMembers.some((existing) => existing.accountId === member.accountId),
+        );
+
+        const selectedFullMembers = newMembers.map(
+            ({ id, name, avatar, status, account, category, categoryId, readed, priority, ...rest }) => rest,
+        );
+
+        const saveMemberToGroup = await addMemberToGroup(activeChat.id, selectedFullMembers);
+
+        if (saveMemberToGroup) {
+            dispatch(addMemberToGroupSlice({ members: newMembers }));
+        }
 
         clear();
         onClose();
@@ -107,13 +126,14 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
                                         const file = e.target.files[0];
                                         if (file) {
                                             const imageUrl = URL.createObjectURL(file); // Tạo URL tạm thời
-                                            setAvatar(imageUrl);
+                                            setpreAvatar(imageUrl);
+                                            setAvatar(file);
                                         }
                                     }}
                                 />
                                 <img
                                     src={
-                                        avatar ||
+                                        preAvatar ||
                                         'https://img.freepik.com/premium-vector/chat-vector-icon_676179-133.jpg'
                                     }
                                     alt="avatar"
@@ -166,10 +186,10 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
                                     />
                                     <img
                                         className="w-10 h-10 bg-gray-300 rounded-full object-cover"
-                                        src={member.avatar}
+                                        src={member?.avatar}
                                         alt="avatar"
                                     />
-                                    <span className="ml-3">{member.name}</span>
+                                    <span className="ml-3">{member?.name}</span>
                                 </div>
                             );
                         })}

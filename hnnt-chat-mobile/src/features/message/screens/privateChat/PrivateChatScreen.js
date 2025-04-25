@@ -38,7 +38,8 @@ import {
     uploadFileToS3,
     getBlockedUsers,
     previewFile,
-} from '../../services/privateChat/PrivateChatService';
+    ShareAnyFile
+} from '../../services/ChatService';
 import { getPinMess, fetchChat } from '../../services/privateChat/PrivateChatInfoService';
 
 import { handleLongPressMessage, MessageOptionsModal } from '../../components/MessageOptions';
@@ -240,7 +241,16 @@ export default function PrivateChatScreen() {
     const handleSendMessage = async (content) => {
         Keyboard.dismiss();
         try {
-            const response = await sendMessage(chatId, content, 'text', replyMessage?.id, null, null, null, token);
+            // const response = await sendMessage(chatId, content, 'text', replyMessage?.id, null, null, null, token);
+            //Kiểm tra xem content có phải là link hay không
+            const isLink = content.match(/https?:\/\/[^\s]+/g);
+            let response = null;
+            if (isLink) {
+                response = await sendMessage(chatId, content, 'link', replyMessage?.id, null, null, null, token);
+            }
+            else {
+                response = await sendMessage(chatId, content, 'text', replyMessage?.id, null, null, null, token);
+            };
             if (replyMessage === null) {
                 socket.emit('send_message', {
                     chatId: chatId,
@@ -487,15 +497,17 @@ export default function PrivateChatScreen() {
                                                         <Text style={styles.message}>{item.content}</Text>
                                                     )}
 
-                                                    {/* Hiển thị file, hình ảnh, hoặc audio nếu có */}
-                                                    {/* {item.audioUri && (
+                                                    {item.type === 'link' && (
                                                         <TouchableOpacity
-                                                            onPress={() => playAudio(item.audioUri)}
-                                                            style={styles.playButton}
+                                                            onPress={() => {
+                                                                Linking.openURL(item.content);
+                                                            }}
                                                         >
-                                                            <Ionicons name="play-circle" size={30} color="blue" />
+                                                            <Text style={{ fontSize: 16, lineHeight: 22, color: '#007AFF', textDecorationLine: 'underline' }}>
+                                                                {item.content}
+                                                            </Text>
                                                         </TouchableOpacity>
-                                                    )} */}
+                                                    )}
 
                                                     {item.type === 'image' && (
                                                         <TouchableOpacity
@@ -545,26 +557,24 @@ export default function PrivateChatScreen() {
                                                         </View>
                                                     )}
 
-                                                    {item.type === 'file' &&
-                                                        !item.fileType?.includes('video') &&
-                                                        !item.fileType?.includes('image') && (
-                                                            <TouchableOpacity
-                                                                onLongPress={() => {
-                                                                    setSelectedFile(item.content);
-                                                                    setModalDownFileVisible(true);
-                                                                }}
-                                                                style={styles.fileContainer}
-                                                            >
-                                                                <Ionicons
-                                                                    name="document-text-outline"
-                                                                    size={24}
-                                                                    color="blue"
-                                                                />
-                                                                <Text style={styles.fileName}>
-                                                                    {item.fileName} {item.fileSize}
-                                                                </Text>
-                                                            </TouchableOpacity>
-                                                        )}
+                                                    {item.type === 'file' && (
+                                                        <TouchableOpacity
+                                                            onLongPress={() => {
+                                                                setSelectedFile(item.content);
+                                                                setModalDownFileVisible(true);
+                                                            }}
+                                                            style={styles.fileContainer}
+                                                        >
+                                                            <Ionicons
+                                                                name="document-text-outline"
+                                                                size={24}
+                                                                color="blue"
+                                                            />
+                                                            <Text style={styles.fileName}>
+                                                                {item.fileName} {item.fileSize}
+                                                            </Text>
+                                                        </TouchableOpacity>
+                                                    )}
 
                                                     {item.type === 'audio' && (
                                                         <TouchableOpacity
@@ -742,6 +752,15 @@ export default function PrivateChatScreen() {
                                                 <Text style={styles.modalButtonText}>Download</Text>
                                             </TouchableOpacity>
                                             <TouchableOpacity
+                                                style={styles.modalButton}
+                                                onPress={() => {
+                                                    ShareAnyFile(selectedFile);
+                                                    setModalDownFileVisible(false);
+                                                }}
+                                            >
+                                                <Text style={styles.modalButtonText}>Share</Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity
                                                 style={[styles.modalButton, styles.cancelButton]}
                                                 onPress={() => setModalDownVisible(false)} // Đóng modal
                                             >
@@ -781,10 +800,13 @@ export default function PrivateChatScreen() {
                                                 <Text style={styles.modalButtonText}>Download</Text>
                                             </TouchableOpacity>
                                             <TouchableOpacity
-                                                style={[styles.modalButton, styles.cancelButton]}
-                                                onPress={() => setModalDownFileVisible(false)}
+                                                style={styles.modalButton}
+                                                onPress={() => {
+                                                    ShareAnyFile(selectedFile);
+                                                    setModalDownFileVisible(false);
+                                                }}
                                             >
-                                                <Text style={styles.modalButtonText}>Cancel</Text>
+                                                <Text style={styles.modalButtonText}>Share</Text>
                                             </TouchableOpacity>
                                         </View>
                                     </View>

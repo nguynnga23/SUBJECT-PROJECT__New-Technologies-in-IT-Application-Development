@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import prisma from '../utils/prismaClient';
 
 // Create a new poll
-export const createPoll = async (req: Request, res: Response) => {
+export const createPoll = async (req: Request, res: Response): Promise<void> => {
     try {
         const { chatId, creatorId, title, endsAt, options } = req.body;
 
@@ -27,7 +27,7 @@ export const createPoll = async (req: Request, res: Response) => {
 };
 
 // Get all polls for a chat
-export const getPollsByChat = async (req: Request, res: Response) => {
+export const getPollsByChat = async (req: Request, res: Response): Promise<void> => {
     try {
         const { chatId } = req.params;
 
@@ -44,7 +44,7 @@ export const getPollsByChat = async (req: Request, res: Response) => {
 };
 
 // Vote on a poll option
-export const votePollOption = async (req: Request, res: Response) => {
+export const votePollOption = async (req: Request, res: Response): Promise<void> => {
     try {
         const { pollOptionId, voterId } = req.body;
 
@@ -63,7 +63,7 @@ export const votePollOption = async (req: Request, res: Response) => {
 };
 
 // Delete a poll
-export const deletePoll = async (req: Request, res: Response) => {
+export const deletePoll = async (req: Request, res: Response): Promise<void> => {
     try {
         const { pollId } = req.params;
 
