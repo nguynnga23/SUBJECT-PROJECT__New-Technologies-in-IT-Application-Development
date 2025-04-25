@@ -762,7 +762,7 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
                                 {!isDeleted && Component && (
                                     <div className="flex items-center">
                                         <div className=" mr-3 w-[45px] h-[45px] ">
-                                            {message.sender.id !== userId && showAvatar && (
+                                            {message.sender.id !== userId && Component !== ChatPollCard && (
                                                 <div className="relative w-[45px] h-[45px] flex-shrink-0">
                                                     <img
                                                         src={message.sender.avatar}
@@ -862,7 +862,8 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
                                                         )}
                                                     </div>
                                                 )}
-                                                {hoveredMessage === index &&
+                                                {Component !== ChatPollCard &&
+                                                    hoveredMessage === index &&
                                                     isPopupOpenIndex === null &&
                                                     !message.destroy && (
                                                         <button
@@ -876,7 +877,8 @@ function TabMessage({ setShowModalShareMes, setMessageShare }) {
                                                         </button>
                                                     )}
 
-                                                {showPopupReaction &&
+                                                {Component !== ChatPollCard &&
+                                                    showPopupReaction &&
                                                     hoveredMessage === index &&
                                                     isPopupOpenIndex === null && (
                                                         <PopupReacttion

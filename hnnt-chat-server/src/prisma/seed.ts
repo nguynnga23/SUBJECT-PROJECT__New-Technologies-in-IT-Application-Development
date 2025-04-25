@@ -75,28 +75,37 @@ async function main() {
         },
     });
 
-    // Additional Users
-    const users = [];
-    for (let i = 5; i <= 10; i++) {
-        const hashedPassword = await bcrypt.hash('123456789', 10);
-        const birthDate = new Date('2003-04-20'); // Generate valid date
-        const user = await prisma.account.create({
-            data: {
-                id: uuidv4(),
-                name: `User ${i}`,
-                number: `077646${(1000 + i).toString().padStart(4, '0')}`, // Ensure 11-digit numbers
-                password: hashedPassword,
-                email: `user${i}@example.com`,
-                avatar: `https://i.pravatar.cc/150?img=${i}`,
-                status: 'active',
-                birthDate, // Use valid date
-                location: `Location ${i}`,
-                gender: i % 2 === 0 ? 'Nam' : 'Nữ',
-                currentAvatars: [],
-            },
-        });
-        users.push(user);
-    }
+    const user5 = await prisma.account.create({
+        data: {
+            id: uuidv4(),
+            name: 'Phạm Lê Thanh Nhã',
+            number: '0776466185',
+            password: hashedPassword4,
+            email: 'email5@gmail.com',
+            avatar: 'https://i.pravatar.cc/150?img=19',
+            status: 'active',
+            birthDate: new Date('2003-04-20'),
+            location: 'Tp. Hồ Chí Minh',
+            gender: 'Nữ',
+            currentAvatars: [],
+        },
+    });
+
+    const user6 = await prisma.account.create({
+        data: {
+            id: uuidv4(),
+            name: 'Phạm Lê Thanh Hòa',
+            number: '0776466184',
+            password: hashedPassword4,
+            email: 'email6@gmail.com',
+            avatar: 'https://i.pravatar.cc/150?img=39',
+            status: 'active',
+            birthDate: new Date('2003-04-20'),
+            location: 'Tp. Hồ Chí Minh',
+            gender: 'Nam',
+            currentAvatars: [],
+        },
+    });
 
     // Group Chat
     const groupChat1 = await prisma.chat.create({
@@ -119,76 +128,10 @@ async function main() {
                         accountId: user3.id,
                         role: 'MEMBER',
                     },
-                ],
-            },
-        },
-    });
-    const groupChat2 = await prisma.chat.create({
-        data: {
-            id: uuidv4(),
-            isGroup: true,
-            name: 'Friends Group',
-            avatar: 'https://i.pravatar.cc/150?img=200',
-            participants: {
-                create: [
-                    {
-                        accountId: user2.id,
-                        role: 'LEADER',
-                    },
                     {
                         accountId: user4.id,
                         role: 'MEMBER',
                     },
-                ],
-            },
-        },
-    });
-
-    // Additional Group Chats
-    for (let i = 3; i <= 5; i++) {
-        await prisma.chat.create({
-            data: {
-                id: uuidv4(),
-                isGroup: true,
-                name: `Group Chat ${i}`,
-                avatar: `https://i.pravatar.cc/150?img=${i + 100}`,
-                participants: {
-                    create: users.slice(i, i + 3).map((user, index) => ({
-                        accountId: user.id,
-                        role: index === 0 ? 'LEADER' : 'MEMBER',
-                    })),
-                },
-            },
-        });
-    }
-
-    // Additional Groups for Nguyễn Thị Nga
-    const ngaGroup1 = await prisma.chat.create({
-        data: {
-            id: uuidv4(),
-            isGroup: true,
-            name: "Nga's Study Group",
-            avatar: 'https://i.pravatar.cc/150?img=20',
-            participants: {
-                create: [
-                    { accountId: user2.id, role: 'LEADER' },
-                    { accountId: user1.id, role: 'MEMBER' },
-                    { accountId: user3.id, role: 'MEMBER' },
-                ],
-            },
-        },
-    });
-    const ngaGroup2 = await prisma.chat.create({
-        data: {
-            id: uuidv4(),
-            isGroup: true,
-            name: "Nga's Friends",
-            avatar: 'https://i.pravatar.cc/150?img=21',
-            participants: {
-                create: [
-                    { accountId: user2.id, role: 'LEADER' },
-                    { accountId: user4.id, role: 'MEMBER' },
-                    { accountId: users[5].id, role: 'MEMBER' },
                 ],
             },
         },
