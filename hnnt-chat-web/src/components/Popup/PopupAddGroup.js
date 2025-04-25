@@ -1,12 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { IoClose } from 'react-icons/io5';
 import { useSelector, useDispatch } from 'react-redux';
-import { addMemberToGroup, createGroupChat, uploadFileFormChatGroupToS3 } from '../../screens/Messaging/api';
+import {
+    addMemberToGroup,
+    createGroupChat,
+    sendMessage,
+    uploadFileFormChatGroupToS3,
+} from '../../screens/Messaging/api';
 import { getListFriend } from '../../screens/Contacts/api';
 import { addMemberToGroupSlice } from '../../redux/slices/chatSlice';
 
 const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
     const userActive = useSelector((state) => state.auth.userActive);
+    const chatId = activeChat?.id;
 
     const dispatch = useDispatch();
 
@@ -77,6 +83,21 @@ const PopupAddGroup = ({ isOpen, onClose, activeChat }) => {
 
         if (saveMemberToGroup) {
             dispatch(addMemberToGroupSlice({ members: newMembers }));
+            if (newMembers.length > 0) {
+                await sendMessage(
+                    chatId,
+                    `${newMembers
+                        .map((m) => {
+                            return m.name;
+                        })
+                        .join(', ')} đã được ${userActive.name} thêm vào nhóm`,
+                    'notify',
+                    null,
+                    null,
+                    null,
+                    null,
+                );
+            }
         }
 
         clear();

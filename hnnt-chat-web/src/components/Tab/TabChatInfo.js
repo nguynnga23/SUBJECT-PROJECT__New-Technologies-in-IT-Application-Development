@@ -77,10 +77,8 @@ function TabChatInfo({ setActiveMessageTab }) {
     };
 
     const handleLeaveGroup = async () => {
-        const leave = await leaveGroup(chatId, userId);
-        if (leave) {
-            await sendMessage(chatId, `${userActive.name} đã rời nhóm`, 'notify', null, null, null, null);
-        }
+        await sendMessage(chatId, `${userActive.name} đã rời nhóm`, 'notify', null, null, null, null);
+        await leaveGroup(chatId, userId);
 
         dispatch(setActiveChat(null));
         dispatch(setShowOrOffRightBar(false));
