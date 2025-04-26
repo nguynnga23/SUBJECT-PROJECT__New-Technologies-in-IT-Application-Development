@@ -1,13 +1,18 @@
 import { IoIosArrowDropdown, IoIosArrowDropright } from 'react-icons/io';
 import { MdFilePresent } from 'react-icons/md';
+import { FaRegFileAlt } from 'react-icons/fa';
 import PopupViewImage from '../Popup/PopupViewImage';
 import { VscFilePdf } from 'react-icons/vsc';
 import { FaRegFileWord } from 'react-icons/fa';
 import { FaRegFileExcel } from 'react-icons/fa';
 import { FaRegFilePowerpoint } from 'react-icons/fa';
+import { MdOutlineLink } from 'react-icons/md';
 import { useState } from 'react';
 import { RiGroupLine } from 'react-icons/ri';
-import { useSelector } from 'react-redux';
+import { LuCopy } from 'react-icons/lu';
+import { LuCopyCheck } from 'react-icons/lu';
+import { useSelector, useDispatch } from 'react-redux';
+import { showModal, hideModal, toggleModal } from '../../redux/slices/modalSlice';
 
 const getFileIcon = (fileType) => {
     if (fileType.includes('pdf')) return <VscFilePdf className="text-3xl text-red-500 mr-2" />;
@@ -24,6 +29,19 @@ const Archive = ({ title, isOpen, toggleOpen, messages, type, group, setActiveMe
     const userActive = useSelector((state) => state.auth.userActive);
     const userId = userActive.id;
     const [selectedImage, setSelectedImage] = useState(null);
+
+    const dispatch = useDispatch();
+
+    // link to invite group
+    const [copied, setCopied] = useState(false);
+    const link = group?.[0]?.chatId ? `http://localhost:3000/invite/${group[0].chatId}` : 'Link không khả dụng';
+
+    const handleCopy = (e) => {
+        e.stopPropagation(); // Ngăn click lan ra div cha
+        navigator.clipboard.writeText(link);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+    };
 
     return (
         <div className="p-2 relative border-b-[7px] dark:border-b-gray-900 cursor-pointer">
@@ -42,6 +60,34 @@ const Archive = ({ title, isOpen, toggleOpen, messages, type, group, setActiveMe
                 >
                     <RiGroupLine size={16} className="m-2" />
                     <p className="text-[12px]">{group.length} thành viên</p>
+                </div>
+            )}
+            {isOpen && type === 'groupNews' && (
+                <div
+                    className="w-full p-1 flex items-center hover:bg-gray-100 hover:dark:bg-gray-700"
+                    onClick={() => dispatch(toggleModal())}
+                >
+                    <FaRegFileAlt size={16} className="m-2" />
+                    <p className="text-[12px]">Ghi chú, ghim, bình chọn</p>
+                </div>
+            )}
+            {isOpen && type === 'invite' && (
+                <div
+                    className="w-full p-1 flex items-center justify-between hover:bg-gray-100 hover:dark:bg-gray-700"
+                    onClick={() => console.log('invite')}
+                >
+                    <div className="flex items-center">
+                        <MdOutlineLink size={16} className="m-2" />
+                        <p className="text-[12px]">{link}</p>
+                    </div>
+                    <button
+                        onClick={handleCopy}
+                        className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                        title="Copy link"
+                    >
+                        {!copied && <LuCopy size={16} />}
+                    </button>
+                    {copied && <LuCopyCheck size={16} />}
                 </div>
             )}
             {isOpen && (

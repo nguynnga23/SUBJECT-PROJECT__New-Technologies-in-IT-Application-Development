@@ -27,7 +27,9 @@ function ChatFile({ userId, message, showName, replyMessage }) {
             }`}
         >
             {showName && (
-                <p className="text-[10px] text-gray-400 pb-[2px]">{message?.sender !== userId && message?.name}</p>
+                <p className="text-[10px] text-gray-400 pb-[2px]">
+                    {message?.sender !== userId && message?.sender.name}
+                </p>
             )}
 
             <div>

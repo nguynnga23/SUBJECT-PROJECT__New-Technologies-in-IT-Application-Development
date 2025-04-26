@@ -53,13 +53,10 @@ export default function MemberListScreen() {
 
     const handleCheckFriend = async (member, token) => {
         try {
-            console.log('Checking friend status for member:', member.accountId, 'My ID:', myId);
             if (member.accountId === myId) {
-                console.log('This is the current user. Skipping check.');
                 return; // Không kiểm tra trạng thái bạn bè cho chính mình
             }
             const response = await checkFriend(member.accountId, token);
-            console.log('Friend check response:', response);
             return response.result; // Trả về true hoặc false tùy thuộc vào trạng thái bạn bè
         } catch (error) {
             console.warn('Error checking friend status:', error);
@@ -96,9 +93,9 @@ export default function MemberListScreen() {
                 }),
             );
             //console log for each membersdata
-            membersData.forEach((member) => {
-                console.log('Member data:', member.name, member.isFriend, member.action);
-            });
+            // membersData.forEach((member) => {
+            //     console.log('Member data:', member.name, member.isFriend, member.action);
+            // });
             setMembers(membersData);
         } catch (error) {
             console.warn('Error fetching chat info:', error);
@@ -194,7 +191,7 @@ export default function MemberListScreen() {
 
     const handleViewProfile = () => {
         setFooterModalVisible(false);
-        navigation.navigate('ProfileScreen', { userId: selectedMember.accId });
+        navigation.navigate('FriendProfileScreen', { userId: selectedMember.accId });
     };
 
     const handleAppointAsAdmin = () => {
@@ -221,7 +218,12 @@ export default function MemberListScreen() {
                     renderItem={({ item }) => (
                         <TouchableOpacity onLongPress={() => handleLongPressMember(item)} activeOpacity={0.7}>
                             <View style={styles.memberItem}>
-                                <Image source={{ uri: item.avatar }} style={styles.avatar} />
+                                <View style={styles.avatarContainer}>
+                                    <Image source={{ uri: item.avatar }} style={styles.avatar} />
+                                    {item.role === 'LEADER' && (
+                                        <Ionicons name="key" size={16} color="gold" style={styles.leaderIcon} />
+                                    )}
+                                </View>
                                 <View style={styles.memberInfo}>
                                     <Text style={styles.name}>{item.name}</Text>
                                     <Text style={styles.role}>{item.role}</Text>
@@ -363,11 +365,23 @@ const styles = StyleSheet.create({
         borderRadius: 10, // Rounded corners
         marginBottom: 5, // Spacing between items
     },
+    avatarContainer: {
+        position: 'relative',
+    },
     avatar: {
         width: 50,
         height: 50,
         borderRadius: 25,
         marginRight: 15,
+    },
+    leaderIcon: {
+        position: 'absolute',
+        bottom: 0,
+        right: 12,
+        backgroundColor: '#fff',
+        // opacity: 0.8,
+        borderRadius: 50,
+        padding: 2,
     },
     memberInfo: {
         flex: 1,
@@ -423,7 +437,7 @@ const styles = StyleSheet.create({
     cancelButton: {
         flex: 1,
         padding: 12,
-        backgroundColor: '#f0f0f0',
+        backgroundColor: 'red',
         borderRadius: 10,
         alignItems: 'center',
         marginRight: 10,

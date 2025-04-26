@@ -10,7 +10,9 @@ function ChatImageGroup({ userId, message, showName, replyMessage }) {
     return (
         <div className="relative rounded-lg pb-2">
             {showName && (
-                <p className="text-[10px] text-gray-400 pb-[2px]">{message?.sender.id !== userId && message?.name}</p>
+                <p className="text-[10px] text-gray-400 pb-[2px]">
+                    {message?.sender.id !== userId && message?.sender.name}
+                </p>
             )}
 
             {replyMessage && (

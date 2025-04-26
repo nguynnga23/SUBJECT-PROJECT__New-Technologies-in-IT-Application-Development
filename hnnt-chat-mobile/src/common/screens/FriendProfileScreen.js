@@ -109,7 +109,7 @@ const FriendProfileScreen = () => {
                     showUndoModal('Friend request sent!');
                     setFriendStatus((prev) => ({
                         ...prev,
-                        requestSent: true,
+                        // requestSent: true,
                         requestExists: true,
                     }));
                 }

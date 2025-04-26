@@ -73,7 +73,7 @@ const ChatListScreen = () => {
 
     const handlePress = (item, name) => {
         if (item.isGroup) {
-            navigation.navigate('GroupChatScreen', { chatId: item.id, chatName: item.name });
+            navigation.navigate('GroupChatScreen', { chatId: item.id, chatName: item.name, chats: chats });
         } else {
             navigation.navigate('PrivateChatScreen', {
                 chatId: item.id,
