@@ -21,8 +21,17 @@ pipeline {
             steps {
                 echo 'Installing dependencies...'
                 sh '''
+                    # Ensure nvm is installed and available
+                    export NVM_DIR="$HOME/.nvm"
+                    if [ ! -s "$NVM_DIR/nvm.sh" ]; then
+                        echo "nvm not found, installing..."
+                        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+                        . "$NVM_DIR/nvm.sh"
+                    else
+                        . "$NVM_DIR/nvm.sh"
+                    fi
+
                     # Set up Node.js
-                    . ~/.nvm/nvm.sh
                     nvm install ${NODE_VERSION}
                     nvm use ${NODE_VERSION}
                     npm install
@@ -37,8 +46,11 @@ pipeline {
                         echo 'Running tests for hnnt-chat-server...'
                         dir('hnnt-chat-server') {
                             sh '''
+                                # Ensure nvm is installed and available
+                                export NVM_DIR="$HOME/.nvm"
+                                . "$NVM_DIR/nvm.sh"
+
                                 # Set up Node.js
-                                . ~/.nvm/nvm.sh
                                 nvm use ${NODE_VERSION}
                                 npm test
                             '''
