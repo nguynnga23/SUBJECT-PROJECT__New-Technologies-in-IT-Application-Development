@@ -20,115 +20,118 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 echo 'Installing dependencies...'
-                nodejs(nodeJSInstallationName: "Node ${env.NODE_VERSION}") {
-                    sh 'npm install'
-                }
+                sh '''
+                    # Set up Node.js
+                    . ~/.nvm/nvm.sh
+                    nvm install ${NODE_VERSION}
+                    nvm use ${NODE_VERSION}
+                    npm install
+                '''
             }
         }
 
         stage('Run Tests') {
             parallel {
-                // stage('Test Web') {
-                //     steps {
-                //         echo 'Running tests for hnnt-chat-web...'
-                //         dir('hnnt-chat-web') {
-                //             nodejs(nodeJSInstallationName: "Node ${env.NODE_VERSION}") {
-                //                 sh 'npm test'
-                //             }
-                //         }
-                //     }
-                // }
-                // stage('Test Mobile') {
-                //     steps {
-                //         echo 'Running tests for hnnt-chat-mobile...'
-                //         dir('hnnt-chat-mobile') {
-                //             sh './gradlew test'
-                //         }
-                //     }
-                // }
                 stage('Test Server') {
                     steps {
                         echo 'Running tests for hnnt-chat-server...'
                         dir('hnnt-chat-server') {
-                            nodejs(nodeJSInstallationName: "Node ${env.NODE_VERSION}") {
-                                sh 'npm test'
-                            }
+                            sh '''
+                                # Set up Node.js
+                                . ~/.nvm/nvm.sh
+                                nvm use ${NODE_VERSION}
+                                npm test
+                            '''
                         }
                     }
                 }
             }
         }
 
-    //     stage('Build') {
-    //         parallel {
-    //             stage('Build Web') {
-    //                 steps {
-    //                     echo 'Building hnnt-chat-web...'
-    //                     dir('hnnt-chat-web') {
-    //                         nodejs(nodeJSInstallationName: "Node ${env.NODE_VERSION}") {
-    //                             sh 'npm run build'
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //             stage('Build Mobile') {
-    //                 steps {
-    //                     echo 'Building hnnt-chat-mobile...'
-    //                     dir('hnnt-chat-mobile') {
-    //                         sh './gradlew clean assembleRelease'
-    //                     }
-    //                 }
-    //             }
-    //             stage('Build Server') {
-    //                 steps {
-    //                     echo 'Building hnnt-chat-server...'
-    //                     dir('hnnt-chat-server') {
-    //                         nodejs(nodeJSInstallationName: "Node ${env.NODE_VERSION}") {
-    //                             sh 'npm run build'
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
+        //     stage('Build') {
+        //         parallel {
+        //             stage('Build Web') {
+        //                 steps {
+        //                     echo 'Building hnnt-chat-web...'
+        //                     dir('hnnt-chat-web') {
+        //                         sh '''
+        //                             # Set up Node.js
+        //                             . ~/.nvm/nvm.sh
+        //                             nvm use ${NODE_VERSION}
+        //                             npm run build
+        //                         '''
+        //                     }
+        //                 }
+        //             }
+        //             stage('Build Mobile') {
+        //                 steps {
+        //                     echo 'Building hnnt-chat-mobile...'
+        //                     dir('hnnt-chat-mobile') {
+        //                         sh './gradlew clean assembleRelease'
+        //                     }
+        //                 }
+        //             }
+        //             stage('Build Server') {
+        //                 steps {
+        //                     echo 'Building hnnt-chat-server...'
+        //                     dir('hnnt-chat-server') {
+        //                         sh '''
+        //                             # Set up Node.js
+        //                             . ~/.nvm/nvm.sh
+        //                             nvm use ${NODE_VERSION}
+        //                             npm run build
+        //                         '''
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
 
-    //     stage('Deploy') {
-    //         when {
-    //             expression { params.ENV == 'prod' }
-    //         }
-    //         parallel {
-    //             stage('Deploy Web') {
-    //                 steps {
-    //                     echo 'Deploying hnnt-chat-web...'
-    //                     dir('hnnt-chat-web') {
-    //                         withCredentials([string(credentialsId: 'npm-token', variable: 'NPM_TOKEN')]) {
-    //                             sh 'echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc'
-    //                             sh 'npm run deploy'
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //             stage('Deploy Mobile') {
-    //                 steps {
-    //                     echo 'Deploying hnnt-chat-mobile...'
-    //                     dir('hnnt-chat-mobile') {
-    //                         sh 'fastlane deploy'
-    //                     }
-    //                 }
-    //             }
-    //             stage('Deploy Server') {
-    //                 steps {
-    //                     echo 'Deploying hnnt-chat-server...'
-    //                     dir('hnnt-chat-server') {
-    //                         nodejs(nodeJSInstallationName: "Node ${env.NODE_VERSION}") {
-    //                             sh 'npm install'
-    //                             sh 'pm2 restart server.js || pm2 start server.js'
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
+        //     stage('Deploy') {
+        //         when {
+        //             expression { params.ENV == 'prod' }
+        //         }
+        //         parallel {
+        //             stage('Deploy Web') {
+        //                 steps {
+        //                     echo 'Deploying hnnt-chat-web...'
+        //                     dir('hnnt-chat-web') {
+        //                         withCredentials([string(credentialsId: 'npm-token', variable: 'NPM_TOKEN')]) {
+        //                             sh 'echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc'
+        //                             sh '''
+        //                                 # Set up Node.js
+        //                                 . ~/.nvm/nvm.sh
+        //                                 nvm use ${NODE_VERSION}
+        //                                 npm run deploy
+        //                             '''
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //             stage('Deploy Mobile') {
+        //                 steps {
+        //                     echo 'Deploying hnnt-chat-mobile...'
+        //                     dir('hnnt-chat-mobile') {
+        //                         sh 'fastlane deploy'
+        //                     }
+        //                 }
+        //             }
+        //             stage('Deploy Server') {
+        //                 steps {
+        //                     echo 'Deploying hnnt-chat-server...'
+        //                     dir('hnnt-chat-server') {
+        //                         sh '''
+        //                             # Set up Node.js
+        //                             . ~/.nvm/nvm.sh
+        //                             nvm use ${NODE_VERSION}
+        //                             npm install
+        //                             pm2 restart server.js || pm2 start server.js
+        //                         '''
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
     }
 
     post {
