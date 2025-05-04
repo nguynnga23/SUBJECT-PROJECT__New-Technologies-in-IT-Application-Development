@@ -20,10 +20,8 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 echo 'Installing dependencies...'
-                cache(path: 'node_modules', key: 'npm-${env.NODE_VERSION}') {
-                    nodejs(nodeJSInstallationName: "Node ${env.NODE_VERSION}") {
-                        sh 'npm install'
-                    }
+                nodejs(nodeJSInstallationName: "Node ${env.NODE_VERSION}") {
+                    sh 'npm install'
                 }
             }
         }
