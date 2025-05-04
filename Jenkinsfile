@@ -20,22 +20,32 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 echo 'Installing dependencies...'
-                sh '''
-                    # Ensure nvm is installed and available
-                    export NVM_DIR="$HOME/.nvm"
-                    if [ ! -s "$NVM_DIR/nvm.sh" ]; then
-                        echo "nvm not found, installing..."
-                        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
-                        . "$NVM_DIR/nvm.sh"
-                    else
-                        . "$NVM_DIR/nvm.sh"
-                    fi
+                dir('hnnt-chat-server') {
+                    sh '''
+                        # Ensure nvm is installed and available
+                        export NVM_DIR="$HOME/.nvm"
+                        if [ ! -s "$NVM_DIR/nvm.sh" ]; then
+                            echo "nvm not found, installing..."
+                            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+                            . "$NVM_DIR/nvm.sh"
+                        else
+                            . "$NVM_DIR/nvm.sh"
+                        fi
 
-                    # Set up Node.js
-                    nvm install ${NODE_VERSION}
-                    nvm use ${NODE_VERSION}
-                    npm install
-                '''
+                        # Set up Node.js
+                        nvm install ${NODE_VERSION}
+                        nvm use ${NODE_VERSION}
+
+                        # Check if package.json exists
+                        if [ ! -f package.json ]; then
+                            echo "Error: package.json not found in hnnt-chat-server directory."
+                            exit 1
+                        fi
+
+                        # Install dependencies
+                        npm install
+                    '''
+                }
             }
         }
 
