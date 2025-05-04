@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        NODE_VERSION = '16'
+        NODE_VERSION = '22.2.0' // Updated to a compatible Node.js version
     }
 
     parameters {
