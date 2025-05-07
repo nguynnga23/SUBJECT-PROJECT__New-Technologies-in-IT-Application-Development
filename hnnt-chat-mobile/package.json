@@ -47,6 +47,7 @@
     "react-native-emoji-selector": "^0.2.0",
     "react-native-gesture-handler": "^2.23.0",
     "react-native-image-slider-box": "^2.0.7",
+    "react-native-modal-datetime-picker": "^18.0.0",
     "react-native-pager-view": "6.5.1",
     "react-native-paper": "^5.13.1",
     "react-native-phone-number-input": "^2.1.0",

@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-// import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+
+// import DateTimePickerModal from 'react-native-modal-datetime-picker';
+
 import { Platform, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -60,9 +63,9 @@ export default function EditPersonalInformation({ navigation }) {
     useEffect(() => {
         setIsChanged(
             selectedImage !== null ||
-            formData.name !== initialFormData.name ||
-            formData.birthday !== initialFormData.birthday ||
-            formData.gender !== initialFormData.gender,
+                formData.name !== initialFormData.name ||
+                formData.birthday !== initialFormData.birthday ||
+                formData.gender !== initialFormData.gender,
         );
     }, [formData, selectedImage, initialFormData]);
 
@@ -157,26 +160,17 @@ export default function EditPersonalInformation({ navigation }) {
                     </View>
                 </View>
 
-                {/* {showDatePicker && (
-                    <View style={styles.footerDatePicker}>
-                    <DateTimePicker
-                            value={
-                                formData.birthday
-                                    ? new Date(formData.birthday.split('/').reverse().join('-'))
-                                    : new Date()
-                            } // Parse dd/MM/yyyy to yyyy-MM-dd
-                            mode="date"
-                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                            onChange={(event, selectedDate) => {
-                                setShowDatePicker(false);
-                                if (selectedDate) {
-                                    const formattedDate = format(selectedDate, 'dd/MM/yyyy'); // Format as dd/MM/yyyy
-                                    handleChange('birthday', formattedDate);
-                                }
-                            }}
-                        />
-                    </View>
-                )} */}
+                {showDatePicker && (
+                    <DateTimePickerModal
+                        isVisible={showDatePicker}
+                        mode="date"
+                        onConfirm={(date) => {
+                            handleChange('birthday', format(date, 'dd/MM/yyyy'));
+                            setShowDatePicker(false);
+                        }}
+                        onCancel={() => setShowDatePicker(false)}
+                    />
+                )}
 
                 <TouchableOpacity
                     style={[styles.saveButton, !isChanged && styles.disabledButton]}
