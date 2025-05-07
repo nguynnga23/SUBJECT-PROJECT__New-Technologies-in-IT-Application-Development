@@ -111,12 +111,18 @@ export default function GroupChatScreen() {
 
     useEffect(() => {
         const parentNav = navigation.getParent();
-        parentNav?.setOptions({ tabBarStyle: { display: 'none' }, headerShown: false });
+        parentNav?.setOptions({
+            tabBarStyle: { display: 'none' },
+            headerShown: false,
+        });
         return () => {
             parentNav?.setOptions({
-                tabBarStyle: { backgroundColor: 'white', height: 60 },
+                tabBarStyle: {
+                    backgroundColor: 'white',
+                    height: 60,
+                    display: 'flex',
+                },
                 headerShown: true,
-                headerTitle: () => <Header iconName1="qrcode-scan" iconName2="plus" />,
             });
         };
     }, [navigation]);

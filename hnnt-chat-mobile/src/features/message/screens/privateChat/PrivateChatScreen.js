@@ -38,7 +38,7 @@ import {
     uploadFileToS3,
     getBlockedUsers,
     previewFile,
-    ShareAnyFile
+    ShareAnyFile,
 } from '../../services/ChatService';
 import { getPinMess, fetchChat } from '../../services/privateChat/PrivateChatInfoService';
 
@@ -106,12 +106,18 @@ export default function PrivateChatScreen() {
 
     useEffect(() => {
         const parentNav = navigation.getParent();
-        parentNav?.setOptions({ tabBarStyle: { display: 'none' }, headerShown: false });
+        parentNav?.setOptions({
+            tabBarStyle: { display: 'none' },
+            headerShown: false,
+        });
         return () => {
             parentNav?.setOptions({
-                tabBarStyle: { backgroundColor: 'white', height: 60 },
+                tabBarStyle: {
+                    backgroundColor: 'white',
+                    height: 60,
+                    display: 'flex',
+                },
                 headerShown: true,
-                headerTitle: () => <Header iconName1="qrcode-scan" iconName2="plus" />,
             });
         };
     }, [navigation]);
@@ -247,10 +253,9 @@ export default function PrivateChatScreen() {
             let response = null;
             if (isLink) {
                 response = await sendMessage(chatId, content, 'link', replyMessage?.id, null, null, null, token);
-            }
-            else {
+            } else {
                 response = await sendMessage(chatId, content, 'text', replyMessage?.id, null, null, null, token);
-            };
+            }
             if (replyMessage === null) {
                 socket.emit('send_message', {
                     chatId: chatId,
@@ -503,7 +508,14 @@ export default function PrivateChatScreen() {
                                                                 Linking.openURL(item.content);
                                                             }}
                                                         >
-                                                            <Text style={{ fontSize: 16, lineHeight: 22, color: '#007AFF', textDecorationLine: 'underline' }}>
+                                                            <Text
+                                                                style={{
+                                                                    fontSize: 16,
+                                                                    lineHeight: 22,
+                                                                    color: '#007AFF',
+                                                                    textDecorationLine: 'underline',
+                                                                }}
+                                                            >
                                                                 {item.content}
                                                             </Text>
                                                         </TouchableOpacity>
