@@ -60,9 +60,9 @@ export default function EditPersonalInformation({ navigation }) {
     useEffect(() => {
         setIsChanged(
             selectedImage !== null ||
-            formData.name !== initialFormData.name ||
-            formData.birthday !== initialFormData.birthday ||
-            formData.gender !== initialFormData.gender,
+                formData.name !== initialFormData.name ||
+                formData.birthday !== initialFormData.birthday ||
+                formData.gender !== initialFormData.gender,
         );
     }, [formData, selectedImage, initialFormData]);
 

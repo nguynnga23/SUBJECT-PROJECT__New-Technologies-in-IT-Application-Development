@@ -49,6 +49,9 @@ export default function BottomTabNavigator() {
                 component={MessageStackNavigator}
                 options={{
                     headerTitle: () => <Header iconName1="qrcode-scan" iconName2="plus" showMenu={true} />,
+                    headerRight: null,
+                    headerLeft: null,
+                    headerTitleAlign: 'center', // Center the title content
                 }}
             />
             <Tab.Screen
@@ -56,6 +59,9 @@ export default function BottomTabNavigator() {
                 component={ContactScreen}
                 options={{
                     headerTitle: () => <Header iconName2="adduser" onPress2={contactHandlePress} />,
+                    headerRight: null,
+                    headerLeft: null,
+                    headerTitleAlign: 'center', // Cen
                 }}
             />
             <Tab.Screen
@@ -63,6 +69,9 @@ export default function BottomTabNavigator() {
                 component={ProfileScreen}
                 options={{
                     headerTitle: () => <Header iconName2="setting" />,
+                    headerRight: null,
+                    headerLeft: null,
+                    headerTitleAlign: 'center', // Cen
                 }}
             />
         </Tab.Navigator>
