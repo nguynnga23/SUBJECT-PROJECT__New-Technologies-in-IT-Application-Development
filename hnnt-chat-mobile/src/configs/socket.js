@@ -1,7 +1,7 @@
 import { io } from 'socket.io-client';
 import { localhost } from '../utils/localhosts';
 
-export const socket = io(`http://${localhost}`, {
+export const socket = io(`${localhost}`, {
     withCredentials: true,
     transports: ['websocket'],
     forceNew: true,

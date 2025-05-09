@@ -10,7 +10,7 @@ import axios from 'axios';
 import * as WebBrowser from 'expo-web-browser';
 import { localhost } from '../../../utils/localhosts';
 import { socket } from '../../../configs/socket';
-const API_URL = `http://${localhost}/api`;
+const API_URL = `${localhost}/api`;
 
 let recording = null;
 

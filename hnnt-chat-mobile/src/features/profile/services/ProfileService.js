@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { localhost } from '../../../utils/localhosts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-const BASE_URL = `http://${localhost}/api/user`;
+const BASE_URL = `${localhost}/api/user`;
 
 const ProfileService = {
     updateProfile: async (token, { name, gender, birthDate }) => {

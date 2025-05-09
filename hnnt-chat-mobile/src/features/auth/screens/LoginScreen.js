@@ -82,7 +82,7 @@ export default function LoginScreen() {
             });
         } catch (error) {
             console.warn('Login failed:', error);
-            Alert.alert('Login Failed', 'Số điện thoại hoặc mật khẩu không đúng');
+            Alert.alert('Login Failed', error.message || `${error}`);
         }
     };
 
