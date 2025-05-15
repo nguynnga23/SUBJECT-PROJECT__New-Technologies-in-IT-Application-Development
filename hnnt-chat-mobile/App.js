@@ -9,7 +9,7 @@ export default function App() {
     return (
         <Provider store={store}>
             <MenuProvider>
-                <GestureHandlerRootView style={{ flex: 1 }}>
+                <GestureHandlerRootView style={{ flex: 1, backgroundColor: 'black' }}>
                     <AppNavigator />
                 </GestureHandlerRootView>
             </MenuProvider>
@@ -21,7 +21,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        alignItems: 'center',
         justifyContent: 'center',
     },
 });
