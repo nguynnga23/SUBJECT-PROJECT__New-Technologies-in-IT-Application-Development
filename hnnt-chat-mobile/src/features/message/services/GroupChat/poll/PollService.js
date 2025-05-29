@@ -2,7 +2,7 @@ import axios from 'axios';
 
 import { localhost } from '../../../../../utils/localhosts';
 
-const API_BASE_URL = `http://${localhost}/api/polls`;
+const API_BASE_URL = `${localhost}/api/polls`;
 // Create a new poll
 export const createPoll = async (pollData) => {
     try {

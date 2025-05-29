@@ -3,7 +3,7 @@ import axios from 'axios';
 import { localhost } from '../../../../utils/localhosts'
 import { socket } from '../../../../configs/socket';
 
-const API_URL = `http://${localhost}/api`;
+const API_URL = `${localhost}/api`;
 
 export const fetchChat = async (chatId, token) => {
     try {

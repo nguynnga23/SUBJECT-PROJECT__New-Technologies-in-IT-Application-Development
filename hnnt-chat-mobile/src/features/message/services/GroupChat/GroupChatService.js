@@ -7,7 +7,7 @@ import axios from 'axios';
 import { getUserIdFromToken } from '../../../../utils/auth';
 import { localhost } from '../../../../utils/localhosts';
 
-const API_URL = `http://${localhost}/api`;
+const API_URL = `${localhost}/api`;
 
 export const fetchMessages = async (chatId, token) => {
     try {
@@ -304,6 +304,6 @@ export async function playAudio(uri) {
 }
 
 //reaction
-export function handleReaction(userId, emoji, messageId) {}
+export function handleReaction(userId, emoji, messageId) { }
 
 export default chatData;

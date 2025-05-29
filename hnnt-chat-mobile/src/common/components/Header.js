@@ -4,30 +4,23 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { MenuProvider, Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
 import { useNavigation } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient'; // Import LinearGradient
 const { width } = Dimensions.get('window');
 export default function Header({ iconName1, iconName2, onPress1, onPress2, showMenu }) {
     const navigation = useNavigation();
     return (
-        <LinearGradient
-            colors={['#0087FD', '#00ACF4']} // Gradient colors
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }} // Horizontal gradient
+        <View
             style={styles.container} // Apply gradient to header container
         >
-            <TouchableOpacity style={{ paddingRight: 15 }}>
+            <TouchableOpacity style={{}}>
                 <AntDesign name="search1" size={25} color="white" />
             </TouchableOpacity>
-            <View style={{ width: '55%' }}>
+            <View style={{ width: '60%' }}>
                 <TextInput style={styles.searchInput} placeholder="Search" placeholderTextColor="white" />
             </View>
 
             {showMenu ? (
                 <>
-                    <TouchableOpacity
-                        style={{ width: '10%', marginLeft: 30 }}
-                        onPress={() => navigation.navigate('CameraScreen')}
-                    >
+                    <TouchableOpacity style={{ width: '10%' }} onPress={() => navigation.navigate('CameraScreen')}>
                         <MaterialCommunityIcons name={iconName1} size={20} color="white" />
                     </TouchableOpacity>
                     <Menu>
@@ -64,15 +57,15 @@ export default function Header({ iconName1, iconName2, onPress1, onPress2, showM
                 </>
             ) : (
                 <>
-                    <TouchableOpacity style={{ width: '10%', marginLeft: 30 }} onPress={onPress2}>
+                    <TouchableOpacity style={{}} onPress={onPress2}>
                         <MaterialCommunityIcons name={iconName1} size={20} color="white" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={{ width: '10%' }} onPress={onPress2}>
+                    <TouchableOpacity style={{}} onPress={onPress2}>
                         <AntDesign name={iconName2} size={25} color="white" />
                     </TouchableOpacity>
                 </>
             )}
-        </LinearGradient>
+        </View>
     );
 }
 
@@ -80,9 +73,11 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         alignItems: 'center',
-        width: width,
+        justifyContent: 'space-between',
+        width: '100%',
         zIndex: 1, // Ensure header is on top
         paddingVertical: 10, // Add padding for better appearance
+        paddingHorizontal: 5,
     },
     triangle: {
         position: 'absolute',
@@ -97,6 +92,9 @@ const styles = StyleSheet.create({
         borderLeftColor: 'transparent',
         borderRightColor: 'transparent',
         borderBottomColor: 'white', // Màu của popup
+    },
+    searchInput: {
+        width: '100%',
     },
     menuStyle: {
         borderRadius: 8,

@@ -2,7 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Ensure AsyncStorage is imported
 import { localhost } from '../../../utils/localhosts'; // Import localhost variable
 
-const API_BASE_URL = `http://${localhost}/api/loggedin-devices`;
+const API_BASE_URL = `${localhost}/api/loggedin-devices`;
 
 const getToken = async () => {
     return await AsyncStorage.getItem('token');

@@ -1,0 +1,31 @@
+version: "3"
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    user: root
+    ports:
+      - "9091:8080" # Mapped port 9091 on host to 8080 on container
+      - "50000:50000" # Mapped port 50000 for Jenkins agent communication
+    volumes:
+      - jenkins_data:/var/jenkins_home # Mount a volume for Jenkins data persistence
+    networks:
+      - jenkins_network
+
+  ngrok:
+    image: wernight/ngrok
+    container_name: ngrok
+    environment:
+      - NGROK_AUTH=${NGROK_AUTH}
+      - NGROK_PORT=jenkins:9091 # Thay thế với dịch vụ Jenkins nếu cần
+    depends_on:
+      - jenkins
+    networks:
+      - jenkins_network
+
+networks:
+  jenkins_network:
+    driver: bridge
+
+volumes:
+  jenkins_data:

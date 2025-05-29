@@ -6,7 +6,7 @@ import { getCurrentTimeString } from '../../../../utils/dateNow';
 import { socket } from '../../../../configs/socket';
 import * as FileSystem from 'expo-file-system';
 
-const API_URL = `http://${localhost}/api`;
+const API_URL = `${localhost}/api`;
 
 const axiosInstance_30s = axios.create({
     baseURL: API_URL,

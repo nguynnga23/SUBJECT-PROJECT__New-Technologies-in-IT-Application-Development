@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { localhost } from '../../../utils/localhosts';
 
-const API_URL = `http://${localhost}/api/chats`;
+const API_URL = `${localhost}/api/chats`;
 
 export const fetchChats = async (token) => {
     try {

@@ -5,7 +5,7 @@ import { socket } from '../../../configs/socket';
 import * as FileSystem from 'expo-file-system';
 import { localhost } from '../../../utils/localhosts';
 
-const API_URL = `http://${localhost}/api`;
+const API_URL = `${localhost}/api`;
 
 // Hàm tạo nhóm
 export const createGroup = async (name, avatar, chatParticipants, token) => {

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { localhost } from '../../../utils/localhosts';
-const API_BASE_URL = `http://${localhost}/api`; // Replace with your server's base URL
+const API_BASE_URL = `${localhost}/api`; // Replace with your server's base URL
 
 const ContactService = {
     async getListGroupChats(token) {

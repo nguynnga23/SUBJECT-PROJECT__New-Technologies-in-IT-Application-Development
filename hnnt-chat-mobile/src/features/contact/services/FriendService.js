@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { localhost } from '../../../utils/localhosts';
 import { socket } from '../../../configs/socket';
-const BASE_URL = `http://${localhost}/api/friends`; // Ensure the correct port is used
+const BASE_URL = `${localhost}/api/friends`; // Ensure the correct port is used
 
 const friendService = {
     // Lấy danh sách bạn bè

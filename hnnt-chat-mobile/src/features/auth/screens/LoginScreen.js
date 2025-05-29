@@ -18,7 +18,6 @@ import { login } from '../services/AuthService'; // Import hàm login từ AuthS
 import LoggedInDeviceService from '../../profile/services/LoggedInDeviceService'; // Import LoggedInDeviceService
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
-import * as Notifications from 'expo-notifications';
 import { socket } from '../../../configs/socket';
 
 export default function LoginScreen() {
@@ -65,15 +64,6 @@ export default function LoginScreen() {
             };
             await LoggedInDeviceService.addDevice(deviceInfo);
 
-            // Register push token after login
-            const pushToken = await registerForPushNotificationsAsync();
-            if (pushToken) {
-                socket.emit('register_push_token', {
-                    userId: user.id,
-                    pushToken: pushToken,
-                });
-            }
-
             Alert.alert('Login Successful', `Welcome, ${user.name}!`);
             // Điều hướng đến màn hình chính
             navigation.reset({
@@ -82,40 +72,9 @@ export default function LoginScreen() {
             });
         } catch (error) {
             console.warn('Login failed:', error);
-            Alert.alert('Login Failed', 'Số điện thoại hoặc mật khẩu không đúng');
+            Alert.alert('Login Failed', error.message || `${error}`);
         }
     };
-
-    async function registerForPushNotificationsAsync() {
-        if (Device.isDevice) {
-            const { status: existingStatus } = await Notifications.getPermissionsAsync();
-            let finalStatus = existingStatus;
-            if (existingStatus !== 'granted') {
-                const { status } = await Notifications.requestPermissionsAsync();
-                finalStatus = status;
-            }
-            if (finalStatus !== 'granted') {
-                alert('Failed to get push token for push notification!');
-                return null;
-            }
-            const token = (await Notifications.getExpoPushTokenAsync()).data;
-            console.log('Expo Push Token:', token);
-            return token;
-        } else {
-            alert('Must use physical device for Push Notifications');
-            return null;
-        }
-
-        if (Platform.OS === 'android') {
-            Notifications.setNotificationChannelAsync('default', {
-                name: 'default',
-                importance: Notifications.AndroidImportance.MAX,
-                vibrationPattern: [0, 250, 250, 250],
-                lightColor: '#FF231F7C',
-            });
-        }
-    }
-
     return (
         <SafeAreaView style={styles.container}>
             <SafeAreaProvider>
