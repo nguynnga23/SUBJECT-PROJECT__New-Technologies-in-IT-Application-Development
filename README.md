@@ -1,7 +1,3 @@
-Dưới đây là bản nâng cấp chuyên nghiệp hơn cho file `README.md` của dự án **Chat App** môn học _Công nghệ mới trong phát triển ứng dụng CNTT_:
-
----
-
 # 💬 Chat App Project – New Technologies in IT Application Development
 
 Dự án này được phát triển trong khuôn khổ môn học **Công nghệ mới trong phát triển ứng dụng CNTT**. Ứng dụng chat đa nền tảng hỗ trợ realtime, quản lý người dùng, xác thực OTP và đồng bộ dữ liệu giữa thiết bị di động và trình duyệt.
@@ -76,7 +72,7 @@ npm run seed
 #### Chạy server
 
 ```bash
-npm run dev
+npm start
 ```
 
 ---
